@@ -3,20 +3,16 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import asyncio
 
-from budget_master.models import Account, Budget
-from budget_master.models import Category
-from budget_master.models import Currency
-from budget_master.models import Operation
+from budget_master.models import Account, Budget, Category, Currency, Operation
 from budget_master.repositories import SQLiteRepository
-from budget_master.services import CSVImportService
-from budget_master.services import DatabaseService
+from budget_master.services import CSVImportService, DatabaseService
 
 
 async def main():
     """Главная функция для создания БД и импорта данных"""
 
     # Пути к файлам
-    db_path = "budget_master.db"
+    db_path = "../BudgetMasterBackend/budget_master.db"
     csv_dir = "../app"  # Текущая папка с CSV файлами
 
     print("🚀 Запуск импорта данных в SQLite базу данных...")

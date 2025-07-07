@@ -14,7 +14,7 @@ class Account(BaseEntity):
     position: int = Field(..., description="Позиция для сортировки")
     title: str = Field(..., description="Название счета")
     amount: int = Field(..., description="Баланс счета в копейках")
-    type: int = Field(..., description="Тип счета (0 - обычный, 1 - кредитный)")
+    type: int = Field(..., description="Тип счета (1 - Текущие, 2 - Сбережения, 3-Кредитные)")
     currency_id: int = Field(..., description="ID валюты счета")
     closed: int = Field(..., description="Закрыт ли счет (0 - нет, 1 - да)")
     credit_card_limit: Optional[int] = Field(None, description="Лимит кредитной карты")

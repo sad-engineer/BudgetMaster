@@ -10,6 +10,7 @@ packages = [{include = "budget_master"}]
 python = "^3.9"
 pydantic = "^2.11.3"
 pydantic-settings = "^2.9.1"
+jpype1 = "^1.5.2"
 
 
 [tool.poetry.group.dev.dependencies]
