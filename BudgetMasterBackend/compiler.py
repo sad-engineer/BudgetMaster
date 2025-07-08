@@ -34,7 +34,7 @@ for extra_file in EXTRA_JAVA_FILES:
 
 # Компилировать
 if java_files:
-    compile_cmd = ["javac", "-d", BUILD_DIR] + java_files
+    compile_cmd = ["javac", "-encoding", "UTF-8", "-d", BUILD_DIR] + java_files
     print("Компиляция:", "\n".join(compile_cmd))
     result = subprocess.run(compile_cmd, capture_output=True, text=True)
     print(result.stdout)

@@ -30,8 +30,15 @@ def main():
 
         # Создаем новую базу данных
         print("\n--- Создание базы данных ---")
-        DatabaseUtil.createDatabaseIfNotExists(test_db_path)
-        print("✅ База данных создана успешно")
+        try:
+            DatabaseUtil.createDatabaseIfNotExists(test_db_path)
+            print("✅ База данных создана успешно")
+        except Exception as e:
+            # Игнорируем предупреждения о нативных библиотеках SQLite
+            if "Failed to delete old native lib" in str(e) or "AccessDeniedException" in str(e):
+                print("⚠️ База данных создана с предупреждением (нативные библиотеки SQLite)")
+            else:
+                raise e
 
         # Проверяем, что файл БД создался
         if os.path.exists(test_db_path):
@@ -75,6 +82,58 @@ def main():
 
         except Exception as e:
             print(f"❌ Ошибка при проверке структуры БД: {e}")
+
+        # Проверяем дефолтные данные
+        print("\n--- Проверка дефолтных данных ---")
+        try:
+            # Проверяем количество валют
+            currency_count = DatabaseUtil.getTableRecordCount(test_db_path, "currencies")
+            print(f"Дефолтных валют: {currency_count}")
+            
+            # Проверяем количество категорий
+            category_count = DatabaseUtil.getTableRecordCount(test_db_path, "categories")
+            print(f"Дефолтных категорий: {category_count}")
+            
+            # Показываем дефолтные валюты
+            conn = sqlite3.connect(test_db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT title, position FROM currencies ORDER BY position")
+            currencies = cursor.fetchall()
+            print("Дефолтные валюты:")
+            for title, position in currencies:
+                print(f"  {position}. {title}")
+            
+            # Показываем иерархические категории
+            cursor.execute("""
+                SELECT c1.title as parent_title, c2.title, c2.operation_type, c2.type, c2.position 
+                FROM categories c1 
+                LEFT JOIN categories c2 ON c1.id = c2.parent_id 
+                WHERE c1.parent_id IS NULL 
+                ORDER BY c1.operation_type, c1.position, c2.position
+            """)
+            hierarchical_categories = cursor.fetchall()
+            print("Иерархические категории:")
+            
+            current_parent = None
+            for parent_title, child_title, operation_type, cat_type, position in hierarchical_categories:
+                if parent_title != current_parent:
+                    operation_str = "Расходы" if operation_type == 1 else "Доходы"
+                    print(f"  📁 {parent_title} ({operation_str})")
+                    current_parent = parent_title
+                
+                if child_title:
+                    type_str = "Родительская" if cat_type == 0 else "Дочерняя"
+                    print(f"    └─ {child_title} (тип: {type_str})")
+            
+            # Показываем общую статистику
+            cursor.execute("SELECT COUNT(*) FROM categories")
+            total_categories = cursor.fetchone()[0]
+            print(f"\nВсего категорий: {total_categories}")
+            
+            conn.close()
+
+        except Exception as e:
+            print(f"❌ Ошибка при проверке дефолтных данных: {e}")
 
         print("✅ Все тесты выполнены успешно!")
 

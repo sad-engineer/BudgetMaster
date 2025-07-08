@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="budget_master" uuid="059ef604-eb69-422a-b0b8-7ab3bafa607f">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\Korenyk.A\Documents\Проекты\budget_master\budget_master\budget_master.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="budget_master [2]" uuid="7f1389c0-4d45-49de-9f83-e52e061af7b8">
+    <data-source source="LOCAL" name="budget_master" uuid="d22553a9-209f-42d8-b892-f21ea2c2c6f1">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

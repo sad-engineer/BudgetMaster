@@ -79,6 +79,9 @@ public class DatabaseUtil {
             
             // Initialize default currencies
             initializeDefaultCurrencies(conn);
+            
+            // Initialize default categories
+            initializeDefaultCategories(conn);
         }
     }
     
@@ -284,26 +287,106 @@ public class DatabaseUtil {
         // Use repository to add default categories with auto-position
         String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
         CategoryRepository categoryRepo = new CategoryRepository(dbPath);
+                
+        // Сначала создаем родительские категории
+        Category incomeParent = new Category();
+        incomeParent.setTitle("Доходы");
+        incomeParent.setOperationType(2); // Доходы
+        incomeParent.setType(0); // Родительская
+        incomeParent.setParentId(null);
+        incomeParent.setCreatedBy("initializer");
+        incomeParent.setUpdatedBy("initializer");
+        incomeParent.setCreateTime(java.time.LocalDateTime.now());
+        incomeParent.setUpdateTime(java.time.LocalDateTime.now());
+        incomeParent.setDeleteTime(null);
         
-        // Add default categories
-        String[][] categories = {
-            // title, operation_type, type
-            {"Продукты", "1", "1"},      // Расходы, Основные
-            {"Транспорт", "1", "1"},     // Расходы, Основные
-            {"Развлечения", "1", "1"},   // Расходы, Основные
-            {"Зарплата", "2", "1"},      // Доходы, Основные
-            {"Подработка", "2", "1"},    // Доходы, Основные
-            {"Подарки", "1", "2"},       // Расходы, Дополнительные
-            {"Бонусы", "2", "2"}         // Доходы, Дополнительные
-        };
+        Category expenseParent = new Category();
+        expenseParent.setTitle("Расходы");
+        expenseParent.setOperationType(1); // Расходы
+        expenseParent.setType(0); // Родительская
+        expenseParent.setParentId(null);
+        expenseParent.setCreatedBy("initializer");
+        expenseParent.setUpdatedBy("initializer");
+        expenseParent.setCreateTime(java.time.LocalDateTime.now());
+        expenseParent.setUpdateTime(java.time.LocalDateTime.now());
+        expenseParent.setDeleteTime(null);
         
-        for (String[] categoryData : categories) {
+        // Сохраняем родительские категории
+        Category savedIncomeParent = categoryRepo.save(incomeParent);
+        Category savedExpenseParent = categoryRepo.save(expenseParent);
+        
+        // Создаем дочерние категории доходов
+        String[] incomeCategoryTitles = {"Работа", "Подработка", "Подарки"};
+        
+        for (String title : incomeCategoryTitles) {
             Category category = new Category();
-            category.setPosition(0); // Will be auto-assigned by repository
-            category.setTitle(categoryData[0]);
-            category.setOperationType(Integer.parseInt(categoryData[1]));
-            category.setType(Integer.parseInt(categoryData[2]));
-            category.setParentId(null);
+            category.setTitle(title);
+            category.setOperationType(2); // Доходы
+            category.setType(1); // Дочерняя
+            category.setParentId(savedIncomeParent.getId());
+            category.setCreatedBy("initializer");
+            category.setUpdatedBy("initializer");
+            category.setCreateTime(java.time.LocalDateTime.now());
+            category.setUpdateTime(java.time.LocalDateTime.now());
+            category.setDeleteTime(null);
+            
+            categoryRepo.save(category);
+        }
+        
+        // Создаем промежуточные категории расходов
+        Category necessaryExpense = new Category();
+        necessaryExpense.setTitle("Необходимые");
+        necessaryExpense.setOperationType(1); // Расходы
+        necessaryExpense.setType(1); // Дочерняя
+        necessaryExpense.setParentId(savedExpenseParent.getId());
+        necessaryExpense.setCreatedBy("initializer");
+        necessaryExpense.setUpdatedBy("initializer");
+        necessaryExpense.setCreateTime(java.time.LocalDateTime.now());
+        necessaryExpense.setUpdateTime(java.time.LocalDateTime.now());
+        necessaryExpense.setDeleteTime(null);
+        
+        Category additionalExpense = new Category();
+        additionalExpense.setTitle("Дополнительные");
+        additionalExpense.setOperationType(1); // Расходы
+        additionalExpense.setType(1); // Дочерняя
+        additionalExpense.setParentId(savedExpenseParent.getId());
+        additionalExpense.setCreatedBy("initializer");
+        additionalExpense.setUpdatedBy("initializer");
+        additionalExpense.setCreateTime(java.time.LocalDateTime.now());
+        additionalExpense.setUpdateTime(java.time.LocalDateTime.now());
+        additionalExpense.setDeleteTime(null);
+        
+        // Сохраняем промежуточные категории
+        Category savedNecessary = categoryRepo.save(necessaryExpense);
+        Category savedAdditional = categoryRepo.save(additionalExpense);
+        
+        // Создаем дочерние категории необходимых расходов
+        String[] necessaryCategoryTitles = {"Коммунальные", "Продукты", "Транспорт", "Медицина", "Одежда", "Налоги"};
+        
+        for (String title : necessaryCategoryTitles) {
+            Category category = new Category();
+            category.setTitle(title);
+            category.setOperationType(1); // Расходы
+            category.setType(1); // Дочерняя
+            category.setParentId(savedNecessary.getId());
+            category.setCreatedBy("initializer");
+            category.setUpdatedBy("initializer");
+            category.setCreateTime(java.time.LocalDateTime.now());
+            category.setUpdateTime(java.time.LocalDateTime.now());
+            category.setDeleteTime(null);
+            
+            categoryRepo.save(category);
+        }
+        
+        // Создаем дочерние категории дополнительных расходов
+        String[] additionalCategoryTitles = {"Домашние нужды", "Кино", "Кафе и рестораны", "Подарки"};
+        
+        for (String title : additionalCategoryTitles) {
+            Category category = new Category();
+            category.setTitle(title);
+            category.setOperationType(1); // Расходы
+            category.setType(1); // Дочерняя
+            category.setParentId(savedAdditional.getId());
             category.setCreatedBy("initializer");
             category.setUpdatedBy("initializer");
             category.setCreateTime(java.time.LocalDateTime.now());
