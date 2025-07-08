@@ -8,15 +8,17 @@ public class Budget extends BaseEntity {
     private int amount;
     private int currencyId;
     private Integer categoryId;
+    private int position;
 
     public Budget() {}
 
     public Budget(int id, LocalDateTime createTime, LocalDateTime updateTime, LocalDateTime deleteTime,
-                  String createdBy, String updatedBy, String deletedBy, int amount, int currencyId, Integer categoryId) {
+                  String createdBy, String updatedBy, String deletedBy, int position, int amount, int currencyId, Integer categoryId) {
         super(id, createTime, updateTime, deleteTime, createdBy, updatedBy, deletedBy);
         this.amount = amount;
         this.currencyId = currencyId;
         this.categoryId = categoryId;
+        this.position = position;
     }
 
     public int getAmount() { return amount; }
@@ -25,6 +27,8 @@ public class Budget extends BaseEntity {
     public void setCurrencyId(int currencyId) { this.currencyId = currencyId; }
     public Integer getCategoryId() { return categoryId; }
     public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
+    public int getPosition() { return position; }
+    public void setPosition(int position) { this.position = position; }
 
     @Override
     public boolean equals(Object o) {

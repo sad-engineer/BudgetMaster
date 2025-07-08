@@ -1,61 +1,27 @@
 import os
+import sys
 
-import jpype
-import jpype.imports
+from BudgetMasterBackend.examples.common import cleanup_example, get_java_class, setup_example, test_data_manager
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
-
-# Путь к build, где лежат скомпилированные классы
-BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
-
-# Путь к библиотекам (SQLite драйвер)
-LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "lib"))
-
-# Classpath с библиотеками
-CLASSPATH = (
-    BUILD_PATH
-    + os.pathsep
-    + os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar")
-    + os.pathsep
-    + os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar")
-    + os.pathsep
-    + os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar")
-)
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def main():
     print("=== Тест DatabaseUtil через JPype ===")
-    print(f"Classpath: {CLASSPATH}")
 
-    # Путь к тестовой базе данных
-    test_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "budget_master.db"))
-    print(f"Тестовая БД: {test_db_path}")
-
-    # Проверяем наличие JAR файлов
-    required_jars = ["sqlite-jdbc-3.45.1.0.jar", "slf4j-api-2.0.13.jar", "slf4j-simple-2.0.13.jar"]
-
-    for jar in required_jars:
-        jar_path = os.path.join(LIB_PATH, jar)
-        if not os.path.exists(jar_path):
-            print(f"❌ JAR файл не найден: {jar_path}")
-            return
-
-    print("✅ Все необходимые JAR файлы найдены")
-
-    # Запуск JVM
-    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=CLASSPATH, convertStrings=True)
+    # Настройка окружения
+    if not setup_example():
+        return
 
     try:
-        # Загружаем SQLite драйвер
-        Class = jpype.JClass("java.lang.Class")
-        Class.forName("org.sqlite.JDBC")
-        print("✅ SQLite драйвер загружен")
-
         # Импортируем классы
-        DatabaseUtil = jpype.JClass("util.DatabaseUtil")
+        DatabaseUtil = get_java_class("util.DatabaseUtil")
 
         print("✅ Классы импортированы")
+
+        # Путь к тестовой базе данных
+        test_db_path = test_data_manager.db_manager.db_path
+        print(f"Тестовая БД: {test_db_path}")
 
         # Удаляем старую тестовую БД если существует
         if os.path.exists(test_db_path):
@@ -119,15 +85,8 @@ def main():
         traceback.print_exc()
 
     finally:
-        # Останавливаем JVM
-        if jpype.isJVMStarted():
-            jpype.shutdownJVM()
-            print("JVM остановлена")
-
-        # # Удаляем тестовую БД
-        # if os.path.exists(test_db_path):
-        #     os.remove(test_db_path)
-        #     print("🗑️ Тестовая БД удалена")
+        # Очистка и остановка
+        cleanup_example()
 
 
 if __name__ == "__main__":

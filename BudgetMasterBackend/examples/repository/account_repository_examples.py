@@ -1,6 +1,7 @@
+import os
+
 import jpype
 import jpype.imports
-import os
 
 # Путь к JDK (где лежит jvm.dll)
 JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
@@ -12,63 +13,61 @@ BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "b
 LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "lib"))
 
 # Classpath с библиотеками
-CLASSPATH = (BUILD_PATH + os.pathsep + 
-             os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar"))
+CLASSPATH = (
+    BUILD_PATH
+    + os.pathsep
+    + os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar")
+    + os.pathsep
+    + os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar")
+    + os.pathsep
+    + os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar")
+)
 
 # Путь к базе данных
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "budget_master.db"))
+
 
 def main():
     print("=== Тест AccountRepository через JPype ===")
     print(f"Classpath: {CLASSPATH}")
     print(f"Database: {DB_PATH}")
-    
+
     # Проверяем существование файлов
     if not os.path.exists(DB_PATH):
         print(f"❌ База данных не найдена: {DB_PATH}")
         return
-    
+
     # Проверяем наличие всех необходимых JAR файлов
-    required_jars = [
-        "sqlite-jdbc-3.45.1.0.jar",
-        "slf4j-api-2.0.13.jar", 
-        "slf4j-simple-2.0.13.jar"
-    ]
-    
+    required_jars = ["sqlite-jdbc-3.45.1.0.jar", "slf4j-api-2.0.13.jar", "slf4j-simple-2.0.13.jar"]
+
     for jar in required_jars:
         jar_path = os.path.join(LIB_PATH, jar)
         if not os.path.exists(jar_path):
             print(f"❌ JAR файл не найден: {jar_path}")
             return
-    
+
     print("✅ Все необходимые JAR файлы найдены")
-    
+
     # Запуск JVM
-    jpype.startJVM(
-        jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"),
-        classpath=CLASSPATH,
-        convertStrings=True
-    )
+    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=CLASSPATH, convertStrings=True)
 
     try:
         # Загружаем SQLite драйвер
         Class = jpype.JClass("java.lang.Class")
         Class.forName("org.sqlite.JDBC")
         print("✅ SQLite драйвер загружен")
-        
+
         # Импортируем классы
         Account = jpype.JClass("model.Account")
         AccountRepository = jpype.JClass("repository.AccountRepository")
         LocalDateTime = jpype.JClass("java.time.LocalDateTime")
-        
+
         print("✅ Классы импортированы")
-        
+
         # Создаем репозиторий
         repo = AccountRepository(DB_PATH)
         print("✅ Репозиторий создан")
-        
+
         # Создаем тестовый счет
         account = Account()
         account.setPosition(1)
@@ -77,20 +76,20 @@ def main():
         account.setType(1)  # Текущий счет
         account.setCurrencyId(1)  # RUB
         account.setClosed(0)  # Не закрыт
-        
+
         # Устанавливаем базовые поля (наследуемые от BaseEntity)
         account.setCreatedBy("tester")
         account.setUpdatedBy("tester")
-        
+
         # Устанавливаем даты
         now = LocalDateTime.now()
         account.setCreateTime(now)
         account.setUpdateTime(now)
         account.setDeleteTime(None)
-        
+
         print("✅ Тестовый счет создан")
         print(f"Счет: {account.toString()}")
-        
+
         # Тестируем сохранение
         print("\n--- Тест сохранения ---")
         saved_account = repo.save(account)
@@ -117,12 +116,14 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при поиске: {e}")
             import traceback
+
             traceback.print_exc()
 
         # Прямой SQL-запрос для проверки
         print("\n--- Прямой SQL-запрос ---")
         try:
             import sqlite3
+
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
 
@@ -249,12 +250,13 @@ def main():
         #     traceback.print_exc()
         #
         # print("\n✅ Все тесты выполнены успешно!")
-        
+
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         import traceback
+
         traceback.print_exc()
-    
+
     finally:
         # Останавливаем JVM
         if jpype.isJVMStarted():
@@ -263,4 +265,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

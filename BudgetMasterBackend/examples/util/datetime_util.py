@@ -1,29 +1,22 @@
 import os
+import sys
 
-import jpype
-import jpype.imports
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
-
-# Путь к build, где лежат скомпилированные классы
-BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
-
-# Classpath
-CLASSPATH = BUILD_PATH
+from BudgetMasterBackend.examples.common import cleanup_example, get_java_class, setup_example
 
 
 def main():
     print("=== Тест DateTimeUtil через JPype ===")
-    print(f"Classpath: {CLASSPATH}")
 
-    # Запуск JVM
-    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=CLASSPATH, convertStrings=True)
+    # Настройка окружения
+    if not setup_example():
+        return
 
     try:
         # Импортируем классы
-        DateTimeUtil = jpype.JClass("util.DateTimeUtil")
-        LocalDateTime = jpype.JClass("java.time.LocalDateTime")
+        DateTimeUtil = get_java_class("util.DateTimeUtil")
+        LocalDateTime = get_java_class("java.time.LocalDateTime")
 
         print("✅ Классы импортированы")
 
@@ -76,10 +69,8 @@ def main():
         traceback.print_exc()
 
     finally:
-        # Останавливаем JVM
-        if jpype.isJVMStarted():
-            jpype.shutdownJVM()
-            print("JVM остановлена")
+        # Очистка и остановка
+        cleanup_example()
 
 
 if __name__ == "__main__":

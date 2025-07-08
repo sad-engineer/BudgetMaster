@@ -6,24 +6,23 @@ import util.DateTimeUtil;
 import java.sql.*;
 import java.util.*;
 
-public class CurrencyRepository implements Repository<Currency, Integer> {
-    private final String url;
+public class CurrencyRepository extends BaseRepository implements Repository<Currency, Integer> {
 
     public CurrencyRepository(String dbPath) {
-        this.url = "jdbc:sqlite:" + dbPath;
-    }
-
-    private Connection getConnection() throws SQLException {
-        Connection conn = DriverManager.getConnection(url);
-        // Устанавливаем кодировку UTF-8 для подключения
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA encoding = 'UTF-8'");
-        }
-        return conn;
+        super(dbPath);
     }
 
     @Override
     public Currency save(Currency currency) {
+        // Check if there's a deleted record with the same title and restore it
+        if (checkAndRestoreDeletedRecord(currency, "currencies", "title", currency.getTitle())) {
+            return currency; // Record was restored
+        }
+        
+        // No deleted record found, proceed with normal save
+        // Automatically set position if not set (equals 0)
+        setAutoPosition(currency, "currencies");
+        
         String sql = "INSERT INTO currencies (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
@@ -53,43 +52,28 @@ public class CurrencyRepository implements Repository<Currency, Integer> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        // Normalize positions after save
+        normalizePositions("currencies");
+        
         return currency;
     }
 
     @Override
     public Optional<Currency> findById(Integer id) {
-        String sql = "SELECT * FROM currencies WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return Optional.of(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+        return findById("currencies", id, this::mapRowSafe);
     }
 
     @Override
     public List<Currency> findAll() {
-        List<Currency> result = new ArrayList<>();
-        String sql = "SELECT * FROM currencies";
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                result.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return findAll("currencies", this::mapRowSafe);
     }
 
     @Override
     public Currency update(Currency currency) {
+        // Adjust positions if needed before updating
+        adjustPositionsForUpdate(currency, "currencies", currency.getId());
+        
         String sql = "UPDATE currencies SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=? WHERE id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -112,20 +96,50 @@ public class CurrencyRepository implements Repository<Currency, Integer> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        // Normalize positions after update
+        normalizePositions("currencies");
+        
         return currency;
     }
 
     @Override
     public boolean delete(Integer id) {
-        String sql = "DELETE FROM currencies WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return softDelete("currencies", id, "system");
+    }
+
+    /**
+     * Soft delete with custom deletedBy parameter
+     * @param id entity ID
+     * @param deletedBy user who deleted the entity
+     * @return true if successful
+     */
+    public boolean delete(Integer id, String deletedBy) {
+        return softDelete("currencies", id, deletedBy);
+    }
+
+    /**
+     * Restores a soft-deleted currency
+     * @param id currency ID
+     * @return true if successful
+     */
+    public boolean restore(Integer id) {
+        return restore("currencies", id);
+    }
+
+    /**
+     * Gets only deleted currencies
+     * @return list of deleted currencies
+     */
+    public List<Currency> findDeleted() {
+        return findDeleted("currencies", this::mapRowSafe);
+    }
+
+    /**
+     * Normalizes positions of all active currencies to be sequential starting from 1
+     */
+    public void normalizePositions() {
+        normalizePositions("currencies");
     }
 
     private Currency mapRow(ResultSet rs) throws SQLException {
@@ -148,5 +162,14 @@ public class CurrencyRepository implements Repository<Currency, Integer> {
         currency.setPosition(rs.getInt("position"));
         currency.setTitle(rs.getString("title"));
         return currency;
+    }
+
+    private Currency mapRowSafe(ResultSet rs) {
+        try {
+            return mapRow(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 } 

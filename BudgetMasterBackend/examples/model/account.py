@@ -1,42 +1,52 @@
 import os
+import sys
 
-import jpype
-import jpype.imports
+from BudgetMasterBackend.examples.common import cleanup_example, get_java_class, setup_example
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
-
-# Путь к build, где лежит model/Account.class
-CLASSPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def main():
-    # Запуск JVM
-    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=[CLASSPATH], convertStrings=True)
+    print("=== Тест модели Account ===")
 
-    # Импортируем класс Account
-    Account = jpype.JClass("model.Account")
+    # Настройка окружения
+    if not setup_example():
+        return
 
-    # Создаем объект
-    account = Account()
-    account.setId(1)
-    account.setPosition(1)
-    account.setTitle("Основной счет")
-    account.setAmount(10000)
-    account.setType(1)  # 1 - банковский счет
-    account.setCurrencyId(1)
-    account.setClosed(0)  # 0 - активный счет
+    try:
+        # Импортируем класс Account
+        Account = get_java_class("model.Account")
 
-    print("id:", account.getId())
-    print("position:", account.getPosition())
-    print("title:", account.getTitle())
-    print("amount:", account.getAmount())
-    print("type:", account.getType())
-    print("currencyId:", account.getCurrencyId())
-    print("closed:", account.getClosed())
-    print("toString:", account.toString())
+        # Создаем объект
+        account = Account()
+        account.setId(1)
+        account.setPosition(1)
+        account.setTitle("Основной счет")
+        account.setAmount(10000)
+        account.setType(1)  # 1 - банковский счет
+        account.setCurrencyId(1)
+        account.setClosed(0)  # 0 - активный счет
 
-    jpype.shutdownJVM()
+        print("id:", account.getId())
+        print("position:", account.getPosition())
+        print("title:", account.getTitle())
+        print("amount:", account.getAmount())
+        print("type:", account.getType())
+        print("currencyId:", account.getCurrencyId())
+        print("closed:", account.getClosed())
+        print("toString:", account.toString())
+
+        print("\n✅ Тест модели Account выполнен успешно!")
+
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+
+        traceback.print_exc()
+
+    finally:
+        # Очистка и остановка
+        cleanup_example()
 
 
 if __name__ == "__main__":

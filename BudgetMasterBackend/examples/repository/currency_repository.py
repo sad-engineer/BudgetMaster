@@ -1,98 +1,51 @@
-import jpype
-import jpype.imports
 import os
+import sys
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
+from BudgetMasterBackend.examples.common import (
+    cleanup_example,
+    create_test_entity,
+    get_java_class,
+    setup_example,
+    test_data_manager,
+)
 
-# Путь к build, где лежат скомпилированные классы
-BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-# Путь к библиотекам (SQLite драйвер)
-LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "lib"))
-
-# Classpath с библиотеками
-CLASSPATH = (BUILD_PATH + os.pathsep + 
-             os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar"))
-
-# Путь к базе данных
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "budget_master.db"))
 
 def main():
     print("=== Тест CurrencyRepository через JPype ===")
-    print(f"Classpath: {CLASSPATH}")
-    print(f"Database: {DB_PATH}")
-    
-    # Проверяем существование файлов
-    if not os.path.exists(DB_PATH):
-        print(f"❌ База данных не найдена: {DB_PATH}")
+
+    # Настройка окружения
+    if not setup_example():
         return
-    
-    # Проверяем наличие всех необходимых JAR файлов
-    required_jars = [
-        "sqlite-jdbc-3.45.1.0.jar",
-        "slf4j-api-2.0.13.jar", 
-        "slf4j-simple-2.0.13.jar"
-    ]
-    
-    for jar in required_jars:
-        jar_path = os.path.join(LIB_PATH, jar)
-        if not os.path.exists(jar_path):
-            print(f"❌ JAR файл не найден: {jar_path}")
-            return
-    
-    print("✅ Все необходимые JAR файлы найдены")
-    
-    # Запуск JVM
-    jpype.startJVM(
-        jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"),
-        classpath=CLASSPATH,
-        convertStrings=True
-    )
 
     try:
-        # Загружаем SQLite драйвер
-        Class = jpype.JClass("java.lang.Class")
-        Class.forName("org.sqlite.JDBC")
-        print("✅ SQLite драйвер загружен")
-        
         # Импортируем классы
-        Currency = jpype.JClass("model.Currency")
-        CurrencyRepository = jpype.JClass("repository.CurrencyRepository")
-        LocalDateTime = jpype.JClass("java.time.LocalDateTime")
-        
+        Currency = get_java_class("model.Currency")
+        CurrencyRepository = get_java_class("repository.CurrencyRepository")
+        LocalDateTime = get_java_class("java.time.LocalDateTime")
+
         print("✅ Классы импортированы")
-        
+
         # Создаем репозиторий
-        repo = CurrencyRepository(DB_PATH)
+        repo = CurrencyRepository(test_data_manager.db_manager.db_path)
         print("✅ Репозиторий создан")
-        
+
         # Создаем тестовую валюту
-        currency = Currency()
-        currency.setPosition(1)
-        currency.setTitle("Доллар США")
-        
-        # Устанавливаем базовые поля (наследуемые от BaseEntity)
-        currency.setCreatedBy("tester")
-        currency.setUpdatedBy("tester")
-        
-        # Устанавливаем даты
-        now = LocalDateTime.now()
-        currency.setCreateTime(now)
-        currency.setUpdateTime(now)
-        currency.setDeleteTime(None)
-        
+        currency = create_test_entity(Currency, title="Доллар США", createdBy="tester", updatedBy="tester")
+
         print("✅ Тестовая валюта создана")
         print(f"Валюта: {currency.toString()}")
-        
+
         # Тестируем сохранение
         print("\n--- Тест сохранения ---")
         saved_currency = repo.save(currency)
         print(f"Валюта сохранена: {saved_currency.toString()}")
         print(f"ID валюты: {saved_currency.getId()}")
-        
+
+        # Сохраняем ID для последующего удаления
+        test_data_manager.add_test_id("currencies", saved_currency.getId())
+
         # Тестируем поиск по ID
         print("\n--- Тест поиска по ID ---")
         try:
@@ -109,48 +62,109 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при поиске: {e}")
             import traceback
+
             traceback.print_exc()
-        
+
         # Прямой SQL-запрос для проверки
         print("\n--- Прямой SQL-запрос ---")
         try:
             import sqlite3
-            conn = sqlite3.connect(DB_PATH)
+
+            conn = sqlite3.connect(test_data_manager.db_manager.db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("SELECT * FROM currencies WHERE id = ?", (saved_currency.getId(),))
             row = cursor.fetchone()
-            
+
             if row:
                 print("✅ Найдена валюта в БД:")
                 cursor.execute("PRAGMA table_info(currencies)")
                 columns = [col[1] for col in cursor.fetchall()]
-                
+
                 for i, (col_name, value) in enumerate(zip(columns, row)):
                     print(f"  {col_name}: {value} (тип: {type(value).__name__})")
             else:
                 print("❌ Валюта не найдена в БД")
-            
+
             conn.close()
-            
+
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
-        
-        # Тестируем обновление
-        print("\n--- Тест обновления ---")
+
+        # Тестируем создание нескольких валют для проверки автонумерации
+        print("\n--- Тест создания нескольких валют ---")
+        test_currencies = []
+        for i in range(3):
+            test_currency = create_test_entity(
+                Currency,
+                title=f"Тестовая валюта {i + 1}",
+                createdBy="position_tester",
+                updatedBy="position_tester",
+            )
+
+            saved_test_currency = repo.save(test_currency)
+            test_currencies.append(saved_test_currency)
+            test_data_manager.add_test_id("currencies", saved_test_currency.getId())
+            print(f"Создана валюта: {saved_test_currency.getTitle()}, Position: {saved_test_currency.getPosition()}")
+
+        # Проверяем сортировку (позиции должны быть нормализованы после каждого save)
+        all_currencies = repo.findAll()
+        print(f"\nВсе валюты (отсортированы по position, нормализованы после save):")
+        for curr in all_currencies:
+            print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
+
+        # Проверяем, что позиции идут по порядку после создания
+        positions = [curr.getPosition() for curr in all_currencies]
+        expected_positions = list(range(1, len(positions) + 1))
+        if positions == expected_positions:
+            print("✅ Позиции нормализованы корректно после создания валют!")
+        else:
+            print(f"❌ Ошибка нормализации после создания: ожидались {expected_positions}, получены {positions}")
+
+        # Тестируем перестановку позиций
+        print("\n--- Тест перестановки позиций ---")
+        try:
+            # Берем первую валюту и меняем её position на 2 (которая уже занята)
+            first_currency = test_currencies[0]
+            original_position = first_currency.getPosition()
+            print(f"Исходная позиция первой валюты: {original_position}")
+
+            # Меняем position на 2 (которая должна быть занята)
+            first_currency.setPosition(2)
+            first_currency.setTitle("Первая валюта (перемещена)")
+            first_currency.setUpdatedBy("position_reorder_tester")
+            first_currency.setUpdateTime(LocalDateTime.now())
+
+            updated_currency = repo.update(first_currency)
+            print(f"Валюта обновлена: {updated_currency.getTitle()}, Position: {updated_currency.getPosition()}")
+
+            # Проверяем результат перестановки (позиции должны быть нормализованы после update)
+            all_currencies_after = repo.findAll()
+            print(f"\nВсе валюты после перестановки (позиции нормализованы):")
+            for curr in all_currencies_after:
+                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
+
+        except Exception as e:
+            print(f"❌ Ошибка при перестановке позиций: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+        # Тестируем обычное обновление
+        print("\n--- Тест обычного обновления ---")
         try:
             # Обновляем данные валюты
             saved_currency.setTitle("Доллар США (обновленный)")
-            saved_currency.setPosition(2)
+            saved_currency.setPosition(1)  # Меняем на позицию 1
             saved_currency.setUpdatedBy("jpype_update_test")
-            
+
             # Обновляем дату
             updated_now = LocalDateTime.now()
             saved_currency.setUpdateTime(updated_now)
-            
+
             updated_currency = repo.update(saved_currency)
             print(f"Валюта обновлена: {updated_currency.toString()}")
-            
+
             # Проверяем обновление
             found_updated = repo.findById(saved_currency.getId())
             if found_updated.isPresent():
@@ -161,52 +175,166 @@ def main():
                 print(f"Updated by: {curr.getUpdatedBy()}")
             else:
                 print("❌ Обновленная валюта не найдена")
-                
+
+            # Проверяем, что позиции нормализованы после обновления
+            all_after_update = repo.findAll()
+            print(f"\nВсе валюты после обновления (позиции нормализованы):")
+            for curr in all_after_update:
+                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
+
+            # Проверяем, что позиции идут по порядку
+            positions_after_update = [curr.getPosition() for curr in all_after_update]
+            expected_positions_after_update = list(range(1, len(positions_after_update) + 1))
+            if positions_after_update == expected_positions_after_update:
+                print("✅ Позиции нормализованы корректно после обновления!")
+            else:
+                print(
+                    f"❌ Ошибка нормализации после обновления: ожидались {expected_positions_after_update}, получены {positions_after_update}"
+                )
+
         except Exception as e:
             print(f"❌ Ошибка при обновлении: {e}")
             import traceback
+
             traceback.print_exc()
-        
-        # Тестируем удаление
-        print("\n--- Тест удаления ---")
+
+        # Тестируем soft delete
+        print("\n--- Тест soft delete ---")
         try:
             currency_id = saved_currency.getId()
-            deleted = repo.delete(currency_id)
-            print(f"Валюта удалена: {deleted}")
-            
-            # Проверяем удаление
+
+            # Проверяем, что валюта есть в обычном списке
+            all_before_delete = repo.findAll()
+            print(f"Валют до удаления: {len(all_before_delete)}")
+
+            # Удаляем валюту (soft delete)
+            deleted = repo.delete(currency_id, "test_user")
+            print(f"Валюта помечена как удаленная: {deleted}")
+
+            # Проверяем, что валюта исчезла из обычного списка
+            all_after_delete = repo.findAll()
+            print(f"Валют после удаления (обычный режим): {len(all_after_delete)}")
+
+            # Включаем показ удаленных записей
+            repo.setIncludeDeleted(True)
+            all_with_deleted = repo.findAll()
+            print(f"Валют после удаления (включая удаленные): {len(all_with_deleted)}")
+
+            # Проверяем удаленную запись (должна быть найдена в режиме includeDeleted)
             found_deleted = repo.findById(currency_id)
             if found_deleted.isPresent():
-                print("❌ Валюта все еще существует")
+                deleted_currency = found_deleted.get()
+                print(f"Найдена удаленная валюта: {deleted_currency.getTitle()}")
+                print(f"Deleted by: {deleted_currency.getDeletedBy()}")
+                print(f"Delete time: {deleted_currency.getDeleteTime()}")
             else:
-                print("✅ Валюта успешно удалена")
-                
+                print("❌ Удаленная валюта не найдена")
+
+            # Тестируем метод findDeleted
+            print("\n--- Тест findDeleted ---")
+            deleted_currencies = repo.findDeleted()
+            print(f"Найдено удаленных валют: {len(deleted_currencies)}")
+            for curr in deleted_currencies:
+                print(f"  Удаленная валюта: {curr.getTitle()}, Deleted by: {curr.getDeletedBy()}")
+
+            # Тестируем восстановление через save с тем же title
+            print("\n--- Тест восстановления через save ---")
+            try:
+                # Создаем новую валюту с тем же названием, что и удаленная
+                new_currency = create_test_entity(
+                    Currency,
+                    title="Доллар США (обновленный)",  # То же название, что и удаленная
+                    createdBy="restore_test",
+                    updatedBy="restore_test",
+                )
+
+                restored_currency = repo.save(new_currency)
+                test_data_manager.add_test_id("currencies", restored_currency.getId())
+                print(f"Валюта восстановлена через save: {restored_currency.getTitle()}")
+                print(f"ID восстановленной валюты: {restored_currency.getId()}")
+                print(f"Position: {restored_currency.getPosition()}")
+
+                # Проверяем, что валюта снова видна в обычном режиме
+                repo.setIncludeDeleted(False)
+                all_after_restore_save = repo.findAll()
+                print(f"Валют после восстановления через save: {len(all_after_restore_save)}")
+
+                # Проверяем, что это та же запись (тот же ID)
+                found_restored_save = repo.findById(restored_currency.getId())
+                if found_restored_save.isPresent():
+                    final_currency = found_restored_save.get()
+                    print(f"Проверка восстановленной валюты: {final_currency.getTitle()}")
+                    print(f"Delete time: {final_currency.getDeleteTime()}")
+                    print(f"Deleted by: {final_currency.getDeletedBy()}")
+                    print(f"Updated by: {final_currency.getUpdatedBy()}")
+                else:
+                    print("❌ Восстановленная валюта не найдена")
+
+            except Exception as e:
+                print(f"❌ Ошибка при восстановлении через save: {e}")
+                import traceback
+
+                traceback.print_exc()
+
+            # Тестируем восстановление через метод restore
+            print("\n--- Тест восстановления через restore ---")
+            try:
+                # Сначала удаляем валюту снова для теста
+                repo.delete(restored_currency.getId(), "test_user_2")
+                print("Валюта снова удалена для теста restore")
+
+                # Восстанавливаем через метод restore
+                restored = repo.restore(restored_currency.getId())
+                print(f"Валюта восстановлена через restore: {restored}")
+
+                # Проверяем, что валюта снова видна в обычном режиме
+                all_after_restore = repo.findAll()
+                print(f"Валют после восстановления через restore: {len(all_after_restore)}")
+
+                # Проверяем восстановленную запись
+                found_restored = repo.findById(restored_currency.getId())
+                if found_restored.isPresent():
+                    restored_currency = found_restored.get()
+                    print(f"Найдена восстановленная валюта: {restored_currency.getTitle()}")
+                    print(f"Delete time после восстановления: {restored_currency.getDeleteTime()}")
+                    print(f"Deleted by после восстановления: {restored_currency.getDeletedBy()}")
+                else:
+                    print("❌ Восстановленная валюта не найдена")
+
+            except Exception as e:
+                print(f"❌ Ошибка при восстановлении через restore: {e}")
+                import traceback
+
+                traceback.print_exc()
+
             # Проверяем через прямой SQL
             import sqlite3
-            conn = sqlite3.connect(DB_PATH)
+
+            conn = sqlite3.connect(test_data_manager.db_manager.db_path)
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM currencies WHERE id = ?", (currency_id,))
-            count = cursor.fetchone()[0]
-            print(f"Количество записей с ID {currency_id} в БД: {count}")
+            cursor.execute("SELECT delete_time, deleted_by FROM currencies WHERE id = ?", (currency_id,))
+            row = cursor.fetchone()
+            if row:
+                print(f"SQL проверка - Delete time: {row[0]}, Deleted by: {row[1]}")
             conn.close()
-            
+
         except Exception as e:
-            print(f"❌ Ошибка при удалении: {e}")
+            print(f"❌ Ошибка при soft delete: {e}")
             import traceback
+
             traceback.print_exc()
-        
+
         print("\n✅ Все тесты выполнены успешно!")
-        
+
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         import traceback
+
         traceback.print_exc()
-    
+
     finally:
-        # Останавливаем JVM
-        if jpype.isJVMStarted():
-            jpype.shutdownJVM()
-            print("JVM остановлена")
+        # Очистка тестовых данных и остановка JVM
+        cleanup_example()
 
 
 if __name__ == "__main__":

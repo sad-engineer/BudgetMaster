@@ -1,34 +1,44 @@
 import os
+import sys
 
-import jpype
-import jpype.imports
+from BudgetMasterBackend.examples.common import cleanup_example, get_java_class, setup_example
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
-
-# Путь к build, где лежит model/Budget.class
-CLASSPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def main():
-    # Запуск JVM
-    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=[CLASSPATH], convertStrings=True)
+    print("=== Тест модели Budget ===")
 
-    # Импортируем класс Budget
-    Budget = jpype.JClass("model.Budget")
+    # Настройка окружения
+    if not setup_example():
+        return
 
-    # Создаем объект
-    budget = Budget()
-    budget.setId(1)
-    budget.setAmount(50000)
-    budget.setCurrencyId(1)
+    try:
+        # Импортируем класс Budget
+        Budget = get_java_class("model.Budget")
 
-    print("id:", budget.getId())
-    print("amount:", budget.getAmount())
-    print("currencyId:", budget.getCurrencyId())
-    print("categoryId:", budget.getCategoryId())
+        # Создаем объект
+        budget = Budget()
+        budget.setId(1)
+        budget.setAmount(50000)
+        budget.setCurrencyId(1)
 
-    jpype.shutdownJVM()
+        print("id:", budget.getId())
+        print("amount:", budget.getAmount())
+        print("currencyId:", budget.getCurrencyId())
+        print("categoryId:", budget.getCategoryId())
+
+        print("\n✅ Тест модели Budget выполнен успешно!")
+
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+
+        traceback.print_exc()
+
+    finally:
+        # Очистка и остановка
+        cleanup_example()
 
 
 if __name__ == "__main__":

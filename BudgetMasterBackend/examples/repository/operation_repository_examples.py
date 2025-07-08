@@ -1,6 +1,7 @@
+import os
+
 import jpype
 import jpype.imports
-import os
 
 # Путь к JDK (где лежит jvm.dll)
 JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
@@ -12,10 +13,15 @@ BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "b
 LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "lib"))
 
 # Classpath с библиотеками (объединяем в строку с разделителем)
-CLASSPATH = (BUILD_PATH + os.pathsep + 
-             os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar") + os.pathsep +
-             os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar"))
+CLASSPATH = (
+    BUILD_PATH
+    + os.pathsep
+    + os.path.join(LIB_PATH, "sqlite-jdbc-3.45.1.0.jar")
+    + os.pathsep
+    + os.path.join(LIB_PATH, "slf4j-api-2.0.13.jar")
+    + os.pathsep
+    + os.path.join(LIB_PATH, "slf4j-simple-2.0.13.jar")
+)
 
 # Путь к базе данных
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "budget_master.db"))
@@ -25,51 +31,43 @@ def main():
     print("=== Тест OperationRepository через JPype ===")
     print(f"Classpath: {CLASSPATH}")
     print(f"Database: {DB_PATH}")
-    
+
     # Проверяем существование файлов
     if not os.path.exists(DB_PATH):
         print(f"❌ База данных не найдена: {DB_PATH}")
         return
-    
+
     # Проверяем наличие всех необходимых JAR файлов
-    required_jars = [
-        "sqlite-jdbc-3.45.1.0.jar",
-        "slf4j-api-2.0.13.jar", 
-        "slf4j-simple-2.0.13.jar"
-    ]
-    
+    required_jars = ["sqlite-jdbc-3.45.1.0.jar", "slf4j-api-2.0.13.jar", "slf4j-simple-2.0.13.jar"]
+
     for jar in required_jars:
         jar_path = os.path.join(LIB_PATH, jar)
         if not os.path.exists(jar_path):
             print(f"❌ JAR файл не найден: {jar_path}")
             return
-    
+
     print("✅ Все необходимые JAR файлы найдены")
-    
+
     # Запуск JVM
-    jpype.startJVM(
-        jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"),
-        classpath=CLASSPATH,
-        convertStrings=True
-    )
+    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=CLASSPATH, convertStrings=True)
 
     try:
         # Загружаем SQLite драйвер
         Class = jpype.JClass("java.lang.Class")
         Class.forName("org.sqlite.JDBC")
         print("✅ SQLite драйвер загружен")
-        
+
         # Импортируем классы
         Operation = jpype.JClass("model.Operation")
         OperationRepository = jpype.JClass("repository.OperationRepository")
         DateTimeUtil = jpype.JClass("util.DateTimeUtil")
-        
+
         print("✅ Классы импортированы")
-        
+
         # Создаем репозиторий
         repo = OperationRepository(DB_PATH)
         print("✅ Репозиторий создан")
-        
+
         # Создаем тестовую операцию
         operation = Operation()
         operation.setId(1289)  # Уникальный ID для теста
@@ -84,25 +82,25 @@ def main():
         operation.setCategoryId(1)
         operation.setAccountId(1)
         operation.setCurrencyId(1)
-        
+
         # Устанавливаем базовые поля (наследуемые от BaseEntity)
         operation.setCreatedBy("jpype_test")
         operation.setUpdatedBy("jpype_test")
-        
+
         # Устанавливаем даты (используем уже созданный LocalDateTime)
         now = LocalDateTime.now()
         operation.setCreateTime(now)
         operation.setUpdateTime(now)
         operation.setDeleteTime(None)  # если поле допускает null
-        
+
         print("✅ Тестовая операция создана")
         print(f"Операция: {operation.toString()}")
-        
+
         # Тестируем сохранение
         print("\n--- Тест сохранения ---")
         saved_operation = repo.save(operation)
         print(f"Операция сохранена: {saved_operation.toString()}")
-        
+
         # Тестируем поиск по ID
         print("\n--- Тест поиска по ID ---")
         try:
@@ -114,43 +112,45 @@ def main():
                 print("❌ Операция не найдена")
         except Exception as e:
             print(f"❌ Ошибка при поиске: {e}")
-        
+
         # Прямой SQL-запрос к базе данных
         print("\n--- Прямой SQL-запрос ---")
         try:
             import sqlite3
+
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
-            
+
             # Запрос всех операций
             cursor.execute("SELECT * FROM operations WHERE id = 1289")
             row = cursor.fetchone()
-            
+
             if row:
                 print("✅ Найдена операция в БД:")
                 # Получаем названия колонок
                 cursor.execute("PRAGMA table_info(operations)")
                 columns = [col[1] for col in cursor.fetchall()]
-                
+
                 for i, (col_name, value) in enumerate(zip(columns, row)):
                     print(f"  {col_name}: {value} (тип: {type(value).__name__})")
             else:
                 print("❌ Операция с ID=1289 не найдена в БД")
-                
+
                 # Показываем все операции
                 cursor.execute("SELECT id, type, amount, comment, date FROM operations LIMIT 5")
                 all_ops = cursor.fetchall()
                 print(f"Всего операций в БД: {len(all_ops)}")
                 for op in all_ops:
                     print(f"  ID={op[0]}, Type={op[1]}, Amount={op[2]}, Comment='{op[3]}', Date='{op[4]}'")
-            
+
             conn.close()
-            
+
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
             import traceback
+
             traceback.print_exc()
-        
+
         # # Тестируем получение всех операций
         # print("\n--- Тест получения всех операций ---")
         # try:
@@ -193,12 +193,13 @@ def main():
         #     print("✅ Операция успешно удалена")
         #
         print("\n✅ Все тесты выполнены успешно!")
-        
+
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         import traceback
+
         traceback.print_exc()
-    
+
     finally:
         # Останавливаем JVM
         if jpype.isJVMStarted():
@@ -207,4 +208,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

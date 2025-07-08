@@ -1,34 +1,44 @@
 import os
+import sys
 
-import jpype
-import jpype.imports
+from BudgetMasterBackend.examples.common import cleanup_example, get_java_class, setup_example
 
-# Путь к JDK (где лежит jvm.dll)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
-
-# Путь к build, где лежит model/Operation.class
-CLASSPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../..", "build"))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def main():
-    # Запуск JVM
-    jpype.startJVM(jvmpath=os.path.join(JDK_PATH, "server", "jvm.dll"), classpath=[CLASSPATH], convertStrings=True)
+    print("=== Тест модели Operation ===")
 
-    # Импортируем класс Operation
-    Operation = jpype.JClass("model.Operation")
+    # Настройка окружения
+    if not setup_example():
+        return
 
-    # Создаем объект
-    op = Operation()
-    op.setAmount(1234)
-    op.setComment("Бензак")
-    op.setType(1)
+    try:
+        # Импортируем класс Operation
+        Operation = get_java_class("model.Operation")
 
-    print("amount:", op.getAmount())
-    print("comment:", op.getComment())
-    print("type:", op.getType())
-    print("toString:", op.toString())
+        # Создаем объект
+        op = Operation()
+        op.setAmount(1234)
+        op.setComment("Бензак")
+        op.setType(1)
 
-    jpype.shutdownJVM()
+        print("amount:", op.getAmount())
+        print("comment:", op.getComment())
+        print("type:", op.getType())
+        print("toString:", op.toString())
+
+        print("\n✅ Тест модели Operation выполнен успешно!")
+
+    except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+
+        traceback.print_exc()
+
+    finally:
+        # Очистка и остановка
+        cleanup_example()
 
 
 if __name__ == "__main__":
