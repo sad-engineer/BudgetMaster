@@ -8,89 +8,81 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import model.Currency;
 import model.Category;
+import model.Account;
 import repository.CurrencyRepository;
 import repository.CategoryRepository;
+import repository.AccountRepository;
 
 public class DatabaseUtil {
     /**
-     * Clears all data from all tables
-     * @param dbPath path to database file
-     * @throws SQLException if database operation fails
+     * Очищает все данные из всех таблиц
+     * @param dbPath путь к файлу базы данных
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static void clearAllData(String dbPath) throws SQLException {
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
             try (Statement stmt = conn.createStatement()) {
-                // Disable foreign key constraints temporarily
+                // Временно отключаем внешние ключи
                 stmt.execute("PRAGMA foreign_keys = OFF");
-                
-                // Clear all tables in reverse dependency order
+                // Очищаем все таблицы в обратном порядке зависимостей
                 stmt.execute("DELETE FROM operations");
                 stmt.execute("DELETE FROM budgets");
                 stmt.execute("DELETE FROM accounts");
                 stmt.execute("DELETE FROM categories");
                 stmt.execute("DELETE FROM currencies");
-                
-                // Reset auto-increment counters
+                // Сбрасываем счетчики автоинкремента
                 stmt.execute("DELETE FROM sqlite_sequence WHERE name IN ('operations', 'budgets', 'accounts', 'categories', 'currencies')");
-                
-                // Re-enable foreign key constraints
+                // Включаем внешние ключи обратно
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
         }
     }
-    
     /**
-     * Clears data from specific table
-     * @param dbPath path to database file
-     * @param tableName name of table to clear
-     * @throws SQLException if database operation fails
+     * Очищает данные из указанной таблицы
+     * @param dbPath путь к файлу базы данных
+     * @param tableName имя таблицы
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static void clearTable(String dbPath, String tableName) throws SQLException {
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
             try (Statement stmt = conn.createStatement()) {
-                // Disable foreign key constraints temporarily
+                // Временно отключаем внешние ключи
                 stmt.execute("PRAGMA foreign_keys = OFF");
-                
-                // Clear table
+                // Очищаем таблицу
                 stmt.execute("DELETE FROM " + tableName);
-                
-                // Reset auto-increment counter
+                // Сбрасываем счетчик автоинкремента
                 stmt.execute("DELETE FROM sqlite_sequence WHERE name = '" + tableName + "'");
-                
-                // Re-enable foreign key constraints
+                // Включаем внешние ключи обратно
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
         }
     }
-    
     public static void createDatabaseIfNotExists(String dbPath) throws SQLException {
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
-            // Set UTF-8 encoding for database
+            // Устанавливаем кодировку UTF-8 для базы
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("PRAGMA encoding = 'UTF-8'");
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
-            
-            // Create tables
+            // Создаем таблицы
             createTables(conn);
-            
-            // Initialize default currencies
+            // Инициализируем дефолтные валюты
             initializeDefaultCurrencies(conn);
-            
-            // Initialize default categories
+            // Инициализируем дефолтные категории
             initializeDefaultCategories(conn);
+            // Инициализируем дефолтные счета
+            initializeDefaultAccounts(conn);
         }
     }
-    
     /**
-     * Gets count of records in specified table
-     * @param dbPath path to database file
-     * @param tableName name of table
-     * @return number of records
-     * @throws SQLException if database operation fails
+     * Получает количество записей в указанной таблице
+     * @param dbPath путь к файлу базы данных
+     * @param tableName имя таблицы
+     * @return количество записей
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static int getTableRecordCount(String dbPath, String tableName) throws SQLException {
         String url = "jdbc:sqlite:" + dbPath;
@@ -103,76 +95,67 @@ public class DatabaseUtil {
         }
         return 0;
     }
-    
     /**
-     * Gets count of all records in all tables
-     * @param dbPath path to database file
-     * @return total number of records
-     * @throws SQLException if database operation fails
+     * Получает общее количество записей во всех таблицах
+     * @param dbPath путь к файлу базы данных
+     * @return общее количество записей
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static int getTotalRecordCount(String dbPath) throws SQLException {
         String[] tables = {"currencies", "categories", "accounts", "budgets", "operations"};
         int total = 0;
-        
         for (String table : tables) {
             total += getTableRecordCount(dbPath, table);
         }
-        
         return total;
     }
-    
     /**
-     * Restores default categories only
-     * @param dbPath path to database file
-     * @throws SQLException if database operation fails
+     * Восстанавливает только дефолтные категории
+     * @param dbPath путь к файлу базы данных
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static void restoreDefaultCategories(String dbPath) throws SQLException {
-        // Clear categories table
+        // Очищаем таблицу категорий
         clearTable(dbPath, "categories");
-        
-        // Reinitialize categories
+        // Переинициализируем категории
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
             initializeDefaultCategories(conn);
         }
     }
-    
     /**
-     * Restores default currencies only
-     * @param dbPath path to database file
-     * @throws SQLException if database operation fails
+     * Восстанавливает только дефолтные валюты
+     * @param dbPath путь к файлу базы данных
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static void restoreDefaultCurrencies(String dbPath) throws SQLException {
-        // Clear currencies table
+        // Очищаем таблицу валют
         clearTable(dbPath, "currencies");
-        
-        // Reinitialize currencies
+        // Переинициализируем валюты
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
             initializeDefaultCurrencies(conn);
         }
     }
-    
     /**
-     * Restores default values to the database
-     * @param dbPath path to database file
-     * @throws SQLException if database operation fails
+     * Восстанавливает дефолтные значения во всей базе
+     * @param dbPath путь к файлу базы данных
+     * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static void restoreDefaults(String dbPath) throws SQLException {
-        // Clear all data first
+        // Сначала очищаем все данные
         clearAllData(dbPath);
-        
-        // Reinitialize with defaults
+        // Переинициализируем дефолтные значения
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
             initializeDefaultCurrencies(conn);
             initializeDefaultCategories(conn);
+            initializeDefaultAccounts(conn);
         }
     }
-    
     private static void createTables(Connection conn) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            // Currencies table
+            // Таблица валют
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS currencies (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -186,7 +169,7 @@ public class DatabaseUtil {
                     delete_time TIMESTAMP
                 )
             """);
-            // Accounts table
+            // Таблица счетов
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS accounts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -208,7 +191,7 @@ public class DatabaseUtil {
                     FOREIGN KEY (currency_id) REFERENCES currencies (id)
                 )
             """);
-            // Categories table
+            // Таблица категорий
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS categories (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -226,7 +209,7 @@ public class DatabaseUtil {
                     FOREIGN KEY (parent_id) REFERENCES categories (id)
                 )
             """);
-            // Budgets table
+            // Таблица бюджетов
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS budgets (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -244,7 +227,7 @@ public class DatabaseUtil {
                     FOREIGN KEY (category_id) REFERENCES categories (id)
                 )
             """);
-            // Operations table
+            // Таблица операций
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS operations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -425,5 +408,45 @@ public class DatabaseUtil {
             
             currencyRepo.save(currency);
         }    
+    }
+
+    private static void initializeDefaultAccounts(Connection conn) throws SQLException {
+        // Check if accounts already exist in table
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM accounts")) {
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Accounts already exist, don't add
+                return;
+            }
+        }
+        String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
+        AccountRepository accountRepo = new AccountRepository(dbPath);
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        // title, type, currencyId, closed
+        Object[][] defaultAccounts = {
+            {"Наличные", 1, 1, 0},
+            {"Зарплатная карта", 1, 1, 0},
+            {"Сберегательный счет", 2, 1, 0},
+            {"Кредитная карта", 3, 1, 0},
+            {"Карта рассрочки", 3, 1, 0},
+        };
+        for (Object[] acc : defaultAccounts) {
+            Account account = new Account();
+            account.setTitle((String) acc[0]);
+            account.setAmount(0);
+            account.setType((int) acc[1]);
+            account.setCurrencyId((int) acc[2]);
+            account.setClosed((int) acc[3]);
+            account.setCreditCardLimit(null);
+            account.setCreditCardCategoryId(null);
+            account.setCreditCardCommissionCategoryId(null);
+            account.setCreatedBy("initializer");
+            account.setUpdatedBy("initializer");
+            account.setDeletedBy(null);
+            account.setCreateTime(now);
+            account.setUpdateTime(now);
+            account.setDeleteTime(null);
+            accountRepo.save(account);
+        }
     }
 } 
