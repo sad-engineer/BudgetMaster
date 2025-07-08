@@ -13,12 +13,12 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
 
     @Override
     public Category save(Category category) {
-        // Check if there's a deleted record with the same title and restore it
+        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
         if (checkAndRestoreDeletedRecord(category, "categories", "title", category.getTitle())) {
-            return category; // Record was restored
+            return category; // Запись восстановлена
         }
         
-        // Automatically set position if not set (equals 0)
+        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
         setAutoPosition(category, "categories");
         
         String sql = "INSERT INTO categories (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title, operation_type, type, parent_id) " +
@@ -54,7 +54,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
             e.printStackTrace();
         }
         
-        // Normalize positions after save
+        // Нормализуем позиции после сохранения
         normalizePositions("categories");
         
         return category;
@@ -72,7 +72,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
 
     @Override
     public Category update(Category category) {
-        // Adjust positions if needed before updating
+        // Корректируем позиции, если они нужны перед обновлением
         adjustPositionsForUpdate(category, "categories", category.getId());
         
         String sql = "UPDATE categories SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=?, operation_type=?, type=?, parent_id=? WHERE id=?";
@@ -101,7 +101,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
             e.printStackTrace();
         }
         
-        // Normalize positions after update
+        // Нормализуем позиции после обновления
         normalizePositions("categories");
         
         return category;
@@ -113,33 +113,33 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
     }
 
     /**
-     * Soft delete with custom deletedBy parameter
-     * @param id entity ID
-     * @param deletedBy user who deleted the entity
+     * Soft delete с пользовательским параметром deletedBy
+     * @param id ID сущности
+     * @param deletedBy пользователь, который удалил сущность
      */
     public boolean delete(Integer id, String deletedBy) {
         return softDelete("categories", id, deletedBy);
     }
 
     /**
-     * Restores a soft-deleted category
-     * @param id category ID
-     * @return true if successful
+     * Восстанавливает удаленную категорию
+     * @param id ID категории
+     * @return true, если успешно
      */
     public boolean restore(Integer id) {
         return restore("categories", id);
     }
 
     /**
-     * Gets only deleted categories
-     * @return list of deleted categories
+     * Получает только удаленные категории
+     * @return список удаленных категорий
      */
     public List<Category> findDeleted() {
         return findDeleted("categories", this::mapRowSafe);
     }
 
     /**
-     * Normalizes positions of all active categories to be sequential starting from 1
+     * Нормализует позиции всех активных категорий, чтобы они были последовательными, начиная с 1
      */
     public void normalizePositions() {
         normalizePositions("categories");

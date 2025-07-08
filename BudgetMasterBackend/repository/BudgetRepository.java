@@ -13,7 +13,11 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
 
     @Override
     public Budget save(Budget budget) {
-        // Automatically set position if not set (equals 0)
+        // Проверяем, есть ли удалённая запись с таким же category_id, и восстанавливаем её
+        if (checkAndRestoreDeletedRecord(budget, "budgets", "category_id", String.valueOf(budget.getCategoryId()))) {
+            return budget; // Запись восстановлена
+        }
+        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
         setAutoPosition(budget, "budgets");
         
         String sql = "INSERT INTO budgets (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, amount, currency_id, category_id) " +
@@ -48,7 +52,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
             e.printStackTrace();
         }
         
-        // Normalize positions after save
+        // Нормализуем позиции после сохранения
         normalizePositions("budgets");
         
         return budget;
@@ -66,7 +70,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
 
     @Override
     public Budget update(Budget budget) {
-        // Adjust positions if needed before updating
+        // Корректируем позиции, если они нужны перед обновлением
         adjustPositionsForUpdate(budget, "budgets", budget.getId());
         
         String sql = "UPDATE budgets SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, amount=?, currency_id=?, category_id=? WHERE id=?";
@@ -94,7 +98,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
             e.printStackTrace();
         }
         
-        // Normalize positions after update
+        // Нормализуем позиции после обновления
         normalizePositions("budgets");
         
         return budget;
@@ -106,34 +110,34 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     }
 
     /**
-     * Soft delete with custom deletedBy parameter
-     * @param id entity ID
-     * @param deletedBy user who deleted the entity
-     * @return true if successful
+     * Soft delete с пользовательским параметром deletedBy
+     * @param id ID сущности
+     * @param deletedBy пользователь, который удалил сущность
+     * @return true, если успешно
      */
     public boolean delete(Integer id, String deletedBy) {
         return softDelete("budgets", id, deletedBy);
     }
 
     /**
-     * Restores a soft-deleted budget
-     * @param id budget ID
-     * @return true if successful
+     * Восстанавливает удаленный бюджет
+     * @param id ID бюджета
+     * @return true, если успешно
      */
     public boolean restore(Integer id) {
         return restore("budgets", id);
     }
 
     /**
-     * Gets only deleted budgets
-     * @return list of deleted budgets
+     * Получает только удаленные бюджеты
+     * @return список удаленных бюджетов
      */
     public List<Budget> findDeleted() {
         return findDeleted("budgets", this::mapRowSafe);
     }
 
     /**
-     * Normalizes positions of all active budgets to be sequential starting from 1
+     * Нормализует позиции всех активных бюджетов, чтобы они были последовательными, начиная с 1
      */
     public void normalizePositions() {
         normalizePositions("budgets");

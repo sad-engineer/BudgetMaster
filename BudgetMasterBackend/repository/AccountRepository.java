@@ -13,12 +13,12 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
 
     @Override
     public Account save(Account account) {
-        // Check if there's a deleted record with the same title and restore it
+        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
         if (checkAndRestoreDeletedRecord(account, "accounts", "title", account.getTitle())) {
-            return account; // Record was restored
+            return account; // Запись восстановлена
         }
         
-        // Automatically set position if not set (equals 0)
+        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
         setAutoPosition(account, "accounts");
         
         String sql = "INSERT INTO accounts (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title, amount, type, currency_id, closed, credit_card_limit, credit_card_category_id, credit_card_commission_category_id) " +
@@ -58,7 +58,7 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
             e.printStackTrace();
         }
         
-        // Normalize positions after save
+        // Нормализуем позиции после сохранения
         normalizePositions("accounts");
         
         return account;
@@ -76,7 +76,7 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
 
     @Override
     public Account update(Account account) {
-        // Adjust positions if needed before updating
+        // Корректируем позиции, если они нужны перед обновлением
         adjustPositionsForUpdate(account, "accounts", account.getId());
         
         String sql = "UPDATE accounts SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=?, amount=?, type=?, currency_id=?, closed=?, credit_card_limit=?, credit_card_category_id=?, credit_card_commission_category_id=? WHERE id=?";
@@ -109,7 +109,7 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
             e.printStackTrace();
         }
         
-        // Normalize positions after update
+        // Нормализуем позиции после обновления
         normalizePositions("accounts");
         
         return account;
@@ -121,34 +121,34 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
-     * Soft delete with custom deletedBy parameter
-     * @param id entity ID
-     * @param deletedBy user who deleted the entity
-     * @return true if successful
+     * Soft delete с пользовательским параметром deletedBy
+     * @param id ID сущности
+     * @param deletedBy пользователь, который удалил сущность
+     * @return true, если удаление успешно
      */
     public boolean delete(Integer id, String deletedBy) {
         return softDelete("accounts", id, deletedBy);
     }
 
     /**
-     * Restores a soft-deleted account
-     * @param id account ID
-     * @return true if successful
+     * Восстанавливает удаленную учетную запись
+     * @param id ID учетной записи
+     * @return true, если восстановление успешно
      */
     public boolean restore(Integer id) {
         return restore("accounts", id);
     }
 
     /**
-     * Gets only deleted accounts
-     * @return list of deleted accounts
+     * Получает только удаленные учетные записи
+     * @return список удаленных учетных записей
      */
     public List<Account> findDeleted() {
         return findDeleted("accounts", this::mapRowSafe);
     }
 
     /**
-     * Normalizes positions of all active accounts to be sequential starting from 1
+     * Нормализует позиции всех активных учетных записей, чтобы они были последовательными, начиная с 1
      */
     public void normalizePositions() {
         normalizePositions("accounts");

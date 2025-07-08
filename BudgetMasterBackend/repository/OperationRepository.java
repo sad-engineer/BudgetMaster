@@ -57,12 +57,34 @@ public class OperationRepository extends BaseRepository implements Repository<Op
 
     @Override
     public Optional<Operation> findById(Integer id) {
-        return findById("operations", id, this::mapRowSafe);
+        String sql = "SELECT * FROM operations WHERE id = ?" + getDeletedFilterAndClause();
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     @Override
     public List<Operation> findAll() {
-        return findAll("operations", this::mapRowSafe);
+        List<Operation> result = new ArrayList<>();
+        String sql = "SELECT * FROM operations" + getDeletedFilterClause();
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                result.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
@@ -103,39 +125,69 @@ public class OperationRepository extends BaseRepository implements Repository<Op
 
     @Override
     public boolean delete(Integer id) {
-        return softDelete("operations", id, "system");
+        return delete(id, "system");
     }
 
     /**
-     * Soft delete with custom deletedBy parameter
-     * @param id entity ID
-     * @param deletedBy user who deleted the entity
-     * @return true if successful
+     * Soft delete с параметром deletedBy
+     * @param id идентификатор сущности
+     * @param deletedBy пользователь, который удалил сущность
+     * @return true, если удаление успешно
      */
     public boolean delete(Integer id, String deletedBy) {
-        return softDelete("operations", id, deletedBy);
+        String sql = "UPDATE operations SET delete_time = ?, deleted_by = ? WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String deleteTimeStr = DateTimeUtil.formatForSqlite(java.time.LocalDateTime.now());
+            stmt.setString(1, deleteTimeStr);
+            stmt.setString(2, deletedBy);
+            stmt.setInt(3, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
-     * Restores a soft-deleted operation
-     * @param id operation ID
-     * @return true if successful
+     * Восстанавливает удаленную операцию
+     * @param id идентификатор операции
+     * @return true, если восстановление успешно
      */
     public boolean restore(Integer id) {
-        return restore("operations", id);
+        String sql = "UPDATE operations SET delete_time = NULL, deleted_by = NULL WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
-     * Gets only deleted operations
-     * @return list of deleted operations
+     * Получает только удаленные операции
+     * @return список удаленных операций
      */
     public List<Operation> findDeleted() {
-        return findDeleted("operations", this::mapRowSafe);
+        List<Operation> result = new ArrayList<>();
+        String sql = "SELECT * FROM operations WHERE delete_time IS NOT NULL";
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                result.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
-     * Gets operations ordered by date (newest first)
-     * @return list of operations ordered by date
+     * Получает операции, отсортированные по дате (сначала новые)
+     * @return список операций, отсортированных по дате
      */
     public List<Operation> findAllOrderedByDate() {
         List<Operation> result = new ArrayList<>();

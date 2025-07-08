@@ -14,13 +14,13 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
 
     @Override
     public Currency save(Currency currency) {
-        // Check if there's a deleted record with the same title and restore it
+        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
         if (checkAndRestoreDeletedRecord(currency, "currencies", "title", currency.getTitle())) {
-            return currency; // Record was restored
+            return currency; // Запись восстановлена
         }
         
-        // No deleted record found, proceed with normal save
-        // Automatically set position if not set (equals 0)
+        // Удаленной записи не найдено, продолжаем обычное сохранение
+        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
         setAutoPosition(currency, "currencies");
         
         String sql = "INSERT INTO currencies (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title) " +
@@ -53,7 +53,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
             e.printStackTrace();
         }
         
-        // Normalize positions after save
+        // Нормализуем позиции после сохранения
         normalizePositions("currencies");
         
         return currency;
@@ -71,7 +71,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
 
     @Override
     public Currency update(Currency currency) {
-        // Adjust positions if needed before updating
+        // Корректируем позиции, если это необходимо перед обновлением
         adjustPositionsForUpdate(currency, "currencies", currency.getId());
         
         String sql = "UPDATE currencies SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=? WHERE id=?";
@@ -97,7 +97,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
             e.printStackTrace();
         }
         
-        // Normalize positions after update
+        // Нормализуем позиции после обновления
         normalizePositions("currencies");
         
         return currency;
@@ -109,34 +109,34 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
     }
 
     /**
-     * Soft delete with custom deletedBy parameter
-     * @param id entity ID
-     * @param deletedBy user who deleted the entity
-     * @return true if successful
+     * Soft delete с пользовательским параметром deletedBy
+     * @param id ID сущности
+     * @param deletedBy пользователь, который удалил сущность
+     * @return true, если удаление успешно
      */
     public boolean delete(Integer id, String deletedBy) {
         return softDelete("currencies", id, deletedBy);
     }
 
     /**
-     * Restores a soft-deleted currency
-     * @param id currency ID
-     * @return true if successful
+     * Восстанавливает удаленную валюту
+     * @param id ID валюты
+     * @return true, если восстановление успешно
      */
     public boolean restore(Integer id) {
         return restore("currencies", id);
     }
 
     /**
-     * Gets only deleted currencies
-     * @return list of deleted currencies
+     * Получает только удаленные записи
+     * @return список удаленных записей
      */
     public List<Currency> findDeleted() {
         return findDeleted("currencies", this::mapRowSafe);
     }
 
     /**
-     * Normalizes positions of all active currencies to be sequential starting from 1
+     * Нормализует позиции всех активных валют, чтобы они были последовательными, начиная с 1
      */
     public void normalizePositions() {
         normalizePositions("currencies");
