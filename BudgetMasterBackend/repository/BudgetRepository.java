@@ -13,13 +13,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
 
     @Override
     public Budget save(Budget budget) {
-        // Проверяем, есть ли удалённая запись с таким же category_id, и восстанавливаем её
-        if (checkAndRestoreDeletedRecord(budget, "budgets", "category_id", String.valueOf(budget.getCategoryId()))) {
-            return budget; // Запись восстановлена
-        }
-        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
-        setAutoPosition(budget, "budgets");
-        
         String sql = "INSERT INTO budgets (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, amount, currency_id, category_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
@@ -52,9 +45,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
             e.printStackTrace();
         }
         
-        // Нормализуем позиции после сохранения
-        normalizePositions("budgets");
-        
         return budget;
     }
 
@@ -70,9 +60,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
 
     @Override
     public Budget update(Budget budget) {
-        // Корректируем позиции, если они нужны перед обновлением
-        adjustPositionsForUpdate(budget, "budgets", budget.getId());
-        
         String sql = "UPDATE budgets SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, amount=?, currency_id=?, category_id=? WHERE id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -97,9 +84,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        // Нормализуем позиции после обновления
-        normalizePositions("budgets");
         
         return budget;
     }
@@ -137,10 +121,46 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     }
 
     /**
-     * Нормализует позиции всех активных бюджетов, чтобы они были последовательными, начиная с 1
+     * Проверяет, есть ли удаленная запись с таким же category_id
+     * @param categoryId ID категории
+     * @return Optional с ID удаленной записи, если найдена
+     */
+    public Optional<Integer> findDeletedByCategoryId(Integer categoryId) {
+        String sql = "SELECT id FROM budgets WHERE category_id = ? AND delete_time IS NOT NULL";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Получает следующую доступную позицию
+     * @return следующая позиция
+     */
+    public int getNextPosition() {
+        return getNextPosition("budgets");
+    }
+
+    /**
+     * Нормализует позиции всех активных бюджетов
      */
     public void normalizePositions() {
         normalizePositions("budgets");
+    }
+
+    /**
+     * Корректирует позиции при обновлении
+     * @param budget бюджет для обновления
+     */
+    public void adjustPositionsForUpdate(Budget budget) {
+        adjustPositionsForUpdate(budget, "budgets", budget.getId());
     }
 
     private Budget mapRow(ResultSet rs) throws SQLException {

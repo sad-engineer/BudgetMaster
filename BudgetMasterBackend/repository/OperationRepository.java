@@ -57,34 +57,12 @@ public class OperationRepository extends BaseRepository implements Repository<Op
 
     @Override
     public Optional<Operation> findById(Integer id) {
-        String sql = "SELECT * FROM operations WHERE id = ?" + getDeletedFilterAndClause();
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return Optional.of(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+        return findById("operations", id, this::mapRowSafe);
     }
 
     @Override
     public List<Operation> findAll() {
-        List<Operation> result = new ArrayList<>();
-        String sql = "SELECT * FROM operations" + getDeletedFilterClause();
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                result.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return findAll("operations", this::mapRowSafe);
     }
 
     @Override
@@ -125,7 +103,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
 
     @Override
     public boolean delete(Integer id) {
-        return delete(id, "system");
+        return softDelete("operations", id, "system");
     }
 
     /**
@@ -135,18 +113,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return true, если удаление успешно
      */
     public boolean delete(Integer id, String deletedBy) {
-        String sql = "UPDATE operations SET delete_time = ?, deleted_by = ? WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            String deleteTimeStr = DateTimeUtil.formatForSqlite(java.time.LocalDateTime.now());
-            stmt.setString(1, deleteTimeStr);
-            stmt.setString(2, deletedBy);
-            stmt.setInt(3, id);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return softDelete("operations", id, deletedBy);
     }
 
     /**
@@ -155,15 +122,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return true, если восстановление успешно
      */
     public boolean restore(Integer id) {
-        String sql = "UPDATE operations SET delete_time = NULL, deleted_by = NULL WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return restore("operations", id);
     }
 
     /**
@@ -171,18 +130,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список удаленных операций
      */
     public List<Operation> findDeleted() {
-        List<Operation> result = new ArrayList<>();
-        String sql = "SELECT * FROM operations WHERE delete_time IS NOT NULL";
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                result.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return findDeleted("operations", this::mapRowSafe);
     }
 
     /**

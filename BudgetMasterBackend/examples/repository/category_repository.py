@@ -38,6 +38,7 @@ def main():
             operationType=1,  # Расходы
             type=1,           # Основные
             parentId=None,
+            position=1,  # Явно указываем позицию
             createdBy="tester", 
             updatedBy="tester"
         )
@@ -101,25 +102,26 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
 
-        # Тестируем создание нескольких категорий для проверки автонумерации
+        # Тестируем создание нескольких категорий
         print("\n--- Тест создания нескольких категорий ---")
         test_categories = []
         
         # Создаем категории разных типов
         category_data = [
-            ("Транспорт", 1, 1, None),      # Расходы, Основные
-            ("Развлечения", 1, 1, None),    # Расходы, Основные
-            ("Зарплата", 2, 1, None),       # Доходы, Основные
-            ("Подработка", 2, 1, None),     # Доходы, Основные
+            ("Транспорт", 1, 1, None, 2),      # Расходы, Основные
+            ("Развлечения", 1, 1, None, 3),    # Расходы, Основные
+            ("Зарплата", 2, 1, None, 4),       # Доходы, Основные
+            ("Подработка", 2, 1, None, 5),     # Доходы, Основные
         ]
         
-        for i, (title, operation_type, cat_type, parent_id) in enumerate(category_data):
+        for i, (title, operation_type, cat_type, parent_id, position) in enumerate(category_data):
             test_category = create_test_entity(
                 Category,
                 title=title,
                 operationType=operation_type,
                 type=cat_type,
                 parentId=parent_id,
+                position=position,  # Явно указываем позиции
                 createdBy="position_tester",
                 updatedBy="position_tester",
             )
@@ -129,21 +131,13 @@ def main():
             test_data_manager.add_test_id("categories", saved_test_category.getId())
             print(f"Создана категория: {saved_test_category.getTitle()}, Position: {saved_test_category.getPosition()}, Type: {saved_test_category.getOperationType()}")
 
-        # Проверяем сортировку (позиции должны быть нормализованы после каждого save)
+        # Проверяем все категории
         all_categories = repo.findAll()
-        print(f"\nВсе категории (отсортированы по position, нормализованы после save):")
+        print(f"\nВсе категории:")
         for cat in all_categories:
             operation_type_str = "Расходы" if cat.getOperationType() == 1 else "Доходы"
             type_str = "Основные" if cat.getType() == 1 else "Дополнительные"
             print(f"  Position: {cat.getPosition()}, Title: {cat.getTitle()}, {operation_type_str}, {type_str}")
-
-        # Проверяем, что позиции идут по порядку после создания
-        positions = [cat.getPosition() for cat in all_categories]
-        expected_positions = list(range(1, len(positions) + 1))
-        if positions == expected_positions:
-            print("✅ Позиции нормализованы корректно после создания категорий!")
-        else:
-            print(f"❌ Ошибка нормализации после создания: ожидались {expected_positions}, получены {positions}")
 
         # Тестируем создание иерархических категорий
         print("\n--- Тест создания иерархических категорий ---")
@@ -155,6 +149,7 @@ def main():
                 operationType=1,  # Расходы
                 type=1,           # Основные
                 parentId=None,
+                position=6,  # Явно указываем позицию
                 createdBy="hierarchy_tester",
                 updatedBy="hierarchy_tester",
             )
@@ -165,18 +160,19 @@ def main():
 
             # Создаем дочерние категории
             child_categories = [
-                ("Молочные продукты", 1, 2, saved_parent.getId()),
-                ("Мясо", 1, 2, saved_parent.getId()),
-                ("Овощи", 1, 2, saved_parent.getId()),
+                ("Молочные продукты", 1, 2, saved_parent.getId(), 7),
+                ("Мясо", 1, 2, saved_parent.getId(), 8),
+                ("Овощи", 1, 2, saved_parent.getId(), 9),
             ]
             
-            for title, operation_type, cat_type, parent_id in child_categories:
+            for title, operation_type, cat_type, parent_id, position in child_categories:
                 child_category = create_test_entity(
                     Category,
                     title=title,
                     operationType=operation_type,
                     type=cat_type,
                     parentId=parent_id,
+                    position=position,  # Явно указываем позиции
                     createdBy="hierarchy_tester",
                     updatedBy="hierarchy_tester",
                 )
@@ -190,41 +186,12 @@ def main():
             import traceback
             traceback.print_exc()
 
-        # Тестируем перестановку позиций
-        print("\n--- Тест перестановки позиций ---")
-        try:
-            # Берем первую категорию и меняем её position
-            first_category = test_categories[0]
-            original_position = first_category.getPosition()
-            print(f"Исходная позиция первой категории: {original_position}")
-
-            # Меняем position на 3
-            first_category.setPosition(3)
-            first_category.setTitle("Первая категория (перемещена)")
-            first_category.setUpdatedBy("position_reorder_tester")
-            first_category.setUpdateTime(LocalDateTime.now())
-
-            updated_category = repo.update(first_category)
-            print(f"Категория обновлена: {updated_category.getTitle()}, Position: {updated_category.getPosition()}")
-
-            # Проверяем результат перестановки (позиции должны быть нормализованы после update)
-            all_categories_after = repo.findAll()
-            print(f"\nВсе категории после перестановки (позиции нормализованы):")
-            for cat in all_categories_after:
-                operation_type_str = "Расходы" if cat.getOperationType() == 1 else "Доходы"
-                print(f"  Position: {cat.getPosition()}, Title: {cat.getTitle()}, {operation_type_str}")
-
-        except Exception as e:
-            print(f"❌ Ошибка при перестановке позиций: {e}")
-            import traceback
-            traceback.print_exc()
-
-        # Тестируем обычное обновление
-        print("\n--- Тест обычного обновления ---")
+        # Тестируем обновление
+        print("\n--- Тест обновления ---")
         try:
             # Обновляем данные категории
             saved_category.setTitle("Продукты питания (обновленные)")
-            saved_category.setPosition(1)  # Меняем на позицию 1
+            saved_category.setPosition(10)  # Меняем позицию
             saved_category.setOperationType(1)  # Расходы
             saved_category.setType(2)  # Дополнительные
             saved_category.setUpdatedBy("jpype_update_test")
@@ -248,22 +215,6 @@ def main():
                 print(f"Updated by: {cat.getUpdatedBy()}")
             else:
                 print("❌ Обновленная категория не найдена")
-
-            # Проверяем, что позиции нормализованы после обновления
-            all_after_update = repo.findAll()
-            print(f"\nВсе категории после обновления (позиции нормализованы):")
-            for cat in all_after_update:
-                operation_type_str = "Расходы" if cat.getOperationType() == 1 else "Доходы"
-                type_str = "Основные" if cat.getType() == 1 else "Дополнительные"
-                print(f"  Position: {cat.getPosition()}, Title: {cat.getTitle()}, {operation_type_str}, {type_str}")
-
-            # Проверяем, что позиции идут по порядку
-            positions_after_update = [cat.getPosition() for cat in all_after_update]
-            expected_positions_after_update = list(range(1, len(positions_after_update) + 1))
-            if positions_after_update == expected_positions_after_update:
-                print("✅ Позиции нормализованы корректно после обновления!")
-            else:
-                print(f"❌ Ошибка нормализации после обновления: ожидались {expected_positions_after_update}, получены {positions_after_update}")
 
         except Exception as e:
             print(f"❌ Ошибка при обновлении: {e}")
@@ -310,64 +261,20 @@ def main():
                 operation_type_str = "Расходы" if cat.getOperationType() == 1 else "Доходы"
                 print(f"  Удаленная категория: {cat.getTitle()}, {operation_type_str}, Deleted by: {cat.getDeletedBy()}")
 
-            # Тестируем восстановление через save с тем же title
-            print("\n--- Тест восстановления через save ---")
-            try:
-                # Создаем новую категорию с тем же названием, что и удаленная
-                new_category = create_test_entity(
-                    Category,
-                    title="Продукты питания (обновленные)",  # То же название, что и удаленная
-                    operationType=1,
-                    type=2,
-                    parentId=None,
-                    createdBy="restore_test",
-                    updatedBy="restore_test",
-                )
-
-                restored_category = repo.save(new_category)
-                test_data_manager.add_test_id("categories", restored_category.getId())
-                print(f"Категория восстановлена через save: {restored_category.getTitle()}")
-                print(f"ID восстановленной категории: {restored_category.getId()}")
-                print(f"Position: {restored_category.getPosition()}")
-
-                # Проверяем, что категория снова видна в обычном режиме
-                repo.setIncludeDeleted(False)
-                all_after_restore_save = repo.findAll()
-                print(f"Категорий после восстановления через save: {len(all_after_restore_save)}")
-
-                # Проверяем, что это та же запись (тот же ID)
-                found_restored_save = repo.findById(restored_category.getId())
-                if found_restored_save.isPresent():
-                    final_category = found_restored_save.get()
-                    print(f"Проверка восстановленной категории: {final_category.getTitle()}")
-                    print(f"Delete time: {final_category.getDeleteTime()}")
-                    print(f"Deleted by: {final_category.getDeletedBy()}")
-                    print(f"Updated by: {final_category.getUpdatedBy()}")
-                else:
-                    print("❌ Восстановленная категория не найдена")
-
-            except Exception as e:
-                print(f"❌ Ошибка при восстановлении через save: {e}")
-                import traceback
-                traceback.print_exc()
-
             # Тестируем восстановление через метод restore
             print("\n--- Тест восстановления через restore ---")
             try:
-                # Сначала удаляем категорию снова для теста
-                repo.delete(restored_category.getId(), "test_user_2")
-                print("Категория снова удалена для теста restore")
-
                 # Восстанавливаем через метод restore
-                restored = repo.restore(restored_category.getId())
+                restored = repo.restore(category_id)
                 print(f"Категория восстановлена через restore: {restored}")
 
                 # Проверяем, что категория снова видна в обычном режиме
+                repo.setIncludeDeleted(False)
                 all_after_restore = repo.findAll()
                 print(f"Категорий после восстановления через restore: {len(all_after_restore)}")
 
                 # Проверяем восстановленную запись
-                found_restored = repo.findById(restored_category.getId())
+                found_restored = repo.findById(category_id)
                 if found_restored.isPresent():
                     restored_category = found_restored.get()
                     print(f"Найдена восстановленная категория: {restored_category.getTitle()}")
@@ -380,17 +287,6 @@ def main():
                 print(f"❌ Ошибка при восстановлении через restore: {e}")
                 import traceback
                 traceback.print_exc()
-
-            # Проверяем через прямой SQL
-            import sqlite3
-
-            conn = sqlite3.connect(test_data_manager.db_manager.db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT delete_time, deleted_by FROM categories WHERE id = ?", (category_id,))
-            row = cursor.fetchone()
-            if row:
-                print(f"SQL проверка - Delete time: {row[0]}, Deleted by: {row[1]}")
-            conn.close()
 
         except Exception as e:
             print(f"❌ Ошибка при soft delete: {e}")

@@ -13,14 +13,6 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
 
     @Override
     public Account save(Account account) {
-        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
-        if (checkAndRestoreDeletedRecord(account, "accounts", "title", account.getTitle())) {
-            return account; // Запись восстановлена
-        }
-        
-        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
-        setAutoPosition(account, "accounts");
-        
         String sql = "INSERT INTO accounts (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title, amount, type, currency_id, closed, credit_card_limit, credit_card_category_id, credit_card_commission_category_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
@@ -58,9 +50,6 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
             e.printStackTrace();
         }
         
-        // Нормализуем позиции после сохранения
-        normalizePositions("accounts");
-        
         return account;
     }
 
@@ -76,9 +65,6 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
 
     @Override
     public Account update(Account account) {
-        // Корректируем позиции, если они нужны перед обновлением
-        adjustPositionsForUpdate(account, "accounts", account.getId());
-        
         String sql = "UPDATE accounts SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=?, amount=?, type=?, currency_id=?, closed=?, credit_card_limit=?, credit_card_category_id=?, credit_card_commission_category_id=? WHERE id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -108,9 +94,6 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        // Нормализуем позиции после обновления
-        normalizePositions("accounts");
         
         return account;
     }
@@ -148,10 +131,46 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
-     * Нормализует позиции всех активных учетных записей, чтобы они были последовательными, начиная с 1
+     * Проверяет, есть ли удаленная запись с таким же title
+     * @param title заголовок счета
+     * @return Optional с ID удаленной записи, если найдена
+     */
+    public Optional<Integer> findDeletedByTitle(String title) {
+        String sql = "SELECT id FROM accounts WHERE title = ? AND delete_time IS NOT NULL";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, title);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Получает следующую доступную позицию
+     * @return следующая позиция
+     */
+    public int getNextPosition() {
+        return getNextPosition("accounts");
+    }
+
+    /**
+     * Нормализует позиции всех активных счетов
      */
     public void normalizePositions() {
         normalizePositions("accounts");
+    }
+
+    /**
+     * Корректирует позиции при обновлении
+     * @param account счет для обновления
+     */
+    public void adjustPositionsForUpdate(Account account) {
+        adjustPositionsForUpdate(account, "accounts", account.getId());
     }
 
     private Account mapRow(ResultSet rs) throws SQLException {

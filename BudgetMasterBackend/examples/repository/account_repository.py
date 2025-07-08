@@ -35,6 +35,7 @@ def main():
         account = create_test_entity(
             Account,
             title="Наличные (тест)",
+            position=1,  # Явно указываем позицию
             amount=100000,  # 1000.00 в копейках
             type=1,  # Текущий счет
             currencyId=1,  # RUB
@@ -101,11 +102,38 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
 
+        # Тестируем создание нескольких счетов
+        print("\n--- Тест создания нескольких счетов ---")
+        test_accounts = []
+        for i in range(3):
+            test_account = create_test_entity(
+                Account,
+                title=f"Тестовый счет {i + 1}",
+                position=i + 2,  # Явно указываем позиции
+                amount=50000 * (i + 1),  # Разные суммы
+                type=1,  # Текущий счет
+                currencyId=1,  # RUB
+                closed=0,  # Не закрыт
+                createdBy="position_tester",
+                updatedBy="position_tester",
+            )
+
+            saved_test_account = repo.save(test_account)
+            test_accounts.append(saved_test_account)
+            test_data_manager.add_test_id("accounts", saved_test_account.getId())
+            print(f"Создан счет: {saved_test_account.getTitle()}, Position: {saved_test_account.getPosition()}")
+
+        # Проверяем все счета
+        all_accounts = repo.findAll()
+        print(f"\nВсе счета:")
+        for acc in all_accounts:
+            print(f"  Position: {acc.getPosition()}, Title: {acc.getTitle()}, Amount: {acc.getAmount()} копеек")
+
         # Тестируем обновление
         print("\n--- Тест обновления ---")
         try:
             saved_account.setTitle("Основной счет (обновленный)")
-            saved_account.setPosition(2)
+            saved_account.setPosition(5)  # Меняем позицию
             saved_account.setAmount(150000)  # 1500.00 в копейках
             saved_account.setUpdatedBy("jpype_update_test")
             saved_account.setUpdateTime(LocalDateTime.now())
@@ -154,22 +182,39 @@ def main():
             else:
                 print("❌ Удаленный счет не найден")
 
-            # Восстановление через restore
+            # Тестируем метод findDeleted
+            print("\n--- Тест findDeleted ---")
+            deleted_accounts = repo.findDeleted()
+            print(f"Найдено удаленных счетов: {len(deleted_accounts)}")
+            for acc in deleted_accounts:
+                print(f"  Удаленный счет: {acc.getTitle()}, Deleted by: {acc.getDeletedBy()}")
+
+            # Тестируем восстановление через метод restore
             print("\n--- Тест восстановления через restore ---")
-            restored = repo.restore(account_id)
-            print(f"Счет восстановлен через restore: {restored}")
+            try:
+                # Восстанавливаем через метод restore
+                restored = repo.restore(account_id)
+                print(f"Счет восстановлен через restore: {restored}")
 
-            all_after_restore = repo.findAll()
-            print(f"Счетов после восстановления: {len(all_after_restore)}")
+                # Проверяем, что счет снова виден в обычном режиме
+                repo.setIncludeDeleted(False)
+                all_after_restore = repo.findAll()
+                print(f"Счетов после восстановления через restore: {len(all_after_restore)}")
 
-            found_restored = repo.findById(account_id)
-            if found_restored.isPresent():
-                restored_account = found_restored.get()
-                print(f"Найден восстановленный счет: {restored_account.getTitle()}")
-                print(f"Delete time после восстановления: {restored_account.getDeleteTime()}")
-                print(f"Deleted by после восстановления: {restored_account.getDeletedBy()}")
-            else:
-                print("❌ Восстановленный счет не найден")
+                # Проверяем восстановленную запись
+                found_restored = repo.findById(account_id)
+                if found_restored.isPresent():
+                    restored_account = found_restored.get()
+                    print(f"Найден восстановленный счет: {restored_account.getTitle()}")
+                    print(f"Delete time после восстановления: {restored_account.getDeleteTime()}")
+                    print(f"Deleted by после восстановления: {restored_account.getDeletedBy()}")
+                else:
+                    print("❌ Восстановленный счет не найден")
+
+            except Exception as e:
+                print(f"❌ Ошибка при восстановлении через restore: {e}")
+                import traceback
+                traceback.print_exc()
 
         except Exception as e:
             print(f"❌ Ошибка при soft delete: {e}")

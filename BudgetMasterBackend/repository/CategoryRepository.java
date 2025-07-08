@@ -13,14 +13,6 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
 
     @Override
     public Category save(Category category) {
-        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
-        if (checkAndRestoreDeletedRecord(category, "categories", "title", category.getTitle())) {
-            return category; // Запись восстановлена
-        }
-        
-        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
-        setAutoPosition(category, "categories");
-        
         String sql = "INSERT INTO categories (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title, operation_type, type, parent_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
@@ -54,9 +46,6 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
             e.printStackTrace();
         }
         
-        // Нормализуем позиции после сохранения
-        normalizePositions("categories");
-        
         return category;
     }
 
@@ -72,9 +61,6 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
 
     @Override
     public Category update(Category category) {
-        // Корректируем позиции, если они нужны перед обновлением
-        adjustPositionsForUpdate(category, "categories", category.getId());
-        
         String sql = "UPDATE categories SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=?, operation_type=?, type=?, parent_id=? WHERE id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -100,9 +86,6 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        // Нормализуем позиции после обновления
-        normalizePositions("categories");
         
         return category;
     }
@@ -139,10 +122,46 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
     }
 
     /**
-     * Нормализует позиции всех активных категорий, чтобы они были последовательными, начиная с 1
+     * Проверяет, есть ли удаленная запись с таким же title
+     * @param title заголовок категории
+     * @return Optional с ID удаленной записи, если найдена
+     */
+    public Optional<Integer> findDeletedByTitle(String title) {
+        String sql = "SELECT id FROM categories WHERE title = ? AND delete_time IS NOT NULL";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, title);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Получает следующую доступную позицию
+     * @return следующая позиция
+     */
+    public int getNextPosition() {
+        return getNextPosition("categories");
+    }
+
+    /**
+     * Нормализует позиции всех активных категорий
      */
     public void normalizePositions() {
         normalizePositions("categories");
+    }
+
+    /**
+     * Корректирует позиции при обновлении
+     * @param category категория для обновления
+     */
+    public void adjustPositionsForUpdate(Category category) {
+        adjustPositionsForUpdate(category, "categories", category.getId());
     }
 
     private Category mapRow(ResultSet rs) throws SQLException {

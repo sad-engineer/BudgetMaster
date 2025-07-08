@@ -37,7 +37,7 @@ def main():
             amount=100000,  # 1000.00
             currencyId=1,   # RUB
             categoryId=None,
-            position=0,
+            position=1,  # Явно указываем позицию
             createdBy="tester",
             updatedBy="tester",
         )
@@ -98,11 +98,36 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
 
+        # Тестируем создание нескольких бюджетов
+        print("\n--- Тест создания нескольких бюджетов ---")
+        test_budgets = []
+        for i in range(3):
+            test_budget = create_test_entity(
+                Budget,
+                amount=50000 * (i + 1),  # Разные суммы
+                currencyId=1,   # RUB
+                categoryId=i + 1,  # Разные категории
+                position=i + 2,  # Явно указываем позиции
+                createdBy="position_tester",
+                updatedBy="position_tester",
+            )
+
+            saved_test_budget = repo.save(test_budget)
+            test_budgets.append(saved_test_budget)
+            test_data_manager.add_test_id("budgets", saved_test_budget.getId())
+            print(f"Создан бюджет: {saved_test_budget.getAmount()}, Position: {saved_test_budget.getPosition()}")
+
+        # Проверяем все бюджеты
+        all_budgets = repo.findAll()
+        print(f"\nВсе бюджеты:")
+        for bud in all_budgets:
+            print(f"  Position: {bud.getPosition()}, Amount: {bud.getAmount()}, Category ID: {bud.getCategoryId()}")
+
         # Тестируем обновление
         print("\n--- Тест обновления ---")
         try:
             saved_budget.setAmount(200000)  # 2000.00
-            saved_budget.setPosition(2)
+            saved_budget.setPosition(5)  # Меняем позицию
             saved_budget.setUpdatedBy("jpype_update_test")
             saved_budget.setUpdateTime(LocalDateTime.now())
 
@@ -149,22 +174,39 @@ def main():
             else:
                 print("❌ Удаленный бюджет не найден")
 
-            # Восстановление через restore
+            # Тестируем метод findDeleted
+            print("\n--- Тест findDeleted ---")
+            deleted_budgets = repo.findDeleted()
+            print(f"Найдено удаленных бюджетов: {len(deleted_budgets)}")
+            for bud in deleted_budgets:
+                print(f"  Удаленный бюджет: {bud.getAmount()}, Deleted by: {bud.getDeletedBy()}")
+
+            # Тестируем восстановление через метод restore
             print("\n--- Тест восстановления через restore ---")
-            restored = repo.restore(budget_id)
-            print(f"Бюджет восстановлен через restore: {restored}")
+            try:
+                # Восстанавливаем через метод restore
+                restored = repo.restore(budget_id)
+                print(f"Бюджет восстановлен через restore: {restored}")
 
-            all_after_restore = repo.findAll()
-            print(f"Бюджетов после восстановления: {len(all_after_restore)}")
+                # Проверяем, что бюджет снова виден в обычном режиме
+                repo.setIncludeDeleted(False)
+                all_after_restore = repo.findAll()
+                print(f"Бюджетов после восстановления через restore: {len(all_after_restore)}")
 
-            found_restored = repo.findById(budget_id)
-            if found_restored.isPresent():
-                restored_budget = found_restored.get()
-                print(f"Найден восстановленный бюджет: {restored_budget.getAmount()}")
-                print(f"Delete time после восстановления: {restored_budget.getDeleteTime()}")
-                print(f"Deleted by после восстановления: {restored_budget.getDeletedBy()}")
-            else:
-                print("❌ Восстановленный бюджет не найден")
+                # Проверяем восстановленную запись
+                found_restored = repo.findById(budget_id)
+                if found_restored.isPresent():
+                    restored_budget = found_restored.get()
+                    print(f"Найден восстановленный бюджет: {restored_budget.getAmount()}")
+                    print(f"Delete time после восстановления: {restored_budget.getDeleteTime()}")
+                    print(f"Deleted by после восстановления: {restored_budget.getDeletedBy()}")
+                else:
+                    print("❌ Восстановленный бюджет не найден")
+
+            except Exception as e:
+                print(f"❌ Ошибка при восстановлении через restore: {e}")
+                import traceback
+                traceback.print_exc()
 
         except Exception as e:
             print(f"❌ Ошибка при soft delete: {e}")

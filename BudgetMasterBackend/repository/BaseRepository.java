@@ -45,27 +45,6 @@ public abstract class BaseRepository {
     }
 
     /**
-     * Automatically sets position for entity if it's not set (equals 0)
-     * @param entity entity with position field
-     * @param tableName table name
-     */
-    protected void setAutoPosition(Object entity, String tableName) {
-        try {
-            // Use reflection to get and set position
-            java.lang.reflect.Method getPosition = entity.getClass().getMethod("getPosition");
-            java.lang.reflect.Method setPosition = entity.getClass().getMethod("setPosition", int.class);
-            
-            int currentPosition = (Integer) getPosition.invoke(entity);
-            if (currentPosition == 0) {
-                int nextPosition = getNextPosition(tableName);
-                setPosition.invoke(entity, nextPosition);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Adjusts positions when updating an entity to avoid conflicts
      * @param entity entity being updated
      * @param tableName table name
@@ -200,14 +179,7 @@ public abstract class BaseRepository {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            boolean result = stmt.executeUpdate() > 0;
-            
-            // Normalize positions after restore
-            if (result) {
-                normalizePositions(tableName);
-            }
-            
-            return result;
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -248,83 +220,6 @@ public abstract class BaseRepository {
     }
 
     /**
-     * Checks if positions need normalization and performs it if needed
-     * @param tableName table name
-     */
-    protected void checkAndNormalizePositions(String tableName) {
-        try (Connection conn = getConnection()) {
-            // Check if there are gaps in positions
-            String checkSql = "SELECT COUNT(*) as total, MAX(position) as max_pos FROM " + tableName + " WHERE delete_time IS NULL";
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery(checkSql)) {
-                if (rs.next()) {
-                    int total = rs.getInt("total");
-                    int maxPos = rs.getInt("max_pos");
-                    
-                    // If max position is greater than total count, there are gaps
-                    if (maxPos > total) {
-                        normalizePositions(tableName);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Generic method to check and restore deleted record with same title/name
-     * @param entity entity to save
-     * @param tableName table name
-     * @param titleField field name for title/name (e.g., "title", "name")
-     * @param titleValue value of the title field
-     * @return true if restored, false if not found
-     */
-    protected boolean checkAndRestoreDeletedRecord(Object entity, String tableName, String titleField, String titleValue) {
-        String checkSql = "SELECT id FROM " + tableName + " WHERE " + titleField + " = ? AND delete_time IS NOT NULL";
-        try (Connection conn = getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-            checkStmt.setString(1, titleValue);
-            ResultSet rs = checkStmt.executeQuery();
-            
-            if (rs.next()) {
-                // Found a deleted record with the same title, restore it
-                int existingId = rs.getInt("id");
-                
-                // Get the maximum position and add 1 for the restored record
-                int newPosition = getNextPosition(tableName);
-                
-                String restoreSql = "UPDATE " + tableName + " SET delete_time = NULL, deleted_by = NULL, update_time = ?, updated_by = ?, position = ? WHERE id = ?";
-                try (PreparedStatement restoreStmt = conn.prepareStatement(restoreSql)) {
-                    // Use reflection to get update time and updated by
-                    java.lang.reflect.Method getUpdateTime = entity.getClass().getMethod("getUpdateTime");
-                    java.lang.reflect.Method getUpdatedBy = entity.getClass().getMethod("getUpdatedBy");
-                    java.lang.reflect.Method setId = entity.getClass().getMethod("setId", int.class);
-                    java.lang.reflect.Method setPosition = entity.getClass().getMethod("setPosition", int.class);
-                    
-                    Object updateTime = getUpdateTime.invoke(entity);
-                    String updatedBy = (String) getUpdatedBy.invoke(entity);
-                    
-                    String updateTimeStr = DateTimeUtil.formatForSqlite((java.time.LocalDateTime) updateTime);
-                    restoreStmt.setString(1, updateTimeStr);
-                    restoreStmt.setString(2, updatedBy);
-                    restoreStmt.setInt(3, newPosition);
-                    restoreStmt.setInt(4, existingId);
-                    restoreStmt.executeUpdate();
-                    
-                    // Set the ID and position to the restored record
-                    setId.invoke(entity, existingId);
-                    setPosition.invoke(entity, newPosition);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
      * Generic method to find deleted entities
      * @param tableName table name
      * @param mapper function to map ResultSet to entity
@@ -332,7 +227,7 @@ public abstract class BaseRepository {
      */
     protected <T> List<T> findDeleted(String tableName, java.util.function.Function<ResultSet, T> mapper) {
         List<T> result = new ArrayList<>();
-        String sql = "SELECT * FROM " + tableName + " WHERE delete_time IS NOT NULL ORDER BY position ASC";
+        String sql = "SELECT * FROM " + tableName + " WHERE delete_time IS NOT NULL";
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -375,7 +270,7 @@ public abstract class BaseRepository {
      */
     protected <T> List<T> findAll(String tableName, java.util.function.Function<ResultSet, T> mapper) {
         List<T> result = new ArrayList<>();
-        String sql = "SELECT * FROM " + tableName + getDeletedFilterClause() + " ORDER BY position ASC";
+        String sql = "SELECT * FROM " + tableName + getDeletedFilterClause();
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {

@@ -32,7 +32,13 @@ def main():
         print("✅ Репозиторий создан")
 
         # Создаем тестовую валюту
-        currency = create_test_entity(Currency, title="Доллар США", createdBy="tester", updatedBy="tester")
+        currency = create_test_entity(
+            Currency, 
+            title="Доллар США", 
+            position=1,
+            createdBy="tester", 
+            updatedBy="tester"
+        )
 
         print("✅ Тестовая валюта создана")
         print(f"Валюта: {currency.toString()}")
@@ -62,7 +68,6 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при поиске: {e}")
             import traceback
-
             traceback.print_exc()
 
         # Прямой SQL-запрос для проверки
@@ -91,13 +96,14 @@ def main():
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
 
-        # Тестируем создание нескольких валют для проверки автонумерации
+        # Тестируем создание нескольких валют
         print("\n--- Тест создания нескольких валют ---")
         test_currencies = []
         for i in range(3):
             test_currency = create_test_entity(
                 Currency,
                 title=f"Тестовая валюта {i + 1}",
+                position=i + 2,  # Явно указываем позиции
                 createdBy="position_tester",
                 updatedBy="position_tester",
             )
@@ -107,55 +113,18 @@ def main():
             test_data_manager.add_test_id("currencies", saved_test_currency.getId())
             print(f"Создана валюта: {saved_test_currency.getTitle()}, Position: {saved_test_currency.getPosition()}")
 
-        # Проверяем сортировку (позиции должны быть нормализованы после каждого save)
+        # Проверяем все валюты
         all_currencies = repo.findAll()
-        print(f"\nВсе валюты (отсортированы по position, нормализованы после save):")
+        print(f"\nВсе валюты:")
         for curr in all_currencies:
             print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
-
-        # Проверяем, что позиции идут по порядку после создания
-        positions = [curr.getPosition() for curr in all_currencies]
-        expected_positions = list(range(1, len(positions) + 1))
-        if positions == expected_positions:
-            print("✅ Позиции нормализованы корректно после создания валют!")
-        else:
-            print(f"❌ Ошибка нормализации после создания: ожидались {expected_positions}, получены {positions}")
-
-        # Тестируем перестановку позиций
-        print("\n--- Тест перестановки позиций ---")
-        try:
-            # Берем первую валюту и меняем её position на 2 (которая уже занята)
-            first_currency = test_currencies[0]
-            original_position = first_currency.getPosition()
-            print(f"Исходная позиция первой валюты: {original_position}")
-
-            # Меняем position на 2 (которая должна быть занята)
-            first_currency.setPosition(2)
-            first_currency.setTitle("Первая валюта (перемещена)")
-            first_currency.setUpdatedBy("position_reorder_tester")
-            first_currency.setUpdateTime(LocalDateTime.now())
-
-            updated_currency = repo.update(first_currency)
-            print(f"Валюта обновлена: {updated_currency.getTitle()}, Position: {updated_currency.getPosition()}")
-
-            # Проверяем результат перестановки (позиции должны быть нормализованы после update)
-            all_currencies_after = repo.findAll()
-            print(f"\nВсе валюты после перестановки (позиции нормализованы):")
-            for curr in all_currencies_after:
-                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
-
-        except Exception as e:
-            print(f"❌ Ошибка при перестановке позиций: {e}")
-            import traceback
-
-            traceback.print_exc()
 
         # Тестируем обычное обновление
         print("\n--- Тест обычного обновления ---")
         try:
             # Обновляем данные валюты
             saved_currency.setTitle("Доллар США (обновленный)")
-            saved_currency.setPosition(1)  # Меняем на позицию 1
+            saved_currency.setPosition(5)  # Меняем позицию
             saved_currency.setUpdatedBy("jpype_update_test")
 
             # Обновляем дату
@@ -176,26 +145,9 @@ def main():
             else:
                 print("❌ Обновленная валюта не найдена")
 
-            # Проверяем, что позиции нормализованы после обновления
-            all_after_update = repo.findAll()
-            print(f"\nВсе валюты после обновления (позиции нормализованы):")
-            for curr in all_after_update:
-                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
-
-            # Проверяем, что позиции идут по порядку
-            positions_after_update = [curr.getPosition() for curr in all_after_update]
-            expected_positions_after_update = list(range(1, len(positions_after_update) + 1))
-            if positions_after_update == expected_positions_after_update:
-                print("✅ Позиции нормализованы корректно после обновления!")
-            else:
-                print(
-                    f"❌ Ошибка нормализации после обновления: ожидались {expected_positions_after_update}, получены {positions_after_update}"
-                )
-
         except Exception as e:
             print(f"❌ Ошибка при обновлении: {e}")
             import traceback
-
             traceback.print_exc()
 
         # Тестируем soft delete
@@ -220,7 +172,7 @@ def main():
             all_with_deleted = repo.findAll()
             print(f"Валют после удаления (включая удаленные): {len(all_with_deleted)}")
 
-            # Проверяем удаленную запись (должна быть найдена в режиме includeDeleted)
+            # Проверяем удаленную запись
             found_deleted = repo.findById(currency_id)
             if found_deleted.isPresent():
                 deleted_currency = found_deleted.get()
@@ -237,62 +189,20 @@ def main():
             for curr in deleted_currencies:
                 print(f"  Удаленная валюта: {curr.getTitle()}, Deleted by: {curr.getDeletedBy()}")
 
-            # Тестируем восстановление через save с тем же title
-            print("\n--- Тест восстановления через save ---")
-            try:
-                # Создаем новую валюту с тем же названием, что и удаленная
-                new_currency = create_test_entity(
-                    Currency,
-                    title="Доллар США (обновленный)",  # То же название, что и удаленная
-                    createdBy="restore_test",
-                    updatedBy="restore_test",
-                )
-
-                restored_currency = repo.save(new_currency)
-                test_data_manager.add_test_id("currencies", restored_currency.getId())
-                print(f"Валюта восстановлена через save: {restored_currency.getTitle()}")
-                print(f"ID восстановленной валюты: {restored_currency.getId()}")
-                print(f"Position: {restored_currency.getPosition()}")
-
-                # Проверяем, что валюта снова видна в обычном режиме
-                repo.setIncludeDeleted(False)
-                all_after_restore_save = repo.findAll()
-                print(f"Валют после восстановления через save: {len(all_after_restore_save)}")
-
-                # Проверяем, что это та же запись (тот же ID)
-                found_restored_save = repo.findById(restored_currency.getId())
-                if found_restored_save.isPresent():
-                    final_currency = found_restored_save.get()
-                    print(f"Проверка восстановленной валюты: {final_currency.getTitle()}")
-                    print(f"Delete time: {final_currency.getDeleteTime()}")
-                    print(f"Deleted by: {final_currency.getDeletedBy()}")
-                    print(f"Updated by: {final_currency.getUpdatedBy()}")
-                else:
-                    print("❌ Восстановленная валюта не найдена")
-
-            except Exception as e:
-                print(f"❌ Ошибка при восстановлении через save: {e}")
-                import traceback
-
-                traceback.print_exc()
-
             # Тестируем восстановление через метод restore
             print("\n--- Тест восстановления через restore ---")
             try:
-                # Сначала удаляем валюту снова для теста
-                repo.delete(restored_currency.getId(), "test_user_2")
-                print("Валюта снова удалена для теста restore")
-
                 # Восстанавливаем через метод restore
-                restored = repo.restore(restored_currency.getId())
+                restored = repo.restore(currency_id)
                 print(f"Валюта восстановлена через restore: {restored}")
 
                 # Проверяем, что валюта снова видна в обычном режиме
+                repo.setIncludeDeleted(False)
                 all_after_restore = repo.findAll()
                 print(f"Валют после восстановления через restore: {len(all_after_restore)}")
 
                 # Проверяем восстановленную запись
-                found_restored = repo.findById(restored_currency.getId())
+                found_restored = repo.findById(currency_id)
                 if found_restored.isPresent():
                     restored_currency = found_restored.get()
                     print(f"Найдена восстановленная валюта: {restored_currency.getTitle()}")
@@ -304,24 +214,11 @@ def main():
             except Exception as e:
                 print(f"❌ Ошибка при восстановлении через restore: {e}")
                 import traceback
-
                 traceback.print_exc()
-
-            # Проверяем через прямой SQL
-            import sqlite3
-
-            conn = sqlite3.connect(test_data_manager.db_manager.db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT delete_time, deleted_by FROM currencies WHERE id = ?", (currency_id,))
-            row = cursor.fetchone()
-            if row:
-                print(f"SQL проверка - Delete time: {row[0]}, Deleted by: {row[1]}")
-            conn.close()
 
         except Exception as e:
             print(f"❌ Ошибка при soft delete: {e}")
             import traceback
-
             traceback.print_exc()
 
         print("\n✅ Все тесты выполнены успешно!")
@@ -329,7 +226,6 @@ def main():
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         import traceback
-
         traceback.print_exc()
 
     finally:

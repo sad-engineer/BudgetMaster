@@ -14,15 +14,6 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
 
     @Override
     public Currency save(Currency currency) {
-        // Проверяем, есть ли удаленная запись с таким же заголовком, и восстанавливаем ее
-        if (checkAndRestoreDeletedRecord(currency, "currencies", "title", currency.getTitle())) {
-            return currency; // Запись восстановлена
-        }
-        
-        // Удаленной записи не найдено, продолжаем обычное сохранение
-        // Автоматически устанавливаем позицию, если она не установлена (равна 0)
-        setAutoPosition(currency, "currencies");
-        
         String sql = "INSERT INTO currencies (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
@@ -53,9 +44,6 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
             e.printStackTrace();
         }
         
-        // Нормализуем позиции после сохранения
-        normalizePositions("currencies");
-        
         return currency;
     }
 
@@ -71,9 +59,6 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
 
     @Override
     public Currency update(Currency currency) {
-        // Корректируем позиции, если это необходимо перед обновлением
-        adjustPositionsForUpdate(currency, "currencies", currency.getId());
-        
         String sql = "UPDATE currencies SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=? WHERE id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -96,9 +81,6 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        // Нормализуем позиции после обновления
-        normalizePositions("currencies");
         
         return currency;
     }
@@ -136,10 +118,46 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
     }
 
     /**
-     * Нормализует позиции всех активных валют, чтобы они были последовательными, начиная с 1
+     * Проверяет, есть ли удаленная запись с таким же title
+     * @param title заголовок валюты
+     * @return Optional с ID удаленной записи, если найдена
+     */
+    public Optional<Integer> findDeletedByTitle(String title) {
+        String sql = "SELECT id FROM currencies WHERE title = ? AND delete_time IS NOT NULL";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, title);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Получает следующую доступную позицию
+     * @return следующая позиция
+     */
+    public int getNextPosition() {
+        return getNextPosition("currencies");
+    }
+
+    /**
+     * Нормализует позиции всех активных валют
      */
     public void normalizePositions() {
         normalizePositions("currencies");
+    }
+
+    /**
+     * Корректирует позиции при обновлении
+     * @param currency валюта для обновления
+     */
+    public void adjustPositionsForUpdate(Currency currency) {
+        adjustPositionsForUpdate(currency, "currencies", currency.getId());
     }
 
     private Currency mapRow(ResultSet rs) throws SQLException {
