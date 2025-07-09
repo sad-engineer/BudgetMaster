@@ -217,23 +217,23 @@ def main():
             print("\n--- Тест восстановления через restore ---")
             try:
                 # Восстанавливаем через метод restore
-                restored = repo.restore(operation_id)
-                print(f"Операция восстановлена через restore: {restored}")
+            restored = repo.restore(operation_id)
+            print(f"Операция восстановлена через restore: {restored}")
 
                 # Проверяем, что операция снова видна в обычном режиме
                 repo.setIncludeDeleted(False)
-                all_after_restore = repo.findAll()
+            all_after_restore = repo.findAll()
                 print(f"Операций после восстановления через restore: {len(all_after_restore)}")
 
                 # Проверяем восстановленную запись
-                found_restored = repo.findById(operation_id)
-                if found_restored.isPresent():
-                    restored_op = found_restored.get()
-                    print(f"Найдена восстановленная операция: {restored_op.getComment()}")
-                    print(f"Delete time после восстановления: {restored_op.getDeleteTime()}")
-                    print(f"Deleted by после восстановления: {restored_op.getDeletedBy()}")
-                else:
-                    print("❌ Восстановленная операция не найдена")
+            found_restored = repo.findById(operation_id)
+            if found_restored.isPresent():
+                restored_op = found_restored.get()
+                print(f"Найдена восстановленная операция: {restored_op.getComment()}")
+                print(f"Delete time после восстановления: {restored_op.getDeleteTime()}")
+                print(f"Deleted by после восстановления: {restored_op.getDeletedBy()}")
+            else:
+                print("❌ Восстановленная операция не найдена")
 
             except Exception as e:
                 print(f"❌ Ошибка при восстановлении через restore: {e}")

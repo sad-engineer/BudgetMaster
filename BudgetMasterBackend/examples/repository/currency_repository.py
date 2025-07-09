@@ -14,23 +14,23 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 def main():
     print("=== Тест CurrencyRepository через JPype ===")
-
+    
     # Настройка окружения
     if not setup_example():
         return
-
+    
     try:
         # Импортируем классы
         Currency = get_java_class("model.Currency")
         CurrencyRepository = get_java_class("repository.CurrencyRepository")
         LocalDateTime = get_java_class("java.time.LocalDateTime")
-
+        
         print("✅ Классы импортированы")
-
+        
         # Создаем репозиторий
         repo = CurrencyRepository(test_data_manager.db_manager.db_path)
         print("✅ Репозиторий создан")
-
+        
         # Создаем тестовую валюту
         currency = create_test_entity(
             Currency, 
@@ -39,10 +39,10 @@ def main():
             createdBy="tester", 
             updatedBy="tester"
         )
-
+        
         print("✅ Тестовая валюта создана")
         print(f"Валюта: {currency.toString()}")
-
+        
         # Тестируем сохранение
         print("\n--- Тест сохранения ---")
         saved_currency = repo.save(currency)
@@ -51,7 +51,7 @@ def main():
 
         # Сохраняем ID для последующего удаления
         test_data_manager.add_test_id("currencies", saved_currency.getId())
-
+        
         # Тестируем поиск по ID
         print("\n--- Тест поиска по ID ---")
         try:
@@ -69,7 +69,19 @@ def main():
             print(f"❌ Ошибка при поиске: {e}")
             import traceback
             traceback.print_exc()
-
+        
+        # Тестируем поиск по названию
+        print("\n--- Тест поиска по названию ---")
+        try:
+            found_by_title = repo.findByTitle("Доллар США")
+            if found_by_title.isPresent():
+                curr = found_by_title.get()
+                print(f"Найдена валюта по названию: {curr.getTitle()}")
+            else:
+                print("❌ Валюта не найдена по названию")
+        except Exception as e:
+            print(f"❌ Ошибка при поиске по названию: {e}")
+        
         # Прямой SQL-запрос для проверки
         print("\n--- Прямой SQL-запрос ---")
         try:
@@ -77,25 +89,25 @@ def main():
 
             conn = sqlite3.connect(test_data_manager.db_manager.db_path)
             cursor = conn.cursor()
-
+            
             cursor.execute("SELECT * FROM currencies WHERE id = ?", (saved_currency.getId(),))
             row = cursor.fetchone()
-
+            
             if row:
                 print("✅ Найдена валюта в БД:")
                 cursor.execute("PRAGMA table_info(currencies)")
                 columns = [col[1] for col in cursor.fetchall()]
-
+                
                 for i, (col_name, value) in enumerate(zip(columns, row)):
                     print(f"  {col_name}: {value} (тип: {type(value).__name__})")
             else:
                 print("❌ Валюта не найдена в БД")
-
+            
             conn.close()
-
+            
         except Exception as e:
             print(f"❌ Ошибка при прямом SQL-запросе: {e}")
-
+        
         # Тестируем создание нескольких валют
         print("\n--- Тест создания нескольких валют ---")
         test_currencies = []
@@ -119,6 +131,14 @@ def main():
         for curr in all_currencies:
             print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
 
+        # Тестируем получение максимальной позиции
+        print("\n--- Тест получения максимальной позиции ---")
+        try:
+            max_position = repo.getMaxPosition()
+            print(f"Максимальная позиция: {max_position}")
+        except Exception as e:
+            print(f"❌ Ошибка при получении максимальной позиции: {e}")
+
         # Тестируем обычное обновление
         print("\n--- Тест обычного обновления ---")
         try:
@@ -126,14 +146,14 @@ def main():
             saved_currency.setTitle("Доллар США (обновленный)")
             saved_currency.setPosition(5)  # Меняем позицию
             saved_currency.setUpdatedBy("jpype_update_test")
-
+            
             # Обновляем дату
             updated_now = LocalDateTime.now()
             saved_currency.setUpdateTime(updated_now)
-
+            
             updated_currency = repo.update(saved_currency)
             print(f"Валюта обновлена: {updated_currency.toString()}")
-
+            
             # Проверяем обновление
             found_updated = repo.findById(saved_currency.getId())
             if found_updated.isPresent():
@@ -144,33 +164,28 @@ def main():
                 print(f"Updated by: {curr.getUpdatedBy()}")
             else:
                 print("❌ Обновленная валюта не найдена")
-
+                
         except Exception as e:
             print(f"❌ Ошибка при обновлении: {e}")
             import traceback
             traceback.print_exc()
-
+        
         # Тестируем soft delete
         print("\n--- Тест soft delete ---")
         try:
             currency_id = saved_currency.getId()
 
-            # Проверяем, что валюта есть в обычном списке
+            # Проверяем, что валюта есть в списке
             all_before_delete = repo.findAll()
             print(f"Валют до удаления: {len(all_before_delete)}")
 
             # Удаляем валюту (soft delete)
-            deleted = repo.delete(currency_id, "test_user")
+            deleted = repo.deleteById(currency_id, "test_user")
             print(f"Валюта помечена как удаленная: {deleted}")
-
-            # Проверяем, что валюта исчезла из обычного списка
+            
+            # Проверяем, что валюта все еще в списке (репозиторий возвращает все записи)
             all_after_delete = repo.findAll()
-            print(f"Валют после удаления (обычный режим): {len(all_after_delete)}")
-
-            # Включаем показ удаленных записей
-            repo.setIncludeDeleted(True)
-            all_with_deleted = repo.findAll()
-            print(f"Валют после удаления (включая удаленные): {len(all_with_deleted)}")
+            print(f"Валют после удаления: {len(all_after_delete)}")
 
             # Проверяем удаленную запись
             found_deleted = repo.findById(currency_id)
@@ -181,53 +196,24 @@ def main():
                 print(f"Delete time: {deleted_currency.getDeleteTime()}")
             else:
                 print("❌ Удаленная валюта не найдена")
-
-            # Тестируем метод findDeleted
-            print("\n--- Тест findDeleted ---")
-            deleted_currencies = repo.findDeleted()
-            print(f"Найдено удаленных валют: {len(deleted_currencies)}")
-            for curr in deleted_currencies:
-                print(f"  Удаленная валюта: {curr.getTitle()}, Deleted by: {curr.getDeletedBy()}")
-
-            # Тестируем восстановление через метод restore
-            print("\n--- Тест восстановления через restore ---")
-            try:
-                # Восстанавливаем через метод restore
-                restored = repo.restore(currency_id)
-                print(f"Валюта восстановлена через restore: {restored}")
-
-                # Проверяем, что валюта снова видна в обычном режиме
-                repo.setIncludeDeleted(False)
-                all_after_restore = repo.findAll()
-                print(f"Валют после восстановления через restore: {len(all_after_restore)}")
-
-                # Проверяем восстановленную запись
-                found_restored = repo.findById(currency_id)
-                if found_restored.isPresent():
-                    restored_currency = found_restored.get()
-                    print(f"Найдена восстановленная валюта: {restored_currency.getTitle()}")
-                    print(f"Delete time после восстановления: {restored_currency.getDeleteTime()}")
-                    print(f"Deleted by после восстановления: {restored_currency.getDeletedBy()}")
-                else:
-                    print("❌ Восстановленная валюта не найдена")
-
-            except Exception as e:
-                print(f"❌ Ошибка при восстановлении через restore: {e}")
-                import traceback
-                traceback.print_exc()
-
+                
+            # Тестируем удаление по названию
+            print("\n--- Тест удаления по названию ---")
+            deleted_by_title = repo.deleteByTitle("Тестовая валюта 1", "test_user")
+            print(f"Валюта удалена по названию: {deleted_by_title}")
+            
         except Exception as e:
             print(f"❌ Ошибка при soft delete: {e}")
             import traceback
             traceback.print_exc()
-
+        
         print("\n✅ Все тесты выполнены успешно!")
-
+        
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         import traceback
         traceback.print_exc()
-
+    
     finally:
         # Очистка тестовых данных и остановка JVM
         cleanup_example()

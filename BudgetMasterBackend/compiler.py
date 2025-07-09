@@ -2,7 +2,12 @@ import os
 import subprocess
 
 # Папки с исходниками
-SRC_DIRS = ["model", "repository", "service", "util"]
+SRC_DIRS = [
+    "model",
+    "repository",
+    "service",
+    "util"
+]
 # Явно указываем отдельные файлы для компиляции
 EXTRA_JAVA_FILES = ["Main.java"]
 

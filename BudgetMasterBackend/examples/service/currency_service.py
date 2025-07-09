@@ -28,37 +28,26 @@ def main():
 
         print("✅ Классы импортированы")
 
-        # Создаем репозиторий и сервис
+        # Создаем репозиторий и сервис с пользователем
         repo = CurrencyRepository(test_data_manager.db_manager.db_path)
-        service = CurrencyService(repo)
-        print("✅ Сервис создан")
+        service = CurrencyService(repo, "test_user")
+        print("✅ Сервис создан с пользователем 'test_user'")
 
-        # Создаем тестовую валюту (без позиции - сервис установит автоматически)
-        currency = create_test_entity(
-            Currency, 
-            title="Доллар США", 
-            position=0,  # Сервис установит автоматически
-            createdBy="tester", 
-            updatedBy="tester"
-        )
-
-        print("✅ Тестовая валюта создана")
-        print(f"Валюта: {currency.toString()}")
-
-        # Тестируем создание через сервис (с автонумерацией позиции)
-        print("\n--- Тест создания через сервис ---")
-        saved_currency = service.createCurrency(currency)
-        print(f"Валюта создана через сервис: {saved_currency.toString()}")
-        print(f"ID валюты: {saved_currency.getId()}")
-        print(f"Автоматически установленная позиция: {saved_currency.getPosition()}")
+        # Тестируем создание валюты через сервис
+        print("\n--- Тест создания валюты через сервис ---")
+        created_currency = service.create("Евро")
+        print(f"Валюта создана: {created_currency.toString()}")
+        print(f"ID валюты: {created_currency.getId()}")
+        print(f"Автоматически установленная позиция: {created_currency.getPosition()}")
+        print(f"Created by: {created_currency.getCreatedBy()}")
 
         # Сохраняем ID для последующего удаления
-        test_data_manager.add_test_id("currencies", saved_currency.getId())
+        test_data_manager.add_test_id("currencies", created_currency.getId())
 
         # Тестируем поиск по ID через сервис
         print("\n--- Тест поиска по ID через сервис ---")
         try:
-            found_currency = service.getCurrencyById(saved_currency.getId())
+            found_currency = service.getById(created_currency.getId())
             if found_currency.isPresent():
                 curr = found_currency.get()
                 print(f"Найдена валюта: {curr.toString()}")
@@ -77,114 +66,96 @@ def main():
         print("\n--- Тест создания нескольких валют через сервис ---")
         test_currencies = []
         for i in range(3):
-            test_currency = create_test_entity(
-                Currency,
-                title=f"Тестовая валюта {i + 1}",
-                position=0,  # Сервис установит автоматически
-                createdBy="service_tester",
-                updatedBy="service_tester",
-            )
-
-            saved_test_currency = service.createCurrency(test_currency)
-            test_currencies.append(saved_test_currency)
-            test_data_manager.add_test_id("currencies", saved_test_currency.getId())
-            print(f"Создана валюта: {saved_test_currency.getTitle()}, Position: {saved_test_currency.getPosition()}")
+            currency_name = f"Тестовая валюта {i + 1}"
+            saved_currency = service.create(currency_name)
+            test_currencies.append(saved_currency)
+            test_data_manager.add_test_id("currencies", saved_currency.getId())
+            print(f"Создана валюта: {saved_currency.getTitle()}, Position: {saved_currency.getPosition()}")
 
         # Проверяем все валюты через сервис
-        all_currencies = service.getAllCurrencies()
-        print(f"\nВсе валюты (позиции нормализованы сервисом):")
+        all_currencies = service.getAll()
+        print(f"\nВсе валюты:")
         for curr in all_currencies:
             print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
 
-        # Проверяем, что позиции идут по порядку после создания через сервис
-        positions = [curr.getPosition() for curr in all_currencies]
-        expected_positions = list(range(1, len(positions) + 1))
-        if positions == expected_positions:
-            print("✅ Позиции нормализованы корректно сервисом!")
-        else:
-            print(f"❌ Ошибка нормализации сервисом: ожидались {expected_positions}, получены {positions}")
-
-        # Тестируем обновление через сервис
-        print("\n--- Тест обновления через сервис ---")
+        # Тестируем получение валюты по названию (создание если не существует)
+        print("\n--- Тест получения валюты по названию ---")
         try:
-            # Обновляем данные валюты
-            saved_currency.setTitle("Доллар США (обновленный через сервис)")
-            saved_currency.setPosition(2)  # Меняем позицию
-            saved_currency.setUpdatedBy("service_update_test")
-
-            # Обновляем дату
-            updated_now = LocalDateTime.now()
-            saved_currency.setUpdateTime(updated_now)
-
-            updated_currency = service.updateCurrency(saved_currency)
-            print(f"Валюта обновлена через сервис: {updated_currency.toString()}")
-
-            # Проверяем обновление
-            found_updated = service.getCurrencyById(saved_currency.getId())
-            if found_updated.isPresent():
-                curr = found_updated.get()
-                print(f"Проверка обновления: {curr.toString()}")
-                print(f"Новый title: {curr.getTitle()}")
-                print(f"Новый position: {curr.getPosition()}")
-                print(f"Updated by: {curr.getUpdatedBy()}")
-            else:
-                print("❌ Обновленная валюта не найдена")
-
-            # Проверяем, что позиции нормализованы после обновления через сервис
-            all_after_update = service.getAllCurrencies()
-            print(f"\nВсе валюты после обновления через сервис (позиции нормализованы):")
-            for curr in all_after_update:
-                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
-
-            # Проверяем, что позиции идут по порядку
-            positions_after_update = [curr.getPosition() for curr in all_after_update]
-            expected_positions_after_update = list(range(1, len(positions_after_update) + 1))
-            if positions_after_update == expected_positions_after_update:
-                print("✅ Позиции нормализованы корректно после обновления через сервис!")
-            else:
-                print(f"❌ Ошибка нормализации после обновления через сервис: ожидались {expected_positions_after_update}, получены {positions_after_update}")
-
+            # Получаем существующую валюту
+            existing_currency = service.get("Евро")
+            print(f"Получена существующая валюта: {existing_currency.getTitle()}")
+            
+            # Получаем несуществующую валюту (создается автоматически)
+            new_currency = service.get("Рубль")
+            print(f"Создана новая валюта: {new_currency.getTitle()}, Position: {new_currency.getPosition()}")
+            test_data_manager.add_test_id("currencies", new_currency.getId())
+            
         except Exception as e:
-            print(f"❌ Ошибка при обновлении через сервис: {e}")
+            print(f"❌ Ошибка при получении валюты по названию: {e}")
+
+        # Тестируем изменение позиции
+        print("\n--- Тест изменения позиции ---")
+        try:
+            # Меняем позицию валюты
+            currency_to_move = all_currencies[0]
+            old_position = currency_to_move.getPosition()
+            new_position = 3
+            
+            moved_currency = service.changePosition(currency_to_move, new_position)
+            print(f"Валюта перемещена с позиции {old_position} на позицию {new_position}")
+            print(f"Updated by: {moved_currency.getUpdatedBy()}")
+            
+            # Проверяем результат
+            all_after_move = service.getAll()
+            print(f"\nВсе валюты после перемещения:")
+            for curr in all_after_move:
+                print(f"  Position: {curr.getPosition()}, Title: {curr.getTitle()}")
+                
+        except Exception as e:
+            print(f"❌ Ошибка при изменении позиции: {e}")
             import traceback
             traceback.print_exc()
 
         # Тестируем soft delete через сервис
         print("\n--- Тест soft delete через сервис ---")
         try:
-            currency_id = saved_currency.getId()
+            currency_id = created_currency.getId()
 
-            # Проверяем, что валюта есть в обычном списке
-            all_before_delete = service.getAllCurrencies()
+            # Проверяем, что валюта есть в списке
+            all_before_delete = service.getAll()
             print(f"Валют до удаления: {len(all_before_delete)}")
 
             # Удаляем валюту через сервис
-            deleted = service.deleteCurrency(currency_id, "service_test_user")
+            deleted = service.delete("Евро")
             print(f"Валюта удалена через сервис: {deleted}")
 
-            # Проверяем, что валюта исчезла из обычного списка
-            all_after_delete = service.getAllCurrencies()
+            # Проверяем, что валюта все еще в списке (включая удаленные)
+            all_after_delete = service.getAll()
             print(f"Валют после удаления: {len(all_after_delete)}")
 
-            # Проверяем удаленные валюты через сервис
-            deleted_currencies = service.getDeletedCurrencies()
-            print(f"Найдено удаленных валют через сервис: {len(deleted_currencies)}")
-            for curr in deleted_currencies:
-                print(f"  Удаленная валюта: {curr.getTitle()}, Deleted by: {curr.getDeletedBy()}")
+            # Проверяем удаленную запись
+            found_deleted = service.getById(currency_id)
+            if found_deleted.isPresent():
+                deleted_currency = found_deleted.get()
+                print(f"Найдена удаленная валюта: {deleted_currency.getTitle()}")
+                print(f"Deleted by: {deleted_currency.getDeletedBy()}")
+                print(f"Delete time: {deleted_currency.getDeleteTime()}")
+            else:
+                print("❌ Удаленная валюта не найдена")
 
             # Тестируем восстановление через сервис
             print("\n--- Тест восстановления через сервис ---")
             try:
                 # Восстанавливаем через сервис
-                restored = service.restoreCurrency(currency_id)
-                print(f"Валюта восстановлена через сервис: {restored}")
-
-                # Проверяем, что валюта снова видна
-                all_after_restore = service.getAllCurrencies()
-                print(f"Валют после восстановления через сервис: {len(all_after_restore)}")
+                restored = service.restore(currency_id)
+                if restored:
+                    print(f"Валюта восстановлена через сервис: {restored.getTitle()}")
+                    print(f"Updated by: {restored.getUpdatedBy()}")
+                else:
+                    print("❌ Не удалось восстановить валюту")
 
                 # Проверяем восстановленную запись
-                found_restored = service.getCurrencyById(currency_id)
+                found_restored = service.getById(currency_id)
                 if found_restored.isPresent():
                     restored_currency = found_restored.get()
                     print(f"Найдена восстановленная валюта: {restored_currency.getTitle()}")
@@ -204,29 +175,21 @@ def main():
             traceback.print_exc()
 
         # Тестируем восстановление удаленной записи с тем же title
-        print("\n--- Тест восстановления через createCurrency с тем же title ---")
+        print("\n--- Тест восстановления через get с тем же title ---")
         try:
             # Сначала удаляем валюту
-            service.deleteCurrency(saved_currency.getId(), "restore_test_user")
+            service.delete("Рубль")
             print("Валюта удалена для теста восстановления")
 
-            # Создаем новую валюту с тем же названием
-            new_currency = create_test_entity(
-                Currency,
-                title="Доллар США (обновленный через сервис)",  # То же название, что и удаленная
-                position=0,  # Сервис установит автоматически
-                createdBy="restore_test",
-                updatedBy="restore_test",
-            )
-
-            restored_currency = service.createCurrency(new_currency)
-            test_data_manager.add_test_id("currencies", restored_currency.getId())
-            print(f"Валюта восстановлена через createCurrency: {restored_currency.getTitle()}")
+            # Получаем валюту с тем же названием (должна восстановиться)
+            restored_currency = service.get("Рубль")
+            print(f"Валюта восстановлена через get: {restored_currency.getTitle()}")
             print(f"ID восстановленной валюты: {restored_currency.getId()}")
             print(f"Position: {restored_currency.getPosition()}")
+            print(f"Updated by: {restored_currency.getUpdatedBy()}")
 
             # Проверяем, что это та же запись (тот же ID)
-            found_restored_save = service.getCurrencyById(restored_currency.getId())
+            found_restored_save = service.getById(restored_currency.getId())
             if found_restored_save.isPresent():
                 final_currency = found_restored_save.get()
                 print(f"Проверка восстановленной валюты: {final_currency.getTitle()}")
@@ -237,7 +200,7 @@ def main():
                 print("❌ Восстановленная валюта не найдена")
 
         except Exception as e:
-            print(f"❌ Ошибка при восстановлении через createCurrency: {e}")
+            print(f"❌ Ошибка при восстановлении через get: {e}")
             import traceback
             traceback.print_exc()
 

@@ -21,6 +21,7 @@ import java.util.Optional;
         }
 
         String dbPath = "BudgetMasterDB.db";
+        String user = "admin";
         try {
             // 1. Создание базы данных и таблиц
             DatabaseUtil.createDatabaseIfNotExists(dbPath);
@@ -34,26 +35,26 @@ import java.util.Optional;
             OperationRepository operationRepo = new OperationRepository(dbPath);
 
             // 3. Создание сервисов
-            CurrencyService currencyService = new CurrencyService(currencyRepo);
-            AccountService accountService = new AccountService(accountRepo);
-            CategoryService categoryService = new CategoryService(categoryRepo);
-            BudgetService budgetService = new BudgetService(budgetRepo);
-            OperationService operationService = new OperationService(operationRepo);
+            CurrencyService currencyService = new CurrencyService(currencyRepo, user);
+            AccountService accountService = new AccountService(accountRepo, user);
+            CategoryService categoryService = new CategoryService(categoryRepo, user);
+            BudgetService budgetService = new BudgetService(budgetRepo, user);
+            OperationService operationService = new OperationService(operationRepo, user);
 
             // 4. CRUD для Currency
-            Currency rub = new Currency(0, LocalDateTime.now(), null, null, null, null, null, 1, "Рубль");
-            currencyService.createCurrency(rub);
-            System.out.println("Добавлена валюта: " + rub);
+            //Currency rub = new Currency(0, LocalDateTime.now(), null, null, null, null, null, 1, "Рубль");
+            //currencyService.create(rub);
+            //System.out.println("Добавлена валюта: " + rub);
 
-            List<Currency> allCurrencies = currencyService.getAllCurrencies();
-            System.out.println("Все валюты: " + allCurrencies);
+            //List<Currency> allCurrencies = currencyService.getAll();
+            //System.out.println("Все валюты: " + allCurrencies);
 
-            Optional<Currency> foundCurrency = currencyService.getCurrencyById(1);
-            foundCurrency.ifPresent(c -> System.out.println("Найдена валюта: " + c));
+            //Optional<Currency> foundCurrency = currencyService.getById(1);
+            //foundCurrency.ifPresent(c -> System.out.println("Найдена валюта: " + c));
 
-            rub.setTitle("Рубль (обновлено)");
-            currencyService.updateCurrency(rub);
-            System.out.println("Валюта после обновления: " + currencyService.getCurrencyById(1).get());
+            //rub.setTitle("Рубль (обновлено)");
+            //currencyService.update(rub);
+            //System.out.println("Валюта после обновления: " + currencyService.getById(1).get());
 
             // currencyService.deleteCurrency(1);
             // System.out.println("Валюта удалена");
