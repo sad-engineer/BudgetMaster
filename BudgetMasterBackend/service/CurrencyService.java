@@ -220,7 +220,7 @@ public class CurrencyService {
     }
 
     /**
-     * Устанавливает нового пользователя для операций
+     * Устанавливает нового пользователя для валют
      * @param newUser новый пользователь
      */
     public void setUser(String newUser) {
