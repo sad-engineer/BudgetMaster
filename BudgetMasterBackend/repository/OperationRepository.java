@@ -120,13 +120,42 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * Получение операций по дате
      * 
      * <p>Возвращает список всех операций с указанной датой.
+     * Поиск выполняется за весь день (от 00:00:00 до 23:59:59).
      * Поиск выполняется независимо от статуса удаления.
      * 
      * @param date дата для поиска (не null)
      * @return список операций с указанной датой (может быть пустым, но не null)
      */
     public List<Operation> findAllByDate(LocalDateTime date) {
-        return findAll("operations", "date", date, this::mapRowSafe);
+        List<Operation> result = new ArrayList<>();
+        
+        // Получаем начало и конец дня
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59, 999999999);
+        
+        // Форматируем даты для SQLite
+        String startDateStr = DateTimeUtil.formatForSqlite(startOfDay);
+        String endDateStr = DateTimeUtil.formatForSqlite(endOfDay);
+        
+        String sql = "SELECT * FROM operations WHERE date >= ? AND date <= ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, startDateStr);
+            stmt.setString(2, endDateStr);
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Operation op = mapRowSafe(rs);
+                if (op != null) {
+                    result.add(op);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return result;
     }
 
     /**

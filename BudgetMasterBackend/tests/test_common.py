@@ -69,10 +69,10 @@ class JPypeSetup:
 
             # Получаем DatabaseUtil класс
             DatabaseUtil = self.get_class("util.DatabaseUtil")
-            
+
             # Создаем базу данных
             DatabaseUtil.createDatabaseIfNotExists(self.DB_PATH)
-            
+
             print(f"✅ База данных успешно создана: {self.DB_PATH}")
             return True
 
@@ -193,24 +193,20 @@ class DatabaseManager:
 
     def get_database_info(self) -> dict:
         """Получает информацию о базе данных"""
-        info = {
-            'exists': self.check_database_exists(),
-            'path': self.db_path,
-            'size_bytes': self.get_database_size()
-        }
-        
+        info = {'exists': self.check_database_exists(), 'path': self.db_path, 'size_bytes': self.get_database_size()}
+
         if info['exists']:
             # Получаем список таблиц
             tables = self.execute_query("SELECT name FROM sqlite_master WHERE type='table'")
             info['tables'] = [table[0] for table in tables]
-            
+
             # Получаем количество записей в каждой таблице
             info['table_counts'] = {}
             for table in info['tables']:
                 count_result = self.execute_query(f"SELECT COUNT(*) FROM {table}")
                 if count_result:
                     info['table_counts'][table] = count_result[0][0]
-        
+
         return info
 
 
@@ -254,28 +250,28 @@ class TestDataManager:
     def reset_database_to_defaults(self):
         """Сбрасывает базу данных к дефолтным значениям"""
         print("\n--- Сброс базы данных к дефолтам ---")
-        
+
         try:
             # Получаем DatabaseUtil класс
             DatabaseUtil = jpype_setup.get_class("util.DatabaseUtil")
-            
+
             # Восстанавливаем дефолтные значения
             DatabaseUtil.restoreDefaults(jpype_setup.DB_PATH)
-            
+
             print("✅ База данных сброшена к дефолтным значениям")
-            
+
         except Exception as e:
             print(f"❌ Ошибка при сбросе базы данных: {e}")
 
 
-# Глобальные экземпляры для использования в примерах
+# Глобальные экземпляры для использования в тестах
 jpype_setup = JPypeSetup()
 db_manager = DatabaseManager(jpype_setup.DB_PATH)
 test_data_manager = TestDataManager(db_manager)
 
 
 def setup_example():
-    """Настройка окружения для примера"""
+    """Настройка окружения для тестов"""
     if not jpype_setup.check_prerequisites():
         return False
 
@@ -285,34 +281,34 @@ def setup_example():
             return False
 
         jpype_setup.start_jvm()
-        
+
         # Выводим информацию о базе данных
         db_info = db_manager.get_database_info()
         print(f"\n📊 Информация о базе данных:")
         print(f"   Путь: {db_info['path']}")
         print(f"   Размер: {db_info['size_bytes']} байт")
         print(f"   Таблицы: {', '.join(db_info.get('tables', []))}")
-        
+
         if 'table_counts' in db_info:
             print(f"   Записей в таблицах:")
             for table, count in db_info['table_counts'].items():
                 print(f"     {table}: {count}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Ошибка при настройке: {e}")
         return False
 
 
 def cleanup_example():
-    """Очистка после выполнения примера"""
+    """Очистка после выполнения тестов"""
     test_data_manager.cleanup_test_data()
     jpype_setup.shutdown_jvm()
 
 
 def get_java_class(class_name: str):
-    """Получает Java класс для использования в примерах"""
+    """Получает Java класс для использования в тестах"""
     return jpype_setup.get_class(class_name)
 
 
@@ -343,15 +339,15 @@ def create_test_entity(entity_class, **kwargs):
 def print_database_status():
     """Выводит текущий статус базы данных"""
     db_info = db_manager.get_database_info()
-    
+
     print(f"\n📊 Статус базы данных:")
     print(f"   Существует: {'✅' if db_info['exists'] else '❌'}")
     print(f"   Путь: {db_info['path']}")
-    
+
     if db_info['exists']:
         print(f"   Размер: {db_info['size_bytes']} байт")
         print(f"   Таблицы: {', '.join(db_info.get('tables', []))}")
-        
+
         if 'table_counts' in db_info:
             print(f"   Записей:")
             for table, count in db_info['table_counts'].items():

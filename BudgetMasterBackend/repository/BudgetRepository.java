@@ -118,6 +118,19 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     }
 
     /**
+     * Поиск бюджета по позиции
+     * 
+     * <p>Возвращает бюджет независимо от статуса удаления (активный или удаленный).
+     * Если бюджет не найден, возвращает пустой Optional.
+     * 
+     * @param position позиция бюджета для поиска (положительное целое число)
+     * @return бюджет, если найден, иначе null
+     */
+    public Optional<Budget> findByPosition(Integer position) { 
+        return findByColumn("budgets", "position", position, this::mapRowSafe);
+    }
+
+    /**
      * Получение максимального значения позиции среди всех бюджетов
      * 
      * <p>Выполняет SQL-запрос для получения максимального значения позиции.
@@ -167,7 +180,13 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
         budget.setPosition(rs.getInt("position"));
         budget.setAmount(rs.getInt("amount"));
         budget.setCurrencyId(rs.getInt("currency_id"));
-        budget.setCategoryId(rs.getObject("category_id", Integer.class));
+        // Безопасное чтение поля category_id с обработкой NULL значений
+        try {
+            Integer categoryId = rs.getObject("category_id", Integer.class);
+            budget.setCategoryId(categoryId);
+        } catch (SQLException e) {
+            budget.setCategoryId(null);
+        }
         return budget;
     }
 
@@ -281,4 +300,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
         
         return budget;
     }
+
+    
 } 

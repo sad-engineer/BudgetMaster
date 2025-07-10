@@ -132,6 +132,19 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
+     * Поиск счета по позиции
+     * 
+     * <p>Возвращает счет независимо от статуса удаления (активный или удаленный).
+     * Если счет не найден, возвращает пустой Optional.
+     * 
+     * @param position позиция счета для поиска (положительное целое число)
+     * @return счет, если найден, иначе null
+     */
+    public Optional<Account> findByPosition(Integer position) { 
+        return findByColumn("accounts", "position", position, this::mapRowSafe);
+    }
+
+    /**
      * Получение максимального значения позиции среди всех счетов
      * 
      * <p>Выполняет SQL-запрос для получения максимального значения позиции.
@@ -189,9 +202,27 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
         account.setType(rs.getInt("type"));
         account.setCurrencyId(rs.getInt("currency_id"));
         account.setClosed(rs.getInt("closed"));
-        account.setCreditCardLimit(rs.getObject("credit_card_limit", Integer.class));
-        account.setCreditCardCategoryId(rs.getObject("credit_card_category_id", Integer.class));
-        account.setCreditCardCommissionCategoryId(rs.getObject("credit_card_commission_category_id", Integer.class));
+        // Безопасное чтение полей кредитных карт с обработкой NULL значений
+        try {
+            Integer creditCardLimit = rs.getObject("credit_card_limit", Integer.class);
+            account.setCreditCardLimit(creditCardLimit);
+        } catch (SQLException e) {
+            account.setCreditCardLimit(null);
+        }
+        
+        try {
+            Integer creditCardCategoryId = rs.getObject("credit_card_category_id", Integer.class);
+            account.setCreditCardCategoryId(creditCardCategoryId);
+        } catch (SQLException e) {
+            account.setCreditCardCategoryId(null);
+        }
+        
+        try {
+            Integer creditCardCommissionCategoryId = rs.getObject("credit_card_commission_category_id", Integer.class);
+            account.setCreditCardCommissionCategoryId(creditCardCommissionCategoryId);
+        } catch (SQLException e) {
+            account.setCreditCardCommissionCategoryId(null);
+        }
         return account;
     }
 

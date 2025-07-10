@@ -120,8 +120,9 @@ public class BudgetService {
      * @param newPosition новая позиция
      * @return бюджет с новой позицией
      */
-    public Budget changePosition(int oldPosition, int newPosition) {   
-        Optional<Budget> budgetOpt = getById(oldPosition);
+    public Budget changePosition(int oldPosition, int newPosition) {
+        // поиск по позиции  
+        Optional<Budget> budgetOpt = budgetRepository.findByPosition(oldPosition);
         if (budgetOpt.isPresent()) {
             return changePosition(budgetOpt.get(), newPosition);
         }
@@ -132,9 +133,10 @@ public class BudgetService {
      * Создает новый бюджет
      * @param categoryId ID категории
      * @param amount сумма бюджета в копейках валюты
+     * @param currencyId ID валюты
      * @return созданный бюджет
      */
-    public Budget create(Integer categoryId, int amount) {
+    public Budget create(Integer categoryId, int amount, int currencyId) {
         Budget newBudget = new Budget();
         int nextPosition = budgetRepository.getMaxPosition() + 1;
         newBudget.setCategoryId(categoryId);
@@ -144,7 +146,7 @@ public class BudgetService {
         newBudget.setCreatedBy(user);
         newBudget.setUpdateTime(LocalDateTime.now());
         newBudget.setUpdatedBy(user);
-        
+        newBudget.setCurrencyId(currencyId);
         return budgetRepository.save(newBudget);
     }
 

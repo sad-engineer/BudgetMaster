@@ -274,6 +274,7 @@ public class DatabaseUtil {
         // Сначала создаем родительские категории
         Category incomeParent = new Category();
         incomeParent.setTitle("Доходы");
+        incomeParent.setPosition(1);
         incomeParent.setOperationType(2); // Доходы
         incomeParent.setType(0); // Родительская
         incomeParent.setParentId(null);
@@ -285,6 +286,7 @@ public class DatabaseUtil {
         
         Category expenseParent = new Category();
         expenseParent.setTitle("Расходы");
+        expenseParent.setPosition(2);
         expenseParent.setOperationType(1); // Расходы
         expenseParent.setType(0); // Родительская
         expenseParent.setParentId(null);
@@ -300,10 +302,11 @@ public class DatabaseUtil {
         
         // Создаем дочерние категории доходов
         String[] incomeCategoryTitles = {"Работа", "Подработка", "Подарки"};
-        
+        int incomePosition = 3;
         for (String title : incomeCategoryTitles) {
             Category category = new Category();
             category.setTitle(title);
+            category.setPosition(incomePosition);
             category.setOperationType(2); // Доходы
             category.setType(1); // Дочерняя
             category.setParentId(savedIncomeParent.getId());
@@ -314,11 +317,13 @@ public class DatabaseUtil {
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
+            incomePosition++;
         }
-        
+
         // Создаем промежуточные категории расходов
         Category necessaryExpense = new Category();
         necessaryExpense.setTitle("Необходимые");
+        necessaryExpense.setPosition(6);
         necessaryExpense.setOperationType(1); // Расходы
         necessaryExpense.setType(1); // Дочерняя
         necessaryExpense.setParentId(savedExpenseParent.getId());
@@ -330,6 +335,7 @@ public class DatabaseUtil {
         
         Category additionalExpense = new Category();
         additionalExpense.setTitle("Дополнительные");
+        additionalExpense.setPosition(7);
         additionalExpense.setOperationType(1); // Расходы
         additionalExpense.setType(1); // Дочерняя
         additionalExpense.setParentId(savedExpenseParent.getId());
@@ -345,10 +351,11 @@ public class DatabaseUtil {
         
         // Создаем дочерние категории необходимых расходов
         String[] necessaryCategoryTitles = {"Коммунальные", "Продукты", "Транспорт", "Медицина", "Одежда", "Налоги"};
-        
+        int necessaryPosition = 8;
         for (String title : necessaryCategoryTitles) {
             Category category = new Category();
             category.setTitle(title);
+            category.setPosition(necessaryPosition);
             category.setOperationType(1); // Расходы
             category.setType(1); // Дочерняя
             category.setParentId(savedNecessary.getId());
@@ -359,14 +366,16 @@ public class DatabaseUtil {
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
+            necessaryPosition++;
         }
         
         // Создаем дочерние категории дополнительных расходов
         String[] additionalCategoryTitles = {"Домашние нужды", "Кино", "Кафе и рестораны", "Подарки"};
-        
+        int additionalPosition = 14;
         for (String title : additionalCategoryTitles) {
             Category category = new Category();
             category.setTitle(title);
+            category.setPosition(additionalPosition);
             category.setOperationType(1); // Расходы
             category.setType(1); // Дочерняя
             category.setParentId(savedAdditional.getId());
@@ -377,6 +386,7 @@ public class DatabaseUtil {
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
+            additionalPosition++;
         }
     }
     
@@ -395,11 +405,15 @@ public class DatabaseUtil {
         CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
         
         // Add default currencies
-        String[] currencyTitles = {"RUB", "USD", "EUR"};
-        for (String title : currencyTitles) {
+        Object[][] currencyData = {
+            {"RUB", 1},
+            {"USD", 2},
+            {"EUR", 3}
+        };
+        for (Object[] currencyInfo : currencyData) {
             Currency currency = new Currency();
-            currency.setPosition(0); // Will be auto-assigned by repository
-            currency.setTitle(title);
+            currency.setTitle((String) currencyInfo[0]);
+            currency.setPosition((int) currencyInfo[1]);
             currency.setCreatedBy("initializer");
             currency.setUpdatedBy("initializer");
             currency.setCreateTime(java.time.LocalDateTime.now());
@@ -422,13 +436,13 @@ public class DatabaseUtil {
         String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
         AccountRepository accountRepo = new AccountRepository(dbPath);
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        // title, type, currencyId, closed
+        // title, type, currencyId, closed, position
         Object[][] defaultAccounts = {
-            {"Наличные", 1, 1, 0},
-            {"Зарплатная карта", 1, 1, 0},
-            {"Сберегательный счет", 2, 1, 0},
-            {"Кредитная карта", 3, 1, 0},
-            {"Карта рассрочки", 3, 1, 0},
+            {"Наличные", 1, 1, 0, 1},
+            {"Зарплатная карта", 1, 1, 0, 2},
+            {"Сберегательный счет", 2, 1, 0, 3},
+            {"Кредитная карта", 3, 1, 0, 4},
+            {"Карта рассрочки", 3, 1, 0, 5},
         };
         for (Object[] acc : defaultAccounts) {
             Account account = new Account();
@@ -437,6 +451,7 @@ public class DatabaseUtil {
             account.setType((int) acc[1]);
             account.setCurrencyId((int) acc[2]);
             account.setClosed((int) acc[3]);
+            account.setPosition((int) acc[4]);
             account.setCreditCardLimit(null);
             account.setCreditCardCategoryId(null);
             account.setCreditCardCommissionCategoryId(null);

@@ -67,8 +67,8 @@ public class AccountService {
         List<Account> allAccounts = getAll();
         
         // Проверяем, что новая позиция валидна
-        if (newPosition < 1 || newPosition > allAccounts.size()) {
-            throw new IllegalArgumentException("Новая позиция должна быть от 1 до " + allAccounts.size());
+        if (newPosition < 1 || newPosition > accountRepository.getMaxPosition()) {
+            throw new IllegalArgumentException("Новая позиция должна быть от 1 до " + accountRepository.getMaxPosition());
         }
         
         // Переупорядочиваем позиции
@@ -112,7 +112,7 @@ public class AccountService {
      * @return счет с новой позицией
      */
     public Account changePosition(int oldPosition, int newPosition) {   
-        Optional<Account> accountOpt = getById(oldPosition);
+        Optional<Account> accountOpt = accountRepository.findByPosition(oldPosition);
         if (accountOpt.isPresent()) {
             return changePosition(accountOpt.get(), newPosition);
         }

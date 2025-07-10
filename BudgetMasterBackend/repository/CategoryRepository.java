@@ -195,7 +195,13 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         category.setTitle(rs.getString("title"));
         category.setOperationType(rs.getInt("operation_type"));
         category.setType(rs.getInt("type"));
-        category.setParentId(rs.getObject("parent_id", Integer.class));
+        // Безопасное чтение поля parent_id с обработкой NULL значений
+        try {
+            Integer parentId = rs.getObject("parent_id", Integer.class);
+            category.setParentId(parentId);
+        } catch (SQLException e) {
+            category.setParentId(null);
+        }
         return category;
     }
 

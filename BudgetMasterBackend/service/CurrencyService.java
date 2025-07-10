@@ -17,7 +17,7 @@ public class CurrencyService {
      * Репозиторий для работы с валютами
      */
     private final CurrencyRepository currencyRepository;
-    
+
     /**
      * Пользователь, выполняющий операции
      */
@@ -115,7 +115,7 @@ public class CurrencyService {
         currency.setUpdatedBy(user);
         return currencyRepository.update(currency);
     }
-    
+
     /**
      * Изменяет порядок валюты с переупорядочиванием других валют
      * @param oldPosition старая позиция
@@ -164,7 +164,7 @@ public class CurrencyService {
     public Optional<Currency> getById(int id) { 
         return currencyRepository.findById(id);
     }
-    
+
     /**
      * Получает валюту по title.
      * Если валюта не существует, создает новую.
@@ -182,8 +182,8 @@ public class CurrencyService {
             return currency.get();
         }
         return create(title);
-    } 
-    
+    }
+
     /**
      * Проверка валюты на удаление
      * @param currency класс валюты
