@@ -28,6 +28,7 @@ public class CategoryValidator {
         validateOperationType(category.getOperationType());
         validateType(category.getType());
         validateParentId(category.getParentId());
+        validateNotSelfParent(category);
     }
     
     /**
@@ -113,15 +114,8 @@ public class CategoryValidator {
         validateOperationType(category.getOperationType());
         validateType(category.getType());
         validateParentId(category.getParentId());
-    }
-    
-    /**
-     * Валидирует категорию для обновления
-     * @param category категория для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForUpdate(Category category) {
-        validate(category);
+
+        validateNotSelfParent(category);
     }
     
     /**

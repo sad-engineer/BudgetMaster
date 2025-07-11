@@ -36,10 +36,10 @@ import java.util.Optional;
 
             // 3. Создание сервисов
             CurrencyService currencyService = new CurrencyService(currencyRepo, user);
-            AccountService accountService = new AccountService(accountRepo, user);
+            AccountService accountService = new AccountService(currencyService, user);
             CategoryService categoryService = new CategoryService(categoryRepo, user);
             BudgetService budgetService = new BudgetService(budgetRepo, user);
-            OperationService operationService = new OperationService(operationRepo, user);
+            OperationService operationService = new OperationService(accountService, currencyService, user);
 
             // 4. CRUD для Currency
             //Currency rub = new Currency(0, LocalDateTime.now(), null, null, null, null, null, 1, "Рубль");

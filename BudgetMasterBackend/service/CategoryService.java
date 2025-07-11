@@ -2,6 +2,7 @@ package service;
 
 import model.Category;
 import repository.CategoryRepository;
+import validator.CategoryValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -124,6 +125,9 @@ public class CategoryService {
         newCategory.setCreatedBy(user);
         newCategory.setUpdateTime(LocalDateTime.now());
         newCategory.setUpdatedBy(user);
+
+        // Валидация категории
+        CategoryValidator.validateForCreate(newCategory);
         
         return categoryRepository.save(newCategory);
     }

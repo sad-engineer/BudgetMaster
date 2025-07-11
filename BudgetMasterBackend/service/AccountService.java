@@ -2,6 +2,7 @@ package service;
 
 import model.Account;
 import repository.AccountRepository;
+import validator.AccountValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,11 @@ public class AccountService {
     private final AccountRepository accountRepository;
     
     /**
+     * Сервис для работы с валютами
+     */
+    private final CurrencyService currencyService;
+    
+    /**
      * Пользователь, выполняющий операции
      */
     private final String user;
@@ -24,19 +30,33 @@ public class AccountService {
     /**
      * Конструктор для сервиса
      * @param accountRepository репозиторий для работы со счетами
+     * @param currencyService сервис для работы с валютами
      * @param user пользователь, выполняющий операции
      */
-    public AccountService(AccountRepository accountRepository, String user) {
+    public AccountService(AccountRepository accountRepository, CurrencyService currencyService, String user) {
         this.accountRepository = accountRepository;
+        this.currencyService = currencyService;
         this.user = user;
     }
 
     /**
      * Конструктор для сервиса с автоматическим созданием репозитория
+     * @param currencyService сервис для работы с валютами
+     * @param user пользователь, выполняющий операции
+     */
+    public AccountService(CurrencyService currencyService, String user) {
+        this.accountRepository = new AccountRepository("budget_master.db");
+        this.currencyService = currencyService;
+        this.user = user;
+    }
+
+    /**
+     * Конструктор для сервиса с автоматическим созданием репозитория и сервиса валют
      * @param user пользователь, выполняющий операции
      */
     public AccountService(String user) {
         this.accountRepository = new AccountRepository("budget_master.db");
+        this.currencyService = new CurrencyService(user);
         this.user = user;
     }
 
@@ -122,9 +142,13 @@ public class AccountService {
     /**
      * Создает новый счет
      * @param title название счета
+     * @param amount начальный баланс
+     * @param type тип счета
+     * @param currencyId ID валюты
+     * @param closed закрытый счет
      * @return счет
      */
-    public Account create(String title) {
+    public Account create(String title, int amount, int type, int currencyId, int closed) {
         Account newAccount = new Account();
         int nextPosition = accountRepository.getMaxPosition() + 1;
         newAccount.setTitle(title);
@@ -133,9 +157,25 @@ public class AccountService {
         newAccount.setCreatedBy(user);
         newAccount.setUpdateTime(LocalDateTime.now());
         newAccount.setUpdatedBy(user);
+        newAccount.setType(type);
+        newAccount.setCurrencyId(currencyId);
+        newAccount.setAmount(amount);
+        newAccount.setClosed(closed);
+        // Валидация счета
+        AccountValidator.validate(newAccount);
         
         return accountRepository.save(newAccount);
     }
+
+    /**
+     * Создает новый расчетный счет по названию (с начальным балансом 0, не закрытый, рублевый)
+     * @param title название счета
+     * @return счет
+     */
+    public Account create(String title) {
+        return create(title, 0, 1, 1, 0); // 1 - расчетный счет по умолчанию, 1 - ID валюты по умолчанию, 0 - не закрытый
+    }
+
 
     /**
      * Получает все счета
@@ -173,6 +213,24 @@ public class AccountService {
     }
 
     /**
+     * Получает валюту по названию через CurrencyService
+     * @param currencyTitle название валюты
+     * @return валюта
+     */
+    public model.Currency getCurrency(String currencyTitle) {
+        return currencyService.get(currencyTitle);
+    }
+
+    /**
+     * Получает валюту по ID через CurrencyService
+     * @param currencyId ID валюты
+     * @return валюта
+     */
+    public model.Currency getCurrencyById(int currencyId) {
+        return currencyService.get(currencyId);
+    }
+
+    /**
      * Получает счет по title.
      * Если счет не существует, создает новый.
      * Если счет существует и удален, восстанавливает его.
@@ -183,9 +241,6 @@ public class AccountService {
     public Account get(String title) {
         Optional<Account> account = accountRepository.findByTitle(title);
         if (account.isPresent()) {
-            if (isAccountDeleted(account.get())) {
-                return restore(account.get());
-            }
             return account.get();
         }
         return create(title);
@@ -210,6 +265,7 @@ public class AccountService {
         restoredAccount.setDeletedBy(null);
         restoredAccount.setUpdateTime(LocalDateTime.now());
         restoredAccount.setUpdatedBy(user);
+
         return accountRepository.update(restoredAccount);
     }
 

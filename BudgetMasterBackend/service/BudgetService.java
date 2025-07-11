@@ -2,6 +2,7 @@ package service;
 
 import model.Budget;
 import repository.BudgetRepository;
+import validator.BudgetValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -147,6 +148,10 @@ public class BudgetService {
         newBudget.setUpdateTime(LocalDateTime.now());
         newBudget.setUpdatedBy(user);
         newBudget.setCurrencyId(currencyId);
+
+        // Валидация бюджета
+        BudgetValidator.validateForCreate(newBudget);
+
         return budgetRepository.save(newBudget);
     }
 

@@ -21,7 +21,7 @@ public class BudgetValidator {
         
         // Валидация базовых полей
         BaseEntityValidator.validate(budget);
-        
+
         // Валидация специфичных полей
         validateAmount(budget.getAmount());
         validateCurrencyId(budget.getCurrencyId());
@@ -87,25 +87,5 @@ public class BudgetValidator {
         validateCurrencyId(budget.getCurrencyId());
         validateCategoryId(budget.getCategoryId());
         validatePosition(budget.getPosition());
-    }
-    
-    /**
-     * Валидирует бюджет для обновления
-     * @param budget бюджет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForUpdate(Budget budget) {
-        validate(budget);
-    }
-    
-    /**
-     * Проверяет, что бюджет не превышает разумные пределы
-     * @param budget бюджет для проверки
-     * @throws IllegalArgumentException если бюджет превышает пределы
-     */
-    public static void validateReasonableAmount(Budget budget) {
-        if (budget.getAmount() > 1000000000) { // 1 миллиард
-            throw new IllegalArgumentException("Сумма бюджета не может превышать 1 миллиард");
-        }
     }
 } 

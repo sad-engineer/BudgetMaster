@@ -2,11 +2,8 @@ package service;
 
 import model.Operation;
 import repository.OperationRepository;
+import validator.OperationValidator;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +19,16 @@ public class OperationService {
     private final OperationRepository operationRepository;
     
     /**
+     * Сервис для работы со счетами
+     */
+    private final AccountService accountService;
+    
+    /**
+     * Сервис для работы с валютами
+     */
+    private final CurrencyService currencyService;
+    
+    /**
      * Пользователь, выполняющий операции
      */
     private final String user;
@@ -29,19 +36,38 @@ public class OperationService {
     /**
      * Конструктор для сервиса
      * @param operationRepository репозиторий для работы с операциями
+     * @param accountService сервис для работы со счетами
+     * @param currencyService сервис для работы с валютами
      * @param user пользователь, выполняющий операции
      */
-    public OperationService(OperationRepository operationRepository, String user) {
+    public OperationService(OperationRepository operationRepository, AccountService accountService, CurrencyService currencyService, String user) {
         this.operationRepository = operationRepository;
+        this.accountService = accountService;
+        this.currencyService = currencyService;
         this.user = user;
     }
 
     /**
      * Конструктор для сервиса с автоматическим созданием репозитория
+     * @param accountService сервис для работы со счетами
+     * @param currencyService сервис для работы с валютами
+     * @param user пользователь, выполняющий операции
+     */
+    public OperationService(AccountService accountService, CurrencyService currencyService, String user) {
+        this.operationRepository = new OperationRepository("budget_master.db");
+        this.accountService = accountService;
+        this.currencyService = currencyService;
+        this.user = user;
+    }
+
+    /**
+     * Конструктор для сервиса с автоматическим созданием всех зависимостей
      * @param user пользователь, выполняющий операции
      */
     public OperationService(String user) {
         this.operationRepository = new OperationRepository("budget_master.db");
+        this.currencyService = new CurrencyService(user);
+        this.accountService = new AccountService(this.currencyService, user);
         this.user = user;
     }
 
@@ -70,21 +96,6 @@ public class OperationService {
      * @throws IllegalArgumentException если тип операции не равен 1 или 2, дата больше текущего времени, или сумма не больше нуля
      */
     public Operation create(int type, LocalDateTime date, int amount, String comment, int categoryId, int accountId, int currencyId, int toAccountId, int toCurrencyId, int toAmount) {
-        // Валидация типа операции
-        if (type != 1 && type != 2) {
-            throw new IllegalArgumentException("Тип операции должен быть 1 (расход) или 2 (доход), получено: " + type);
-        }
-        
-        // Валидация даты операции
-        LocalDateTime now = LocalDateTime.now();
-        if (date.isAfter(now)) {
-            throw new IllegalArgumentException("Дата операции не может быть больше текущего времени. Получено: " + date + ", текущее время: " + now);
-        }
-        
-        // Валидация суммы операции
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Сумма операции должна быть больше нуля. Получено: " + amount);
-        }
         
         Operation newOperation = new Operation();
         newOperation.setType(type);
@@ -101,6 +112,9 @@ public class OperationService {
         newOperation.setCreatedBy(user);
         newOperation.setUpdateTime(LocalDateTime.now());
         newOperation.setUpdatedBy(user);
+
+        // Валидация операции перед сохранением
+        OperationValidator.validate(newOperation);
         
         return operationRepository.save(newOperation);
     }
@@ -340,6 +354,79 @@ public class OperationService {
     public void setUser(String newUser) {
         // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
         // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр CurrencyService");
+        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр OperationService");
+    }
+
+    /**
+     * Получает счет по названию через AccountService
+     * @param accountTitle название счета
+     * @return счет
+     */
+    public model.Account getAccount(String accountTitle) {
+        return accountService.get(accountTitle);
+    }
+
+    /**
+     * Получает счет по ID через AccountService
+     * @param accountId ID счета
+     * @return счет
+     */
+    public Optional<model.Account> getAccountById(int accountId) {
+        return accountService.getById(accountId);
+    }
+
+    /**
+     * Получает валюту по названию через CurrencyService
+     * @param currencyTitle название валюты
+     * @return валюта
+     */
+    public model.Currency getCurrency(String currencyTitle) {
+        return currencyService.get(currencyTitle);
+    }
+
+    /**
+     * Получает валюту по ID через CurrencyService
+     * @param currencyId ID валюты
+     * @return валюта
+     */
+    public model.Currency getCurrencyById(int currencyId) {
+        return currencyService.get(currencyId);
+    }
+
+    /**
+     * Создает операцию с автоматическим получением счетов и валют по названиям
+     * @param type тип операции (1 - расход, 2 - доход)
+     * @param date дата операции
+     * @param amount сумма операции
+     * @param comment комментарий операции
+     * @param categoryId ID категории
+     * @param accountTitle название счета
+     * @param currencyTitle название валюты
+     * @param toAccountTitle название целевого счета (для переводов, может быть null)
+     * @param toCurrencyTitle название целевой валюты (для переводов, может быть null)
+     * @param toAmount сумма в целевой валюте (для переводов, может быть null)
+     * @return операция
+     */
+    public Operation createWithTitles(int type, LocalDateTime date, int amount, String comment, int categoryId, 
+                                    String accountTitle, String currencyTitle, 
+                                    String toAccountTitle, String toCurrencyTitle, Integer toAmount) {
+        
+        // Получаем счет и валюту по названиям
+        model.Account account = getAccount(accountTitle);
+        model.Currency currency = getCurrency(currencyTitle);
+        
+        Integer toAccountId = null;
+        Integer toCurrencyId = null;
+        
+        // Если указаны целевые параметры, получаем их
+        if (toAccountTitle != null && toCurrencyTitle != null && toAmount != null) {
+            model.Account toAccount = getAccount(toAccountTitle);
+            model.Currency toCurrency = getCurrency(toCurrencyTitle);
+            toAccountId = toAccount.getId();
+            toCurrencyId = toCurrency.getId();
+        }
+        
+        return create(type, date, amount, comment, categoryId, account.getId(), currency.getId(), 
+                     toAccountId, toCurrencyId, toAmount);
     }
 } 

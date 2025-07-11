@@ -52,6 +52,18 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
     }
 
     /**
+     * Поиск валюты по позиции
+     * 
+     * <p>Возвращает валюту с указанной позицией.
+     * 
+     * @param position позиция валюты для поиска (положительное целое число)    
+     * @return Optional с найденной валютой, если найдена, иначе пустой Optional
+     */
+    public Optional<Currency> findByPosition(int position) {
+        return findByColumn("currencies", "position", position, this::mapRowSafe);
+    }
+
+    /**
      * Мягкое удаление валюты по названию с указанием пользователя
      * 
      * <p>Устанавливает поля delete_time = текущее время и deleted_by = указанный пользователь.

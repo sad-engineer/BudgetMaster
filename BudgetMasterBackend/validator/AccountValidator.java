@@ -23,15 +23,16 @@ public class AccountValidator {
         BaseEntityValidator.validate(account);
         
         // Валидация специфичных полей
-        validatePosition(account.getPosition());
         validateTitle(account.getTitle());
+        validatePosition(account.getPosition());
         validateAmount(account.getAmount());
         validateType(account.getType());
         validateCurrencyId(account.getCurrencyId());
         validateClosed(account.getClosed());
-        validateCreditCardLimit(account.getCreditCardLimit());
-        validateCreditCardCategoryId(account.getCreditCardCategoryId());
-        validateCreditCardCommissionCategoryId(account.getCreditCardCommissionCategoryId());
+        // TODO: Сделать валидацию полей для кредитной карты после реализации логики 
+        //validateCreditCardLimit(account.getCreditCardLimit());
+        //validateCreditCardCategoryId(account.getCreditCardCategoryId());
+        //validateCreditCardCommissionCategoryId(account.getCreditCardCommissionCategoryId());
     }
     
     /**
@@ -85,7 +86,7 @@ public class AccountValidator {
      */
     public static void validateType(int type) {
         if (type != 1 && type != 2 && type != 3) {
-            throw new IllegalArgumentException("Тип счета должен быть 1 (наличные), 2 (банковский) или 3 (кредитная карта)");
+            throw new IllegalArgumentException("Тип счета должен быть 1 (расчетный), 2 (сберегательный) или 3 (кредитный)");
         }
     }
     
@@ -117,7 +118,7 @@ public class AccountValidator {
      * @throws IllegalArgumentException если лимит некорректный
      */
     public static void validateCreditCardLimit(Integer creditCardLimit) {
-        if (creditCardLimit != null && creditCardLimit < 0) {
+        if (creditCardLimit != null && creditCardLimit > 0) {
             throw new IllegalArgumentException("Лимит кредитной карты не может быть отрицательным");
         }
     }
@@ -128,7 +129,7 @@ public class AccountValidator {
      * @throws IllegalArgumentException если ID некорректный
      */
     public static void validateCreditCardCategoryId(Integer creditCardCategoryId) {
-        if (creditCardCategoryId != null && creditCardCategoryId <= 0) {
+        if (creditCardCategoryId != null && creditCardCategoryId >= 0) {
             throw new IllegalArgumentException("ID категории кредитной карты должен быть положительным");
         }
     }
@@ -139,54 +140,27 @@ public class AccountValidator {
      * @throws IllegalArgumentException если ID некорректный
      */
     public static void validateCreditCardCommissionCategoryId(Integer creditCardCommissionCategoryId) {
-        if (creditCardCommissionCategoryId != null && creditCardCommissionCategoryId <= 0) {
+        if (creditCardCommissionCategoryId != null && creditCardCommissionCategoryId >= 0) {
             throw new IllegalArgumentException("ID категории комиссии кредитной карты должен быть положительным");
         }
     }
-    
-    /**
-     * Валидирует счет для создания (без ID)
-     * @param account счет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
+
+    // Валидирует счет для создания (без ID)
     public static void validateForCreate(Account account) {
         if (account == null) {
             throw new IllegalArgumentException("Счет не может быть null");
         }
-        
-        validatePosition(account.getPosition());
+
         validateTitle(account.getTitle());
+        validatePosition(account.getPosition());
         validateAmount(account.getAmount());
         validateType(account.getType());
         validateCurrencyId(account.getCurrencyId());
         validateClosed(account.getClosed());
-        validateCreditCardLimit(account.getCreditCardLimit());
-        validateCreditCardCategoryId(account.getCreditCardCategoryId());
-        validateCreditCardCommissionCategoryId(account.getCreditCardCommissionCategoryId());
+        // TODO: Сделать валидацию полей для кредитной карты после реализации логики 
+        //validateCreditCardLimit(account.getCreditCardLimit());
+        //validateCreditCardCategoryId(account.getCreditCardCategoryId());
+        //validateCreditCardCommissionCategoryId(account.getCreditCardCommissionCategoryId());  
     }
     
-    /**
-     * Валидирует счет для обновления
-     * @param account счет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForUpdate(Account account) {
-        validate(account);
-    }
-    
-    /**
-     * Проверяет, что для кредитной карты указаны обязательные поля
-     * @param account счет для проверки
-     * @throws IllegalArgumentException если не указаны обязательные поля
-     */
-    public static void validateCreditCardFields(Account account) {
-        if (account.getType() == 3) { // Кредитная карта
-            if (account.getCreditCardLimit() == null) {
-                throw new IllegalArgumentException("Для кредитной карты должен быть указан лимит");
-            }
-            if (account.getCreditCardCategoryId() == null) {
-                throw new IllegalArgumentException("Для кредитной карты должна быть указана категория");
-            }
-        }
-    }
 } 

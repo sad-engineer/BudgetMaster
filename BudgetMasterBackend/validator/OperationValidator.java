@@ -9,36 +9,6 @@ import java.time.LocalDateTime;
  * Валидатор для операции
  */
 public class OperationValidator {
-    
-    /**
-     * Валидирует операцию
-     * @param operation операция для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validate(Operation operation) {
-        if (operation == null) {
-            throw new IllegalArgumentException("Операция не может быть null");
-        }
-        
-        // Валидация базовых полей
-        BaseEntityValidator.validate(operation);
-        
-        // Валидация специфичных полей
-        validateType(operation.getType());
-        validateDate(operation.getDate());
-        validateAmount(operation.getAmount());
-        validateComment(operation.getComment());
-        validateCategoryId(operation.getCategoryId());
-        validateAccountId(operation.getAccountId());
-        validateCurrencyId(operation.getCurrencyId());
-        validateToAccountId(operation.getToAccountId());
-        validateToCurrencyId(operation.getToCurrencyId());
-        validateToAmount(operation.getToAmount());
-        
-        // Валидация бизнес-логики
-        validateTransferFields(operation);
-    }
-    
     /**
      * Валидирует тип операции
      * @param type тип для валидации
@@ -82,8 +52,8 @@ public class OperationValidator {
      * @throws IllegalArgumentException если комментарий некорректный
      */
     public static void validateComment(String comment) {
-        if (comment != null && comment.length() > 500) {
-            throw new IllegalArgumentException("Комментарий операции не может быть длиннее 500 символов");
+        if (comment != null && comment.length() > 300) {
+            throw new IllegalArgumentException("Комментарий операции не может быть длиннее 300 символов");
         }
         
         // Проверка на допустимые символы (буквы, цифры, пробелы, знаки препинания)
@@ -159,47 +129,33 @@ public class OperationValidator {
     }
     
     /**
-     * Валидирует поля для перевода между счетами
+     * Валидирует операцию для создания (без ID)
      * @param operation операция для валидации
-     * @throws IllegalArgumentException если поля некорректные
+     * @throws IllegalArgumentException если валидация не прошла
      */
-    public static void validateTransferFields(Operation operation) {
-        // Если указан целевой счет, должны быть указаны и другие поля перевода
-        if (operation.getToAccountId() != null) {
-            if (operation.getToCurrencyId() == null) {
-                throw new IllegalArgumentException("При указании целевого счета должна быть указана целевая валюта");
-            }
-            if (operation.getToAmount() == null) {
-                throw new IllegalArgumentException("При указании целевого счета должна быть указана целевая сумма");
-            }
+    public static void validate(Operation operation) {
+        if (operation == null) {
+            throw new IllegalArgumentException("Операция не может быть null");
         }
-        
-        // Если указана целевая валюта, должны быть указаны и другие поля перевода
-        if (operation.getToCurrencyId() != null) {
-            if (operation.getToAccountId() == null) {
-                throw new IllegalArgumentException("При указании целевой валюты должен быть указан целевой счет");
-            }
-            if (operation.getToAmount() == null) {
-                throw new IllegalArgumentException("При указании целевой валюты должна быть указана целевая сумма");
-            }
-        }
-        
-        // Если указана целевая сумма, должны быть указаны и другие поля перевода
-        if (operation.getToAmount() != null) {
-            if (operation.getToAccountId() == null) {
-                throw new IllegalArgumentException("При указании целевой суммы должен быть указан целевой счет");
-            }
-            if (operation.getToCurrencyId() == null) {
-                throw new IllegalArgumentException("При указании целевой суммы должна быть указана целевая валюта");
-            }
-        }
-        
-        // Проверка, что счет не переводит сам в себя
-        if (operation.getToAccountId() != null && operation.getAccountId() == operation.getToAccountId()) {
-            throw new IllegalArgumentException("Нельзя переводить деньги с счета на тот же счет");
-        }
+
+        // Валидация базовых полей
+        BaseEntityValidator.validate(operation);
+
+        // Валидация специфичных полей
+        validateType(operation.getType());
+        validateDate(operation.getDate());
+        validateAmount(operation.getAmount());
+        validateComment(operation.getComment());
+        validateCategoryId(operation.getCategoryId());
+        validateAccountId(operation.getAccountId());
+        validateCurrencyId(operation.getCurrencyId());
+        // TODO: Сделать валидацию полей для перевода между счетами после реализации логики перевода
+        //validateToAccountId(operation.getToAccountId());
+        //validateToCurrencyId(operation.getToCurrencyId());
+        //validateToAmount(operation.getToAmount());
+        //validateTransferFields(operation);
     }
-    
+
     /**
      * Валидирует операцию для создания (без ID)
      * @param operation операция для валидации
@@ -209,7 +165,7 @@ public class OperationValidator {
         if (operation == null) {
             throw new IllegalArgumentException("Операция не может быть null");
         }
-        
+
         validateType(operation.getType());
         validateDate(operation.getDate());
         validateAmount(operation.getAmount());
@@ -217,33 +173,11 @@ public class OperationValidator {
         validateCategoryId(operation.getCategoryId());
         validateAccountId(operation.getAccountId());
         validateCurrencyId(operation.getCurrencyId());
-        validateToAccountId(operation.getToAccountId());
-        validateToCurrencyId(operation.getToCurrencyId());
-        validateToAmount(operation.getToAmount());
-        validateTransferFields(operation);
-    }
+        // TODO: Сделать валидацию полей для перевода между счетами после реализации логики перевода
+        //validateToAccountId(operation.getToAccountId());
+        //validateToCurrencyId(operation.getToCurrencyId());
+        //validateToAmount(operation.getToAmount());
+        //validateTransferFields(operation);
+    }   
     
-    /**
-     * Валидирует операцию для обновления
-     * @param operation операция для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForUpdate(Operation operation) {
-        validate(operation);
-    }
-    
-    /**
-     * Проверяет, что операция не превышает разумные пределы
-     * @param operation операция для проверки
-     * @throws IllegalArgumentException если операция превышает пределы
-     */
-    public static void validateReasonableAmount(Operation operation) {
-        if (operation.getAmount() > 1000000000) { // 1 миллиард
-            throw new IllegalArgumentException("Сумма операции не может превышать 1 миллиард");
-        }
-        
-        if (operation.getToAmount() != null && operation.getToAmount() > 1000000000) {
-            throw new IllegalArgumentException("Целевая сумма операции не может превышать 1 миллиард");
-        }
-    }
 } 

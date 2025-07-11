@@ -89,9 +89,11 @@ class TestAccountService(unittest.TestCase):
         """Тест 03: Создание нового счета"""
         # Arrange
         title = "Основной счет"
+        type_ = self.Integer(1)
+        currency_id = self.Integer(1)
 
         # Act
-        account = self.service.create(title)
+        account = self.service.create(title, type_, currency_id)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
@@ -102,8 +104,8 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(account.getTitle(), title)
         self.assertEqual(account.getPosition(), position)
         self.assertEqual(account.getAmount(), 0)
-        self.assertEqual(account.getType(), 0)
-        self.assertEqual(account.getCurrencyId(), 0)
+        self.assertEqual(account.getType(), 1)
+        self.assertEqual(account.getCurrencyId(), 1)
         self.assertEqual(account.getClosed(), 0)
         self.assertIsNotNone(account.getCreateTime())
         self.assertEqual(account.getCreatedBy(), "test_user")
@@ -137,8 +139,8 @@ class TestAccountService(unittest.TestCase):
     def test_05_get_all_accounts(self):
         """Тест 05: Получение всех счетов"""
         # Arrange
-        account1 = self.service.create("Счет 1")
-        account2 = self.service.create("Счет 2")
+        account1 = self.service.create("Счет 21")
+        account2 = self.service.create("Счет 22")
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
@@ -185,18 +187,12 @@ class TestAccountService(unittest.TestCase):
     def test_08_get_by_currency_id(self):
         """Тест 08: Получение счетов по ID валюты"""
         # Arrange
-        account1 = self.service.create("Счет 1")
-        account2 = self.service.create("Счет 2")
+        account1 = self.service.create("Счет 31", self.Integer(1), self.Integer(1))
+        account2 = self.service.create("Счет 31", self.Integer(1), self.Integer(2))
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
         self.test_account_ids.append(account2.getId())
-
-        # Устанавливаем валюту для счетов
-        account1.setCurrencyId(self.Integer(1))
-        account2.setCurrencyId(self.Integer(2))
-        self.repository.update(account1)
-        self.repository.update(account2)
 
         # Act
         accounts = self.service.getByCurrencyId(1)
@@ -218,18 +214,12 @@ class TestAccountService(unittest.TestCase):
     def test_09_get_by_type(self):
         """Тест 09: Получение счетов по типу"""
         # Arrange
-        account1 = self.service.create("Счет 1")
-        account2 = self.service.create("Счет 2")
+        account1 = self.service.create("Счет 41", self.Integer(1), self.Integer(1))
+        account2 = self.service.create("Счет 42", self.Integer(2), self.Integer(1))
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
         self.test_account_ids.append(account2.getId())
-
-        # Устанавливаем тип для счетов
-        account1.setType(self.Integer(1))
-        account2.setType(self.Integer(2))
-        self.repository.update(account1)
-        self.repository.update(account2)
 
         # Act
         accounts = self.service.getByType(1)
@@ -268,7 +258,7 @@ class TestAccountService(unittest.TestCase):
         """Тест 11: Получение счета по названию - существующий счет"""
         # Arrange
         title = "Существующий счет"
-        created_account = self.service.create(title)
+        created_account = self.service.get(title)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(created_account.getId())
@@ -285,7 +275,7 @@ class TestAccountService(unittest.TestCase):
         """Тест 12: Получение счета по названию - удаленный счет"""
         # Arrange
         title = "Удаленный счет"
-        account = self.service.create(title)
+        account = self.service.get(title)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
@@ -431,7 +421,7 @@ class TestAccountService(unittest.TestCase):
         """Тест 21: Перемещение счета вниз"""
         # Arrange
         position = self.repository.getMaxPosition()
-        account1 = self.service.create("Счет 1")
+        account1 = self.service.create("Счет 1", )
         account2 = self.service.create("Счет 2")
         account3 = self.service.create("Счет 3")
 
@@ -479,9 +469,9 @@ class TestAccountService(unittest.TestCase):
     def test_23_change_position_by_old_new(self):
         """Тест 23: Изменение позиции по старой и новой позиции"""
         # Arrange
-        account1 = self.service.create("Счет 1")
-        account2 = self.service.create("Счет 2")
-        account3 = self.service.create("Счет 3")
+        account1 = self.service.create("Счет 51")
+        account2 = self.service.create("Счет 52")
+        account3 = self.service.create("Счет 53")
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())

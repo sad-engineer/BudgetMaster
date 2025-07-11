@@ -57,16 +57,22 @@ class TestCurrencyService(unittest.TestCase):
 
     def test_01_create_currency(self):
         """Тест 01: Создание новой валюты"""
-        title = "Тестовая валюта"
-        currency = self.service.create(title)
+        title = "Валюта 1"
+        position = self.repository.getMaxPosition() + 1
+
+        currency = self.service.get(title)
         self.test_currency_ids.append(currency.getId())
+
         self.assertIsNotNone(currency)
         self.assertEqual(currency.getTitle(), title)
+        self.assertEqual(currency.getPosition(), position)
         self.assertEqual(currency.getCreatedBy(), "test_user")
-        self.assertEqual(currency.getUpdatedBy(), "test_user")
+        self.assertIsNone(currency.getUpdatedBy())
+        self.assertIsNone(currency.getDeletedBy())
         self.assertIsNotNone(currency.getCreateTime())
-        self.assertIsNotNone(currency.getUpdateTime())
-        self.assertGreater(currency.getPosition(), 0)
+        self.assertIsNone(currency.getUpdateTime())
+        self.assertIsNone(currency.getDeleteTime())
+
 
     def test_02_get_all_currencies(self):
         """Тест 02: Получение всех валют"""

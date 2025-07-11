@@ -2,7 +2,8 @@ package service;
 
 import model.Currency;
 import repository.CurrencyRepository;
-
+import validator.CurrencyValidator;
+import validator.BaseEntityValidator;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,21 +44,23 @@ public class CurrencyService {
     }
     
     /**
+     * Удаляет валюту по id
+     * @param id id валюты
+     * @return true, если удаление успешно
+     */
+    public boolean delete(Integer id) {
+        CurrencyValidator.validateId(id);
+        return currencyRepository.deleteById(id, user);
+    }
+
+    /**
      * Удаляет валюту по title
      * @param title название валюты
      * @return true, если удаление успешно
      */
     public boolean delete(String title) {
+        CurrencyValidator.validateTitle(title);
         return currencyRepository.deleteByTitle(title, user);
-    }
-
-    /**
-     * Удаляет валюту по id
-     * @param id id валюты
-     * @return true, если удаление успешно
-     */
-    public boolean delete(int id) {
-        return currencyRepository.deleteById(id, user);
     }
 
     /**
@@ -67,6 +70,8 @@ public class CurrencyService {
      * @return валюта с новой позицией
      */
     public Currency changePosition(Currency currency, int newPosition) {
+        BaseEntityValidator.validate(currency); 
+        CurrencyValidator.validatePosition(newPosition);
         int oldPosition = currency.getPosition();
         
         // Если позиция не изменилась, ничего не делаем
@@ -120,31 +125,49 @@ public class CurrencyService {
      * Изменяет порядок валюты с переупорядочиванием других валют
      * @param oldPosition старая позиция
      * @param newPosition новая позиция
-     * @return валюта с новой позицией
+     * @return валюта с новой позицией. Если валюта не найдена, возвращает null
      */
     public Currency changePosition(int oldPosition, int newPosition) {
-        Optional<Currency> currencyOpt = getById(oldPosition);
+        CurrencyValidator.validatePosition(oldPosition);
+        Optional<Currency> currency = currencyRepository.findByPosition(oldPosition);
+        if (currency.isPresent()) {
+            return changePosition(currency.get(), newPosition);
+        }
+        return null;
+    }
+
+    /**
+     * Изменяет порядок валюты с переупорядочиванием других валют
+     * @param title название валюты
+     * @param newPosition новая позиция
+     * @return валюта с новой позицией. Если валюта не найдена, возвращает null
+     */
+    public Currency changePosition(String title, int newPosition) {
+        CurrencyValidator.validateTitle(title);
+        Optional<Currency> currencyOpt = currencyRepository.findByTitle(title);
         if (currencyOpt.isPresent()) {
             return changePosition(currencyOpt.get(), newPosition);
         }
         return null;
     }
 
+
     /**
-     * Создает новую валюту
+     * Создает новую валюту без валидации названия валюты (для внутреннего использования)
      * @param title название валюты
      * @return валюта
      */
-    public Currency create(String title) {
+    private Currency create(String title) {
         Currency newCurrency = new Currency();
         int nextPosition = currencyRepository.getMaxPosition() + 1;
         newCurrency.setTitle(title);
         newCurrency.setPosition(nextPosition);
         newCurrency.setCreateTime(LocalDateTime.now());
         newCurrency.setCreatedBy(user);
-        newCurrency.setUpdateTime(LocalDateTime.now());
-        newCurrency.setUpdatedBy(user);
-        
+
+        // Валидация валюты
+        CurrencyValidator.validateForCreate(newCurrency);
+
         return currencyRepository.save(newCurrency);
     }
 
@@ -157,27 +180,41 @@ public class CurrencyService {
     }
 
     /**
-     * Получает валюту по ID
+     * Получает валюту по ID. 
+     * Если валюта с таким ID существует, возвращает ее.
+     * Если валюта с таким ID существует, но удалена, восстанавливает ее (удаляет информацию об удалении валюты).
+     * Если валюта с таким ID не существует, вернет null.
      * @param id ID валюты
      * @return валюта
      */
-    public Optional<Currency> getById(int id) { 
-        return currencyRepository.findById(id);
+    public Currency get(Integer id) { 
+        CurrencyValidator.validateId(id);
+        Optional<Currency> currency = currencyRepository.findById(id);
+        if (currency.isPresent()) {
+            Currency currencyObj = currency.get();
+            if (isCurrencyDeleted(currencyObj)) {
+                return restore(currencyObj);
+            }
+            return currencyObj;
+        }
+        return null;
     }
-
+    
     /**
      * Получает валюту по title.
-     * Если валюта не существует, создает новую.
-     * Если валюта существует и удалена, восстанавливает ее.
-     * Если валюта существует и активна, возвращает ее.
+     * Если валюта с таким title существует, возвращает ее.
+     * Если валюта с таким title существует, но удалена, восстанавливает ее (удаляет информацию об удалении валюты).
+     * Если валюта с таким title не существует, создает новую.
      * @param title название валюты
      * @return валюта
      */
     public Currency get(String title) {
+        CurrencyValidator.validateTitle(title);
         Optional<Currency> currency = currencyRepository.findByTitle(title);
         if (currency.isPresent()) {
-            if (isCurrencyDeleted(currency.get())) {
-                return restore(currency.get());
+            Currency currencyObj = currency.get();
+            if (isCurrencyDeleted(currencyObj)) {
+                return restore(currencyObj);
             }
             return currency.get();
         }
@@ -190,42 +227,25 @@ public class CurrencyService {
      * @return true, если валюта удалена
      */
     public boolean isCurrencyDeleted(Currency currency) {
-        return currency.getDeleteTime() != null;
+        BaseEntityValidator.validate(currency);
+        return currency.getDeleteTime() != null || currency.getDeletedBy() != null;
     }
 
     /**
-     * Восстанавливает валюту
+     * Восстанавливает валюту (удаляет информацию об удалении валюты) (для внутреннего использования)
      * @param restoredCurrency валюта
      * @return валюта
      */
-    public Currency restore(Currency restoredCurrency) {
-        restoredCurrency.setDeleteTime(null);
-        restoredCurrency.setDeletedBy(null);
+    private Currency restore(Currency restoredCurrency) {
+        // Устанавливаем время восстановления и пользователя
         restoredCurrency.setUpdateTime(LocalDateTime.now());
         restoredCurrency.setUpdatedBy(user);
+        // Удаляем информацию об удалении если она есть
+        restoredCurrency.setDeleteTime(null);
+        restoredCurrency.setDeletedBy(null);
+        // Валидация валюты
+        CurrencyValidator.validateForUpdate(restoredCurrency);
+        
         return currencyRepository.update(restoredCurrency);
-    }
-
-    /**
-     * Восстанавливает валюту по id
-     * @param id id валюты
-     * @return валюта или null, если валюта не найдена
-     */
-    public Currency restore(int id) {
-        Optional<Currency> currencyOpt = getById(id);
-        if (currencyOpt.isPresent()) {
-            return restore(currencyOpt.get());
-        }
-        return null;
-    }
-
-    /**
-     * Устанавливает нового пользователя для валют
-     * @param newUser новый пользователь
-     */
-    public void setUser(String newUser) {
-        // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
-        // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр CurrencyService");
     }
 } 
