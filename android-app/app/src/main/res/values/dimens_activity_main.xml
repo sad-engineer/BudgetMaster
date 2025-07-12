@@ -1,0 +1,20 @@
+<resources>
+    <!-- Универсальный внешний отступ для контейнеров -->
+    <dimen name="main_margin">5dp</dimen>
+    <!-- Высота строки (кнопки) в таблице главного экрана -->
+    <dimen name="row_height">48dp</dimen>
+    <!-- Размер иконок в строках -->
+    <dimen name="icon_size">32dp</dimen>
+    <!-- Размер основного текста в строках -->
+    <dimen name="text_size">20sp</dimen>
+    <!-- ширина поля вывода суммы -->
+    <dimen name="value_width">135dp</dimen>
+    
+    <!-- Размеры для бокового меню -->
+    <dimen name="navigation_drawer_width">280dp</dimen>
+    <dimen name="menu_item_height">56dp</dimen>
+    <dimen name="menu_icon_size">24dp</dimen>
+    <dimen name="menu_text_size">16sp</dimen>
+    <dimen name="menu_padding">16dp</dimen>
+    <dimen name="menu_header_height">120dp</dimen>
+</resources>

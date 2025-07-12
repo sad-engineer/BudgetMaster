@@ -1,0 +1,16 @@
+<resources>
+    <!-- Высота тулбара (action bar) -->
+    <dimen name="toolbar_height">60dp</dimen>
+    <!-- Отступ тулбара сверху относительно status bar -->
+    <dimen name="toolbar_margin_top">5dp</dimen>
+    <!-- Размер меню-кнопки -->
+    <dimen name="menu_button_size">48dp</dimen>
+    <!-- Размер текста в тулбаре -->
+    <dimen name="toolbar_text">28sp</dimen>
+    <!-- Размер доход-кнопки -->
+    <dimen name="income_button_size">48dp</dimen>
+    <!-- Размер расход-кнопки -->
+    <dimen name="expense_button_size">48dp</dimen>
+    <!-- Размер отступа между элементами тулбара -->
+    <dimen name="toolbar_gap">0dp</dimen>
+</resources> 
