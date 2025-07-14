@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:background="@color/background_toolbar"
+    android:gravity="bottom"
+    android:layout_height="@dimen/menu_header_height"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/menu_padding"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView android:contentDescription="@string/app_name"
+        android:layout_height="@dimen/icon_size"
+        android:layout_width="@dimen/icon_size"
+        android:src="@drawable/ic_budget"
+        android:tint="@color/text_toolbar" />
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/main_margin"
+        android:layout_width="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@color/text_toolbar"
+        android:textSize="@dimen/text_size"
+        android:textStyle="bold" />
+
+</LinearLayout> 

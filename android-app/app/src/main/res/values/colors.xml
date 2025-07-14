@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Палитра цветов -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="green">#FF4FBF03</color>
+    <color name="orange">#FFA00F0F</color>
+    <color name="blue">#FF0000FF</color>
+    <color name="red">#FFFF0000</color>
+    <color name="yellow">#FFFFF000</color>
+    <color name="gray">#FF808080</color>
+    
+
+
+    <!-- Цвета фона -->
+    <color name="background_toolbar">#FF000000</color>
+    <color name="background_content">#FF323232</color>
+
+    <!-- Цвета иконок -->
+    <color name="icon_toolbar">#FFFFFF</color>
+    <color name="icon_activity_main">#FF0000FF</color>
+
+    <!-- Цвета текста -->
+    <color name="text_toolbar">#FFFFFF</color>
+    <color name="text_activity_main">#FFFFFF</color>
+
+</resources>

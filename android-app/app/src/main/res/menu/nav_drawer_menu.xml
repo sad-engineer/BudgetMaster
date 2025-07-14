@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_main"
+            android:icon="@drawable/ic_home"
+            android:title="@string/menu_main" />
+        
+        <item
+            android:id="@+id/nav_instructions"
+            android:icon="@drawable/ic_menu"
+            android:title="@string/menu_instructions" />
+        
+        <item
+            android:id="@+id/nav_accounts"
+            android:icon="@drawable/ic_accounts"
+            android:title="@string/menu_accounts" />
+        
+        <item
+            android:id="@+id/nav_income"
+            android:icon="@drawable/ic_income"
+            android:title="@string/menu_income" />
+        
+        <item
+            android:id="@+id/nav_expense"
+            android:icon="@drawable/ic_expense"
+            android:title="@string/menu_expense" />
+        
+        <item
+            android:id="@+id/nav_budget"
+            android:icon="@drawable/ic_budget"
+            android:title="@string/menu_budget" />
+        
+        <item
+            android:id="@+id/nav_statistics"
+            android:icon="@drawable/ic_target"
+            android:title="@string/menu_statistics" />
+        
+        <item
+            android:id="@+id/nav_currencies"
+            android:icon="@drawable/ic_savings"
+            android:title="@string/menu_currencies" />
+        
+        <item
+            android:id="@+id/nav_income_categories"
+            android:icon="@drawable/ic_income"
+            android:title="@string/menu_income_categories" />
+        
+        <item
+            android:id="@+id/nav_expense_categories"
+            android:icon="@drawable/ic_expense"
+            android:title="@string/menu_expense_categories" />
+        
+        <item
+            android:id="@+id/nav_import_data"
+            android:icon="@drawable/ic_accounts"
+            android:title="@string/menu_import_data" />
+        
+        <item
+            android:id="@+id/nav_export_data"
+            android:icon="@drawable/ic_accounts"
+            android:title="@string/menu_export_data" />
+        
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu"
+            android:title="@string/menu_settings" />
+        
+        <item
+            android:id="@+id/nav_version"
+            android:icon="@drawable/ic_budget"
+            android:title="@string/menu_version" />
+        
+        <item
+            android:id="@+id/nav_authors"
+            android:icon="@drawable/ic_target"
+            android:title="@string/menu_authors" />
+    </group>
+    
+</menu> 

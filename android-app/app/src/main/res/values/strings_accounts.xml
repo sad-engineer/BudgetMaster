@@ -1,0 +1,17 @@
+<resources>
+    <!-- Заголовок тулбара -->
+    <string name="toolbar_title_accounts">Счета</string>
+
+    <!-- Названия вкладок -->
+    <string name="tab_current">Текущие</string>
+    <string name="tab_savings">Сбережения</string>
+    <string name="tab_transfers">Переводы</string>
+    
+    <!-- Элементы списка счетов -->
+    <string name="account_name_example">Основной счет</string>
+    <string name="account_balance_example">15,000.00 RUB</string>
+    
+    <!-- Описания иконок -->
+    <string name="icon_income_toolbar">Кнопка дохода</string>
+    <string name="icon_expense_toolbar">Кнопка расхода</string>
+</resources> 
