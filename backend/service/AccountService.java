@@ -3,6 +3,7 @@ package service;
 import model.Account;
 import repository.AccountRepository;
 import validator.AccountValidator;
+import constants.ServiceConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +46,7 @@ public class AccountService {
      * @param user пользователь, выполняющий операции
      */
     public AccountService(CurrencyService currencyService, String user) {
-        this.accountRepository = new AccountRepository("budget_master.db");
+        this.accountRepository = new AccountRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.currencyService = currencyService;
         this.user = user;
     }
@@ -55,7 +56,7 @@ public class AccountService {
      * @param user пользователь, выполняющий операции
      */
     public AccountService(String user) {
-        this.accountRepository = new AccountRepository("budget_master.db");
+        this.accountRepository = new AccountRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.currencyService = new CurrencyService(user);
         this.user = user;
     }
@@ -88,7 +89,7 @@ public class AccountService {
         
         // Проверяем, что новая позиция валидна
         if (newPosition < 1 || newPosition > accountRepository.getMaxPosition()) {
-            throw new IllegalArgumentException("Новая позиция должна быть от 1 до " + accountRepository.getMaxPosition());
+            throw new IllegalArgumentException(ServiceConstants.ERROR_POSITION_OUT_OF_RANGE + accountRepository.getMaxPosition());
         }
         
         // Переупорядочиваем позиции
@@ -173,7 +174,8 @@ public class AccountService {
      * @return счет
      */
     public Account create(String title) {
-        return create(title, 0, 1, 1, 0); // 1 - расчетный счет по умолчанию, 1 - ID валюты по умолчанию, 0 - не закрытый
+        return create(title, ServiceConstants.DEFAULT_ACCOUNT_BALANCE, ServiceConstants.DEFAULT_ACCOUNT_TYPE, 
+                     ServiceConstants.DEFAULT_CURRENCY_ID, ServiceConstants.DEFAULT_ACCOUNT_CLOSED); // ServiceConstants.COMMENT_DEFAULT_ACCOUNT
     }
 
 
@@ -289,6 +291,6 @@ public class AccountService {
     public void setUser(String newUser) {
         // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
         // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр AccountService");
+        throw new UnsupportedOperationException(ServiceConstants.ERROR_CANNOT_CHANGE_USER + "AccountService");
     }
 } 

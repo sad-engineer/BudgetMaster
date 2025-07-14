@@ -3,6 +3,7 @@ package service;
 import model.Budget;
 import repository.BudgetRepository;
 import validator.BudgetValidator;
+import constants.ServiceConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,7 @@ public class BudgetService {
      * @param user пользователь, выполняющий операции
      */
     public BudgetService(String user) {
-        this.budgetRepository = new BudgetRepository("budget_master.db");
+        this.budgetRepository = new BudgetRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.user = user;
     }
 
@@ -78,7 +79,7 @@ public class BudgetService {
         
         // Проверяем, что новая позиция валидна
         if (newPosition < 1 || newPosition > allBudgets.size()) {
-            throw new IllegalArgumentException("Новая позиция должна быть от 1 до " + allBudgets.size());
+            throw new IllegalArgumentException(ServiceConstants.ERROR_POSITION_OUT_OF_RANGE + allBudgets.size());
         }
         
         // Переупорядочиваем позиции
@@ -250,6 +251,6 @@ public class BudgetService {
     public void setUser(String newUser) {
         // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
         // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр BudgetService");
+        throw new UnsupportedOperationException(ServiceConstants.ERROR_CANNOT_CHANGE_USER + "BudgetService");
     }
 } 

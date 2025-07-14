@@ -4,6 +4,7 @@ import model.Currency;
 import util.DateTimeUtil;
 import java.sql.*;
 import java.util.*;
+import static constants.RepositoryConstants.*;
 
 /**
  * Репозиторий для работы с валютами в базе данных
@@ -48,7 +49,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      * @return true, если удаление выполнено успешно, false если валюта не найдена
      */
     public boolean deleteById(Integer id, String deletedBy) {
-        return softDelete("currencies", id, deletedBy);
+        return softDelete(TABLE_CURRENCIES, id, deletedBy);
     }
 
     /**
@@ -60,7 +61,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      * @return Optional с найденной валютой, если найдена, иначе пустой Optional
      */
     public Optional<Currency> findByPosition(int position) {
-        return findByColumn("currencies", "position", position, this::mapRowSafe);
+        return findByColumn(TABLE_CURRENCIES, COLUMN_POSITION, position, this::mapRowSafe);
     }
 
     /**
@@ -74,7 +75,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      * @return true, если удаление выполнено успешно, false если валюта не найдена
      */
     public boolean deleteByTitle(String title, String deletedBy) {
-        return softDelete("currencies", "title", title, deletedBy);
+        return softDelete(TABLE_CURRENCIES, COLUMN_TITLE, title, deletedBy);
     }
 
     /**
@@ -88,7 +89,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      */
     @Override
     public List<Currency> findAll() {
-        return findAll("currencies", this::mapRowSafe);
+        return findAll(TABLE_CURRENCIES, this::mapRowSafe);
     }
 
     /**
@@ -102,7 +103,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      */
     @Override
     public Optional<Currency> findById(Integer id) {
-        return findByColumn("currencies", "id", id, this::mapRowSafe);
+        return findByColumn(TABLE_CURRENCIES, COLUMN_ID, id, this::mapRowSafe);
     }
 
     /**
@@ -116,7 +117,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      * @return Optional с найденной валютой, если найдена, иначе пустой Optional
      */
     public Optional<Currency> findByTitle(String title) {
-        return findByColumn("currencies", "title", title, this::mapRowSafe);
+        return findByColumn(TABLE_CURRENCIES, COLUMN_TITLE, title, this::mapRowSafe);
     }
 
     /**
@@ -128,7 +129,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      * @return максимальная позиция, 0 если валют нет
      */
     public int getMaxPosition() {
-        return getMaxValue("currencies", "position", null);
+        return getMaxValue(TABLE_CURRENCIES, COLUMN_POSITION, null);
     }
     
     /**
@@ -156,7 +157,7 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
      */
     private Currency mapRow(ResultSet rs) throws SQLException {
         Currency currency = new Currency();
-        currency.setId(rs.getInt("id"));
+        currency.setId(rs.getInt(COLUMN_ID));
         
         // Читаем даты как строки и парсим их
         String createTimeStr = rs.getString("create_time");
@@ -171,8 +172,8 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         currency.setCreatedBy(rs.getString("created_by"));
         currency.setUpdatedBy(rs.getString("updated_by"));
         currency.setDeletedBy(rs.getString("deleted_by"));
-        currency.setPosition(rs.getInt("position"));
-        currency.setTitle(rs.getString("title"));
+        currency.setPosition(rs.getInt(COLUMN_POSITION));
+        currency.setTitle(rs.getString(COLUMN_TITLE));
         return currency;
     }
 
@@ -199,42 +200,26 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         }
     }
 
-    /**
-     * Сохранение новой валюты в базу данных
-     * 
-     * <p>Создает новую запись в таблице currencies с автоматически сгенерированным ID.
-     * Все поля объекта currency сохраняются в базу данных.
-     * После успешного сохранения ID объекта обновляется сгенерированным значением.
-     * 
-     * @param currency объект валюты для сохранения (не null, должен содержать все обязательные поля)
-     * @return объект валюты с установленным ID (тот же объект, что и входной параметр)
-     */
     @Override
     public Currency save(Currency currency) {
-        String sql = "INSERT INTO currencies (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String[] columns = new String[CURRENCY_COLUMNS.length - 1];
+        System.arraycopy(CURRENCY_COLUMNS, 1, columns, 0, CURRENCY_COLUMNS.length - 1);
+        String sql = "INSERT INTO " + TABLE_CURRENCIES + " (" +
+            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = currency.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
-            String updateTimeStr = currency.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
-            String deleteTimeStr = currency.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, currency.getCreatedBy());
-            stmt.setString(5, currency.getUpdatedBy());
-            stmt.setString(6, currency.getDeletedBy());
-            stmt.setInt(7, currency.getPosition());
-            stmt.setString(8, currency.getTitle());
+            String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
+            String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
+            String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
+            stmt.setString(1, currency.getTitle());
+            stmt.setInt(2, currency.getPosition());
+            stmt.setString(3, currency.getCreatedBy());
+            stmt.setString(4, currency.getUpdatedBy());
+            stmt.setString(5, currency.getDeletedBy());
+            stmt.setString(6, createTimeStr);
+            stmt.setString(7, deleteTimeStr);
+            stmt.setString(8, updateTimeStr);
             stmt.executeUpdate();
-            
-            // Получаем сгенерированный id
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
                     currency.setId(rs.getInt(1));
@@ -243,48 +228,33 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return currency;
     }
 
-    /**
-     * Обновление существующей валюты в базе данных
-     * 
-     * <p>Обновляет все поля записи по ID валюты.
-     * Объект currency должен содержать валидный ID существующей записи.
-     * Все поля записи будут заменены значениями из объекта currency.
-     * 
-     * @param currency объект валюты с обновленными данными (не null, должен содержать валидный ID)
-     * @return обновленный объект валюты (тот же объект, что и входной параметр)
-     */
     @Override
     public Currency update(Currency currency) {
-        String sql = "UPDATE currencies SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=? WHERE id=?";
+        String[] columns = new String[CURRENCY_COLUMNS.length - 1];
+        System.arraycopy(CURRENCY_COLUMNS, 1, columns, 0, CURRENCY_COLUMNS.length - 1);
+        String setClause = String.join("=?, ", columns) + "=?";
+        String sql = "UPDATE " + TABLE_CURRENCIES + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = currency.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
-            String updateTimeStr = currency.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
-            String deleteTimeStr = currency.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, currency.getCreatedBy());
-            stmt.setString(5, currency.getUpdatedBy());
-            stmt.setString(6, currency.getDeletedBy());
-            stmt.setInt(7, currency.getPosition());
-            stmt.setString(8, currency.getTitle());
+            String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
+            String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
+            String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
+            stmt.setString(1, currency.getTitle());
+            stmt.setInt(2, currency.getPosition());
+            stmt.setString(3, currency.getCreatedBy());
+            stmt.setString(4, currency.getUpdatedBy());
+            stmt.setString(5, currency.getDeletedBy());
+            stmt.setString(6, createTimeStr);
+            stmt.setString(7, deleteTimeStr);
+            stmt.setString(8, updateTimeStr);
             stmt.setInt(9, currency.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return currency;
     }
 } 

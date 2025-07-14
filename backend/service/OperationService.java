@@ -3,6 +3,7 @@ package service;
 import model.Operation;
 import repository.OperationRepository;
 import validator.OperationValidator;
+import constants.ServiceConstants;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class OperationService {
      * @param user пользователь, выполняющий операции
      */
     public OperationService(AccountService accountService, CurrencyService currencyService, String user) {
-        this.operationRepository = new OperationRepository("budget_master.db");
+        this.operationRepository = new OperationRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.accountService = accountService;
         this.currencyService = currencyService;
         this.user = user;
@@ -65,7 +66,7 @@ public class OperationService {
      * @param user пользователь, выполняющий операции
      */
     public OperationService(String user) {
-        this.operationRepository = new OperationRepository("budget_master.db");
+        this.operationRepository = new OperationRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.currencyService = new CurrencyService(user);
         this.accountService = new AccountService(this.currencyService, user);
         this.user = user;

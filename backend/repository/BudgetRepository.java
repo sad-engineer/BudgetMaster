@@ -4,6 +4,7 @@ import model.Budget;
 import util.DateTimeUtil;
 import java.sql.*;
 import java.util.*;
+import static constants.RepositoryConstants.*;
 
 /**
  * Репозиторий для работы с бюджетами в базе данных
@@ -47,7 +48,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return true, если удаление выполнено успешно, false если бюджет не найден
      */
     public boolean deleteById(Integer id, String deletedBy) {
-        return softDelete("budgets", id, deletedBy);
+        return softDelete(TABLE_BUDGETS, id, deletedBy);
     }
 
     /**
@@ -61,7 +62,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return true, если удаление выполнено успешно, false если бюджет не найден
      */
     public boolean deleteByCategoryId(Integer categoryId, String deletedBy) {
-        return softDelete("budgets", "category_id", categoryId, deletedBy);
+        return softDelete(TABLE_BUDGETS, COLUMN_CATEGORY_ID, categoryId, deletedBy);
     }
     
     /**
@@ -74,7 +75,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public List<Budget> findAll() {
-        return findAll("budgets", this::mapRowSafe);
+        return findAll(TABLE_BUDGETS, this::mapRowSafe);
     }
         
     /**
@@ -87,7 +88,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return Optional с найденным бюджетом, если найден, иначе пустой Optional
      */
     public Optional<Budget> findByCategoryId(Integer categoryId) {
-        return findByColumn("budgets", "category_id", categoryId, this::mapRowSafe);
+        return findByColumn(TABLE_BUDGETS, COLUMN_CATEGORY_ID, categoryId, this::mapRowSafe);
     }
 
     /**
@@ -100,7 +101,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return список бюджетов с указанной валютой (может быть пустым, но не null)
      */
     public List<Budget> findAllByCurrencyId(Integer currencyId) {
-        return findAll("budgets", "currency_id", currencyId, this::mapRowSafe);
+        return findAll(TABLE_BUDGETS, COLUMN_CURRENCY_ID, currencyId, this::mapRowSafe);
     }   
 
     /**
@@ -114,7 +115,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Optional<Budget> findById(Integer id) {
-        return findByColumn("budgets", "id", id, this::mapRowSafe);
+        return findByColumn(TABLE_BUDGETS, COLUMN_ID, id, this::mapRowSafe);
     }
 
     /**
@@ -127,7 +128,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return бюджет, если найден, иначе null
      */
     public Optional<Budget> findByPosition(Integer position) { 
-        return findByColumn("budgets", "position", position, this::mapRowSafe);
+        return findByColumn(TABLE_BUDGETS, COLUMN_POSITION, position, this::mapRowSafe);
     }
 
     /**
@@ -139,7 +140,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return максимальная позиция, 0 если бюджетов нет
      */
     public int getMaxPosition() {
-        return getMaxValue("budgets", "position", null);
+        return getMaxValue(TABLE_BUDGETS, COLUMN_POSITION, null);
     }
 
     /**
@@ -170,19 +171,19 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     private Budget mapRow(ResultSet rs) throws SQLException {
         Budget budget = new Budget();
-        budget.setId(rs.getInt("id"));
-        budget.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString("create_time")));
-        budget.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString("update_time")));
-        budget.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString("delete_time")));
-        budget.setCreatedBy(rs.getString("created_by"));
-        budget.setUpdatedBy(rs.getString("updated_by"));
-        budget.setDeletedBy(rs.getString("deleted_by"));
-        budget.setPosition(rs.getInt("position"));
-        budget.setAmount(rs.getInt("amount"));
-        budget.setCurrencyId(rs.getInt("currency_id"));
+        budget.setId(rs.getInt(COLUMN_ID));
+        budget.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_CREATE_TIME)));
+        budget.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_UPDATE_TIME)));
+        budget.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_DELETE_TIME)));
+        budget.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
+        budget.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
+        budget.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
+        budget.setPosition(rs.getInt(COLUMN_POSITION));
+        budget.setAmount(rs.getInt(COLUMN_AMOUNT));
+        budget.setCurrencyId(rs.getInt(COLUMN_CURRENCY_ID));
         // Безопасное чтение поля category_id с обработкой NULL значений
         try {
-            Integer categoryId = rs.getObject("category_id", Integer.class);
+            Integer categoryId = rs.getObject(COLUMN_CATEGORY_ID, Integer.class);
             budget.setCategoryId(categoryId);
         } catch (SQLException e) {
             budget.setCategoryId(null);
@@ -220,8 +221,13 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Budget save(Budget budget) {
-        String sql = "INSERT INTO budgets (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, amount, currency_id, category_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Используем BUDGET_COLUMNS, исключая id (первый элемент)
+        String[] columns = new String[BUDGET_COLUMNS.length - 1];
+        System.arraycopy(BUDGET_COLUMNS, 1, columns, 0, BUDGET_COLUMNS.length - 1);
+        
+        String sql = "INSERT INTO " + TABLE_BUDGETS + " (" + 
+            String.join(", ", columns) + ") " +
+            "VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
@@ -233,16 +239,17 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
             String deleteTimeStr = budget.getDeleteTime() != null ? 
                 DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
             
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, budget.getCreatedBy());
-            stmt.setString(5, budget.getUpdatedBy());
-            stmt.setString(6, budget.getDeletedBy());
-            stmt.setInt(7, budget.getPosition());
-            stmt.setInt(8, budget.getAmount());
-            stmt.setInt(9, budget.getCurrencyId());
-            stmt.setObject(10, budget.getCategoryId());
+            // Порядок параметров соответствует BUDGET_COLUMNS (без id)
+            stmt.setInt(1, budget.getAmount());
+            stmt.setInt(2, budget.getCurrencyId());
+            stmt.setObject(3, budget.getCategoryId());
+            stmt.setInt(4, budget.getPosition());
+            stmt.setString(5, budget.getCreatedBy());
+            stmt.setString(6, budget.getUpdatedBy());
+            stmt.setString(7, budget.getDeletedBy());
+            stmt.setString(8, createTimeStr);
+            stmt.setString(9, deleteTimeStr);
+            stmt.setString(10, updateTimeStr);
             stmt.executeUpdate();
             
             // Получаем сгенерированный id
@@ -270,10 +277,13 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Budget update(Budget budget) {
-        String sql = "UPDATE budgets SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, amount=?, currency_id=?, category_id=? WHERE id=?";
+        // Используем BUDGET_COLUMNS, исключая id (первый элемент)
+        String[] columns = new String[BUDGET_COLUMNS.length - 1];
+        System.arraycopy(BUDGET_COLUMNS, 1, columns, 0, BUDGET_COLUMNS.length - 1);
+        String setClause = String.join("=?, ", columns) + "=?";
+        String sql = "UPDATE " + TABLE_BUDGETS + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
             // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
             String createTimeStr = budget.getCreateTime() != null ? 
                 DateTimeUtil.formatForSqlite(budget.getCreateTime()) : null;
@@ -281,23 +291,22 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
                 DateTimeUtil.formatForSqlite(budget.getUpdateTime()) : null;
             String deleteTimeStr = budget.getDeleteTime() != null ? 
                 DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, budget.getCreatedBy());
-            stmt.setString(5, budget.getUpdatedBy());
-            stmt.setString(6, budget.getDeletedBy());
-            stmt.setInt(7, budget.getPosition());
-            stmt.setInt(8, budget.getAmount());
-            stmt.setInt(9, budget.getCurrencyId());
-            stmt.setObject(10, budget.getCategoryId());
+            // Порядок параметров соответствует BUDGET_COLUMNS (без id)
+            stmt.setInt(1, budget.getAmount());
+            stmt.setInt(2, budget.getCurrencyId());
+            stmt.setObject(3, budget.getCategoryId());
+            stmt.setInt(4, budget.getPosition());
+            stmt.setString(5, budget.getCreatedBy());
+            stmt.setString(6, budget.getUpdatedBy());
+            stmt.setString(7, budget.getDeletedBy());
+            stmt.setString(8, createTimeStr);
+            stmt.setString(9, deleteTimeStr);
+            stmt.setString(10, updateTimeStr);
             stmt.setInt(11, budget.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return budget;
     }
 

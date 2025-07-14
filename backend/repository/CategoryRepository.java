@@ -4,6 +4,7 @@ import model.Category;
 import util.DateTimeUtil;
 import java.sql.*;
 import java.util.*;
+import static constants.RepositoryConstants.*;
 
 /**
  * Репозиторий для работы с категориями в базе данных
@@ -47,7 +48,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return true, если удаление выполнено успешно, false если категория не найдена
      */
     public boolean deleteById(Integer id, String deletedBy) {
-        return softDelete("categories", id, deletedBy);
+        return softDelete(TABLE_CATEGORIES, id, deletedBy);
     }
 
     /**
@@ -61,7 +62,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return true, если удаление выполнено успешно, false если категория не найдена
      */
     public boolean deleteByTitle(String title, String deletedBy) {
-        return softDelete("categories", "title", title, deletedBy);
+        return softDelete(TABLE_CATEGORIES, COLUMN_TITLE, title, deletedBy);
     }
 
     /**
@@ -74,7 +75,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      */
     @Override
     public List<Category> findAll() {
-        return findAll("categories", this::mapRowSafe);
+        return findAll(TABLE_CATEGORIES, this::mapRowSafe);
     }
 
     /**
@@ -87,7 +88,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return список категорий с указанным типом операции (может быть пустым, но не null)
      */
     public List<Category> findAllByOperationType(Integer operationType) {
-        return findAll("categories", "operation_type", operationType, this::mapRowSafe);
+        return findAll(TABLE_CATEGORIES, COLUMN_OPERATION_TYPE, operationType, this::mapRowSafe);
     }
 
         /**
@@ -100,7 +101,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return Optional с найденной категорией, если найдена, иначе пустой Optional
      */
     public List<Category> findAllByParentId(Integer parentId) {
-        return findAll("categories", "parent_id", parentId, this::mapRowSafe);
+        return findAll(TABLE_CATEGORIES, COLUMN_PARENT_ID, parentId, this::mapRowSafe);
     }
 
     /**
@@ -113,7 +114,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return список категорий с указанным типом (может быть пустым, но не null)
      */
     public List<Category> findAllByType(Integer type) {
-        return findAll("categories", "type", type, this::mapRowSafe);
+        return findAll(TABLE_CATEGORIES, COLUMN_TYPE, type, this::mapRowSafe);
     }
 
     /**
@@ -127,7 +128,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      */
     @Override
     public Optional<Category> findById(Integer id) {
-        return findByColumn("categories", "id", id, this::mapRowSafe);
+        return findByColumn(TABLE_CATEGORIES, COLUMN_ID, id, this::mapRowSafe);
     }
 
     /**
@@ -139,7 +140,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return максимальная позиция, 0 если категорий нет
      */
     public int getMaxPosition() {
-        return getMaxValue("categories", "position", null);
+        return getMaxValue(TABLE_CATEGORIES, COLUMN_POSITION, null);
     }
 
     /**
@@ -152,7 +153,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @return Optional с найденной категорией, если найдена, иначе пустой Optional
      */
     public Optional<Category> findByTitle(String title) {
-        return findByColumn("categories", "title", title, this::mapRowSafe);
+        return findByColumn(TABLE_CATEGORIES, COLUMN_TITLE, title, this::mapRowSafe);
     }
 
     /**
@@ -184,20 +185,20 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      */
     private Category mapRow(ResultSet rs) throws SQLException {
         Category category = new Category();
-        category.setId(rs.getInt("id"));
-        category.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString("create_time")));
-        category.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString("update_time")));
-        category.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString("delete_time")));
-        category.setCreatedBy(rs.getString("created_by"));
-        category.setUpdatedBy(rs.getString("updated_by"));
-        category.setDeletedBy(rs.getString("deleted_by"));
-        category.setPosition(rs.getInt("position"));
-        category.setTitle(rs.getString("title"));
-        category.setOperationType(rs.getInt("operation_type"));
-        category.setType(rs.getInt("type"));
+        category.setId(rs.getInt(COLUMN_ID));
+        category.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_CREATE_TIME)));
+        category.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_UPDATE_TIME)));
+        category.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_DELETE_TIME)));
+        category.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
+        category.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
+        category.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
+        category.setPosition(rs.getInt(COLUMN_POSITION));
+        category.setTitle(rs.getString(COLUMN_TITLE));
+        category.setOperationType(rs.getInt(COLUMN_OPERATION_TYPE));
+        category.setType(rs.getInt(COLUMN_TYPE));
         // Безопасное чтение поля parent_id с обработкой NULL значений
         try {
-            Integer parentId = rs.getObject("parent_id", Integer.class);
+            Integer parentId = rs.getObject(COLUMN_PARENT_ID, Integer.class);
             category.setParentId(parentId);
         } catch (SQLException e) {
             category.setParentId(null);
@@ -223,45 +224,29 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         }
     }
 
-    /**
-     * Сохранение новой категории в базу данных
-     * 
-     * <p>Создает новую запись в таблице categories с автоматически сгенерированным ID.
-     * Все поля объекта category сохраняются в базу данных.
-     * После успешного сохранения ID объекта обновляется сгенерированным значением.
-     * 
-     * @param category объект категории для сохранения (не null, должен содержать все обязательные поля)
-     * @return объект категории с установленным ID (тот же объект, что и входной параметр)
-     */
     @Override
     public Category save(Category category) {
-        String sql = "INSERT INTO categories (create_time, update_time, delete_time, created_by, updated_by, deleted_by, position, title, operation_type, type, parent_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String[] columns = new String[CATEGORY_COLUMNS.length - 1];
+        System.arraycopy(CATEGORY_COLUMNS, 1, columns, 0, CATEGORY_COLUMNS.length - 1);
+        String sql = "INSERT INTO " + TABLE_CATEGORIES + " (" +
+            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = category.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getCreateTime()) : null;
-            String updateTimeStr = category.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getUpdateTime()) : null;
-            String deleteTimeStr = category.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getDeleteTime()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, category.getCreatedBy());
-            stmt.setString(5, category.getUpdatedBy());
-            stmt.setString(6, category.getDeletedBy());
-            stmt.setInt(7, category.getPosition());
-            stmt.setString(8, category.getTitle());
-            stmt.setInt(9, category.getOperationType());
-            stmt.setInt(10, category.getType());
-            if (category.getParentId() != null) stmt.setInt(11, category.getParentId()); else stmt.setNull(11, Types.INTEGER);
+            String createTimeStr = category.getCreateTime() != null ? DateTimeUtil.formatForSqlite(category.getCreateTime()) : null;
+            String updateTimeStr = category.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(category.getUpdateTime()) : null;
+            String deleteTimeStr = category.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(category.getDeleteTime()) : null;
+            stmt.setString(1, category.getTitle());
+            stmt.setInt(2, category.getPosition());
+            stmt.setInt(3, category.getOperationType());
+            stmt.setInt(4, category.getType());
+            stmt.setObject(5, category.getParentId());
+            stmt.setString(6, category.getCreatedBy());
+            stmt.setString(7, category.getUpdatedBy());
+            stmt.setString(8, category.getDeletedBy());
+            stmt.setString(9, createTimeStr);
+            stmt.setString(10, deleteTimeStr);
+            stmt.setString(11, updateTimeStr);
             stmt.executeUpdate();
-            
-            // Получаем сгенерированный id
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
                     category.setId(rs.getInt(1));
@@ -270,51 +255,36 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return category;
     }
 
-    /**
-     * Обновление существующей категории в базе данных
-     * 
-     * <p>Обновляет все поля записи по ID категории.
-     * Объект category должен содержать валидный ID существующей записи.
-     * Все поля записи будут заменены значениями из объекта category.
-     * 
-     * @param category объект категории с обновленными данными (не null, должен содержать валидный ID)
-     * @return обновленный объект категории (тот же объект, что и входной параметр)
-     */
     @Override
     public Category update(Category category) {
-        String sql = "UPDATE categories SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, position=?, title=?, operation_type=?, type=?, parent_id=? WHERE id=?";
+        String[] columns = new String[CATEGORY_COLUMNS.length - 1];
+        System.arraycopy(CATEGORY_COLUMNS, 1, columns, 0, CATEGORY_COLUMNS.length - 1);
+        String setClause = String.join("=?, ", columns) + "=?";
+        String sql = "UPDATE " + TABLE_CATEGORIES + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = category.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getCreateTime()) : null;
-            String updateTimeStr = category.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getUpdateTime()) : null;
-            String deleteTimeStr = category.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(category.getDeleteTime()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, category.getCreatedBy());
-            stmt.setString(5, category.getUpdatedBy());
-            stmt.setString(6, category.getDeletedBy());
-            stmt.setInt(7, category.getPosition());
-            stmt.setString(8, category.getTitle());
-            stmt.setInt(9, category.getOperationType());
-            stmt.setInt(10, category.getType());
-            if (category.getParentId() != null) stmt.setInt(11, category.getParentId()); else stmt.setNull(11, Types.INTEGER);
+            String createTimeStr = category.getCreateTime() != null ? DateTimeUtil.formatForSqlite(category.getCreateTime()) : null;
+            String updateTimeStr = category.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(category.getUpdateTime()) : null;
+            String deleteTimeStr = category.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(category.getDeleteTime()) : null;
+            stmt.setString(1, category.getTitle());
+            stmt.setInt(2, category.getPosition());
+            stmt.setInt(3, category.getOperationType());
+            stmt.setInt(4, category.getType());
+            stmt.setObject(5, category.getParentId());
+            stmt.setString(6, category.getCreatedBy());
+            stmt.setString(7, category.getUpdatedBy());
+            stmt.setString(8, category.getDeletedBy());
+            stmt.setString(9, createTimeStr);
+            stmt.setString(10, deleteTimeStr);
+            stmt.setString(11, updateTimeStr);
             stmt.setInt(12, category.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return category;
     }
 } 

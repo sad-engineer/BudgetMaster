@@ -4,17 +4,46 @@ package model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Базовый класс для всех сущностей в системе
+ * 
+ * <p>Содержит общие поля для всех сущностей:
+ * <ul>
+ *   <li>id - уникальный идентификатор</li>
+ *   <li>createTime - время создания записи</li>
+ *   <li>updateTime - время последнего обновления</li>
+ *   <li>deleteTime - время удаления (для soft delete)</li>
+ *   <li>createdBy - пользователь, создавший запись</li>
+ *   <li>updatedBy - пользователь, последний раз обновивший запись</li>
+ *   <li>deletedBy - пользователь, удаливший запись</li>
+ * </ul>
+ * 
+ * <p>Реализует паттерн "Soft Delete" - записи не удаляются физически,
+ * а помечаются как удаленные с помощью поля deleteTime.
+ * 
+ * @author BudgetMaster Team
+ * @version 1.0
+ */
 public abstract class BaseEntity {
-    protected int id;
-    protected LocalDateTime createTime;
-    protected LocalDateTime updateTime;
-    protected LocalDateTime deleteTime;
-    protected String createdBy;
-    protected String updatedBy;
+    protected int id; // Уникальный идентификатор сущности
+    protected LocalDateTime createTime; // Время создания записи
+    protected LocalDateTime updateTime; // Время последнего обновления записи
+    protected LocalDateTime deleteTime; // Время удаления записи (для soft delete)
+    protected String createdBy; // Пользователь, создавший запись
+    protected String updatedBy; // Пользователь, последний раз обновивший запись
     protected String deletedBy;
 
     public BaseEntity() {}
 
+    /**
+     * @param id уникальный идентификатор
+     * @param createTime время создания записи
+     * @param updateTime время последнего обновления
+     * @param deleteTime время удаления (может быть null)
+     * @param createdBy пользователь, создавший запись
+     * @param updatedBy пользователь, последний раз обновивший запись
+     * @param deletedBy пользователь, удаливший запись (может быть null)
+     */
     public BaseEntity(int id, LocalDateTime createTime, LocalDateTime updateTime, LocalDateTime deleteTime,
                       String createdBy, String updatedBy, String deletedBy) {
         this.id = id;
@@ -41,6 +70,13 @@ public abstract class BaseEntity {
     public String getDeletedBy() { return deletedBy; }
     public void setDeletedBy(String deletedBy) { this.deletedBy = deletedBy; }
 
+    // МЕТОДЫ ДЛЯ РАБОТЫ С ОБЪЕКТАМИ
+
+    /**
+     * Проверяет, равны ли два объекта
+     * @param o объект для сравнения
+     * @return true, если объекты равны
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -55,11 +91,19 @@ public abstract class BaseEntity {
                 Objects.equals(deletedBy, that.deletedBy);
     }
 
+    /**
+     * Возвращает хэш-код объекта
+     * @return хэш-код объекта
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id, createTime, updateTime, deleteTime, createdBy, updatedBy, deletedBy);
     }
 
+    /**
+     * Возвращает строковое представление объекта
+     * @return строковое представление объекта
+     */
     @Override
     public String toString() {
         return "BaseEntity{" +

@@ -2,13 +2,11 @@ import os
 import sys
 import unittest
 import tempfile
-import shutil
 
-from BudgetMasterBackend.tests.test_common import (
+from backend.tests.test_common import (
     cleanup_example,
     get_java_class,
     setup_example,
-    test_data_manager,
 )
 
 # Добавляем путь к родительской директории для импорта

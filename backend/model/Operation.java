@@ -3,18 +3,35 @@ package model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import constants.ModelConstants;
 
+/**
+ * Модель финансовой операции
+ * 
+ * <p>Представляет финансовую операцию в системе:
+ * <ul>
+ *   <li>Расход (OPERATION_TYPE_EXPENSE) - трата денег</li>
+ *   <li>Доход (OPERATION_TYPE_INCOME) - получение денег</li>
+ *   <li>Перевод (transfer) - перемещение денег между счетами</li>
+ * </ul>
+ * 
+ * <p>Операция содержит информацию о сумме, дате, категории, счете и валюте.
+ * Для переводов дополнительно указываются целевой счет, валюта и сумма.
+ * 
+ * @author BudgetMaster Team
+ * @version 1.0
+ */
 public class Operation extends BaseEntity {
-    private int type;
-    private LocalDateTime date;
-    private int amount;
-    private String comment;
-    private int categoryId;
-    private int accountId;
-    private int currencyId;
-    private Integer toAccountId;
-    private Integer toCurrencyId;
-    private Integer toAmount;
+    private int type; // Тип операции (1-расход, 2-доход)
+    private LocalDateTime date; // Дата и время операции
+    private int amount; // Сумма операции (в копейках/центах)
+    private String comment; // Комментарий к операции
+    private int categoryId; // ID категории операции
+    private int accountId; // ID счета операции
+    private int currencyId; // ID валюты операции
+    private Integer toAccountId; // ID целевого счета (для переводов)
+    private Integer toCurrencyId; // ID целевой валюты (для переводов)
+    private Integer toAmount; // Сумма в целевой валюте (для переводов)
 
     public Operation() {}
 
@@ -54,7 +71,62 @@ public class Operation extends BaseEntity {
     public void setToCurrencyId(Integer toCurrencyId) { this.toCurrencyId = toCurrencyId; }
     public Integer getToAmount() { return toAmount; }
     public void setToAmount(Integer toAmount) { this.toAmount = toAmount; }
+    
+    // МЕТОДЫ ДЛЯ РАБОТЫ С КОНСТАНТАМИ
+    
+    /**
+     * Проверяет, является ли операция расходом
+     * @return true, если операция расход
+     */
+    public boolean isExpense() {
+        return type == ModelConstants.OPERATION_TYPE_EXPENSE;
+    }
+    
+    /**
+     * Проверяет, является ли операция доходом
+     * @return true, если операция доход
+     */
+    public boolean isIncome() {
+        return type == ModelConstants.OPERATION_TYPE_INCOME;
+    }
+    
+    /**
+     * Проверяет, является ли операция переводом
+     * @return true, если операция перевод между счетами
+     */
+    public boolean isTransfer() {
+        return toAccountId != null && toCurrencyId != null && toAmount != null;
+    }
+    
+    /**
+     * Проверяет, имеет ли операция комментарий
+     * @return true, если комментарий не пустой
+     */
+    public boolean hasComment() {
+        return comment != null && !comment.trim().isEmpty();
+    }
+    
+    /**
+     * Проверяет, имеет ли операция положительную сумму
+     * @return true, если сумма больше нуля
+     */
+    public boolean hasAmount() {
+        return amount > ModelConstants.MIN_AMOUNT;
+    }
+    
+    /**
+     * Проверяет, является ли операция операцией по умолчанию
+     * @return true, если операция имеет тип по умолчанию
+     */
+    public boolean isDefaultOperation() {
+        return type == ModelConstants.DEFAULT_OPERATION_TYPE;
+    }
 
+    /**
+     * Проверяет, равны ли два объекта
+     * @param o объект для сравнения
+     * @return true, если объекты равны
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,11 +141,19 @@ public class Operation extends BaseEntity {
                 Objects.equals(toAmount, that.toAmount);
     }
 
+    /**
+     * Возвращает хэш-код объекта
+     * @return хэш-код объекта
+     */
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), type, date, amount, comment, categoryId, accountId, currencyId, toAccountId, toCurrencyId, toAmount);
     }
 
+    /**
+     * Возвращает строковое представление объекта
+     * @return строковое представление объекта
+     */
     @Override
     public String toString() {
         return "Operation{" +

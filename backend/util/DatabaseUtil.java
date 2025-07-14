@@ -12,6 +12,18 @@ import model.Account;
 import repository.CurrencyRepository;
 import repository.CategoryRepository;
 import repository.AccountRepository;
+import static constants.RepositoryConstants.*;
+import static constants.ModelConstants.ACCOUNT_TYPE_CURRENT;
+import static constants.ModelConstants.DEFAULT_CURRENCY_ID;
+import static constants.ModelConstants.ACCOUNT_STATUS_OPEN;
+import static constants.ModelConstants.ACCOUNT_TYPE_SAVINGS;
+import static constants.ModelConstants.ACCOUNT_TYPE_CREDIT;
+import static constants.ModelConstants.OPERATION_TYPE_INCOME;
+import static constants.ModelConstants.OPERATION_TYPE_EXPENSE;
+import static constants.ModelConstants.CATEGORY_TYPE_PARENT;
+import static constants.ModelConstants.CATEGORY_TYPE_CHILD;
+import static constants.ModelConstants.ACCOUNT_STATUS_OPEN;
+
 
 public class DatabaseUtil {
     /**
@@ -26,13 +38,13 @@ public class DatabaseUtil {
                 // Временно отключаем внешние ключи
                 stmt.execute("PRAGMA foreign_keys = OFF");
                 // Очищаем все таблицы в обратном порядке зависимостей
-                stmt.execute("DELETE FROM operations");
-                stmt.execute("DELETE FROM budgets");
-                stmt.execute("DELETE FROM accounts");
-                stmt.execute("DELETE FROM categories");
-                stmt.execute("DELETE FROM currencies");
+                stmt.execute("DELETE FROM " + TABLE_OPERATIONS);
+                stmt.execute("DELETE FROM " + TABLE_BUDGETS);
+                stmt.execute("DELETE FROM " + TABLE_ACCOUNTS);
+                stmt.execute("DELETE FROM " + TABLE_CATEGORIES);
+                stmt.execute("DELETE FROM " + TABLE_CURRENCIES);
                 // Сбрасываем счетчики автоинкремента
-                stmt.execute("DELETE FROM sqlite_sequence WHERE name IN ('operations', 'budgets', 'accounts', 'categories', 'currencies')");
+                stmt.execute("DELETE FROM sqlite_sequence WHERE name IN ('" + TABLE_OPERATIONS + "', '" + TABLE_BUDGETS + "', '" + TABLE_ACCOUNTS + "', '" + TABLE_CATEGORIES + "', '" + TABLE_CURRENCIES + "')");
                 // Включаем внешние ключи обратно
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
@@ -102,7 +114,7 @@ public class DatabaseUtil {
      * @throws SQLException если операция с базой завершилась ошибкой
      */
     public static int getTotalRecordCount(String dbPath) throws SQLException {
-        String[] tables = {"currencies", "categories", "accounts", "budgets", "operations"};
+        String[] tables = {TABLE_CURRENCIES, TABLE_CATEGORIES, TABLE_ACCOUNTS, TABLE_BUDGETS, TABLE_OPERATIONS};
         int total = 0;
         for (String table : tables) {
             total += getTableRecordCount(dbPath, table);
@@ -116,7 +128,7 @@ public class DatabaseUtil {
      */
     public static void restoreDefaultCategories(String dbPath) throws SQLException {
         // Очищаем таблицу категорий
-        clearTable(dbPath, "categories");
+        clearTable(dbPath, TABLE_CATEGORIES);
         // Переинициализируем категории
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
@@ -130,7 +142,7 @@ public class DatabaseUtil {
      */
     public static void restoreDefaultCurrencies(String dbPath) throws SQLException {
         // Очищаем таблицу валют
-        clearTable(dbPath, "currencies");
+        clearTable(dbPath, TABLE_CURRENCIES);
         // Переинициализируем валюты
         String url = "jdbc:sqlite:" + dbPath;
         try (Connection conn = DriverManager.getConnection(url)) {
@@ -156,111 +168,106 @@ public class DatabaseUtil {
     private static void createTables(Connection conn) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
             // Таблица валют
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS currencies (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    position INTEGER NOT NULL,
-                    created_by TEXT,
-                    updated_by TEXT,
-                    deleted_by TEXT,
-                    create_time TIMESTAMP NOT NULL,
-                    update_time TIMESTAMP,
-                    delete_time TIMESTAMP
-                )
-            """);
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS " + TABLE_CURRENCIES + " (" + 
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TITLE + " TEXT NOT NULL, " +
+                COLUMN_POSITION + " INTEGER NOT NULL, " +
+                COLUMN_CREATED_BY + " TEXT, " +
+                COLUMN_UPDATED_BY + " TEXT, " +
+                COLUMN_DELETED_BY + " TEXT, " +
+                COLUMN_CREATE_TIME + " TIMESTAMP NOT NULL, " +
+                COLUMN_UPDATE_TIME + " TIMESTAMP, " +
+                COLUMN_DELETE_TIME + " TIMESTAMP" +
+                ")");
             // Таблица счетов
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS accounts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    position INTEGER NOT NULL,
-                    amount INTEGER NOT NULL,
-                    type INTEGER NOT NULL,
-                    currency_id INTEGER NOT NULL,
-                    closed INTEGER NOT NULL DEFAULT 0,
-                    credit_card_limit INTEGER,
-                    credit_card_category_id INTEGER,
-                    credit_card_commission_category_id INTEGER,
-                    created_by TEXT,
-                    updated_by TEXT,
-                    deleted_by TEXT,
-                    create_time TIMESTAMP NOT NULL,
-                    update_time TIMESTAMP,
-                    delete_time TIMESTAMP,
-                    FOREIGN KEY (currency_id) REFERENCES currencies (id)
-                )
-            """);
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS " + TABLE_ACCOUNTS + " (" + 
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TITLE + " TEXT NOT NULL, " +
+                COLUMN_POSITION + " INTEGER NOT NULL, " +
+                COLUMN_AMOUNT + " INTEGER NOT NULL, " +
+                COLUMN_TYPE + " INTEGER NOT NULL, " +
+                COLUMN_CURRENCY_ID + " INTEGER NOT NULL, " +
+                COLUMN_CLOSED + " INTEGER NOT NULL DEFAULT " + ACCOUNT_STATUS_OPEN + ", " +
+                COLUMN_CREDIT_CARD_LIMIT + " INTEGER, " +
+                COLUMN_CREDIT_CARD_CATEGORY_ID + " INTEGER, " +
+                COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID + " INTEGER, " +
+                COLUMN_CREATED_BY + " TEXT, " +
+                COLUMN_UPDATED_BY + " TEXT, " +
+                COLUMN_DELETED_BY + " TEXT, " +
+                COLUMN_CREATE_TIME + " TIMESTAMP NOT NULL, " +
+                COLUMN_UPDATE_TIME + " TIMESTAMP, " +
+                COLUMN_DELETE_TIME + " TIMESTAMP, " +
+                "FOREIGN KEY (" + COLUMN_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + ")" +
+                ")");
             // Таблица категорий
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS categories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    position INTEGER NOT NULL,
-                    operation_type INTEGER NOT NULL,
-                    type INTEGER NOT NULL,
-                    parent_id INTEGER,
-                    created_by TEXT,
-                    updated_by TEXT,
-                    deleted_by TEXT,
-                    create_time TIMESTAMP NOT NULL,
-                    update_time TIMESTAMP,
-                    delete_time TIMESTAMP,
-                    FOREIGN KEY (parent_id) REFERENCES categories (id)
-                )
-            """);
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS " + TABLE_CATEGORIES + " (" + 
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TITLE + " TEXT NOT NULL, " +
+                COLUMN_POSITION + " INTEGER NOT NULL, " +
+                COLUMN_OPERATION_TYPE + " INTEGER NOT NULL, " +
+                COLUMN_TYPE + " INTEGER NOT NULL, " +
+                COLUMN_PARENT_ID + " INTEGER, " +
+                COLUMN_CREATED_BY + " TEXT, " +
+                COLUMN_UPDATED_BY + " TEXT, " +
+                COLUMN_DELETED_BY + " TEXT, " +
+                COLUMN_CREATE_TIME + " TIMESTAMP NOT NULL, " +
+                COLUMN_UPDATE_TIME + " TIMESTAMP, " +
+                COLUMN_DELETE_TIME + " TIMESTAMP, " +
+                "FOREIGN KEY (" + COLUMN_PARENT_ID + ") REFERENCES " + TABLE_CATEGORIES + " (" + COLUMN_ID + ")" +
+                ")");
             // Таблица бюджетов
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS budgets (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    amount INTEGER NOT NULL,
-                    currency_id INTEGER NOT NULL,
-                    category_id INTEGER,
-                    position INTEGER NOT NULL,
-                    created_by TEXT,
-                    updated_by TEXT,
-                    deleted_by TEXT,
-                    create_time TIMESTAMP NOT NULL,
-                    update_time TIMESTAMP,
-                    delete_time TIMESTAMP,
-                    FOREIGN KEY (currency_id) REFERENCES currencies (id),
-                    FOREIGN KEY (category_id) REFERENCES categories (id)
-                )
-            """);
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS " + TABLE_BUDGETS + " (" + 
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_AMOUNT + " INTEGER NOT NULL, " +
+                COLUMN_CURRENCY_ID + " INTEGER NOT NULL, " +
+                COLUMN_CATEGORY_ID + " INTEGER, " +
+                COLUMN_POSITION + " INTEGER NOT NULL, " +
+                COLUMN_CREATED_BY + " TEXT, " +
+                COLUMN_UPDATED_BY + " TEXT, " +
+                COLUMN_DELETED_BY + " TEXT, " +
+                COLUMN_CREATE_TIME + " TIMESTAMP NOT NULL, " +
+                COLUMN_UPDATE_TIME + " TIMESTAMP, " +
+                COLUMN_DELETE_TIME + " TIMESTAMP, " +
+                "FOREIGN KEY (" + COLUMN_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + "), " +
+                "FOREIGN KEY (" + COLUMN_CATEGORY_ID + ") REFERENCES " + TABLE_CATEGORIES + " (" + COLUMN_ID + ")" +
+                ")");
             // Таблица операций
-            stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS operations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type INTEGER NOT NULL,
-                    date TIMESTAMP NOT NULL,
-                    amount INTEGER NOT NULL,
-                    comment TEXT NOT NULL,
-                    category_id INTEGER NOT NULL,
-                    account_id INTEGER NOT NULL,
-                    currency_id INTEGER NOT NULL,
-                    to_account_id INTEGER,
-                    to_currency_id INTEGER,
-                    to_amount INTEGER,
-                    created_by TEXT,
-                    updated_by TEXT,
-                    deleted_by TEXT,
-                    create_time TIMESTAMP NOT NULL,
-                    update_time TIMESTAMP,
-                    delete_time TIMESTAMP,
-                    FOREIGN KEY (category_id) REFERENCES categories (id),
-                    FOREIGN KEY (account_id) REFERENCES accounts (id),
-                    FOREIGN KEY (currency_id) REFERENCES currencies (id),
-                    FOREIGN KEY (to_account_id) REFERENCES accounts (id),
-                    FOREIGN KEY (to_currency_id) REFERENCES currencies (id)
-                )
-            """);
+            stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS " + TABLE_OPERATIONS + " (" + 
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TYPE + " INTEGER NOT NULL, " +
+                COLUMN_DATE + " TIMESTAMP NOT NULL, " +
+                COLUMN_AMOUNT + " INTEGER NOT NULL, " +
+                COLUMN_COMMENT + " TEXT NOT NULL, " +
+                COLUMN_CATEGORY_ID + " INTEGER NOT NULL, " +
+                COLUMN_ACCOUNT_ID + " INTEGER NOT NULL, " +
+                COLUMN_CURRENCY_ID + " INTEGER NOT NULL, " +
+                COLUMN_TO_ACCOUNT_ID + " INTEGER, " +
+                COLUMN_TO_CURRENCY_ID + " INTEGER, " +
+                COLUMN_TO_AMOUNT + " INTEGER, " +
+                COLUMN_CREATED_BY + " TEXT, " +
+                COLUMN_UPDATED_BY + " TEXT, " +
+                COLUMN_DELETED_BY + " TEXT, " +
+                COLUMN_CREATE_TIME + " TIMESTAMP NOT NULL, " +
+                COLUMN_UPDATE_TIME + " TIMESTAMP, " +
+                COLUMN_DELETE_TIME + " TIMESTAMP, " +
+                "FOREIGN KEY (" + COLUMN_CATEGORY_ID + ") REFERENCES " + TABLE_CATEGORIES + " (" + COLUMN_ID + "), " +
+                "FOREIGN KEY (" + COLUMN_ACCOUNT_ID + ") REFERENCES " + TABLE_ACCOUNTS + " (" + COLUMN_ID + "), " +
+                "FOREIGN KEY (" + COLUMN_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + "), " +
+                "FOREIGN KEY (" + COLUMN_TO_ACCOUNT_ID + ") REFERENCES " + TABLE_ACCOUNTS + " (" + COLUMN_ID + "), " +
+                "FOREIGN KEY (" + COLUMN_TO_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + ")" +
+                ")");
         }
     }
     
     private static void initializeDefaultCategories(Connection conn) throws SQLException {
         // Check if categories already exist in table
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM categories")) {
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_CATEGORIES)) {
             if (rs.next() && rs.getInt(1) > 0) {
                 // Categories already exist, don't add
                 return;
@@ -275,8 +282,8 @@ public class DatabaseUtil {
         Category incomeParent = new Category();
         incomeParent.setTitle("Доходы");
         incomeParent.setPosition(1);
-        incomeParent.setOperationType(2); // Доходы
-        incomeParent.setType(0); // Родительская
+        incomeParent.setOperationType(OPERATION_TYPE_INCOME); // Доходы
+        incomeParent.setType(CATEGORY_TYPE_PARENT); // Родительская
         incomeParent.setParentId(null);
         incomeParent.setCreatedBy("initializer");
         incomeParent.setUpdatedBy(null);
@@ -287,8 +294,8 @@ public class DatabaseUtil {
         Category expenseParent = new Category();
         expenseParent.setTitle("Расходы");
         expenseParent.setPosition(2);
-        expenseParent.setOperationType(1); // Расходы
-        expenseParent.setType(0); // Родительская
+        expenseParent.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
+        expenseParent.setType(CATEGORY_TYPE_PARENT); // Родительская
         expenseParent.setParentId(null);
         expenseParent.setCreatedBy("initializer");
         expenseParent.setUpdatedBy(null);
@@ -307,8 +314,8 @@ public class DatabaseUtil {
             Category category = new Category();
             category.setTitle(title);
             category.setPosition(incomePosition);
-            category.setOperationType(2); // Доходы
-            category.setType(1); // Дочерняя
+            category.setOperationType(OPERATION_TYPE_INCOME); // Доходы
+            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
             category.setParentId(savedIncomeParent.getId());
             category.setCreatedBy("initializer");
             category.setUpdatedBy(null);
@@ -324,20 +331,20 @@ public class DatabaseUtil {
         Category necessaryExpense = new Category();
         necessaryExpense.setTitle("Необходимые");
         necessaryExpense.setPosition(6);
-        necessaryExpense.setOperationType(1); // Расходы
-        necessaryExpense.setType(1); // Дочерняя
+        necessaryExpense.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
+        necessaryExpense.setType(CATEGORY_TYPE_CHILD); // Дочерняя
         necessaryExpense.setParentId(savedExpenseParent.getId());
         necessaryExpense.setCreatedBy("initializer");
-        necessaryExpense.setUpdatedBy("initializer");
+        necessaryExpense.setUpdatedBy(null);
         necessaryExpense.setCreateTime(java.time.LocalDateTime.now());
-        necessaryExpense.setUpdateTime(java.time.LocalDateTime.now());
+        necessaryExpense.setUpdateTime(null);
         necessaryExpense.setDeleteTime(null);
         
         Category additionalExpense = new Category();
         additionalExpense.setTitle("Дополнительные");
         additionalExpense.setPosition(7);
-        additionalExpense.setOperationType(1); // Расходы
-        additionalExpense.setType(1); // Дочерняя
+        additionalExpense.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
+        additionalExpense.setType(CATEGORY_TYPE_CHILD); // Дочерняя
         additionalExpense.setParentId(savedExpenseParent.getId());
         additionalExpense.setCreatedBy("initializer");
         additionalExpense.setUpdatedBy(null);
@@ -356,8 +363,8 @@ public class DatabaseUtil {
             Category category = new Category();
             category.setTitle(title);
             category.setPosition(necessaryPosition);
-            category.setOperationType(1); // Расходы
-            category.setType(1); // Дочерняя
+            category.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
+            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
             category.setParentId(savedNecessary.getId());
             category.setCreatedBy("initializer");
             category.setUpdatedBy(null);
@@ -376,8 +383,8 @@ public class DatabaseUtil {
             Category category = new Category();
             category.setTitle(title);
             category.setPosition(additionalPosition);
-            category.setOperationType(1); // Расходы
-            category.setType(1); // Дочерняя
+            category.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
+            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
             category.setParentId(savedAdditional.getId());
             category.setCreatedBy("initializer");
             category.setUpdatedBy(null);
@@ -393,7 +400,7 @@ public class DatabaseUtil {
     private static void initializeDefaultCurrencies(Connection conn) throws SQLException {
         // Check if currencies already exist in table
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM currencies")) {
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_CURRENCIES)) {
             if (rs.next() && rs.getInt(1) > 0) {
                 // Currencies already exist, don't add
                 return;
@@ -427,7 +434,7 @@ public class DatabaseUtil {
     private static void initializeDefaultAccounts(Connection conn) throws SQLException {
         // Check if accounts already exist in table
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM accounts")) {
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_ACCOUNTS)) {
             if (rs.next() && rs.getInt(1) > 0) {
                 // Accounts already exist, don't add
                 return;
@@ -438,11 +445,11 @@ public class DatabaseUtil {
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         // title, type, currencyId, closed, position
         Object[][] defaultAccounts = {
-            {"Наличные", 1, 1, 0, 1},
-            {"Зарплатная карта", 1, 1, 0, 2},
-            {"Сберегательный счет", 2, 1, 0, 3},
-            {"Кредитная карта", 3, 1, 0, 4},
-            {"Карта рассрочки", 3, 1, 0, 5},
+            {"Наличные", ACCOUNT_TYPE_CURRENT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 1},
+            {"Зарплатная карта", ACCOUNT_TYPE_CURRENT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 2},
+            {"Сберегательный счет", ACCOUNT_TYPE_SAVINGS, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 3},
+            {"Кредитная карта", ACCOUNT_TYPE_CREDIT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 4},
+            {"Карта рассрочки", ACCOUNT_TYPE_CREDIT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 5},
         };
         for (Object[] acc : defaultAccounts) {
             Account account = new Account();

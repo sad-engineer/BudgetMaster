@@ -3,6 +3,7 @@ package service;
 import model.Category;
 import repository.CategoryRepository;
 import validator.CategoryValidator;
+import constants.ServiceConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,7 @@ public class CategoryService {
      * @param user пользователь, выполняющий операции
      */
     public CategoryService(String user) {
-        this.categoryRepository = new CategoryRepository("budget_master.db");
+        this.categoryRepository = new CategoryRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
         this.user = user;
     }
 
@@ -60,7 +61,7 @@ public class CategoryService {
         
         // Проверяем, что новая позиция валидна
         if (newPosition < 1 || newPosition > allCategories.size()) {
-            throw new IllegalArgumentException("Новая позиция должна быть от 1 до " + allCategories.size());
+            throw new IllegalArgumentException(ServiceConstants.ERROR_POSITION_OUT_OF_RANGE + allCategories.size());
         }
         
         // Переупорядочиваем позиции
@@ -246,6 +247,6 @@ public class CategoryService {
     public void setUser(String newUser) {
         // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
         // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр CategoryService");
+        throw new UnsupportedOperationException(ServiceConstants.ERROR_CANNOT_CHANGE_USER + "CategoryService");
     }
 } 

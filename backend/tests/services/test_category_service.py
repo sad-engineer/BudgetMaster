@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-from BudgetMasterBackend.tests.test_common import (
+from backend.tests.test_common import (
     cleanup_example,
     get_java_class,
     setup_example,

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
 import util.DateTimeUtil;
+import static constants.RepositoryConstants.*;
 
 /**
  * Базовый класс для репозиториев с техническими методами работы с базой данных
@@ -36,7 +37,7 @@ public abstract class BaseRepository {
      */
     public BaseRepository(String dbPath) {
         this.dbPath = dbPath;
-        this.url = "jdbc:sqlite:" + dbPath;
+        this.url = JDBC_URL_PREFIX + dbPath;
     }
 
     /**
@@ -157,7 +158,7 @@ public abstract class BaseRepository {
         Connection conn = DriverManager.getConnection(url);
         // Устанавливаем UTF-8 кодировку для соединения
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA encoding = 'UTF-8'");
+            stmt.execute(PRAGMA_ENCODING_SQL);
         }
         return conn;
     }
@@ -215,7 +216,7 @@ public abstract class BaseRepository {
      * @throws SQLException при ошибке подключения к базе данных или выполнения запроса
      */
     protected boolean softDelete(String tableName, Integer id, String deletedBy) {
-        String sql = "UPDATE " + tableName + " SET delete_time = ?, deleted_by = ? WHERE id = ?";
+        String sql = "UPDATE " + tableName + " SET " + COLUMN_DELETE_TIME + " = ?, " + COLUMN_DELETED_BY + " = ? WHERE " + COLUMN_ID + " = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             // Используем DateTimeUtil для правильного форматирования даты для SQLite
@@ -246,7 +247,7 @@ public abstract class BaseRepository {
      * @throws SQLException при ошибке подключения к базе данных или выполнения запроса
      */
     protected boolean softDelete(String tableName, String columnName, Object value, String deletedBy) {
-        String sql = "UPDATE " + tableName + " SET delete_time = ?, deleted_by = ? WHERE " + columnName + " = ?";
+        String sql = "UPDATE " + tableName + " SET " + COLUMN_DELETE_TIME + " = ?, " + COLUMN_DELETED_BY + " = ? WHERE " + columnName + " = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             // Используем DateTimeUtil для правильного форматирования даты для SQLite

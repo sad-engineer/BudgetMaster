@@ -5,6 +5,7 @@ import util.DateTimeUtil;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import static constants.RepositoryConstants.*;
 
 /**
  * Репозиторий для работы с операциями в базе данных
@@ -48,7 +49,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return true, если удаление выполнено успешно, false если операция не найдена
      */
     public boolean deleteById(Integer id, String deletedBy) {
-        return softDelete("operations", id, deletedBy);
+        return softDelete(TABLE_OPERATIONS, id, deletedBy);
     }
 
     /**
@@ -61,7 +62,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public List<Operation> findAll() {
-        return findAll("operations", this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, this::mapRowSafe);
     }
 
     /**
@@ -74,7 +75,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанным счетом (может быть пустым, но не null)
      */
     public List<Operation> findAllByAccountId(Integer accountId) {
-        return findAll("operations", "account_id", accountId, this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, COLUMN_ACCOUNT_ID, accountId, this::mapRowSafe);
     }
 
         /**
@@ -87,7 +88,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанной категорией (может быть пустым, но не null)
      */
     public List<Operation> findAllByCategoryId(Integer categoryId) {
-        return findAll("operations", "category_id", categoryId, this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, COLUMN_CATEGORY_ID, categoryId, this::mapRowSafe);
     }
 
     /**
@@ -100,7 +101,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанным комментарием (может быть пустым, но не null)
      */
     public List<Operation> findAllByComment(String comment) {
-        return findAll("operations", "comment", comment, this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, COLUMN_COMMENT, comment, this::mapRowSafe);
     }
 
     /**
@@ -113,7 +114,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанной валютой (может быть пустым, но не null)
      */
     public List<Operation> findAllByCurrencyId(Integer currencyId) {
-        return findAll("operations", "currency_id", currencyId, this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, COLUMN_CURRENCY_ID, currencyId, this::mapRowSafe);
     }
 
     /**
@@ -137,7 +138,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         String startDateStr = DateTimeUtil.formatForSqlite(startOfDay);
         String endDateStr = DateTimeUtil.formatForSqlite(endOfDay);
         
-        String sql = "SELECT * FROM operations WHERE date >= ? AND date <= ?";
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_DATE + " >= ? AND " + COLUMN_DATE + " <= ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -168,7 +169,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанным типом (может быть пустым, но не null)
      */
     public List<Operation> findAllByType(Integer type) {
-        return findAll("operations", "type", type, this::mapRowSafe);
+        return findAll(TABLE_OPERATIONS, COLUMN_TYPE, type, this::mapRowSafe);
     }
 
     /**
@@ -182,7 +183,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Optional<Operation> findById(Integer id) {
-        return findByColumn("operations", "id", id, this::mapRowSafe);
+        return findByColumn(TABLE_OPERATIONS, COLUMN_ID, id, this::mapRowSafe);
     }
        
     /**
@@ -221,7 +222,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         Operation op = new Operation();
         
         // Безопасное чтение ID
-        Object idObj = rs.getObject("id");
+        Object idObj = rs.getObject(COLUMN_ID);
         if (idObj instanceof Long) {
             op.setId(((Long) idObj).intValue());
         } else {
@@ -229,21 +230,21 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         }
         
         // Читаем даты как строки и парсим их
-        String createTimeStr = rs.getString("create_time");
+        String createTimeStr = rs.getString(COLUMN_CREATE_TIME);
         op.setCreateTime(DateTimeUtil.parseFromSqlite(createTimeStr));
         
-        String updateTimeStr = rs.getString("update_time");
+        String updateTimeStr = rs.getString(COLUMN_UPDATE_TIME);
         op.setUpdateTime(DateTimeUtil.parseFromSqlite(updateTimeStr));
         
-        String deleteTimeStr = rs.getString("delete_time");
+        String deleteTimeStr = rs.getString(COLUMN_DELETE_TIME);
         op.setDeleteTime(DateTimeUtil.parseFromSqlite(deleteTimeStr));
         
-        op.setCreatedBy(rs.getString("created_by"));
-        op.setUpdatedBy(rs.getString("updated_by"));
-        op.setDeletedBy(rs.getString("deleted_by"));
+        op.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
+        op.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
+        op.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
         
         // Безопасное чтение числовых полей
-        Object typeObj = rs.getObject("type");
+        Object typeObj = rs.getObject(COLUMN_TYPE);
         if (typeObj instanceof Long) {
             op.setType(((Long) typeObj).intValue());
         } else {
@@ -251,33 +252,33 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         }
         
         // Безопасное чтение даты операции
-        String dateStr = rs.getString("date");
+        String dateStr = rs.getString(COLUMN_DATE);
         op.setDate(DateTimeUtil.parseFromSqlite(dateStr));
         
-        Object amountObj = rs.getObject("amount");
+        Object amountObj = rs.getObject(COLUMN_AMOUNT);
         if (amountObj instanceof Long) {
             op.setAmount(((Long) amountObj).intValue());
         } else {
             op.setAmount((Integer) amountObj);
         }
         
-        op.setComment(rs.getString("comment"));
+        op.setComment(rs.getString(COLUMN_COMMENT));
         
-        Object categoryIdObj = rs.getObject("category_id");
+        Object categoryIdObj = rs.getObject(COLUMN_CATEGORY_ID);
         if (categoryIdObj instanceof Long) {
             op.setCategoryId(((Long) categoryIdObj).intValue());
         } else {
             op.setCategoryId((Integer) categoryIdObj);
         }
         
-        Object accountIdObj = rs.getObject("account_id");
+        Object accountIdObj = rs.getObject(COLUMN_ACCOUNT_ID);
         if (accountIdObj instanceof Long) {
             op.setAccountId(((Long) accountIdObj).intValue());
         } else {
             op.setAccountId((Integer) accountIdObj);
         }
         
-        Object currencyIdObj = rs.getObject("currency_id");
+        Object currencyIdObj = rs.getObject(COLUMN_CURRENCY_ID);
         if (currencyIdObj instanceof Long) {
             op.setCurrencyId(((Long) currencyIdObj).intValue());
         } else {
@@ -285,7 +286,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         }
         
         // Обработка nullable полей
-        Object toAccountIdObj = rs.getObject("to_account_id");
+        Object toAccountIdObj = rs.getObject(COLUMN_TO_ACCOUNT_ID);
         if (toAccountIdObj == null) {
             op.setToAccountId(null);
         } else if (toAccountIdObj instanceof Long) {
@@ -294,7 +295,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
             op.setToAccountId((Integer) toAccountIdObj);
         }
         
-        Object toCurrencyIdObj = rs.getObject("to_currency_id");
+        Object toCurrencyIdObj = rs.getObject(COLUMN_TO_CURRENCY_ID);
         if (toCurrencyIdObj == null) {
             op.setToCurrencyId(null);
         } else if (toCurrencyIdObj instanceof Long) {
@@ -303,7 +304,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
             op.setToCurrencyId((Integer) toCurrencyIdObj);
         }
         
-        Object toAmountObj = rs.getObject("to_amount");
+        Object toAmountObj = rs.getObject(COLUMN_TO_AMOUNT);
         if (toAmountObj == null) {
             op.setToAmount(null);
         } else if (toAmountObj instanceof Long) {
@@ -350,40 +351,33 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Operation save(Operation op) {
-        String sql = "INSERT INTO operations (create_time, update_time, delete_time, created_by, updated_by, deleted_by, type, date, amount, comment, category_id, account_id, currency_id, to_account_id, to_currency_id, to_amount) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String[] columns = new String[OPERATION_COLUMNS.length - 1];
+        System.arraycopy(OPERATION_COLUMNS, 1, columns, 0, OPERATION_COLUMNS.length - 1);
+        String sql = "INSERT INTO " + TABLE_OPERATIONS + " (" +
+            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = op.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
-            String updateTimeStr = op.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
-            String deleteTimeStr = op.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
-            String dateStr = op.getDate() != null ? 
-                DateTimeUtil.formatForSqlite(op.getDate()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, op.getCreatedBy());
-            stmt.setString(5, op.getUpdatedBy());
-            stmt.setString(6, op.getDeletedBy());
-            stmt.setInt(7, op.getType());
-            stmt.setString(8, dateStr);
-            stmt.setInt(9, op.getAmount());
-            stmt.setString(10, op.getComment());
-            stmt.setInt(11, op.getCategoryId());
-            stmt.setInt(12, op.getAccountId());
-            stmt.setInt(13, op.getCurrencyId());
-            if (op.getToAccountId() != null) stmt.setInt(14, op.getToAccountId()); else stmt.setNull(14, Types.INTEGER);
-            if (op.getToCurrencyId() != null) stmt.setInt(15, op.getToCurrencyId()); else stmt.setNull(15, Types.INTEGER);
-            if (op.getToAmount() != null) stmt.setInt(16, op.getToAmount()); else stmt.setNull(16, Types.INTEGER);
+            String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
+            String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
+            String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
+            String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
+            stmt.setInt(1, op.getType());
+            stmt.setString(2, dateStr);
+            stmt.setInt(3, op.getAmount());
+            stmt.setString(4, op.getComment());
+            stmt.setInt(5, op.getCategoryId());
+            stmt.setInt(6, op.getAccountId());
+            stmt.setInt(7, op.getCurrencyId());
+            stmt.setObject(8, op.getToAccountId());
+            stmt.setObject(9, op.getToCurrencyId());
+            stmt.setObject(10, op.getToAmount());
+            stmt.setString(11, op.getCreatedBy());
+            stmt.setString(12, op.getUpdatedBy());
+            stmt.setString(13, op.getDeletedBy());
+            stmt.setString(14, createTimeStr);
+            stmt.setString(15, deleteTimeStr);
+            stmt.setString(16, updateTimeStr);
             stmt.executeUpdate();
-            
-            // Получаем сгенерированный id
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
                     op.setId(rs.getInt(1));
@@ -407,42 +401,37 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Operation update(Operation op) {
-        String sql = "UPDATE operations SET create_time=?, update_time=?, delete_time=?, created_by=?, updated_by=?, deleted_by=?, type=?, date=?, amount=?, comment=?, category_id=?, account_id=?, currency_id=?, to_account_id=?, to_currency_id=?, to_amount=? WHERE id=?";
+        String[] columns = new String[OPERATION_COLUMNS.length - 1];
+        System.arraycopy(OPERATION_COLUMNS, 1, columns, 0, OPERATION_COLUMNS.length - 1);
+        String setClause = String.join("=?, ", columns) + "=?";
+        String sql = "UPDATE " + TABLE_OPERATIONS + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = op.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
-            String updateTimeStr = op.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
-            String deleteTimeStr = op.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
-            String dateStr = op.getDate() != null ? 
-                DateTimeUtil.formatForSqlite(op.getDate()) : null;
-            
-            stmt.setString(1, createTimeStr);
-            stmt.setString(2, updateTimeStr);
-            stmt.setString(3, deleteTimeStr);
-            stmt.setString(4, op.getCreatedBy());
-            stmt.setString(5, op.getUpdatedBy());
-            stmt.setString(6, op.getDeletedBy());
-            stmt.setInt(7, op.getType());
-            stmt.setString(8, dateStr);
-            stmt.setInt(9, op.getAmount());
-            stmt.setString(10, op.getComment());
-            stmt.setInt(11, op.getCategoryId());
-            stmt.setInt(12, op.getAccountId());
-            stmt.setInt(13, op.getCurrencyId());
-            if (op.getToAccountId() != null) stmt.setInt(14, op.getToAccountId()); else stmt.setNull(14, Types.INTEGER);
-            if (op.getToCurrencyId() != null) stmt.setInt(15, op.getToCurrencyId()); else stmt.setNull(15, Types.INTEGER);
-            if (op.getToAmount() != null) stmt.setInt(16, op.getToAmount()); else stmt.setNull(16, Types.INTEGER);
+            String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
+            String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
+            String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
+            String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
+            stmt.setInt(1, op.getType());
+            stmt.setString(2, dateStr);
+            stmt.setInt(3, op.getAmount());
+            stmt.setString(4, op.getComment());
+            stmt.setInt(5, op.getCategoryId());
+            stmt.setInt(6, op.getAccountId());
+            stmt.setInt(7, op.getCurrencyId());
+            stmt.setObject(8, op.getToAccountId());
+            stmt.setObject(9, op.getToCurrencyId());
+            stmt.setObject(10, op.getToAmount());
+            stmt.setString(11, op.getCreatedBy());
+            stmt.setString(12, op.getUpdatedBy());
+            stmt.setString(13, op.getDeletedBy());
+            stmt.setString(14, createTimeStr);
+            stmt.setString(15, deleteTimeStr);
+            stmt.setString(16, updateTimeStr);
             stmt.setInt(17, op.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
         return op;
     }
 

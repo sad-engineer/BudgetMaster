@@ -3,13 +3,34 @@ package model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import constants.ModelConstants;
 
+/**
+ * Модель категории для классификации операций
+ * 
+ * <p>Представляет категорию для группировки доходов и расходов:
+ * <ul>
+ *   <li>Родительская категория (CATEGORY_TYPE_PARENT) - основная группа</li>
+ *   <li>Дочерняя категория (CATEGORY_TYPE_CHILD) - подкатегория</li>
+ * </ul>
+ * 
+ * <p>Категория может быть связана с определенным типом операций:
+ * <ul>
+ *   <li>Расходы (OPERATION_TYPE_EXPENSE)</li>
+ *   <li>Доходы (OPERATION_TYPE_INCOME)</li>
+ * </ul>
+ * 
+ * <p>Поддерживает иерархическую структуру через parentId.
+ * 
+ * @author BudgetMaster Team
+ * @version 1.0
+ */
 public class Category extends BaseEntity {
-    private int position;
-    private String title;
-    private int operationType;
-    private int type;
-    private Integer parentId;
+    private int position; // Позиция категории в списке (для сортировки)
+    private String title; // Название категории
+    private int operationType; // Тип операций для категории (1-расход, 2-доход)
+    private int type; // Тип категории (0-родительская, 1-дочерняя)
+    private Integer parentId; // ID родительской категории (null для корневых категорий)
 
     public Category() {}
 
@@ -33,8 +54,63 @@ public class Category extends BaseEntity {
     public void setType(int type) { this.type = type; }
     public Integer getParentId() { return parentId; }
     public void setParentId(Integer parentId) { this.parentId = parentId; }
+    
+    // МЕТОДЫ ДЛЯ РАБОТЫ С КОНСТАНТАМИ
+    
+    /**
+     * Проверяет, является ли категория родительской
+     * @return true, если категория родительская
+     */
+    public boolean isParentCategory() {
+        return type == ModelConstants.CATEGORY_TYPE_PARENT;
+    }
+    
+    /**
+     * Проверяет, является ли категория дочерней
+     * @return true, если категория дочерняя
+     */
+    public boolean isChildCategory() {
+        return type == ModelConstants.CATEGORY_TYPE_CHILD;
+    }
+    
+    /**
+     * Проверяет, предназначена ли категория для расходов
+     * @return true, если категория для расходов
+     */
+    public boolean isExpenseCategory() {
+        return operationType == ModelConstants.OPERATION_TYPE_EXPENSE;
+    }
+    
+    /**
+     * Проверяет, предназначена ли категория для доходов
+     * @return true, если категория для доходов
+     */
+    public boolean isIncomeCategory() {
+        return operationType == ModelConstants.OPERATION_TYPE_INCOME;
+    }
+    
+    /**
+     * Проверяет, является ли категория корневой (без родителя)
+     * @return true, если категория корневая
+     */
+    public boolean isRootCategory() {
+        return parentId == null || parentId == ModelConstants.ROOT_CATEGORY_ID;
+    }
+    
+    /**
+     * Проверяет, имеет ли категория родительскую категорию
+     * @return true, если у категории есть родитель
+     */
+    public boolean hasParent() {
+        return parentId != null && parentId != ModelConstants.ROOT_CATEGORY_ID;
+    }
 
-    @Override
+    /**
+     * Проверяет, равны ли два объекта
+     * @param o объект для сравнения
+     * @return true, если объекты равны
+     */
+    @Override   
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Category)) return false;
@@ -45,11 +121,19 @@ public class Category extends BaseEntity {
                 Objects.equals(parentId, category.parentId);
     }
 
+    /**
+     * Возвращает хэш-код объекта
+     * @return хэш-код объекта
+     */
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), position, title, operationType, type, parentId);
     }
 
+    /**
+     * Возвращает строковое представление объекта
+     * @return строковое представление объекта
+     */
     @Override
     public String toString() {
         return "Category{" +
