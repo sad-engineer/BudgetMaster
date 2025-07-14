@@ -10,7 +10,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 BUILD_DIR = os.path.join(PROJECT_ROOT, "build")
 
 # JDK bin (если нужно явно)
-JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
+JDK_PATH = r"C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12\bin"
 os.environ["PATH"] = JDK_PATH + os.pathsep + os.environ["PATH"]
 
 # Создать папку для .class файлов

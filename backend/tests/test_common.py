@@ -11,13 +11,13 @@ class JPypeSetup:
 
     def __init__(self):
         # Путь к JDK (где лежит jvm.dll)
-        self.JDK_PATH = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
+        self.JDK_PATH = r"C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12\bin"
 
         # Путь к build, где лежат скомпилированные классы
         self.BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "build"))
 
         # Путь к библиотекам (SQLite драйвер)
-        self.LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "lib"))
+        self.LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "lib"))
 
         # Путь к базе данных
         self.DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "budget_master.db"))

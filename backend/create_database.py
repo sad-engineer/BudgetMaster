@@ -18,11 +18,11 @@ def setup_jpype():
     # Пути к файлам
     current_dir = Path(__file__).parent
     build_path = current_dir / "build"
-    lib_path = current_dir / "lib"
+    lib_path = current_dir.parent / "lib"  # Переходим в корневую папку проекта
     db_path = current_dir / "budget_master.db"
 
     # Путь к JDK (настройте под вашу систему)
-    jdk_path = r"C:\Users\Korenyk.A\Documents\Проекты\jdk-17.0.12\bin"
+    jdk_path = r"C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12\bin"
 
     # Classpath с библиотеками
     classpath = (

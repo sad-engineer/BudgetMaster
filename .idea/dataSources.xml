@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="budget_master" uuid="d22553a9-209f-42d8-b892-f21ea2c2c6f1">
+    <data-source source="LOCAL" name="budget_master" uuid="4d80ae9b-e1f8-4152-97a8-dcc232fd89ce">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\Korenyk.A\Documents\Проекты\budget_master\BudgetMasterBackend\budget_master.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\backend\budget_master.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
         <library>

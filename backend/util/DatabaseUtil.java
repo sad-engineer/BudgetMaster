@@ -279,9 +279,9 @@ public class DatabaseUtil {
         incomeParent.setType(0); // Родительская
         incomeParent.setParentId(null);
         incomeParent.setCreatedBy("initializer");
-        incomeParent.setUpdatedBy("initializer");
+        incomeParent.setUpdatedBy(null);
         incomeParent.setCreateTime(java.time.LocalDateTime.now());
-        incomeParent.setUpdateTime(java.time.LocalDateTime.now());
+        incomeParent.setUpdateTime(null);
         incomeParent.setDeleteTime(null);
         
         Category expenseParent = new Category();
@@ -291,9 +291,9 @@ public class DatabaseUtil {
         expenseParent.setType(0); // Родительская
         expenseParent.setParentId(null);
         expenseParent.setCreatedBy("initializer");
-        expenseParent.setUpdatedBy("initializer");
+        expenseParent.setUpdatedBy(null);
         expenseParent.setCreateTime(java.time.LocalDateTime.now());
-        expenseParent.setUpdateTime(java.time.LocalDateTime.now());
+        expenseParent.setUpdateTime(null);
         expenseParent.setDeleteTime(null);
         
         // Сохраняем родительские категории
@@ -311,9 +311,9 @@ public class DatabaseUtil {
             category.setType(1); // Дочерняя
             category.setParentId(savedIncomeParent.getId());
             category.setCreatedBy("initializer");
-            category.setUpdatedBy("initializer");
+            category.setUpdatedBy(null);
             category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(java.time.LocalDateTime.now());
+            category.setUpdateTime(null);
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
@@ -340,9 +340,9 @@ public class DatabaseUtil {
         additionalExpense.setType(1); // Дочерняя
         additionalExpense.setParentId(savedExpenseParent.getId());
         additionalExpense.setCreatedBy("initializer");
-        additionalExpense.setUpdatedBy("initializer");
+        additionalExpense.setUpdatedBy(null);
         additionalExpense.setCreateTime(java.time.LocalDateTime.now());
-        additionalExpense.setUpdateTime(java.time.LocalDateTime.now());
+        additionalExpense.setUpdateTime(null);
         additionalExpense.setDeleteTime(null);
         
         // Сохраняем промежуточные категории
@@ -360,9 +360,9 @@ public class DatabaseUtil {
             category.setType(1); // Дочерняя
             category.setParentId(savedNecessary.getId());
             category.setCreatedBy("initializer");
-            category.setUpdatedBy("initializer");
+            category.setUpdatedBy(null);
             category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(java.time.LocalDateTime.now());
+            category.setUpdateTime(null);
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
@@ -380,9 +380,9 @@ public class DatabaseUtil {
             category.setType(1); // Дочерняя
             category.setParentId(savedAdditional.getId());
             category.setCreatedBy("initializer");
-            category.setUpdatedBy("initializer");
+            category.setUpdatedBy(null);
             category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(java.time.LocalDateTime.now());
+            category.setUpdateTime(null);
             category.setDeleteTime(null);
             
             categoryRepo.save(category);
@@ -415,9 +415,9 @@ public class DatabaseUtil {
             currency.setTitle((String) currencyInfo[0]);
             currency.setPosition((int) currencyInfo[1]);
             currency.setCreatedBy("initializer");
-            currency.setUpdatedBy("initializer");
+            currency.setUpdatedBy(null);
             currency.setCreateTime(java.time.LocalDateTime.now());
-            currency.setUpdateTime(java.time.LocalDateTime.now());
+            currency.setUpdateTime(null);
             currency.setDeleteTime(null);
             
             currencyRepo.save(currency);
@@ -456,10 +456,10 @@ public class DatabaseUtil {
             account.setCreditCardCategoryId(null);
             account.setCreditCardCommissionCategoryId(null);
             account.setCreatedBy("initializer");
-            account.setUpdatedBy("initializer");
+            account.setUpdatedBy(null);
             account.setDeletedBy(null);
             account.setCreateTime(now);
-            account.setUpdateTime(now);
+            account.setUpdateTime(null);
             account.setDeleteTime(null);
             accountRepo.save(account);
         }
