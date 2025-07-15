@@ -3,11 +3,16 @@ package service;
 import model.Budget;
 import repository.BudgetRepository;
 import validator.BudgetValidator;
+import validator.BaseEntityValidator;
+import validator.CommonValidator;
 import constants.ServiceConstants;
+import constants.ModelConstants;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Сервис для работы с бюджетами
@@ -47,7 +52,8 @@ public class BudgetService {
      * @param id id бюджета
      * @return true, если удаление успешно
      */
-    public boolean delete(int id) {
+    public boolean delete(Integer id) {
+        BaseEntityValidator.validatePositiveId(id, "ID бюджета");
         return budgetRepository.deleteById(id, user);
     }
 
@@ -56,7 +62,8 @@ public class BudgetService {
      * @param categoryId id категории
      * @return true, если удаление успешно
      */
-    public boolean deleteByCategoryId(int categoryId) {
+    public boolean deleteByCategoryId(Integer categoryId) {
+        CommonValidator.validateCategoryId(categoryId);
         return budgetRepository.deleteByCategoryId(categoryId, user);
     }
 
@@ -67,6 +74,8 @@ public class BudgetService {
      * @return бюджет с новой позицией
      */
     public Budget changePosition(Budget budget, int newPosition) {
+        BaseEntityValidator.validate(budget);
+        CommonValidator.validatePositivePosition(newPosition);
         int oldPosition = budget.getPosition();
         
         // Если позиция не изменилась, ничего не делаем
@@ -120,25 +129,25 @@ public class BudgetService {
      * Изменяет порядок бюджета с переупорядочиванием других бюджетов
      * @param oldPosition старая позиция
      * @param newPosition новая позиция
-     * @return бюджет с новой позицией
+     * @return бюджет с новой позицией. Если бюджет не найден, возвращает null
      */
     public Budget changePosition(int oldPosition, int newPosition) {
-        // поиск по позиции  
-        Optional<Budget> budgetOpt = budgetRepository.findByPosition(oldPosition);
-        if (budgetOpt.isPresent()) {
-            return changePosition(budgetOpt.get(), newPosition);
+        CommonValidator.validatePositivePosition(oldPosition);
+        Optional<Budget> budget = budgetRepository.findByPosition(oldPosition);
+        if (budget.isPresent()) {
+            return changePosition(budget.get(), newPosition);
         }
         return null;
     }
 
     /**
-     * Создает новый бюджет
+     * Создает новый бюджет без валидации (для внутреннего использования)
      * @param categoryId ID категории
      * @param amount сумма бюджета в копейках валюты
      * @param currencyId ID валюты
      * @return созданный бюджет
      */
-    public Budget create(Integer categoryId, int amount, int currencyId) {
+    private Budget create(Integer categoryId, int amount, int currencyId) {
         Budget newBudget = new Budget();
         int nextPosition = budgetRepository.getMaxPosition() + 1;
         newBudget.setCategoryId(categoryId);
@@ -146,8 +155,6 @@ public class BudgetService {
         newBudget.setPosition(nextPosition);
         newBudget.setCreateTime(LocalDateTime.now());
         newBudget.setCreatedBy(user);
-        newBudget.setUpdateTime(LocalDateTime.now());
-        newBudget.setUpdatedBy(user);
         newBudget.setCurrencyId(currencyId);
 
         // Валидация бюджета
@@ -172,85 +179,119 @@ public class BudgetService {
     public List<Budget> getAllByCurrencyId(int currencyId) {
         return budgetRepository.findAllByCurrencyId(currencyId);
     }
-
+   
     /**
-     * Получает бюджет по ID
-     * @param id ID бюджета
-     * @return бюджет
-     */
-    public Optional<Budget> getById(int id) { 
-        return budgetRepository.findById(id);
-    }
-
-    /**
-     * Получает бюджет по ID категории
+     * Получает бюджет по ID категории. 
+     * Если бюджет с таким ID категории существует, возвращает его.
+     * Если бюджет с таким ID категории существует, но удален, восстанавливает его.
+     * Если бюджет с таким ID категории не существует, вернет null.
      * @param categoryId ID категории
      * @return бюджет
      */
-    public Optional<Budget> getByCategoryId(int categoryId) {
-        return budgetRepository.findByCategoryId(categoryId);
+    public Budget getByCategoryId(Integer categoryId) {
+        CommonValidator.validateCategoryId(categoryId);
+        Optional<Budget> budget = budgetRepository.findByCategoryId(categoryId);
+        if (budget.isPresent()) {
+            Budget budgetObj = budget.get();
+            if (budgetObj.isDeleted()) {
+                return restore(budgetObj);
+            }
+            return budgetObj;
+        }
+        return null;
     }
 
     /**
-     * Проверка бюджета на удаление
-     * @param budget класс бюджета
-     * @return true, если бюджет удален
-     */
-    public boolean isBudgetDeleted(Budget budget) {
-        return budget.getDeleteTime() != null;
-    }
-
-    /**
-     * Восстанавливает бюджет
-     * @param restoredBudget бюджет
+     * Получает бюджет по ID категории с указанными параметрами.
+     * Если бюджет с таким ID категории существует, и параметры совпадают с указанными, возвращает его.
+     * Если бюджет с таким ID категории существует, но параметры отличные от указанных, обновляет его.
+     * Если бюджет с таким ID категории существует, но удален, восстанавливает его.
+     * Если бюджет с таким ID категории не существует, создает новый с указанными параметрами.
+     * @param categoryId ID категории
+     * @param amount сумма бюджета в копейках валюты
+     * @param currencyId ID валюты
      * @return бюджет
      */
-    public Budget restore(Budget restoredBudget) {
-        restoredBudget.setDeleteTime(null);
+    public Budget get(Integer categoryId, int amount, int currencyId) {
+        CommonValidator.validateCategoryId(categoryId);
+        CommonValidator.validateBudgetAmount(amount);
+        CommonValidator.validateCurrencyId(currencyId);
+
+        Optional<Budget> budget = budgetRepository.findByCategoryId(categoryId);
+        if (budget.isPresent()) {
+            Budget budgetObj = budget.get();
+            
+            if (budgetObj.getCategoryId() == categoryId &&
+                budgetObj.getAmount() == amount &&
+                budgetObj.getCurrencyId() == currencyId) {
+                
+                return budgetObj;
+            }
+
+            return update(budgetObj, amount, currencyId);
+        }
+
+        return create(categoryId, amount, currencyId);
+    }
+    
+    /**
+     * Восстанавливает удаленный бюджет (для внутреннего использования)
+     * @param restoredBudget бюджет для восстановления
+     * @return восстановленный бюджет
+     */
+    private Budget restore(Budget restoredBudget) {
         restoredBudget.setDeletedBy(null);
+        restoredBudget.setDeleteTime(null);
         restoredBudget.setUpdateTime(LocalDateTime.now());
         restoredBudget.setUpdatedBy(user);
-        return budgetRepository.update(restoredBudget);
-    }
+        return updateInternal(restoredBudget);
+    }    
 
     /**
-     * Восстанавливает бюджет по id
-     * @param id id бюджета
-     * @return бюджет или null, если бюджет не найден
+     * Обновляет бюджет. 
+     * 
+     * @param updatedBudget бюджет для обновления
+     * @param newAmount новое значение суммы бюджета (может быть null)
+     * @param newCurrencyId новое значение ID валюты (может быть null)
+     * @return обновленный бюджет
      */
-    public Budget restore(int id) {
-        Optional<Budget> budgetOpt = getById(id);
-        if (budgetOpt.isPresent()) {
-            return restore(budgetOpt.get());
+    public Budget update(Budget updatedBudget, 
+                         Integer newAmount,
+                         Integer newCurrencyId) {
+        BaseEntityValidator.validate(updatedBudget);
+        
+        if (newAmount != null) {
+            CommonValidator.validateBudgetAmount(newAmount);
+            updatedBudget.setAmount(newAmount);
         }
+        
+        if (newCurrencyId != null) {
+            CommonValidator.validateCurrencyId(newCurrencyId);
+            updatedBudget.setCurrencyId(newCurrencyId);
+        }
+
+        if (updatedBudget.isDeleted()) {
+            return restore(updatedBudget);
+        }
+        
+        // Проверяем, был ли задан хотя бы один параметр для обновления
+        if (newAmount != null || newCurrencyId != null) {
+            return updateInternal(updatedBudget);
+        }
+        
+        // Если ни один параметр не задан, возвращаем null
         return null;
     }
 
     /**
-     * Устанавливает сумму бюджета
-     * @param id id бюджета
-     * @param amount сумма бюджета в копейках валюты    
-     * @return бюджет или null, если бюджет не найден
+     * Обновляет бюджет без новых параметров (для внутреннего использования)
+     * @param updatedBudget бюджет для обновления
+     * @return обновленный бюджет
      */
-    public Budget setAmount(int id, int amount) {
-        Optional<Budget> budgetOpt = getById(id);   
-        if (budgetOpt.isPresent()) {
-            Budget budget = budgetOpt.get();
-            budget.setAmount(amount);
-            budget.setUpdateTime(LocalDateTime.now());
-            budget.setUpdatedBy(user);
-            return budgetRepository.update(budget);
-        }
-        return null;
-    }
-
-    /**
-     * Устанавливает нового пользователя для операций
-     * @param newUser новый пользователь
-     */
-    public void setUser(String newUser) {
-        // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
-        // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException(ServiceConstants.ERROR_CANNOT_CHANGE_USER + "BudgetService");
-    }
+    private Budget updateInternal(Budget updatedBudget) {
+        updatedBudget.setUpdateTime(LocalDateTime.now());
+        updatedBudget.setUpdatedBy(user);
+        
+        return budgetRepository.update(updatedBudget);
+    }    
 } 

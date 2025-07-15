@@ -398,10 +398,10 @@ class TestCategoryService(unittest.TestCase):
         
         # Обновляем только название
         updated = self.service.update(category, 
-            self.Optional.of("Новое название"), 
-            self.Optional.empty(), 
-            self.Optional.empty(), 
-            self.Optional.empty())
+            "Новое название",
+            None,
+            None,
+            None)
         
         self.assertEqual(updated.getTitle(), "Новое название")
         self.assertEqual(updated.getOperationType(), category.getOperationType())  # Не изменилось
@@ -416,10 +416,10 @@ class TestCategoryService(unittest.TestCase):
         
         # Обновляем все параметры
         updated = self.service.update(category, 
-            self.Optional.of("Полностью новое название"), 
-            self.Optional.of(self.Integer(2)),  # Доход - Integer
-            self.Optional.of(self.Integer(1)),  # Дочерняя - Integer  
-            self.Optional.of(self.Integer(1)))  # Родитель - Integer
+            "Полностью новое название",
+            self.Integer(2),  # Доход - Integer
+            self.Integer(1),  # Дочерняя - Integer
+            self.Integer(1))  # Родитель - Integer
         
         self.assertEqual(updated.getTitle(), "Полностью новое название")
         self.assertEqual(updated.getOperationType(), 2)

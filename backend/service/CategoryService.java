@@ -280,15 +280,15 @@ public class CategoryService {
             Category categoryObj = category.get();
             Category categoryUpd = new Category(categoryObj.getId(), categoryObj.getCreateTime(), categoryObj.getUpdateTime(), categoryObj.getDeleteTime(), categoryObj.getCreatedBy(), categoryObj.getUpdatedBy(), categoryObj.getDeletedBy(), categoryObj.getPosition(), title, operationType, type, parentId);
             
-            if (categoryObj.getTitle().equals(title) &&
+            if (categoryObj.getTitle() == title &&
                 categoryObj.getOperationType() == operationType &&
                 categoryObj.getType() == type &&
-                Objects.equals(categoryObj.getParentId(), parentId)) {
+                categoryObj.getParentId() == parentId) {
                 
                 return categoryObj;
             }
 
-            return update(categoryUpd, Optional.of(title), Optional.of(operationType), Optional.of(type), Optional.of(parentId));
+            return update(categoryUpd, title, operationType, type, parentId);
         }
 
         return create(title, operationType, type, parentId);
@@ -346,43 +346,50 @@ public class CategoryService {
     /**
      * Обновляет категорию
      * @param updatedCategory категория для обновления
-     * @param newTitle новое название категории
-     * @param newOperationType новое значение типа операции (1-расход, 2-доход)
-     * @param newType новое значение типа категории (0-родительская, 1-дочерняя)
-     * @param newParentId новое значение ID родительской категории (null для корневых категорий)
+     * @param newTitle новое название категории (может быть null)
+     * @param newOperationType новое значение типа операции (1-расход, 2-доход) (может быть null)
+     * @param newType новое значение типа категории (0-родительская, 1-дочерняя) (может быть null)
+     * @param newParentId новое значение ID родительской категории (null для корневых категорий) (может быть null)
      * @return обновленная категория
      */
     public Category update(Category updatedCategory, 
-                            Optional<String> newTitle,
-                            Optional<Integer> newOperationType,
-                            Optional<Integer> newType,
-                            Optional<Integer> newParentId) {
+                            String newTitle,
+                            Integer newOperationType,
+                            Integer newType,
+                            Integer newParentId) {
         BaseEntityValidator.validate(updatedCategory);
         
-        newTitle.ifPresent(title -> {
-            CommonValidator.validateCategoryTitle(title);
-            updatedCategory.setTitle(title);
-        });
+        if (newTitle != null) {
+            CommonValidator.validateCategoryTitle(newTitle);
+            updatedCategory.setTitle(newTitle);
+        }
         
-        newOperationType.ifPresent(operationType -> {
-            CommonValidator.validateOperationType(operationType);
-            updatedCategory.setOperationType(operationType);
-        });
+        if (newOperationType != null) {
+            CommonValidator.validateOperationType(newOperationType);
+            updatedCategory.setOperationType(newOperationType);
+        }
         
-        newType.ifPresent(type -> {
-            CommonValidator.validateCategoryType(type);
-            updatedCategory.setType(type);
-        });
+        if (newType != null) {
+            CommonValidator.validateCategoryType(newType);
+            updatedCategory.setType(newType);
+        }
         
-        newParentId.ifPresent(parentId -> {
-            CommonValidator.validateParentId(parentId);
-            updatedCategory.setParentId(parentId);
-        });
+        if (newParentId != null) {
+            CommonValidator.validateParentId(newParentId);
+            updatedCategory.setParentId(newParentId);
+        }
 
         if (updatedCategory.isDeleted()) {
             return restore(updatedCategory);
         }
-        return update(updatedCategory);
+        
+        // Проверяем, был ли задан хотя бы один параметр для обновления
+        if (newTitle != null || newOperationType != null || newType != null || newParentId != null) {
+            return update(updatedCategory);
+        }
+        
+        // Если ни один параметр не задан, возвращаем null
+        return null;
     }
 
     /**

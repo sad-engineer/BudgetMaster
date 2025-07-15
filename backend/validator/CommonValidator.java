@@ -74,7 +74,7 @@ public class CommonValidator {
      */
     public static void validateCurrencyId(Integer currencyId) {
         if (currencyId != null) {
-            validateCurrencyId(currencyId.intValue());
+            validateId(currencyId.intValue());
         }
     }
     
@@ -94,7 +94,7 @@ public class CommonValidator {
      */
     public static void validateCategoryId(Integer categoryId) {
         if (categoryId != null) {
-            validateCategoryId(categoryId.intValue());
+            BaseEntityValidator.validatePositiveId(categoryId.intValue(), "ID категории");
         }
     }
     
@@ -114,7 +114,7 @@ public class CommonValidator {
      */
     public static void validateAccountId(Integer accountId) {
         if (accountId != null) {
-            validateAccountId(accountId.intValue());
+            BaseEntityValidator.validatePositiveId(accountId.intValue(), "ID счета");
         }
     }
     

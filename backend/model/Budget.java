@@ -74,6 +74,14 @@ public class Budget extends BaseEntity {
     }
 
     /**
+     * Проверяет, удален ли бюджет
+     * @return true, если бюджет удален
+     */
+    public boolean isDeleted() {
+        return getDeletedBy() != null;
+    }
+
+    /**
      * Проверяет, равны ли два объекта
      * @param o объект для сравнения
      * @return true, если объекты равны
