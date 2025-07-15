@@ -27,6 +27,7 @@ class TestCategoryService(unittest.TestCase):
         cls.Category = get_java_class("model.Category")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.Optional = get_java_class("java.util.Optional")
 
         cls.test_category_ids = []
         cls.db_path = test_data_manager.db_manager.db_path
@@ -56,61 +57,104 @@ class TestCategoryService(unittest.TestCase):
             pass
 
     def test_01_create_category(self):
-        """Тест 01: Создание новой категории"""
-        title = "Тестовая категория"
-        category = self.service.create(title)
+        """Тест 01: Получение новой (не существующей) категории"""
+        title = "Категория 1"
+        position = self.repository.getMaxPosition() + 1
+
+        category = self.service.get(title, 1, 0, None)
         self.test_category_ids.append(category.getId())
+
         self.assertIsNotNone(category)
         self.assertEqual(category.getTitle(), title)
+        self.assertEqual(category.getPosition(), position)
+        self.assertEqual(category.getCreatedBy(), "test_user")
+        self.assertIsNone(category.getUpdatedBy())
+        self.assertIsNone(category.getDeletedBy())
+        self.assertIsNotNone(category.getCreateTime())
+        self.assertIsNone(category.getUpdateTime())
+        self.assertIsNone(category.getDeleteTime())
+
+    def test_02_get_category_by_title(self):
+        """Тест 02: Получение существующей категории по Title"""
+        title = "Категория 2"
+        category_new = self.service.get(title, 1, 0, None)
+        self.test_category_ids.append(category_new.getId())
+
+        # Категория создана, ее позиция должна быть наибольшая из существующих
+        position = self.repository.getMaxPosition()
+        category = self.service.get(title)
+        self.test_category_ids.append(category.getId())
+
+        self.assertIsNotNone(category)
+        self.assertEqual(category.getTitle(), title)
+        self.assertEqual(category.getPosition(), position)
+        self.assertEqual(category.getCreatedBy(), "test_user")
+        self.assertIsNone(category.getUpdatedBy())
+        self.assertIsNone(category.getDeletedBy())
+        self.assertIsNotNone(category.getCreateTime())
+        self.assertIsNone(category.getUpdateTime())
+        self.assertIsNone(category.getDeleteTime())
+
+    def test_03_get_deleted_category_by_title(self):
+        """Тест 03: Получение удаленной категории по Title"""
+        title = "Категория 3"
+        category_new = self.service.get(title, 1, 0, None)
+        self.test_category_ids.append(category_new.getId())
+        self.repository.deleteById(category_new.getId(), "test_user")
+
+        # Категория не удалена физически из таблицы, ее позиция должна быть наибольшая из существующих
+        position = self.repository.getMaxPosition()
+        category = self.service.get(title)
+        self.test_category_ids.append(category.getId())
+
+        self.assertIsNotNone(category)
+        self.assertEqual(category.getTitle(), title)
+        self.assertEqual(category.getPosition(), position)
         self.assertEqual(category.getCreatedBy(), "test_user")
         self.assertEqual(category.getUpdatedBy(), "test_user")
+        self.assertIsNone(category.getDeletedBy())
         self.assertIsNotNone(category.getCreateTime())
         self.assertIsNotNone(category.getUpdateTime())
-        self.assertGreater(category.getPosition(), 0)
+        self.assertIsNone(category.getDeleteTime())
+        self.assertNotEqual(category.getCreateTime(), category.getUpdateTime())
+    
+    def test_04_get_category_by_id(self):
+        """Тест 04: Получение категории по ID"""
+        category = self.service.get(self.Integer(1))
+        self.assertIsNotNone(category)
+        self.assertEqual(category.getId(), 1)
+        self.assertEqual(category.getTitle(), "Доходы")
+        self.assertEqual(category.getPosition(), 1)
+        self.assertEqual(category.getCreatedBy(), "initializer")
+        self.assertIsNone(category.getUpdatedBy())
+        self.assertIsNone(category.getDeletedBy())
+        self.assertIsNotNone(category.getCreateTime())
+        self.assertIsNone(category.getUpdateTime())
+        self.assertIsNone(category.getDeleteTime())
 
-    def test_02_get_all_categories(self):
-        """Тест 02: Получение всех категорий"""
-        c1 = self.service.create("Категория 1")
-        c2 = self.service.create("Категория 2")
-        self.test_category_ids.append(c1.getId())
-        self.test_category_ids.append(c2.getId())
-        categories = self.service.getAll()
-        self.assertIsNotNone(categories)
-        self.assertGreater(len(categories), 0)
-        ids = [c.getId() for c in categories]
-        self.assertIn(c1.getId(), ids)
-        self.assertIn(c2.getId(), ids)
+    def test_05_get_category_by_id_not_found(self):
+        """Тест 05: Получение категории по несуществующему ID"""
+        category = self.service.get(self.Integer(999999))
+        self.assertIsNone(category)
 
-    def test_03_get_category_by_id(self):
-        """Тест 03: Получение категории по ID"""
-        category = self.service.create("Категория по ID")
+    def test_06_create_category_with_special_title(self):
+        """Тест 06: Создание категории с необычным названием"""
+        category = self.service.get("12123", 1, 0, None)
         self.test_category_ids.append(category.getId())
-        found = self.service.getById(category.getId())
-        self.assertTrue(found.isPresent())
-        self.assertEqual(found.get().getId(), category.getId())
+        self.assertEqual(category.getTitle(), "12123")
+        
+        category2 = self.service.get("Категория с цифрами 123", 1, 0, None)
+        self.test_category_ids.append(category2.getId())
+        self.assertEqual(category2.getTitle(), "Категория с цифрами 123")
 
-    def test_04_get_category_by_id_not_found(self):
-        """Тест 04: Получение категории по несуществующему ID"""
-        found = self.service.getById(999999)
-        self.assertFalse(found.isPresent())
+    def test_07_create_category_with_invalid_title(self):
+        """Тест 07: Создание категории с недопустимым названием"""
+        with self.assertRaises(Exception):
+            self.service.createCategory("""Категория с недопустимым названием {123}""")
 
-    def test_05_get_category_by_title(self):
-        """Тест 05: Получение категории по названию"""
-        title = "Уникальная категория"
-        category = self.service.create(title)
-        self.test_category_ids.append(category.getId())
-        found = self.service.getByTitle(title)
-        self.assertTrue(found.isPresent())
-        self.assertEqual(found.get().getId(), category.getId())
-
-    def test_06_get_category_by_title_not_found(self):
-        """Тест 06: Получение категории по несуществующему названию"""
-        found = self.service.getByTitle("Несуществующая категория")
-        self.assertFalse(found.isPresent())
-
-    def test_07_delete_category_by_id(self):
-        """Тест 07: Удаление категории по ID"""
-        category = self.service.create("Категория для удаления")
+    def test_08_delete_category_by_id(self):
+        """Тест 08: Удаление категории по ID"""
+        category = self.service.get("Категория 4", 1, 0, None)
         self.test_category_ids.append(category.getId())
         result = self.service.delete(category.getId())
         self.assertTrue(result)
@@ -120,10 +164,10 @@ class TestCategoryService(unittest.TestCase):
         self.assertIsNotNone(found.get().getDeleteTime())
         self.assertEqual(found.get().getDeletedBy(), "test_user")
 
-    def test_08_delete_category_by_title(self):
-        """Тест 08: Удаление категории по названию"""
-        title = "Категория для удаления по названию"
-        category = self.service.create(title)
+    def test_09_delete_category_by_title(self):
+        """Тест 09: Удаление категории по названию"""
+        title = "Категория 5"
+        category = self.service.get(title, 1, 0, None)
         self.test_category_ids.append(category.getId())
         result = self.service.delete(title)
         self.assertTrue(result)
@@ -133,49 +177,12 @@ class TestCategoryService(unittest.TestCase):
         self.assertIsNotNone(found.get().getDeleteTime())
         self.assertEqual(found.get().getDeletedBy(), "test_user")
 
-    def test_09_restore_category(self):
-        """Тест 09: Восстановление удалённой категории"""
-        category = self.service.create("Категория для восстановления")
-        self.test_category_ids.append(category.getId())
-        self.repository.deleteById(category.getId(), "test_user")
-        deleted = self.repository.findById(category.getId()).get()
-        restored = self.service.restore(deleted)
-        self.assertIsNotNone(restored)
-        self.assertIsNone(restored.getDeleteTime())
-        self.assertIsNone(restored.getDeletedBy())
-        self.assertEqual(restored.getUpdatedBy(), "test_user")
-
-    def test_10_restore_category_by_id(self):
-        """Тест 10: Восстановление категории по ID"""
-        category = self.service.create("Категория для восстановления по ID")
-        self.test_category_ids.append(category.getId())
-        self.repository.deleteById(category.getId(), "test_user")
-        restored = self.service.restore(category.getId())
-        self.assertIsNotNone(restored)
-        self.assertIsNone(restored.getDeleteTime())
-        self.assertIsNone(restored.getDeletedBy())
-
-    def test_11_restore_category_by_id_not_found(self):
-        """Тест 11: Восстановление категории по несуществующему ID"""
-        restored = self.service.restore(999999)
-        self.assertIsNone(restored)
-
-    def test_12_is_category_deleted(self):
-        """Тест 12: Проверка удаления категории"""
-        category = self.service.create("Категория для проверки удаления")
-        self.test_category_ids.append(category.getId())
-        self.repository.deleteById(category.getId(), "test_user")
-        deleted = self.repository.findById(category.getId()).get()
-        self.assertTrue(self.service.isCategoryDeleted(deleted))
-        # Восстановим для очистки
-        self.service.restore(deleted)
-
-    def test_13_change_position(self):
-        """Тест 13: Изменение позиции категории"""
+    def test_10_change_position(self):
+        """Тест 10: Изменение позиции категории"""
         position = self.repository.getMaxPosition()
-        c1 = self.service.create("Категория 1")
-        c2 = self.service.create("Категория 2")
-        c3 = self.service.create("Категория 3")
+        c1 = self.service.get("Категория х1", 1, 0, None)
+        c2 = self.service.get("Категория х2", 1, 0, None)
+        c3 = self.service.get("Категория х3", 1, 0, None)
         self.test_category_ids.extend([c1.getId(), c2.getId(), c3.getId()])
         # Перемещаем c1 на позицию 3
         result = self.service.changePosition(c1, position + 3)
@@ -186,12 +193,12 @@ class TestCategoryService(unittest.TestCase):
         self.assertEqual(updated_c2.getPosition(), position + 1)
         self.assertEqual(updated_c3.getPosition(), position + 2)
 
-    def test_14_change_position_up(self):
-        """Тест 14: Перемещение категории вверх"""
+    def test_11_change_position_up(self):
+        """Тест 11: Перемещение категории вверх"""
         position = self.repository.getMaxPosition()
-        c1 = self.service.create("Категория A")
-        c2 = self.service.create("Категория B")
-        c3 = self.service.create("Категория C")
+        c1 = self.service.get("Категория A", 1, 0, None)
+        c2 = self.service.get("Категория B", 1, 0, None)
+        c3 = self.service.get("Категория C", 1, 0, None)
         self.test_category_ids.extend([c1.getId(), c2.getId(), c3.getId()])
         # Перемещаем c3 на позицию 1
         result = self.service.changePosition(c3, position + 1)
@@ -201,182 +208,225 @@ class TestCategoryService(unittest.TestCase):
         self.assertEqual(updated_c1.getPosition(), position + 2)
         self.assertEqual(updated_c2.getPosition(), position + 3)
 
-    def test_15_change_position_by_old_new(self):
-        """Тест 15: Изменение позиции по старой и новой позиции"""
+    def test_12_change_position_by_old_new(self):
+        """Тест 12: Изменение позиции по старой и новой позиции"""
         position = self.repository.getMaxPosition()
-        c1 = self.service.create("Категория X")
-        c2 = self.service.create("Категория Y")
-        c3 = self.service.create("Категория Z")
+        c1 = self.service.get("Категория X", 1, 0, None)
+        c2 = self.service.get("Категория Y", 1, 0, None)
+        c3 = self.service.get("Категория Z", 1, 0, None)
         self.test_category_ids.extend([c1.getId(), c2.getId(), c3.getId()])
         result = self.service.changePosition(position + 1, position + 3)
         self.assertIsNotNone(result)
         self.assertEqual(result.getPosition(), position + 3)
 
-    def test_16_change_position_by_old_new_not_found(self):
-        """Тест 16: Изменение позиции по несуществующей старой позиции"""
+    def test_13_change_position_by_old_new_not_found(self):
+        """Тест 13: Изменение позиции по несуществующей старой позиции"""
         result = self.service.changePosition(999, 1)
         self.assertIsNone(result)
 
-    def test_17_change_position_same_position(self):
-        """Тест 17: Изменение позиции на ту же позицию"""
-        category = self.service.create("Категория без изменений")
+    def test_14_change_position_same_position(self):
+        """Тест 14: Изменение позиции на ту же позицию"""
+        category = self.service.get("Категория без изменений", 1, 0, None)
         self.test_category_ids.append(category.getId())
         old_position = category.getPosition()
         result = self.service.changePosition(category, old_position)
         self.assertEqual(result.getPosition(), old_position)
 
-    def test_18_change_position_invalid_position(self):
-        """Тест 18: Изменение позиции на недопустимую"""
-        category = self.service.create("Категория для теста")
+    def test_15_change_position_invalid_position(self):
+        """Тест 15: Изменение позиции на недопустимую"""
+        category = self.service.get("Категория для теста", 1, 0, None)
         self.test_category_ids.append(category.getId())
         with self.assertRaises(Exception):
             self.service.changePosition(category, 999)
 
-    def test_19_set_user_unsupported(self):
-        """Тест 19: Попытка сменить пользователя"""
-        with self.assertRaises(Exception):
-            self.service.setUser("new_user")
-
-    def test_20_create_category_with_special_title(self):
-        """Тест 20: Создание категории с необычным названием"""
-        category = self.service.create("")
-        self.test_category_ids.append(category.getId())
-        self.assertEqual(category.getTitle(), "")
-        
-        category2 = self.service.create("Категория с цифрами 123")
-        self.test_category_ids.append(category2.getId())
-        self.assertEqual(category2.getTitle(), "Категория с цифрами 123")
-
-    def test_21_category_position_sequence(self):
-        """Тест 21: Последовательность позиций категорий"""
-        categories = []
-        position = self.repository.getMaxPosition()
-        for i in range(4):
-            c = self.service.create(f"Категория {i + 1}")
-            categories.append(c)
-            self.test_category_ids.append(c.getId())
-        for i, c in enumerate(categories):
-            self.assertEqual(c.getPosition(), position + i + 1)
-
-    def test_22_delete_and_restore_cycle(self):
-        """Тест 22: Цикл удаления и восстановления категории"""
-        category = self.service.create("Категория для цикла")
-        self.test_category_ids.append(category.getId())
-        self.service.delete(category.getId())
-        restored1 = self.service.restore(category.getId())
-        self.assertEqual(restored1.getId(), category.getId())
-        self.service.delete(category.getId())
-        restored2 = self.service.restore(category.getId())
-        self.assertEqual(restored2.getId(), category.getId())
-
-    def test_23_get_all_by_operation_type(self):
-        """Тест 23: Получение категорий по типу операции"""
-        # Создаем категории с разными типами операций
-        c1 = self.service.create("Категория типа 1")
-        c2 = self.service.create("Категория типа 2")
+    def test_16_get_all_categories(self):
+        """Тест 16: Получение всех категорий"""
+        c1 = self.service.get("Категория 111", 1, 0, None)
+        c2 = self.service.get("Категория 211", 1, 0, None)
         self.test_category_ids.append(c1.getId())
         self.test_category_ids.append(c2.getId())
+        categories = self.service.getAll()
+        self.assertIsNotNone(categories)
+        self.assertGreater(len(categories), 0)
+        ids = [c.getId() for c in categories]
+        self.assertIn(c1.getId(), ids)
+        self.assertIn(c2.getId(), ids)
+
+    def test_17_is_category_deleted(self):
+        """Тест 17: Проверка удаления категории"""
+        category = self.service.get("Категория для проверки удаления", 1, 0, None)
+        self.test_category_ids.append(category.getId())
+        self.repository.deleteById(category.getId(), "test_user")
+        deleted = self.repository.findById(category.getId()).get()
+        self.assertTrue(self.service.isCategoryDeleted(deleted))
+
+    def test_18_create_category_with_unicode_title(self):
+        """Тест 18: Создание категории с Unicode названием"""
+        title = "Категория с кириллицей и символами: !@#$%^&*()"
+        with self.assertRaises(Exception):
+            self.service.get(title)
+
+    def test_19_get_category_with_special_characters(self):
+        """Тест 19: Получение категории со специальными символами"""
+        title = "Категория с символами: €$¥£₽"
+        with self.assertRaises(Exception):
+            self.service.get(title)
+
+    def test_20_get_category_with_operation_type(self):
+        """Тест 20: Получение категории с указанным типом операций"""
+        title = "Категория расходов"
+        category = self.service.get(title, 1)  # Тип операций: расход
+        self.test_category_ids.append(category.getId())
         
-        # Устанавливаем типы операций через репозиторий
-        c1.setOperationType(1)
-        c2.setOperationType(2)
-        self.repository.update(c1)
-        self.repository.update(c2)
+        self.assertIsNotNone(category)
+        self.assertEqual(category.getTitle(), title)
+        self.assertEqual(category.getOperationType(), 1)
+        self.assertEqual(category.getType(), 1)  # По умолчанию дочерняя
+        self.assertIsNone(category.getParentId())  # По умолчанию null
+
+    def test_21_get_category_with_operation_type_and_type(self):
+        """Тест 21: Получение категории с указанным типом операций и типом категории"""
+        title = "Родительская категория доходов"
+        category = self.service.get(title, 2, 0)  # Доход, родительская
+        self.test_category_ids.append(category.getId())
+        
+        self.assertIsNotNone(category)
+        self.assertEqual(category.getTitle(), title)
+        self.assertEqual(category.getOperationType(), 2)
+        self.assertEqual(category.getType(), 0)
+        self.assertIsNone(category.getParentId())
+
+    def test_22_get_category_with_all_parameters(self):
+        """Тест 22: Получение категории со всеми параметрами"""
+        parent_title = "Родительская категория"
+        parent = self.service.get(parent_title, 1, 0, None)
+        self.test_category_ids.append(parent.getId())
+        
+        child_title = "Дочерняя категория"
+        child = self.service.get(child_title, 1, 1, parent.getId())
+        self.test_category_ids.append(child.getId())
+        
+        self.assertIsNotNone(child)
+        self.assertEqual(child.getTitle(), child_title)
+        self.assertEqual(child.getOperationType(), 1)
+        self.assertEqual(child.getType(), 1)
+        self.assertEqual(child.getParentId(), parent.getId())
+
+    def test_23_get_existing_category_with_different_parameters(self):
+        """Тест 23: Получение существующей категории с другими параметрами (должно обновить)"""
+        title = "Категория для обновления"
+        
+        # Создаем категорию с параметрами по умолчанию
+        category1 = self.service.get(title, 1, 0, None)
+        self.test_category_ids.append(category1.getId())
+        
+        # Получаем ту же категорию с другими параметрами
+        category2 = self.service.get(title, 2, 1, self.Integer(1))
+        self.test_category_ids.append(category2.getId())
+        
+        # Должна быть та же категория, но с обновленными параметрами
+        self.assertEqual(category1.getId(), category2.getId())
+        self.assertEqual(category2.getOperationType(), 2)
+        self.assertEqual(category2.getType(), 1)
+        self.assertEqual(category2.getParentId(), self.Integer(1))
+
+    def test_24_get_all_by_operation_type(self):
+        """Тест 24: Получение категорий по типу операции"""
+        # Создаем категории с разными типами операций
+        c1 = self.service.get("Категория типа 1", 1)
+        c2 = self.service.get("Категория типа 2", 2)
+        self.test_category_ids.append(c1.getId())
+        self.test_category_ids.append(c2.getId())
         
         categories_type_1 = self.service.getAllByOperationType(1)
         categories_type_2 = self.service.getAllByOperationType(2)
         
-        self.assertGreater(categories_type_1.size(), 0)
-        self.assertGreater(categories_type_2.size(), 0)
+        self.assertGreater(len(categories_type_1), 0)
+        self.assertGreater(len(categories_type_2), 0)
         
         # Проверяем, что наши категории есть в соответствующих списках
-        type_1_ids = []
-        type_2_ids = []
-        for c in categories_type_1:
-            type_1_ids.append(c.getId())
-        for c in categories_type_2:
-            type_2_ids.append(c.getId())
+        type_1_ids = [c.getId() for c in categories_type_1]
+        type_2_ids = [c.getId() for c in categories_type_2]
         
         self.assertIn(c1.getId(), type_1_ids)
         self.assertIn(c2.getId(), type_2_ids)
 
-    def test_24_get_all_by_type(self):
-        """Тест 24: Получение категорий по типу категории"""
+    def test_25_get_all_by_type(self):
+        """Тест 25: Получение категорий по типу категории"""
         # Создаем категории с разными типами
-        c1 = self.service.create("Категория типа A")
-        c2 = self.service.create("Категория типа B")
+        c1 = self.service.get("Категория типа A", 1, 0)  # Родительская
+        c2 = self.service.get("Категория типа B", 1, 1)  # Дочерняя
         self.test_category_ids.append(c1.getId())
         self.test_category_ids.append(c2.getId())
         
-        # Устанавливаем типы через репозиторий
-        c1.setType(1)
-        c2.setType(2)
-        self.repository.update(c1)
-        self.repository.update(c2)
-        
+        categories_type_0 = self.service.getAllByType(0)
         categories_type_1 = self.service.getAllByType(1)
-        categories_type_2 = self.service.getAllByType(2)
         
-        self.assertGreater(categories_type_1.size(), 0)
-        self.assertGreater(categories_type_2.size(), 0)
+        self.assertGreater(len(categories_type_0), 0)
+        self.assertGreater(len(categories_type_1), 0)
         
         # Проверяем, что наши категории есть в соответствующих списках
-        type_1_ids = []
-        type_2_ids = []
-        for c in categories_type_1:
-            type_1_ids.append(c.getId())
-        for c in categories_type_2:
-            type_2_ids.append(c.getId())
+        type_0_ids = [c.getId() for c in categories_type_0]
+        type_1_ids = [c.getId() for c in categories_type_1]
         
-        self.assertIn(c1.getId(), type_1_ids)
-        self.assertIn(c2.getId(), type_2_ids)
+        self.assertIn(c1.getId(), type_0_ids)
+        self.assertIn(c2.getId(), type_1_ids)
 
-    def test_25_get_all_by_parent_id(self):
-        """Тест 25: Получение категорий по ID родительской категории"""
+    def test_26_get_all_by_parent_id(self):
+        """Тест 26: Получение категорий по ID родительской категории"""
         # Создаем родительскую и дочерние категории
-        parent = self.service.create("Родительская категория")
-        child1 = self.service.create("Дочерняя категория 1")
-        child2 = self.service.create("Дочерняя категория 2")
+        parent = self.service.get("Родительская категория", 1, 0, None)
+        child1 = self.service.get("Дочерняя категория 1", 1, 1, parent.getId())
+        child2 = self.service.get("Дочерняя категория 2", 1, 1, parent.getId())
         self.test_category_ids.extend([parent.getId(), child1.getId(), child2.getId()])
         
-        # Устанавливаем родительские ID через репозиторий
-        child1.setParentId(parent.getId())
-        child2.setParentId(parent.getId())
-        self.repository.update(child1)
-        self.repository.update(child2)
-        
         children = self.service.getAllByParentId(parent.getId())
-        self.assertGreater(children.size(), 0)
+        self.assertGreater(len(children), 0)
         
         # Проверяем, что дочерние категории есть в списке
-        child_ids = []
-        for c in children:
-            child_ids.append(c.getId())
+        child_ids = [c.getId() for c in children]
         
         self.assertIn(child1.getId(), child_ids)
         self.assertIn(child2.getId(), child_ids)
 
-    def test_26_create_category_with_unicode_title(self):
-        """Тест 26: Создание категории с Unicode названием"""
-        title = "Категория с кириллицей и символами: !@#$%^&*()"
-        category = self.service.create(title)
+    def test_27_update_category_with_optional_parameters(self):
+        """Тест 27: Обновление категории с Optional параметрами"""
+        
+        # Создаем категорию
+        category = self.service.get("Категория для обновления")
         self.test_category_ids.append(category.getId())
-        self.assertEqual(category.getTitle(), title)
+        
+        # Обновляем только название
+        updated = self.service.update(category, 
+            self.Optional.of("Новое название"), 
+            self.Optional.empty(), 
+            self.Optional.empty(), 
+            self.Optional.empty())
+        
+        self.assertEqual(updated.getTitle(), "Новое название")
+        self.assertEqual(updated.getOperationType(), category.getOperationType())  # Не изменилось
+        self.assertEqual(updated.getType(), category.getType())  # Не изменилось
 
-    def test_27_category_audit_fields(self):
-        """Тест 27: Проверка аудит-полей категории"""
-        category = self.service.create("Категория для аудита")
+    def test_28_update_category_with_all_parameters(self):
+        """Тест 28: Обновление категории со всеми параметрами"""
+        
+        # Создаем категорию
+        category = self.service.get("Категория для полного обновления", 1, 0, None)
         self.test_category_ids.append(category.getId())
         
-        # Проверяем, что все аудит-поля заполнены
-        self.assertEqual(category.getCreatedBy(), "test_user")
-        self.assertEqual(category.getUpdatedBy(), "test_user")
-        self.assertIsNotNone(category.getCreateTime())
-        self.assertIsNotNone(category.getUpdateTime())
+        # Обновляем все параметры
+        updated = self.service.update(category, 
+            self.Optional.of("Полностью новое название"), 
+            self.Optional.of(self.Integer(2)),  # Доход - Integer
+            self.Optional.of(self.Integer(1)),  # Дочерняя - Integer  
+            self.Optional.of(self.Integer(1)))  # Родитель - Integer
         
-        # Проверяем, что время создания и обновления совпадают при создании
-        self.assertEqual(category.getCreateTime(), category.getUpdateTime())
+        self.assertEqual(updated.getTitle(), "Полностью новое название")
+        self.assertEqual(updated.getOperationType(), 2)
+        self.assertEqual(updated.getType(), 1)
+        self.assertEqual(updated.getParentId(), 1)
 
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
+    

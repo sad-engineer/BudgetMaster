@@ -3,9 +3,13 @@ package service;
 import model.Category;
 import repository.CategoryRepository;
 import validator.CategoryValidator;
+import validator.BaseEntityValidator;
+import validator.CommonValidator;
 import constants.ServiceConstants;
+import constants.ModelConstants;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +22,7 @@ public class CategoryService {
      */
     private final CategoryRepository categoryRepository;
 
-     /**
+    /**
      * Пользователь, выполняющий операции
      */
     private final String user;
@@ -43,12 +47,34 @@ public class CategoryService {
     }
 
     /**
+     * Удаляет категорию по id
+     * @param id id категории
+     * @return true, если удаление успешно
+     */
+    public boolean delete(Integer id) {
+        CommonValidator.validateId(id);
+        return categoryRepository.deleteById(id, user);
+    }
+
+    /**
+     * Удаляет категорию по title
+     * @param title название категории
+     * @return true, если удаление успешно
+     */
+    public boolean delete(String title) {
+        CommonValidator.validateCategoryTitle(title);
+        return categoryRepository.deleteByTitle(title, user);
+    }
+
+    /**
      * Изменяет порядок категории с переупорядочиванием других категорий
      * @param category категория для изменения позиции
      * @param newPosition новая позиция
      * @return категория с новой позицией
      */
     public Category changePosition(Category category, int newPosition) {
+        BaseEntityValidator.validate(category);
+        CommonValidator.validatePositivePosition(newPosition);
         int oldPosition = category.getPosition();
         
         // Если позиция не изменилась, ничего не делаем
@@ -102,53 +128,55 @@ public class CategoryService {
      * Изменяет порядок категории с переупорядочиванием других категорий
      * @param oldPosition старая позиция
      * @param newPosition новая позиция
-     * @return категория с новой позицией
+     * @return категория с новой позицией. Если категория не найдена, возвращает null
      */
-    public Category changePosition(int oldPosition, int newPosition) {   
-        Optional<Category> categoryOpt = getById(oldPosition);
-        if (categoryOpt.isPresent()) {
-            return changePosition(categoryOpt.get(), newPosition);
+    public Category changePosition(int oldPosition, int newPosition) {
+        CommonValidator.validatePositivePosition(oldPosition);
+        Optional<Category> category = categoryRepository.findByPosition(oldPosition);
+        if (category.isPresent()) {
+            return changePosition(category.get(), newPosition);
         }
         return null;
     }
 
     /**
-     * Создает новую категорию
-     * @param title title категории
-     * @return созданная категория
+     * Изменяет порядок категории с переупорядочиванием других категорий
+     * @param title название категории
+     * @param newPosition новая позиция
+     * @return категория с новой позицией. Если категория не найдена, возвращает null
      */
-    public Category create(String title) {
+    public Category changePosition(String title, int newPosition) {
+        CommonValidator.validateCategoryTitle(title);
+        Optional<Category> categoryOpt = categoryRepository.findByTitle(title);
+        if (categoryOpt.isPresent()) {
+            return changePosition(categoryOpt.get(), newPosition);
+        }
+        return null;
+    }    
+
+    /**
+     * Создает новую категорию без валидации названия категории (для внутреннего использования)
+     * @param title название категории
+     * @param operationType тип операций (1-расход, 2-доход)
+     * @param type тип категории (0-родительская, 1-дочерняя)
+     * @param parentId ID родительской категории (null для корневых категорий)
+     * @return категория
+     */
+    private Category create(String title, int operationType, int type, Integer parentId) {
         Category newCategory = new Category();
-        newCategory.setTitle(title);
         int nextPosition = categoryRepository.getMaxPosition() + 1;
+        newCategory.setTitle(title);
+        newCategory.setOperationType(operationType);
+        newCategory.setType(type);
+        newCategory.setParentId(parentId);
         newCategory.setPosition(nextPosition);
         newCategory.setCreateTime(LocalDateTime.now());
         newCategory.setCreatedBy(user);
-        newCategory.setUpdateTime(LocalDateTime.now());
-        newCategory.setUpdatedBy(user);
 
         // Валидация категории
         CategoryValidator.validateForCreate(newCategory);
-        
+
         return categoryRepository.save(newCategory);
-    }
-
-    /**
-     * Удаляет категорию по id
-     * @param id id категории
-     * @return true, если удаление успешно
-     */
-    public boolean delete(int id) {
-        return categoryRepository.deleteById(id, user);
-    }
-
-    /**
-     * Удаляет категорию по title
-     * @param title title категории
-     * @return true, если удаление успешно
-     */
-    public boolean delete(String title) {
-        return categoryRepository.deleteByTitle(title, user);
     }
 
     /**
@@ -187,66 +215,186 @@ public class CategoryService {
     }
 
     /**
-     * Получает категорию по ID
+     * Получает категорию по ID. 
+     * Если категория с таким ID существует, возвращает ее.
+     * Если категория с таким ID существует, но удалена, восстанавливает ее (удаляет информацию об удалении категории).
+     * Если категория с таким ID не существует, вернет null.
      * @param id ID категории
      * @return категория
      */
-    public Optional<Category> getById(int id) { 
-        return categoryRepository.findById(id);
+    public Category get(Integer id) { 
+        BaseEntityValidator.validatePositiveId(id, "ID категории");
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isPresent()) {
+            Category categoryObj = category.get();
+            if (isCategoryDeleted(categoryObj)) {
+                return restore(categoryObj);
+            }
+            return categoryObj;
+        }
+        return null;
     }
 
     /**
-     * Получает категорию по title
-     * @param title title категории
+     * Получает категорию по названию. 
+     * Если категория с таким названием существует, возвращает ее.
+     * Если категория с таким названием существует, но удалена, восстанавливает ее (удаляет информацию об удалении категории).
+     * Если категория с таким названием не существует, возвращает null.
+     * @param title название категории
      * @return категория
      */
-    public Optional<Category> getByTitle(String title) {
-        return categoryRepository.findByTitle(title);
+    public Category get(String title) {
+        CommonValidator.validateCategoryTitle(title);
+        Optional<Category> category = categoryRepository.findByTitle(title);
+        if (category.isPresent()) {
+            Category categoryObj = category.get();
+            if (isCategoryDeleted(categoryObj)) {
+                return restore(categoryObj);
+            }
+            return categoryObj;
+        }
+        return null;
     }
-   
 
     /**
-     * Проверка категории на удаление
-     * @param category класс категории
+     * Получает категорию по названию или создает новую с указанными параметрами.
+     * Если категория с таким названием существует, и параметры совпадают с указанными, возвращает ее.
+     * Если категория с таким названием существует, но параметры отличные от указанных, обновляет ее.
+     * Если категория с таким названием существует, но удалена, восстанавливает ее.
+     * Если категория с таким названием существует, но удалена и параметры отличные от указанных, восстанавливает ее.
+     * Если категория с таким названием не существует, создает новую с указанными параметрами.
+     * @param title название категории
+     * @param operationType тип операций (1-расход, 2-доход)
+     * @param type тип категории (0-родительская, 1-дочерняя)
+     * @param parentId ID родительской категории (null для корневых категорий)
+     * @return категория
+     */
+    public Category get(String title, int operationType, int type, Integer parentId) {
+        CommonValidator.validateCategoryTitle(title);
+        CommonValidator.validateOperationType(operationType);
+        CommonValidator.validateCategoryType(type);
+        CommonValidator.validateParentId(parentId);
+
+        Optional<Category> category = categoryRepository.findByTitle(title);
+        if (category.isPresent()) {
+            Category categoryObj = category.get();
+            Category categoryUpd = new Category(categoryObj.getId(), categoryObj.getCreateTime(), categoryObj.getUpdateTime(), categoryObj.getDeleteTime(), categoryObj.getCreatedBy(), categoryObj.getUpdatedBy(), categoryObj.getDeletedBy(), categoryObj.getPosition(), title, operationType, type, parentId);
+            
+            if (categoryObj.getTitle().equals(title) &&
+                categoryObj.getOperationType() == operationType &&
+                categoryObj.getType() == type &&
+                Objects.equals(categoryObj.getParentId(), parentId)) {
+                
+                return categoryObj;
+            }
+
+            return update(categoryUpd, Optional.of(title), Optional.of(operationType), Optional.of(type), Optional.of(parentId));
+        }
+
+        return create(title, operationType, type, parentId);
+    }
+
+    /**
+     * Получает категорию по названию или создает новую с указанным типом операций.
+     * Если категория с таким названием существует, возвращает ее.
+     * Если категория с таким названием существует, но удалена, восстанавливает ее.
+     * Если категория с таким названием не существует, создает новую с указанным типом операций.
+     * @param title название категории
+     * @param operationType тип операций (1-расход, 2-доход)
+     * @return категория
+     */
+    public Category get(String title, int operationType) {
+        return get(title, operationType, ModelConstants.DEFAULT_CATEGORY_TYPE, ModelConstants.DEFAULT_PARENT_CATEGORY_ID);
+    }
+
+    /**
+     * Получает категорию по названию или создает новую с указанным типом операций и типом категории.
+     * Если категория с таким названием существует, возвращает ее.
+     * Если категория с таким названием существует, но удалена, восстанавливает ее.
+     * Если категория с таким названием не существует, создает новую с указанными параметрами.
+     * @param title название категории
+     * @param operationType тип операций (1-расход, 2-доход)
+     * @param type тип категории (0-родительская, 1-дочерняя)
+     * @return категория
+     */
+    public Category get(String title, int operationType, int type) {
+        return get(title, operationType, type, ModelConstants.DEFAULT_PARENT_CATEGORY_ID);
+    }
+
+    /**
+     * Проверяет, удалена ли категория
+     * @param category категория для проверки
      * @return true, если категория удалена
      */
     public boolean isCategoryDeleted(Category category) {
-        return category.getDeleteTime() != null;
+        return category.isDeleted();
     }
 
     /**
-     * Восстанавливает категорию
-     * @param restoredCategory категория
-     * @return категория
+     * Восстанавливает удаленную категорию
+     * @param restoredCategory категория для восстановления
+     * @return восстановленная категория
      */
-    public Category restore(Category restoredCategory) {
-        restoredCategory.setDeleteTime(null);
+    private Category restore(Category restoredCategory) {
         restoredCategory.setDeletedBy(null);
+        restoredCategory.setDeleteTime(null);
         restoredCategory.setUpdateTime(LocalDateTime.now());
         restoredCategory.setUpdatedBy(user);
         return categoryRepository.update(restoredCategory);
-    }
-
+    }    
+        
     /**
-     * Восстанавливает категорию по id
-     * @param id id категории
-     * @return категория или null, если категория не найдена
+     * Обновляет категорию
+     * @param updatedCategory категория для обновления
+     * @param newTitle новое название категории
+     * @param newOperationType новое значение типа операции (1-расход, 2-доход)
+     * @param newType новое значение типа категории (0-родительская, 1-дочерняя)
+     * @param newParentId новое значение ID родительской категории (null для корневых категорий)
+     * @return обновленная категория
      */
-    public Category restore(int id) {
-        Optional<Category> categoryOpt = getById(id);
-        if (categoryOpt.isPresent()) {
-            return restore(categoryOpt.get());
+    public Category update(Category updatedCategory, 
+                            Optional<String> newTitle,
+                            Optional<Integer> newOperationType,
+                            Optional<Integer> newType,
+                            Optional<Integer> newParentId) {
+        BaseEntityValidator.validate(updatedCategory);
+        
+        newTitle.ifPresent(title -> {
+            CommonValidator.validateCategoryTitle(title);
+            updatedCategory.setTitle(title);
+        });
+        
+        newOperationType.ifPresent(operationType -> {
+            CommonValidator.validateOperationType(operationType);
+            updatedCategory.setOperationType(operationType);
+        });
+        
+        newType.ifPresent(type -> {
+            CommonValidator.validateCategoryType(type);
+            updatedCategory.setType(type);
+        });
+        
+        newParentId.ifPresent(parentId -> {
+            CommonValidator.validateParentId(parentId);
+            updatedCategory.setParentId(parentId);
+        });
+
+        if (updatedCategory.isDeleted()) {
+            return restore(updatedCategory);
         }
-        return null;
-    }   
+        return update(updatedCategory);
+    }
 
     /**
-     * Устанавливает нового пользователя для операций
-     * @param newUser новый пользователь
+     * Обновляет категорию без новых параметров (для внутреннего использования)
+     * @param updatedCategory категория для обновления
+     * @return обновленная категория
      */
-    public void setUser(String newUser) {
-        // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
-        // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException(ServiceConstants.ERROR_CANNOT_CHANGE_USER + "CategoryService");
+    private Category update(Category updatedCategory) {
+        updatedCategory.setUpdateTime(LocalDateTime.now());
+        updatedCategory.setUpdatedBy(user);
+        
+        return categoryRepository.update(updatedCategory);
     }
+    
 } 

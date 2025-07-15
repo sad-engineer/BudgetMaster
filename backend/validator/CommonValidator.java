@@ -63,7 +63,7 @@ public class CommonValidator {
      * @param currencyId ID валюты для валидации
      * @throws IllegalArgumentException если ID некорректный
      */
-    public static void validateCurrencyId(int currencyId) {
+    public static void validateId(int currencyId) {
         BaseEntityValidator.validatePositiveId(currencyId, "ID валюты");
     }
     
@@ -201,7 +201,16 @@ public class CommonValidator {
      * @throws IllegalArgumentException если название некорректное
      */
     public static void validateCurrencyTitle(String title) {
-        BaseEntityValidator.validateCurrencyTitle(title, "Название валюты");
+        validateTitle(title, "Название валюты");
+    }
+
+    /**
+     * Валидирует название категории
+     * @param title название для валидации
+     * @throws IllegalArgumentException если название некорректное
+     */
+    public static void validateCategoryTitle(String title) {
+        validateTitle(title, "Название категории");
     }
     
     /**

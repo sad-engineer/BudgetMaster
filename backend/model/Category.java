@@ -58,6 +58,14 @@ public class Category extends BaseEntity {
     // МЕТОДЫ ДЛЯ РАБОТЫ С КОНСТАНТАМИ
     
     /**
+     * Проверяет, является ли категория дочерней
+     * @return true, если категория дочерняя
+     */
+    public boolean isChildCategory() {
+        return type == ModelConstants.CATEGORY_TYPE_CHILD;
+    }
+
+    /**
      * Проверяет, является ли категория родительской
      * @return true, если категория родительская
      */
@@ -66,12 +74,12 @@ public class Category extends BaseEntity {
     }
     
     /**
-     * Проверяет, является ли категория дочерней
-     * @return true, если категория дочерняя
+     * Проверяет, является ли категория удаленной
+     * @return true, если категория удалена
      */
-    public boolean isChildCategory() {
-        return type == ModelConstants.CATEGORY_TYPE_CHILD;
-    }
+    public boolean isDeleted() {
+        return getDeletedBy() != null && getDeleteTime() != null;
+    }    
     
     /**
      * Проверяет, предназначена ли категория для расходов

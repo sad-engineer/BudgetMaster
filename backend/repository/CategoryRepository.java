@@ -132,6 +132,18 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
     }
 
     /**
+     * Поиск категории по позиции
+     * 
+     * <p>Возвращает категорию с указанной позицией.
+     * 
+     * @param position позиция категории для поиска (положительное целое число)    
+     * @return Optional с найденной категорией, если найдена, иначе пустой Optional
+     */
+    public Optional<Category> findByPosition(int position) {
+        return findByColumn(TABLE_CATEGORIES, COLUMN_POSITION, position, this::mapRowSafe);
+    }
+
+    /**
      * Получение максимального значения позиции среди всех категорий
      * 
      * <p>Выполняет SQL-запрос для получения максимального значения позиции.
@@ -224,6 +236,14 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         }
     }
 
+    /**
+     * Создание новой категории
+     * 
+     * <p>Вставляет новую категорию в базу данных.
+     * 
+     * @param category объект Category для создания (не null)
+     * @return созданная категория с заполненными полями (не null)  
+     */
     @Override
     public Category save(Category category) {
         String[] columns = new String[CATEGORY_COLUMNS.length - 1];
@@ -258,6 +278,14 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
         return category;
     }
 
+    /**
+     * Обновление категории
+     * 
+     * <p>Обновляет существующую категорию в базе данных.
+     * 
+     * @param category объект Category для обновления (не null) 
+     * @return обновленная категория с заполненными полями (не null)
+     */
     @Override
     public Category update(Category category) {
         String[] columns = new String[CATEGORY_COLUMNS.length - 1];
