@@ -85,297 +85,279 @@ class TestAccountService(unittest.TestCase):
         # Assert
         self.assertIsNotNone(service)
 
-    def test_03_create_account(self):
-        """Тест 03: Создание нового счета"""
-        # Arrange
+    def test_03_get_account_by_title(self):
+        """Тест 03: Получение нового (не существующего) счета по названию"""
         title = "Основной счет"
-        type_ = self.Integer(1)
-        currency_id = self.Integer(1)
+        position = self.repository.getMaxPosition() + 1
 
-        # Act
-        account = self.service.create(title, type_, currency_id)
-
-        # Сохраняем ID для очистки сразу после создания
+        account = self.service.get(title)
         self.test_account_ids.append(account.getId())
 
-        position = self.repository.getMaxPosition()
-        # Assert
         self.assertIsNotNone(account)
         self.assertEqual(account.getTitle(), title)
         self.assertEqual(account.getPosition(), position)
-        self.assertEqual(account.getAmount(), 0)
-        self.assertEqual(account.getType(), 1)
-        self.assertEqual(account.getCurrencyId(), 1)
-        self.assertEqual(account.getClosed(), 0)
-        self.assertIsNotNone(account.getCreateTime())
         self.assertEqual(account.getCreatedBy(), "test_user")
-        self.assertIsNotNone(account.getUpdateTime())
-        self.assertEqual(account.getUpdatedBy(), "test_user")
+        self.assertIsNone(account.getUpdatedBy())
+        self.assertIsNone(account.getDeletedBy())
+        self.assertIsNotNone(account.getCreateTime())
+        self.assertIsNone(account.getUpdateTime())
+        self.assertIsNone(account.getDeleteTime())
 
-    def test_04_create_multiple_accounts(self):
-        """Тест 04: Создание нескольких счетов"""
-        # Arrange
-        titles = ["Счет 1", "Счет 2", "Счет 3"]
+    def test_04_get_existing_account_by_title(self):
+        """Тест 04: Получение существующего счета по названию"""
+        title = "Существующий счет"
+        
+        account_new = self.service.get(title)
+        self.test_account_ids.append(account_new.getId())
+
+        # Счет создан, его позиция должна быть наибольшая из существующих
         position = self.repository.getMaxPosition()
-
-        # Act
-        accounts = []
-        positions = []
-        for title in titles:
-            account = self.service.create(title)
-            accounts.append(account)
-            position += 1
-            positions.append(position)
-
-            # Сохраняем ID для очистки сразу после создания
-            self.test_account_ids.append(account.getId())
-
-        # Assert
-        self.assertEqual(len(accounts), 3)
-        for i, account in enumerate(accounts):
-            self.assertEqual(account.getTitle(), titles[i])
-            self.assertEqual(account.getPosition(), positions[i])
-
-    def test_05_get_all_accounts(self):
-        """Тест 05: Получение всех счетов"""
-        # Arrange
-        account1 = self.service.create("Счет 21")
-        account2 = self.service.create("Счет 22")
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account1.getId())
-        self.test_account_ids.append(account2.getId())
-
-        # Act
-        accounts = self.service.getAll()
-
-        # Assert
-        # Java возвращает ArrayList, проверяем что это коллекция
-        self.assertIsNotNone(accounts)
-        self.assertGreater(accounts.size(), 0)
-
-        # Проверяем, что наши счета есть в списке
-        titles = []
-        for acc in accounts:
-            titles.append(acc.getTitle())
-        self.assertIn("Счет 1", titles)
-        self.assertIn("Счет 2", titles)
-
-    def test_06_get_by_id(self):
-        """Тест 06: Получение счета по ID"""
-        # Arrange
-        created_account = self.service.create("Тестовый счет")
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(created_account.getId())
-
-        # Act
-        found_account = self.service.getById(created_account.getId())
-
-        # Assert
-        self.assertTrue(found_account.isPresent())
-        self.assertEqual(found_account.get().getTitle(), "Тестовый счет")
-
-    def test_07_get_by_id_not_found(self):
-        """Тест 07: Получение счета по несуществующему ID"""
-        # Act
-        found_account = self.service.getById(999)
-
-        # Assert
-        self.assertFalse(found_account.isPresent())
-
-    def test_08_get_by_currency_id(self):
-        """Тест 08: Получение счетов по ID валюты"""
-        # Arrange
-        account1 = self.service.create("Счет 31", self.Integer(1), self.Integer(1))
-        account2 = self.service.create("Счет 31", self.Integer(1), self.Integer(2))
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account1.getId())
-        self.test_account_ids.append(account2.getId())
-
-        # Act
-        accounts = self.service.getByCurrencyId(1)
-
-        # Assert
-        # Java возвращает ArrayList, проверяем что это коллекция
-        self.assertIsNotNone(accounts)
-        self.assertGreater(accounts.size(), 0)
-
-        # Проверяем, что наши счета есть в списке
-        titles = []
-        for acc in accounts:
-            titles.append(acc.getTitle())
-        self.assertIn(account1.getTitle(), titles)
-
-        # account2 нет в списке из-за другого ID валюты
-        self.assertNotIn(account2.getTitle(), titles)
-
-    def test_09_get_by_type(self):
-        """Тест 09: Получение счетов по типу"""
-        # Arrange
-        account1 = self.service.create("Счет 41", self.Integer(1), self.Integer(1))
-        account2 = self.service.create("Счет 42", self.Integer(2), self.Integer(1))
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account1.getId())
-        self.test_account_ids.append(account2.getId())
-
-        # Act
-        accounts = self.service.getByType(1)
-
-        # Assert
-        # Java возвращает ArrayList, проверяем что это коллекция
-        self.assertIsNotNone(accounts)
-        self.assertGreater(accounts.size(), 0)
-
-        # Проверяем, что наши счета есть в списке
-        titles = []
-        for acc in accounts:
-            titles.append(acc.getTitle())
-        self.assertIn(account1.getTitle(), titles)
-
-        # account2 нет в списке из-за другого ID валюты
-        self.assertNotIn(account2.getTitle(), titles)
-
-    def test_10_get_account_by_title_new(self):
-        """Тест 10: Получение счета по названию - новый счет"""
-        # Arrange
-        title = "Новый счет"
-
-        # Act
         account = self.service.get(title)
-
-        # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
 
-        # Assert
         self.assertIsNotNone(account)
         self.assertEqual(account.getTitle(), title)
-        self.assertGreater(account.getPosition(), 0)
+        self.assertEqual(account.getPosition(), position)
+        self.assertEqual(account.getCreatedBy(), "test_user")
+        self.assertIsNone(account.getUpdatedBy())
+        self.assertIsNone(account.getDeletedBy())
+        self.assertIsNotNone(account.getCreateTime())
+        self.assertIsNone(account.getUpdateTime())
+        self.assertIsNone(account.getDeleteTime())
 
-    def test_11_get_account_by_title_existing(self):
-        """Тест 11: Получение счета по названию - существующий счет"""
-        # Arrange
-        title = "Существующий счет"
-        created_account = self.service.get(title)
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(created_account.getId())
-
-        # Act
-        found_account = self.service.get(title)
-
-        # Assert
-        self.assertIsNotNone(found_account)
-        self.assertEqual(found_account.getId(), created_account.getId())
-        self.assertEqual(found_account.getTitle(), title)
-
-    def test_12_get_account_by_title_deleted(self):
-        """Тест 12: Получение счета по названию - удаленный счет"""
-        # Arrange
+    def test_05_get_deleted_account_by_title(self):
+        """Тест 05: Получение удаленного счета по названию"""
         title = "Удаленный счет"
-        account = self.service.get(title)
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account.getId())
-
-        # Удаляем счет
+        
+        account_new = self.service.get(title)
+        self.test_account_ids.append(account_new.getId())
         self.repository.deleteByTitle(title, "test_user")
 
-        # Act
-        restored_account = self.service.get(title)
-
-        # Assert
-        self.assertIsNotNone(restored_account)
-        self.assertEqual(restored_account.getTitle(), title)
-        self.assertIsNone(restored_account.getDeleteTime())
-        self.assertIsNone(restored_account.getDeletedBy())
-
-    def test_13_is_account_deleted(self):
-        """Тест 13: Проверка удаления счета"""
-        # Arrange
-        account = self.service.create("Тестовый счет")
-
-        # Сохраняем ID для очистки сразу после создания
+        # Счет не удален физически из таблицы, его позиция должна быть наибольшая из существующих
+        position = self.repository.getMaxPosition()
+        account = self.service.get(title)
         self.test_account_ids.append(account.getId())
 
-        # Act & Assert - активный счет
-        self.assertFalse(self.service.isAccountDeleted(account))
+        self.assertIsNotNone(account)
+        self.assertEqual(account.getTitle(), title)
+        self.assertEqual(account.getPosition(), position)
+        self.assertEqual(account.getCreatedBy(), "test_user")
+        self.assertEqual(account.getUpdatedBy(), "test_user")
+        self.assertIsNone(account.getDeletedBy())
+        self.assertIsNotNone(account.getCreateTime())
+        self.assertIsNotNone(account.getUpdateTime())
+        self.assertIsNone(account.getDeleteTime())
+        self.assertNotEqual(account.getCreateTime(), account.getUpdateTime())
 
-        # Удаляем счет
-        self.repository.deleteByTitle("Тестовый счет", "test_user")
-        deleted_account = self.repository.findByTitle("Тестовый счет").get()
+    def test_06_get_account_by_id(self):
+        """Тест 06: Получение счета по ID"""
+        account = self.service.get(self.Integer(1))
+        self.assertIsNotNone(account)
+        self.assertEqual(account.getId(), 1)
+        self.assertEqual(account.getTitle(), "Основной счет")
+        self.assertEqual(account.getPosition(), 1)
+        self.assertEqual(account.getCreatedBy(), "initializer")
+        self.assertIsNone(account.getUpdatedBy())
+        self.assertIsNone(account.getDeletedBy())
+        self.assertIsNotNone(account.getCreateTime())
+        self.assertIsNone(account.getUpdateTime())
+        self.assertIsNone(account.getDeleteTime())
 
-        # Act & Assert - удаленный счет
-        self.assertTrue(self.service.isAccountDeleted(deleted_account))
+    def test_07_get_account_by_id_not_found(self):
+        """Тест 07: Получение счета по несуществующему ID"""
+        account = self.service.get(self.Integer(999999))
+        self.assertIsNone(account)
 
-    def test_14_restore_account(self):
-        """Тест 14: Восстановление счета"""
-        # Arrange
-        account = self.service.create("Тестовый счет")
-
-        # Сохраняем ID для очистки сразу после создания
+    def test_08_create_account_with_special_title(self):
+        """Тест 08: Создание счета с необычным названием"""
+        account = self.service.get("12123")
         self.test_account_ids.append(account.getId())
+        self.assertEqual(account.getTitle(), "12123")
+        
+        account2 = self.service.get("Счет с цифрами 123")
+        self.test_account_ids.append(account2.getId())
+        self.assertEqual(account2.getTitle(), "Счет с цифрами 123")
 
-        self.repository.deleteByTitle("Тестовый счет", "test_user")
-        deleted_account = self.repository.findByTitle("Тестовый счет").get()
-
-        # Act
-        restored_account = self.service.restore(deleted_account)
-
-        # Assert
-        self.assertIsNotNone(restored_account)
-        self.assertIsNone(restored_account.getDeleteTime())
-        self.assertIsNone(restored_account.getDeletedBy())
-        self.assertIsNotNone(restored_account.getUpdateTime())
-        self.assertEqual(restored_account.getUpdatedBy(), "test_user")
-
-    def test_15_restore_account_by_id(self):
-        """Тест 15: Восстановление счета по ID"""
-        # Arrange
-        account = self.service.create("Тестовый счет")
-
-        # Сохраняем ID для очистки сразу после создания
+    def test_09_delete_account_by_id(self):
+        """Тест 09: Удаление счета по ID"""
+        account = self.service.get("Счет 4")
         self.test_account_ids.append(account.getId())
+        result = self.service.delete(account.getId())
+        self.assertTrue(result)
+        # Проверяем, что счет помечен как удалённый
+        found = self.repository.findById(account.getId())
+        self.assertTrue(found.isPresent())
+        self.assertIsNotNone(found.get().getDeleteTime())
+        self.assertEqual(found.get().getDeletedBy(), "test_user")
 
-        self.repository.deleteByTitle("Тестовый счет", "test_user")
-
-        # Act
-        restored_account = self.service.restore(account.getId())
-
-        # Assert
-        self.assertIsNotNone(restored_account)
-        self.assertIsNone(restored_account.getDeleteTime())
-        self.assertIsNone(restored_account.getDeletedBy())
-
-    def test_16_restore_account_by_id_not_found(self):
-        """Тест 16: Восстановление счета по несуществующему ID"""
-        # Act
-        restored_account = self.service.restore(999)
-
-        # Assert
-        self.assertIsNone(restored_account)
-
-    def test_17_delete_account(self):
-        """Тест 17: Удаление счета"""
-        # Arrange
-        title = "Счет для удаления"
-        account = self.service.create(title)
-
-        # Сохраняем ID для очистки сразу после создания
+    def test_10_delete_account_by_title(self):
+        """Тест 10: Удаление счета по названию"""
+        title = "Счет 5"
+        account = self.service.get(title)
         self.test_account_ids.append(account.getId())
-
-        # Act
         result = self.service.delete(title)
-
-        # Assert
         self.assertTrue(result)
 
-        # Проверяем, что счет действительно удален
-        deleted_account = self.repository.findByTitle(title).get()
-        self.assertIsNotNone(deleted_account.getDeleteTime())
-        self.assertEqual(deleted_account.getDeletedBy(), "test_user")
+        # Проверяем, что счет удален
+        found = self.service.get(title)
+        self.assertIsNotNone(found)
+        self.assertIsNotNone(found.getDeleteTime())
+        self.assertEqual(found.getDeletedBy(), "test_user")
+
+    def test_11_is_account_deleted(self):
+        """Тест 11: Проверка удаления счета"""
+        account = self.service.get("Счет 6")
+        self.test_account_ids.append(account.getId())
+        self.repository.deleteById(account.getId(), "test_user")
+        deleted = self.repository.findById(account.getId()).get()
+        self.assertTrue(self.service.isAccountDeleted(deleted))
+        # Восстановим для очистки
+        self.service.restore(deleted)
+
+    def test_12_change_position(self):
+        """Тест 12: Изменение позиции счета"""
+        position = self.repository.getMaxPosition()
+        a1 = self.service.get("Счет х1")
+        a2 = self.service.get("Счет х2")
+        a3 = self.service.get("Счет х3")
+        self.test_account_ids.extend([a1.getId(), a2.getId(), a3.getId()])
+        # Перемещаем a1 на позицию 3
+        result = self.service.changePosition(a1, position + 3)
+        self.assertEqual(result.getPosition(), position + 3)
+        # Проверяем, что другие счета сдвинулись
+        updated_a2 = self.repository.findById(a2.getId()).get()
+        updated_a3 = self.repository.findById(a3.getId()).get()
+        self.assertEqual(updated_a2.getPosition(), position + 1)
+        self.assertEqual(updated_a3.getPosition(), position + 2)
+
+    def test_13_change_position_up(self):
+        """Тест 13: Перемещение счета вверх"""
+        position = self.repository.getMaxPosition()
+        a1 = self.service.get("Счет A")
+        a2 = self.service.get("Счет B")
+        a3 = self.service.get("Счет C")
+        self.test_account_ids.extend([a1.getId(), a2.getId(), a3.getId()])
+        # Перемещаем a3 на позицию 1
+        result = self.service.changePosition(a3, position + 1)
+        self.assertEqual(result.getPosition(), position + 1)
+        updated_a1 = self.repository.findById(a1.getId()).get()
+        updated_a2 = self.repository.findById(a2.getId()).get()
+        self.assertEqual(updated_a1.getPosition(), position + 2)
+        self.assertEqual(updated_a2.getPosition(), position + 3)
+
+    def test_14_get_all_accounts(self):
+        """Тест 14: Получение всех счетов"""
+        a1 = self.service.get("Счет 111")
+        a2 = self.service.get("Счет 211")
+        self.test_account_ids.append(a1.getId())
+        self.test_account_ids.append(a2.getId())
+        accounts = self.service.getAll()
+        self.assertIsNotNone(accounts)
+        self.assertGreater(len(accounts), 0)
+        ids = [a.getId() for a in accounts]
+        self.assertIn(a1.getId(), ids)
+        self.assertIn(a2.getId(), ids)
+
+    def test_15_get_all_by_type(self):
+        """Тест 15: Получение счетов по типу"""
+        a1 = self.service.get("Счет типа 1", 1000, 1)
+        a2 = self.service.get("Счет типа 2", 2000, 2)
+        self.test_account_ids.append(a1.getId())
+        self.test_account_ids.append(a2.getId())
+        
+        accounts_type_1 = self.service.getAllByType(1)
+        accounts_type_2 = self.service.getAllByType(2)
+        
+        self.assertGreater(len(accounts_type_1), 0)
+        self.assertGreater(len(accounts_type_2), 0)
+        
+        # Проверяем, что наши счета есть в соответствующих списках
+        type_1_ids = [a.getId() for a in accounts_type_1]
+        type_2_ids = [a.getId() for a in accounts_type_2]
+        
+        self.assertIn(a1.getId(), type_1_ids)
+        self.assertIn(a2.getId(), type_2_ids)
+
+    def test_16_get_all_by_currency_id(self):
+        """Тест 16: Получение счетов по ID валюты"""
+        a1 = self.service.get("Счет валюты 1", 1000, 1, 1)
+        a2 = self.service.get("Счет валюты 2", 2000, 1, 2)
+        self.test_account_ids.append(a1.getId())
+        self.test_account_ids.append(a2.getId())
+        
+        accounts_currency_1 = self.service.getAllByCurrencyId(1)
+        accounts_currency_2 = self.service.getAllByCurrencyId(2)
+        
+        self.assertGreater(len(accounts_currency_1), 0)
+        self.assertGreater(len(accounts_currency_2), 0)
+        
+        # Проверяем, что наши счета есть в соответствующих списках
+        currency_1_ids = [a.getId() for a in accounts_currency_1]
+        currency_2_ids = [a.getId() for a in accounts_currency_2]
+        
+        self.assertIn(a1.getId(), currency_1_ids)
+        self.assertIn(a2.getId(), currency_2_ids)
+
+    def test_17_get_existing_account_with_different_parameters(self):
+        """Тест 17: Получение существующего счета с другими параметрами (должно обновить)"""
+        title = "Счет для обновления"
+        
+        # Создаем счет с параметрами по умолчанию
+        account1 = self.service.get(title)
+        self.test_account_ids.append(account1.getId())
+        
+        # Получаем тот же счет с другими параметрами
+        account2 = self.service.get(title, 5000, 2, 2, 1)
+        self.test_account_ids.append(account2.getId())
+        
+        # Должен быть тот же счет, но с обновленными параметрами
+        self.assertEqual(account1.getId(), account2.getId())
+        self.assertEqual(account2.getAmount(), 5000)
+        self.assertEqual(account2.getType(), 2)
+        self.assertEqual(account2.getCurrencyId(), 2)
+        self.assertEqual(account2.getClosed(), 1)
+
+    def test_18_update_account_with_optional_parameters(self):
+        """Тест 18: Обновление счета с опциональными параметрами"""
+        
+        # Создаем счет
+        account = self.service.get("Счет для обновления")
+        self.test_account_ids.append(account.getId())
+        
+        # Обновляем только название
+        updated = self.service.update("Новое название", None, None, None, None)
+        
+        self.assertEqual(updated.getTitle(), "Новое название")
+        self.assertEqual(updated.getAmount(), account.getAmount())  # Не изменилось
+        self.assertEqual(updated.getType(), account.getType())  # Не изменилось
+
+    def test_19_update_account_with_all_parameters(self):
+        """Тест 19: Обновление счета со всеми параметрами"""
+        
+        # Создаем счет
+        account = self.service.get("Счет для полного обновления")
+        self.test_account_ids.append(account.getId())
+        
+        # Обновляем все параметры
+        updated = self.service.update("Полностью новое название", 15000, 2, 2, 1)
+        
+        self.assertEqual(updated.getTitle(), "Полностью новое название")
+        self.assertEqual(updated.getAmount(), 15000)
+        self.assertEqual(updated.getType(), 2)
+        self.assertEqual(updated.getCurrencyId(), 2)
+        self.assertEqual(updated.getClosed(), 1)
+
+    def test_20_update_account_with_no_parameters(self):
+        """Тест 20: Обновление счета без параметров (должно вернуть null)"""
+        
+        # Создаем счет
+        account = self.service.get("Счет без изменений")
+        self.test_account_ids.append(account.getId())
+        
+        # Обновляем без параметров
+        updated = self.service.update("Счет без изменений", None, None, None, None)
+        
+        self.assertIsNone(updated)
 
     def test_18_delete_account_not_found(self):
         """Тест 18: Удаление несуществующего счета"""

@@ -103,6 +103,19 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
+     * Получение счетов по статусу закрытия
+     * 
+     * <p>Возвращает список всех счетов с указанным статусом закрытия.
+     * Поиск выполняется независимо от статуса удаления.
+     * 
+     * @param closed статус закрытия счета (0 - открыт, 1 - закрыт)
+     * @return список счетов с указанным статусом закрытия (может быть пустым, но не null)
+     */
+    public List<Account> findAllByClosed(Integer closed) {
+        return findAll(TABLE_ACCOUNTS, COLUMN_CLOSED, closed, this::mapRowSafe);
+    }
+
+    /**
      * Поиск счета по уникальному идентификатору
      * 
      * <p>Возвращает счет независимо от статуса удаления (активный или удаленный).

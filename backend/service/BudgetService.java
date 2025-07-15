@@ -245,7 +245,7 @@ public class BudgetService {
         restoredBudget.setDeleteTime(null);
         restoredBudget.setUpdateTime(LocalDateTime.now());
         restoredBudget.setUpdatedBy(user);
-        return updateInternal(restoredBudget);
+        return update(restoredBudget);
     }    
 
     /**
@@ -277,7 +277,7 @@ public class BudgetService {
         
         // Проверяем, был ли задан хотя бы один параметр для обновления
         if (newAmount != null || newCurrencyId != null) {
-            return updateInternal(updatedBudget);
+            return update(updatedBudget);
         }
         
         // Если ни один параметр не задан, возвращаем null
@@ -289,7 +289,7 @@ public class BudgetService {
      * @param updatedBudget бюджет для обновления
      * @return обновленный бюджет
      */
-    private Budget updateInternal(Budget updatedBudget) {
+    private Budget update(Budget updatedBudget) {
         updatedBudget.setUpdateTime(LocalDateTime.now());
         updatedBudget.setUpdatedBy(user);
         
