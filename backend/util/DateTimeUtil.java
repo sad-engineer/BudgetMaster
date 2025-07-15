@@ -4,6 +4,13 @@ package util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Класс для работы с датой и временем
+ * 
+ * <p>Содержит методы для форматирования и парсинга даты и времени в строки для SQLite.
+ * 
+ * <p>Все методы используют UTF-8 кодировку для корректной работы с кириллицей. 
+ */
 public class DateTimeUtil {
     private static final DateTimeFormatter SQLITE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     

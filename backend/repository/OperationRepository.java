@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package repository;
 
 import model.Operation;
@@ -21,9 +22,6 @@ import static constants.RepositoryConstants.*;
  * 
  * <p>Все методы работают с таблицей "operations" и используют
  * безопасное преобразование данных через mapRowSafe.
- * 
- * @author BudgetMaster
- * @version 1.0
  */
 public class OperationRepository extends BaseRepository implements Repository<Operation, Integer> {
 

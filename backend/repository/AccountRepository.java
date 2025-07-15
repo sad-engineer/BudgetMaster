@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package repository;
 
 import model.Account;
@@ -20,9 +21,6 @@ import static constants.RepositoryConstants.*;
  * 
  * <p>Все методы работают с таблицей "accounts" и используют
  * безопасное преобразование данных через mapRowSafe.
- * 
- * @author BudgetMaster
- * @version 1.0
  */
 public class AccountRepository extends BaseRepository implements Repository<Account, Integer> {
 

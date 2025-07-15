@@ -21,9 +21,6 @@ import constants.ModelConstants;
  * </ul>
  * 
  * <p>Поддерживает иерархическую структуру через parentId.
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public class Category extends BaseEntity {
     private int position; // Позиция категории в списке (для сортировки)

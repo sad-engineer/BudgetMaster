@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package repository;
 
 import model.Category;
@@ -20,9 +21,6 @@ import static constants.RepositoryConstants.*;
  * 
  * <p>Все методы работают с таблицей "categories" и используют
  * безопасное преобразование данных через mapRowSafe.
- * 
- * @author BudgetMaster
- * @version 1.0
  */
 public class CategoryRepository extends BaseRepository implements Repository<Category, Integer> {
 

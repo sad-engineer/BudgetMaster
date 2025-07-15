@@ -1,3 +1,5 @@
+// -*- coding: utf-8 -*-
+
 package service;
 
 import model.Operation;

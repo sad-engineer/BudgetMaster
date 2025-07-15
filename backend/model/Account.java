@@ -17,9 +17,6 @@ import constants.ModelConstants;
  * 
  * <p>Счет может быть открытым или закрытым, иметь баланс в определенной валюте.
  * Кредитные счета могут иметь дополнительные параметры: лимит, категории для комиссий.
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public class Account extends BaseEntity {
     

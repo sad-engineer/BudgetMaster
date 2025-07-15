@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package repository;
 
 import java.sql.*;
@@ -18,9 +19,6 @@ import static constants.RepositoryConstants.*;
  * </ul>
  * 
  * <p>Все методы используют UTF-8 кодировку для корректной работы с кириллицей.
- * 
- * @author BudgetMaster
- * @version 1.0
  */
 public abstract class BaseRepository {
     protected final String dbPath;

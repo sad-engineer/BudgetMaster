@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package repository;
 
 import java.util.List;
@@ -16,8 +17,6 @@ import java.util.Optional;
  * 
  * @param <T> тип сущности, с которой работает репозиторий
  * @param <ID> тип идентификатора сущности (обычно Integer или Long)
- * @author BudgetMaster
- * @version 1.0
  */
 public interface Repository<T, ID> {
     

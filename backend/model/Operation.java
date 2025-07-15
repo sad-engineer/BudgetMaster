@@ -17,9 +17,6 @@ import constants.ModelConstants;
  * 
  * <p>Операция содержит информацию о сумме, дате, категории, счете и валюте.
  * Для переводов дополнительно указываются целевой счет, валюта и сумма.
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public class Operation extends BaseEntity {
     private int type; // Тип операции (1-расход, 2-доход)

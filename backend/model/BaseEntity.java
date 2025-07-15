@@ -20,9 +20,6 @@ import java.util.Objects;
  * 
  * <p>Реализует паттерн "Soft Delete" - записи не удаляются физически,
  * а помечаются как удаленные с помощью поля deleteTime.
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public abstract class BaseEntity {
     protected int id; // Уникальный идентификатор сущности

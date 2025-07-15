@@ -17,9 +17,6 @@ import constants.ModelConstants;
  * 
  * <p>Валюта используется для счетов, операций и бюджетов.
  * Все суммы хранятся в копейках/центах для точности расчетов.
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public class Currency extends BaseEntity {
     private int position; // Позиция валюты в списке (для сортировки)

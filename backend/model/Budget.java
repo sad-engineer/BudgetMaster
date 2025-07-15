@@ -17,9 +17,6 @@ import constants.ModelConstants;
  * 
  * <p>Бюджет может быть привязан к конкретной категории расходов
  * или быть общим для всех расходов (categoryId = null).
- * 
- * @author BudgetMaster Team
- * @version 1.0
  */
 public class Budget extends BaseEntity {
     private int amount; // Сумма бюджета (в копейках/центах)
