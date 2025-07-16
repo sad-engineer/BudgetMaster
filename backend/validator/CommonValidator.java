@@ -212,6 +212,15 @@ public class CommonValidator {
     public static void validateCategoryTitle(String title) {
         validateTitle(title, "Название категории");
     }
+
+    /**
+     * Валидирует название счета
+     * @param title название для валидации
+     * @throws IllegalArgumentException если название некорректное
+     */
+    public static void validateAccountTitle(String title) {
+        validateTitle(title, "Название счета");
+    }
     
     /**
      * Валидирует комментарий

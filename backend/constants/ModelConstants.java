@@ -44,6 +44,7 @@ public class ModelConstants {
     // Значения по умолчанию для счетов
     public static final int DEFAULT_ACCOUNT_TYPE = ACCOUNT_TYPE_CURRENT; // Расчетный счет по умолчанию
     public static final int DEFAULT_ACCOUNT_BALANCE = DEFAULT_AMOUNT; // Баланс счета по умолчанию
+    public static final int DEFAULT_ACCOUNT_CLOSED = ACCOUNT_STATUS_OPEN; // Счет открыт по умолчанию
     
     // Значения по умолчанию для кредитных карт
     public static final Integer DEFAULT_CREDIT_CARD_LIMIT = null; // Лимит кредитной карты по умолчанию

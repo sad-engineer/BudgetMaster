@@ -36,7 +36,7 @@ import java.util.Optional;
 
             // 3. Создание сервисов
             CurrencyService currencyService = new CurrencyService(currencyRepo, user);
-            AccountService accountService = new AccountService(currencyService, user);
+            AccountService accountService = new AccountService(accountRepo, user);
             CategoryService categoryService = new CategoryService(categoryRepo, user);
             BudgetService budgetService = new BudgetService(budgetRepo, user);
             OperationService operationService = new OperationService(accountService, currencyService, user);

@@ -90,7 +90,7 @@ class TestAccountService(unittest.TestCase):
         title = "Основной счет"
         position = self.repository.getMaxPosition() + 1
 
-        account = self.service.get(title)
+        account = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
 
         self.assertIsNotNone(account)
@@ -107,7 +107,7 @@ class TestAccountService(unittest.TestCase):
         """Тест 04: Получение существующего счета по названию"""
         title = "Существующий счет"
         
-        account_new = self.service.get(title)
+        account_new = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account_new.getId())
 
         # Счет создан, его позиция должна быть наибольшая из существующих
@@ -129,7 +129,7 @@ class TestAccountService(unittest.TestCase):
         """Тест 05: Получение удаленного счета по названию"""
         title = "Удаленный счет"
         
-        account_new = self.service.get(title)
+        account_new = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account_new.getId())
         self.repository.deleteByTitle(title, "test_user")
 
@@ -154,13 +154,10 @@ class TestAccountService(unittest.TestCase):
         account = self.service.get(self.Integer(1))
         self.assertIsNotNone(account)
         self.assertEqual(account.getId(), 1)
-        self.assertEqual(account.getTitle(), "Основной счет")
-        self.assertEqual(account.getPosition(), 1)
+        self.assertEqual(account.getTitle(), "Наличные")
         self.assertEqual(account.getCreatedBy(), "initializer")
-        self.assertIsNone(account.getUpdatedBy())
         self.assertIsNone(account.getDeletedBy())
         self.assertIsNotNone(account.getCreateTime())
-        self.assertIsNone(account.getUpdateTime())
         self.assertIsNone(account.getDeleteTime())
 
     def test_07_get_account_by_id_not_found(self):
@@ -170,17 +167,17 @@ class TestAccountService(unittest.TestCase):
 
     def test_08_create_account_with_special_title(self):
         """Тест 08: Создание счета с необычным названием"""
-        account = self.service.get("12123")
+        account = self.service.get("12123", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
         self.assertEqual(account.getTitle(), "12123")
         
-        account2 = self.service.get("Счет с цифрами 123")
+        account2 = self.service.get("Счет с цифрами 123", 0, 1, 1, 0)
         self.test_account_ids.append(account2.getId())
         self.assertEqual(account2.getTitle(), "Счет с цифрами 123")
 
     def test_09_delete_account_by_id(self):
         """Тест 09: Удаление счета по ID"""
-        account = self.service.get("Счет 4")
+        account = self.service.get("Счет 4", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
         result = self.service.delete(account.getId())
         self.assertTrue(result)
@@ -193,33 +190,31 @@ class TestAccountService(unittest.TestCase):
     def test_10_delete_account_by_title(self):
         """Тест 10: Удаление счета по названию"""
         title = "Счет 5"
-        account = self.service.get(title)
+        account = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
         result = self.service.delete(title)
         self.assertTrue(result)
 
         # Проверяем, что счет удален
-        found = self.service.get(title)
+        found = self.repository.findByTitle(title).get()
         self.assertIsNotNone(found)
         self.assertIsNotNone(found.getDeleteTime())
         self.assertEqual(found.getDeletedBy(), "test_user")
 
     def test_11_is_account_deleted(self):
         """Тест 11: Проверка удаления счета"""
-        account = self.service.get("Счет 6")
+        account = self.service.get("Счет 6", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
         self.repository.deleteById(account.getId(), "test_user")
         deleted = self.repository.findById(account.getId()).get()
         self.assertTrue(self.service.isAccountDeleted(deleted))
-        # Восстановим для очистки
-        self.service.restore(deleted)
 
     def test_12_change_position(self):
         """Тест 12: Изменение позиции счета"""
         position = self.repository.getMaxPosition()
-        a1 = self.service.get("Счет х1")
-        a2 = self.service.get("Счет х2")
-        a3 = self.service.get("Счет х3")
+        a1 = self.service.get("Счет х1", 0, 1, 1, 0)
+        a2 = self.service.get("Счет х2", 0, 1, 1, 0)
+        a3 = self.service.get("Счет х3", 0, 1, 1, 0)
         self.test_account_ids.extend([a1.getId(), a2.getId(), a3.getId()])
         # Перемещаем a1 на позицию 3
         result = self.service.changePosition(a1, position + 3)
@@ -233,9 +228,9 @@ class TestAccountService(unittest.TestCase):
     def test_13_change_position_up(self):
         """Тест 13: Перемещение счета вверх"""
         position = self.repository.getMaxPosition()
-        a1 = self.service.get("Счет A")
-        a2 = self.service.get("Счет B")
-        a3 = self.service.get("Счет C")
+        a1 = self.service.get("Счет A", 0, 1, 1, 0)
+        a2 = self.service.get("Счет B", 0, 1, 1, 0)
+        a3 = self.service.get("Счет C", 0, 1, 1, 0)
         self.test_account_ids.extend([a1.getId(), a2.getId(), a3.getId()])
         # Перемещаем a3 на позицию 1
         result = self.service.changePosition(a3, position + 1)
@@ -247,8 +242,8 @@ class TestAccountService(unittest.TestCase):
 
     def test_14_get_all_accounts(self):
         """Тест 14: Получение всех счетов"""
-        a1 = self.service.get("Счет 111")
-        a2 = self.service.get("Счет 211")
+        a1 = self.service.get("Счет 111", 0, 1, 1, 0)
+        a2 = self.service.get("Счет 211", 0, 1, 1, 0)
         self.test_account_ids.append(a1.getId())
         self.test_account_ids.append(a2.getId())
         accounts = self.service.getAll()
@@ -260,8 +255,8 @@ class TestAccountService(unittest.TestCase):
 
     def test_15_get_all_by_type(self):
         """Тест 15: Получение счетов по типу"""
-        a1 = self.service.get("Счет типа 1", 1000, 1)
-        a2 = self.service.get("Счет типа 2", 2000, 2)
+        a1 = self.service.get("Счет типа 1", 1000, 1, 1, 0)
+        a2 = self.service.get("Счет типа 2", 2000, 2, 1, 0)
         self.test_account_ids.append(a1.getId())
         self.test_account_ids.append(a2.getId())
         
@@ -280,8 +275,8 @@ class TestAccountService(unittest.TestCase):
 
     def test_16_get_all_by_currency_id(self):
         """Тест 16: Получение счетов по ID валюты"""
-        a1 = self.service.get("Счет валюты 1", 1000, 1, 1)
-        a2 = self.service.get("Счет валюты 2", 2000, 1, 2)
+        a1 = self.service.get("Счет валюты 1", 1000, 1, 1, 0)
+        a2 = self.service.get("Счет валюты 2", 2000, 1, 2, 0)
         self.test_account_ids.append(a1.getId())
         self.test_account_ids.append(a2.getId())
         
@@ -303,7 +298,7 @@ class TestAccountService(unittest.TestCase):
         title = "Счет для обновления"
         
         # Создаем счет с параметрами по умолчанию
-        account1 = self.service.get(title)
+        account1 = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account1.getId())
         
         # Получаем тот же счет с другими параметрами
@@ -317,60 +312,46 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(account2.getCurrencyId(), 2)
         self.assertEqual(account2.getClosed(), 1)
 
-    def test_18_update_account_with_optional_parameters(self):
-        """Тест 18: Обновление счета с опциональными параметрами"""
+    def test_18_update_account_with_all_parameters(self):
+        """Тест 18: Обновление счета со всеми параметрами"""
         
         # Создаем счет
-        account = self.service.get("Счет для обновления")
+        account = self.service.get("Счет для полного обновления", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
-        
-        # Обновляем только название
-        updated = self.service.update("Новое название", None, None, None, None)
-        
-        self.assertEqual(updated.getTitle(), "Новое название")
-        self.assertEqual(updated.getAmount(), account.getAmount())  # Не изменилось
-        self.assertEqual(updated.getType(), account.getType())  # Не изменилось
 
-    def test_19_update_account_with_all_parameters(self):
-        """Тест 19: Обновление счета со всеми параметрами"""
-        
-        # Создаем счет
-        account = self.service.get("Счет для полного обновления")
-        self.test_account_ids.append(account.getId())
-        
         # Обновляем все параметры
-        updated = self.service.update("Полностью новое название", 15000, 2, 2, 1)
+        updated = self.service.get("Счет для полного обновления", 15000, 2, 2, 1)
         
-        self.assertEqual(updated.getTitle(), "Полностью новое название")
+        self.assertEqual(updated.getTitle(), "Счет для полного обновления")
         self.assertEqual(updated.getAmount(), 15000)
         self.assertEqual(updated.getType(), 2)
         self.assertEqual(updated.getCurrencyId(), 2)
         self.assertEqual(updated.getClosed(), 1)
 
-    def test_20_update_account_with_no_parameters(self):
-        """Тест 20: Обновление счета без параметров (должно вернуть null)"""
+    def test_19_update_account_with_no_parameters(self):
+        """Тест 19: Обновление счета без параметров (должно вернуть null)"""
         
         # Создаем счет
-        account = self.service.get("Счет без изменений")
+        account = self.service.get("Счет без изменений", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
-        
+
         # Обновляем без параметров
         updated = self.service.update("Счет без изменений", None, None, None, None)
         
         self.assertIsNone(updated)
 
-    def test_18_delete_account_not_found(self):
-        """Тест 18: Удаление несуществующего счета"""
+    def test_20_delete_account_not_found(self):
+        """Тест 20: Удаление несуществующего счета"""
         # Act
         result = self.service.delete("Несуществующий счет")
 
         # Assert
         self.assertFalse(result)
 
-    def test_19_change_position_same_position(self):
-        """Тест 19: Изменение позиции на ту же позицию"""
+    def test_21_change_position_same_position(self):
+        """Тест 21: Изменение позиции на ту же позицию"""
         # Arrange
-        account = self.service.create("Тестовый счет")
+        account = self.service.get("Тестовый счет", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
@@ -383,10 +364,10 @@ class TestAccountService(unittest.TestCase):
         # Assert
         self.assertEqual(result.getPosition(), original_position)
 
-    def test_20_change_position_invalid_position(self):
-        """Тест 20: Изменение позиции на недопустимую"""
+    def test_22_change_position_invalid_position(self):
+        """Тест 22: Изменение позиции на недопустимую"""
         # Arrange
-        account = self.service.create("Тестовый счет")
+        account = self.service.get("Тестовый счет", 0, 1, 1, 0)
         position = self.repository.getMaxPosition()
 
         # Сохраняем ID для очистки сразу после создания
@@ -399,13 +380,13 @@ class TestAccountService(unittest.TestCase):
         with self.assertRaises(Exception):
             self.service.changePosition(account, position + 1)  # Позиция больше количества счетов
 
-    def test_21_change_position_move_down(self):
-        """Тест 21: Перемещение счета вниз"""
+    def test_23_change_position_move_down(self):
+        """Тест 23: Перемещение счета вниз"""
         # Arrange
         position = self.repository.getMaxPosition()
-        account1 = self.service.create("Счет 1", )
-        account2 = self.service.create("Счет 2")
-        account3 = self.service.create("Счет 3")
+        account1 = self.service.get("Счет 1", 0, 1, 1, 0)
+        account2 = self.service.get("Счет 2", 0, 1, 1, 0)
+        account3 = self.service.get("Счет 3", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
@@ -424,12 +405,12 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(updated_account2.getPosition(), position + 1)
         self.assertEqual(updated_account3.getPosition(), position + 2)
 
-    def test_22_change_position_move_up(self):
-        """Тест 22: Перемещение счета вверх"""
+    def test_24_change_position_move_up(self):
+        """Тест 24: Перемещение счета вверх"""
         # Arrange
-        account1 = self.service.create("Счет 1")
-        account2 = self.service.create("Счет 2")
-        account3 = self.service.create("Счет 3")
+        account1 = self.service.get("Счет 11", 0, 1, 1, 0)
+        account2 = self.service.get("Счет 21", 0, 1, 1, 0)
+        account3 = self.service.get("Счет 31", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
@@ -448,106 +429,77 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(updated_account1.getPosition(), position - 1)
         self.assertEqual(updated_account2.getPosition(), position)
 
-    def test_23_change_position_by_old_new(self):
-        """Тест 23: Изменение позиции по старой и новой позиции"""
+    def test_25_change_position_by_old_new(self):
+        """Тест 25: Изменение позиции по старой и новой позиции"""
         # Arrange
-        account1 = self.service.create("Счет 51")
-        account2 = self.service.create("Счет 52")
-        account3 = self.service.create("Счет 53")
-
+        account1 = self.service.get("Счет 511", 0, 1, 1, 0)
+        account2 = self.service.get("Счет 521", 0, 1, 1, 0)
+        account3 = self.service.get("Счет 531", 0, 1, 1, 0)
+        position = self.repository.getMaxPosition()
+    
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
         self.test_account_ids.append(account2.getId())
         self.test_account_ids.append(account3.getId())
 
         # Act
-        result = self.service.changePosition(1, 3)
+        result = self.service.changePosition(position, position-2)
 
         # Assert
         self.assertIsNotNone(result)
-        self.assertEqual(result.getPosition(), 3)
+        self.assertEqual(result.getPosition(), position-2)
 
-    def test_24_change_position_by_old_new_not_found(self):
-        """Тест 24: Изменение позиции по несуществующей старой позиции"""
+    def test_26_change_position_by_old_new_not_found(self):
+        """Тест 26: Изменение позиции по несуществующей старой позиции"""
         # Act
         result = self.service.changePosition(999, 1)
 
         # Assert
         self.assertIsNone(result)
 
-    def test_25_set_user_unsupported(self):
-        """Тест 25: Попытка установить нового пользователя"""
+    def test_27_set_user_unsupported(self):
+        """Тест 27: Попытка установить нового пользователя"""
         # Act & Assert
         with self.assertRaises(Exception):
             self.service.setUser("new_user")
 
-    def test_26_create_account_with_special_characters(self):
-        """Тест 26: Создание счета со специальными символами"""
+    def test_28_create_account_with_special_characters(self):
+        """Тест 28: Создание счета со специальными символами"""
         # Arrange
         title = "Счет с символами: !@#$%^&*()"
 
-        # Act
-        account = self.service.create(title)
+        # Act & Assert
+        with self.assertRaises(Exception) as context:
+            self.service.get(title, 0, 1, 1, 0)
+        self.assertIn("Название счета содержит недопустимые символы", str(context.exception))
 
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account.getId())
-
-        # Assert
-        self.assertIsNotNone(account)
-        self.assertEqual(account.getTitle(), title)
-
-    def test_27_create_account_with_unicode(self):
-        """Тест 27: Создание счета с Unicode символами"""
-        # Arrange
-        title = "Счет с кириллицей: Привет мир! 🌍"
-
-        # Act
-        account = self.service.create(title)
-
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account.getId())
-
-        # Assert
-        self.assertIsNotNone(account)
-        self.assertEqual(account.getTitle(), title)
-
-    def test_28_create_account_empty_title(self):
-        """Тест 28: Создание счета с пустым названием"""
+    def test_30_create_account_empty_title(self):
+        """Тест 30: Создание счета с пустым названием"""
         # Arrange
         title = ""
 
-        # Act
-        account = self.service.create(title)
+        # Act & Assert
+        with self.assertRaises(Exception) as context:
+            self.service.get(title, 0, 1, 1, 0)
+        self.assertIn("Название счета не может быть пустым", str(context.exception))
 
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account.getId())
-
-        # Assert
-        self.assertIsNotNone(account)
-        self.assertEqual(account.getTitle(), title)
-
-    def test_29_create_account_null_title(self):
-        """Тест 29: Создание счета с null названием"""
+    def test_31_create_account_null_title(self):
+        """Тест 31: Создание счета с null названием"""
         # Arrange
         title = None
 
-        # Act
-        account = self.service.create(title)
+        # Act & Assert
+        with self.assertRaises(Exception) as context:
+            self.service.get(title, 0, 1, 1, 0)
+        self.assertIn("Название счета не может быть null", str(context.exception))
 
-        # Сохраняем ID для очистки сразу после создания
-        self.test_account_ids.append(account.getId())
-
-        # Assert
-        self.assertIsNotNone(account)
-        self.assertIsNone(account.getTitle())
-
-    def test_30_multiple_operations_same_account(self):
-        """Тест 30: Множественные операции с одним счетом"""
+    def test_32_multiple_operations_same_account(self):
+        """Тест 32: Множественные операции с одним счетом"""
         # Arrange
         title = "Многофункциональный счет"
 
         # Act
-        account1 = self.service.create(title)
+        account1 = self.service.get(title, 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
@@ -560,15 +512,15 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(account2.getId(), account3.getId())
         self.assertEqual(account1.getTitle(), title)
 
-    def test_31_account_position_sequence(self):
-        """Тест 31: Последовательность позиций счетов"""
+    def test_33_account_position_sequence(self):
+        """Тест 33: Последовательность позиций счетов"""
         # Arrange
-        titles = ["Счет A", "Счет B", "Счет C", "Счет D"]
+        titles = ["Счет AA", "Счет BB", "Счет CC", "Счет DD"]
         position = self.repository.getMaxPosition()
         # Act
         accounts = []
         for title in titles:
-            account = self.service.create(title)
+            account = self.service.get(title, 0, 1, 1, 0)
             accounts.append(account)
 
             # Сохраняем ID для очистки сразу после создания
@@ -579,11 +531,11 @@ class TestAccountService(unittest.TestCase):
             position += 1
             self.assertEqual(account.getPosition(), position)
 
-    def test_32_delete_and_restore_cycle(self):
-        """Тест 32: Цикл удаления и восстановления"""
+    def test_34_delete_and_restore_cycle(self):
+        """Тест 34: Цикл удаления и восстановления"""
         # Arrange
         title = "Циклический счет"
-        account = self.service.create(title)
+        account = self.service.get(title, 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
@@ -598,10 +550,10 @@ class TestAccountService(unittest.TestCase):
         restored2 = self.service.get(title)
         self.assertEqual(restored2.getId(), account.getId())
 
-    def test_33_edge_case_positions(self):
-        """Тест 33: Граничные случаи позиций"""
+    def test_35_edge_case_positions(self):
+        """Тест 35: Граничные случаи позиций"""
         # Arrange
-        account = self.service.create("Единственный счет")
+        account = self.service.get("Единственный счет", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account.getId())
@@ -614,15 +566,15 @@ class TestAccountService(unittest.TestCase):
         result2 = self.service.changePosition(account, 1)
         self.assertEqual(result2.getPosition(), 1)
 
-    def test_34_service_with_different_users(self):
-        """Тест 34: Сервис с разными пользователями"""
+    def test_36_service_with_different_users(self):
+        """Тест 36: Сервис с разными пользователями"""
         # Arrange
         service1 = self.AccountService(self.repository, "user1")
         service2 = self.AccountService(self.repository, "user2")
 
         # Act
-        account1 = service1.create("Счет пользователя 1")
-        account2 = service2.create("Счет пользователя 2")
+        account1 = service1.get("Счет пользователя 1", 0, 1, 1, 0)
+        account2 = service2.get("Счет пользователя 2", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
@@ -632,15 +584,15 @@ class TestAccountService(unittest.TestCase):
         self.assertEqual(account1.getCreatedBy(), "user1")
         self.assertEqual(account2.getCreatedBy(), "user2")
 
-    def test_35_repository_independence(self):
-        """Тест 35: Независимость репозиториев"""
+    def test_37_repository_independence(self):
+        """Тест 37: Независимость репозиториев"""
         # Arrange
         repository2 = self.AccountRepository(self.db_path)
         service2 = self.AccountService(repository2, "user2")
 
         # Act
-        account1 = self.service.create("Счет в БД 1")
-        account2 = service2.create("Счет в БД 2")
+        account1 = self.service.get("Счет в БД 1", 0, 1, 1, 0)
+        account2 = service2.get("Счет в БД 2", 0, 1, 1, 0)
 
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())

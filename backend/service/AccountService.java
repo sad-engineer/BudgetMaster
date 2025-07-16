@@ -23,7 +23,7 @@ public class AccountService {
      * Репозиторий для работы со счетами
      */
     private final AccountRepository accountRepository;
-        
+    
     /**
      * Пользователь, выполняющий операции
      */
@@ -163,7 +163,7 @@ public class AccountService {
 
         // Валидация счета
         AccountValidator.validateForCreate(newAccount);
-
+        
         return accountRepository.save(newAccount);
     }
 
@@ -203,7 +203,7 @@ public class AccountService {
     public List<Account> getAllByClosed(int closed) {
         CommonValidator.validateClosedStatus(closed);
         return accountRepository.findAllByClosed(closed);
-    }   
+    }
 
     /**
      * Получает счет по ID. 
@@ -243,7 +243,7 @@ public class AccountService {
             Account accountObj = account.get();
             if (isAccountDeleted(accountObj)) {
                 return restore(accountObj);
-            }
+        }
             return accountObj;
         }
         return null;

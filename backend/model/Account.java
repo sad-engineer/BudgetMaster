@@ -109,6 +109,14 @@ public class Account extends BaseEntity {
     public boolean isCreditAccount() {
         return type == ModelConstants.ACCOUNT_TYPE_CREDIT;
     }
+
+    /**
+     * Проверяет, удален ли счет
+     * @return true, если счет удален
+     */
+    public boolean isDeleted() {
+        return deleteTime != null;
+    }
     
     /**
      * Проверяет, открыт ли счет

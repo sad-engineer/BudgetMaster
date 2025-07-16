@@ -69,8 +69,8 @@ public class OperationService {
      */
     public OperationService(String user) {
         this.operationRepository = new OperationRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
+        this.accountService = new AccountService(user);
         this.currencyService = new CurrencyService(user);
-        this.accountService = new AccountService(this.currencyService, user);
         this.user = user;
     }
 
@@ -369,15 +369,7 @@ public class OperationService {
         return accountService.get(accountTitle);
     }
 
-    /**
-     * Получает счет по ID через AccountService
-     * @param accountId ID счета
-     * @return счет
-     */
-    public Optional<model.Account> getAccountById(int accountId) {
-        return accountService.getById(accountId);
-    }
-
+    
     /**
      * Получает валюту по названию через CurrencyService
      * @param currencyTitle название валюты
