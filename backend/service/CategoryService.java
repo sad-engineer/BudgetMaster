@@ -339,9 +339,7 @@ public class CategoryService {
     private Category restore(Category restoredCategory) {
         restoredCategory.setDeletedBy(null);
         restoredCategory.setDeleteTime(null);
-        restoredCategory.setUpdateTime(LocalDateTime.now());
-        restoredCategory.setUpdatedBy(user);
-        return categoryRepository.update(restoredCategory);
+        return update(restoredCategory);
     }    
         
     /**

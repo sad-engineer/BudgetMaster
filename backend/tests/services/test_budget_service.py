@@ -82,7 +82,7 @@ class TestBudgetService(unittest.TestCase):
         category_id = self.Integer(888)
         amount = self.Integer(20000)
         currency_id = self.Integer(2)
-        
+
         budget_new = self.service.get(category_id, amount, currency_id)
         self.test_budget_ids.append(budget_new.getId())
 
@@ -108,7 +108,7 @@ class TestBudgetService(unittest.TestCase):
         category_id = self.Integer(777)
         amount = self.Integer(30000)
         currency_id = self.Integer(3)
-        
+
         budget_new = self.service.get(category_id, amount, currency_id)
         self.test_budget_ids.append(budget_new.getId())
         self.repository.deleteById(budget_new.getId(), "test_user")
@@ -141,7 +141,7 @@ class TestBudgetService(unittest.TestCase):
         budget = self.service.get(self.Integer(666), self.Integer(0), self.Integer(1))
         self.test_budget_ids.append(budget.getId())
         self.assertEqual(budget.getAmount(), 0)
-        
+
         with self.assertRaises(Exception):
             self.service.get(self.Integer(555), self.Integer(-100), self.Integer(1))
 
@@ -258,15 +258,15 @@ class TestBudgetService(unittest.TestCase):
     def test_15_get_existing_budget_with_different_parameters(self):
         """Тест 15: Получение существующего бюджета с другими параметрами (должно обновить)"""
         category_id = self.Integer(161)
-        
+
         # Создаем бюджет с параметрами
         budget1 = self.service.get(category_id, self.Integer(5000), self.Integer(1))
         self.test_budget_ids.append(budget1.getId())
-        
+
         # Получаем тот же бюджет с другими параметрами
         budget2 = self.service.get(category_id, self.Integer(10000), self.Integer(2))
         self.test_budget_ids.append(budget2.getId())
-        
+
         # Должен быть тот же бюджет, но с обновленными параметрами
         self.assertEqual(budget1.getId(), budget2.getId())
         self.assertEqual(budget2.getAmount(), 10000)
@@ -274,44 +274,40 @@ class TestBudgetService(unittest.TestCase):
 
     def test_16_update_budget_with_optional_parameters(self):
         """Тест 16: Обновление бюджета с Optional параметрами"""
-        
+
         # Создаем бюджет
         budget = self.service.get(self.Integer(171), self.Integer(5000), self.Integer(1))
         self.test_budget_ids.append(budget.getId())
-        
+
         # Обновляем только сумму
-        updated = self.service.update(budget, 
-            self.Integer(15000),
-            None)
-        
+        updated = self.service.update(budget, self.Integer(15000), None)
+
         self.assertEqual(updated.getAmount(), 15000)
         self.assertEqual(updated.getCurrencyId(), budget.getCurrencyId())  # Не изменилось
 
     def test_17_update_budget_with_all_parameters(self):
         """Тест 17: Обновление бюджета со всеми параметрами"""
-        
+
         # Создаем бюджет
         budget = self.service.get(self.Integer(181), self.Integer(5000), self.Integer(1))
         self.test_budget_ids.append(budget.getId())
-        
+
         # Обновляем все параметры
-        updated = self.service.update(budget, 
-            self.Integer(25000),  # Новая сумма
-            self.Integer(2))      # Новая валюта
-        
+        updated = self.service.update(budget, self.Integer(25000), self.Integer(2))  # Новая сумма  # Новая валюта
+
         self.assertEqual(updated.getAmount(), 25000)
         self.assertEqual(updated.getCurrencyId(), self.Integer(2))
 
     def test_18_update_budget_with_no_parameters(self):
         """Тест 18: Обновление бюджета без параметров (должно вернуть null)"""
-        
+
         # Создаем бюджет
         budget = self.service.get(self.Integer(191), self.Integer(5000), self.Integer(1))
         self.test_budget_ids.append(budget.getId())
-        
+
         # Обновляем без параметров
         updated = self.service.update(budget, None, None)
-        
+
         self.assertIsNone(updated)
 
     def test_19_budget_position_sequence(self):

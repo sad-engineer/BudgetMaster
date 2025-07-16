@@ -48,8 +48,6 @@ public class AccountService {
         this.user = user;
     }
 
-
-
     /**
      * Удаляет счет по id
      * @param id id счета
@@ -226,8 +224,6 @@ public class AccountService {
         return null;
     }
 
-    
-
     /**
      * Получает счет по названию. 
      * Если счет с таким названием существует, возвращает его.
@@ -296,7 +292,7 @@ public class AccountService {
             accountObj.setType(type);
             accountObj.setCurrencyId(currencyId);
             accountObj.setClosed(closed);
-            return updateInternal(accountObj);
+            return update(accountObj);
         }
 
         return create(title, amount, type, currencyId, closed);
@@ -331,7 +327,7 @@ public class AccountService {
     private Account restore(Account restoredAccount) {
         restoredAccount.setDeletedBy(null);
         restoredAccount.setDeleteTime(null);
-        return updateInternal(restoredAccount);
+        return update(restoredAccount);
     }
 
     /**
@@ -397,7 +393,7 @@ public class AccountService {
         
         // Проверяем, был ли задан хотя бы один параметр для обновления
         if (newAmount != null || newType != null || newCurrencyId != null || newClosed != null) {
-            return updateInternal(updatedAccount);
+            return update(updatedAccount);
         }
         
         // Если ни один параметр не задан, возвращаем null
@@ -409,7 +405,7 @@ public class AccountService {
      * @param updatedAccount счет для обновления
      * @return обновленный счет
      */
-    private Account updateInternal(Account updatedAccount) {
+    private Account update(Account updatedAccount) {
         updatedAccount.setUpdateTime(LocalDateTime.now());
         updatedAccount.setUpdatedBy(user);
         

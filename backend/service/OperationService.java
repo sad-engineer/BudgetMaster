@@ -5,6 +5,8 @@ package service;
 import model.Operation;
 import repository.OperationRepository;
 import validator.OperationValidator;
+import validator.BaseEntityValidator;
+import validator.CommonValidator;
 import constants.ServiceConstants;
 
 import java.time.LocalDateTime;
@@ -51,20 +53,7 @@ public class OperationService {
     }
 
     /**
-     * Конструктор для сервиса с автоматическим созданием репозитория
-     * @param accountService сервис для работы со счетами
-     * @param currencyService сервис для работы с валютами
-     * @param user пользователь, выполняющий операции
-     */
-    public OperationService(AccountService accountService, CurrencyService currencyService, String user) {
-        this.operationRepository = new OperationRepository(ServiceConstants.DEFAULT_DATABASE_NAME);
-        this.accountService = accountService;
-        this.currencyService = currencyService;
-        this.user = user;
-    }
-
-    /**
-     * Конструктор для сервиса с автоматическим созданием всех зависимостей
+     * Конструктор для сервиса с автоматическим созданием репозиториев и сервисов
      * @param user пользователь, выполняющий операции
      */
     public OperationService(String user) {
@@ -79,15 +68,16 @@ public class OperationService {
      * @param id id операции
      * @return true, если удаление успешно
      */
-    public boolean delete(int id) {
+    public boolean delete(Integer id) {
+        BaseEntityValidator.validatePositiveId(id, "ID операции");
         return operationRepository.deleteById(id, user);
     }
 
     /**
-     * Создает новую операцию
+     * Создает новую операцию без валидации (для внутреннего использования)
      * @param type тип операции (1 - расход, 2 - доход)
      * @param date дата операции
-     * @param amount сумма операции
+     * @param amount сумма операции в копейках валюты
      * @param comment комментарий операции
      * @param categoryId ID категории
      * @param accountId ID счета
@@ -96,10 +86,8 @@ public class OperationService {
      * @param toCurrencyId ID целевой валюты (для переводов)
      * @param toAmount сумма в целевой валюте (для переводов)
      * @return операция
-     * @throws IllegalArgumentException если тип операции не равен 1 или 2, дата больше текущего времени, или сумма не больше нуля
      */
-    public Operation create(int type, LocalDateTime date, int amount, String comment, int categoryId, int accountId, int currencyId, int toAccountId, int toCurrencyId, int toAmount) {
-        
+    private Operation create(int type, LocalDateTime date, int amount, String comment, int categoryId, int accountId, int currencyId, Integer toAccountId, Integer toCurrencyId, Integer toAmount) {
         Operation newOperation = new Operation();
         newOperation.setType(type);
         newOperation.setDate(date);
@@ -123,242 +111,199 @@ public class OperationService {
     }
 
     /**
-     * Получает все операции по условию
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций
-     */
-    public List<Operation> getAll(boolean activeOnly) {
-        List<Operation> allOperations = operationRepository.findAll();
-        if (!activeOnly) {
-            return allOperations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : allOperations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
-            }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции (не удаленные)
-     * @return список активных операций
-     */
-    public List<Operation> getAll() {
-        return getAll(true);
-    }
-
-    /**
-     * Получает операцию по ID
+     * Получает операцию по ID. 
+     * Если операция с таким ID существует, возвращает ее.
+     * Если операция с таким ID существует, но удалена, восстанавливает ее.
+     * Если операция с таким ID не существует, вернет null.
      * @param id ID операции
      * @return операция
      */
-    public Optional<Operation> getById(int id) { 
-        return operationRepository.findById(id);
-    }
-
-    /**
-     * Получает операции за день даты
-     * @param date день операций
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций если они были в этот день
-     */
-    public List<Operation> getByDay(LocalDateTime date, boolean activeOnly) {
-        List<Operation> operations = operationRepository.findAllByDate(date);
-        if (!activeOnly) {
-            return operations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : operations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
+    public Operation get(Integer id) { 
+        BaseEntityValidator.validatePositiveId(id, "ID операции");
+        Optional<Operation> operation = operationRepository.findById(id);
+        if (operation.isPresent()) {
+            Operation operationObj = operation.get();
+            if (operationObj.isDeleted()) {
+                return restore(operationObj);
             }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции за день даты
-     * @param date день операций
-     * @return список активных операций если они были в этот день
-     */
-    public List<Operation> getByDay(LocalDateTime date) {
-        return getByDay(date, true);
-    }
-
-    /**
-     * Получает операции по комментарию
-     * @param comment комментарий операции
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций с указанным комментарием
-     */
-    public List<Operation> getByComment(String comment, boolean activeOnly) { 
-        List<Operation> operations = operationRepository.findAllByComment(comment);
-        if (!activeOnly) {
-            return operations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : operations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
-            }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции по комментарию
-     * @param comment комментарий операции
-     * @return список активных операций с указанным комментарием
-     */
-    public List<Operation> getByComment(String comment) { 
-        return getByComment(comment, true);
-    }
-
-    /**
-     * Получает операции по ID категории
-     * @param categoryId ID категории
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций с указанным ID категории
-     */
-    public List<Operation> getByCategoryId(int categoryId, boolean activeOnly) { 
-        List<Operation> operations = operationRepository.findAllByCategoryId(categoryId);
-        if (!activeOnly) {
-            return operations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : operations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
-            }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции по ID категории
-     * @param categoryId ID категории
-     * @return список активных операций с указанным ID категории
-     */
-    public List<Operation> getByCategoryId(int categoryId) { 
-        return getByCategoryId(categoryId, true);
-    }
-
-    /**
-     * Получает операции по ID счета
-     * @param accountId ID счета
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций с указанным ID счета
-     */
-    public List<Operation> getByAccountId(int accountId, boolean activeOnly) { 
-        List<Operation> operations = operationRepository.findAllByAccountId(accountId);
-        if (!activeOnly) {
-            return operations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : operations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
-            }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции по ID счета
-     * @param accountId ID счета
-     * @return список активных операций с указанным ID счета
-     */
-    public List<Operation> getByAccountId(int accountId) { 
-        return getByAccountId(accountId, true);
-    }
-
-    /**
-     * Получает операции по ID валюты
-     * @param currencyId ID валюты
-     * @param activeOnly если true, возвращает только активные (не удаленные) операции
-     * @return список операций с указанным ID валюты
-     */
-    public List<Operation> getByCurrencyId(int currencyId, boolean activeOnly) { 
-        List<Operation> operations = operationRepository.findAllByCurrencyId(currencyId);
-        if (!activeOnly) {
-            return operations;
-        }
-        
-        // Фильтруем только активные операции
-        List<Operation> activeOperations = new ArrayList<>();
-        for (Operation operation : operations) {
-            if (!isOperationDeleted(operation)) {
-                activeOperations.add(operation);
-            }
-        }
-        return activeOperations;
-    }
-
-    /**
-     * Получает только активные операции по ID валюты
-     * @param currencyId ID валюты
-     * @return список активных операций с указанным ID валюты
-     */
-    public List<Operation> getByCurrencyId(int currencyId) { 
-        return getByCurrencyId(currencyId, true);
-    }
-
-    /**
-     * Проверка операции на удаление
-     * @param operation класс операции
-     * @return true, если операция удалена
-     */
-    public boolean isOperationDeleted(Operation operation) {
-        return operation.getDeleteTime() != null;
-    }
-
-    /**
-     * Восстанавливает операцию
-     * @param restoredOperation операция
-     * @return операция
-     */
-    public Operation restore(Operation restoredOperation) {
-        restoredOperation.setDeleteTime(null);
-        restoredOperation.setDeletedBy(null);
-        restoredOperation.setUpdateTime(LocalDateTime.now());
-        restoredOperation.setUpdatedBy(user);
-        return operationRepository.update(restoredOperation);
-    }
-
-    /**
-     * Восстанавливает операцию по id
-     * @param id id операции
-     * @return операция или null, если операция не найдена
-     */
-    public Operation restore(int id) {
-        Optional<Operation> operationOpt = getById(id);
-        if (operationOpt.isPresent()) {
-            return restore(operationOpt.get());
+            return operationObj;
         }
         return null;
     }
 
     /**
-     * Устанавливает нового пользователя для операций
-     * @param newUser новый пользователь
+     * Получает все операции
+     * @return список операций
      */
-    public void setUser(String newUser) {
-        // Обратите внимание: поле user final, поэтому нужно создать новый экземпляр сервиса
-        // или использовать другой подход для смены пользователя
-        throw new UnsupportedOperationException("Для смены пользователя создайте новый экземпляр OperationService");
+    public List<Operation> getAll() {
+        return operationRepository.findAll();
     }
+
+    /**
+     * Получает операции за день даты
+     * @param date день операций
+     * @return список операций если они были в этот день
+     */
+    public List<Operation> getAllByDay(LocalDateTime date) {
+        return operationRepository.findAllByDate(date);
+    }
+
+    /**
+     * Получает операции по комментарию
+     * @param comment комментарий операции
+     * @return список операций с указанным комментарием
+     */
+    public List<Operation> getAllByComment(String comment) { 
+        return operationRepository.findAllByComment(comment);
+    }
+
+    /**
+     * Получает операции по ID категории
+     * @param categoryId ID категории
+     * @return список операций с указанным ID категории
+     */
+    public List<Operation> getAllByCategoryId(Integer categoryId) { 
+        CommonValidator.validateCategoryId(categoryId);
+        return operationRepository.findAllByCategoryId(categoryId);
+    }
+
+    /**
+     * Получает операции по ID счета
+     * @param accountId ID счета
+     * @return список операций с указанным ID счета
+     */
+    public List<Operation> getAllByAccountId(Integer accountId) { 
+        CommonValidator.validateAccountId(accountId);
+        return operationRepository.findAllByAccountId(accountId);
+    }
+
+    /**
+     * Получает операции по ID валюты
+     * @param currencyId ID валюты
+     * @return список операций с указанным ID валюты
+     */
+    public List<Operation> getAllByCurrencyId(Integer currencyId) { 
+        CommonValidator.validateCurrencyId(currencyId);
+        return operationRepository.findAllByCurrencyId(currencyId);
+    }
+
+    /**
+     * Восстанавливает операцию (удаляет данные в полях deletedBy и deleteTime)
+     * Для внутреннего использования
+     * @param restoredOperation операция для восстановления
+     * @return восстановленная операция
+     */
+    private Operation restore(Operation restoredOperation) {
+        restoredOperation.setDeleteTime(null);
+        restoredOperation.setDeletedBy(null);
+        return update(restoredOperation);
+    }
+
+    /**
+     * Обновляет операцию без новых параметров (для внутреннего использования)
+     * @param updatedOperation операция для обновления
+     * @return обновленная операция
+     */
+    private Operation update(Operation updatedOperation) {
+        updatedOperation.setUpdateTime(LocalDateTime.now());
+        updatedOperation.setUpdatedBy(user);
+        
+        return operationRepository.update(updatedOperation);
+    }
+
+    /**
+     * Обновляет операцию. 
+     * 
+     * @param updatedOperation операция для обновления
+     * @param newType новое значение типа операции (может быть null)
+     * @param newDate новое значение даты операции (может быть null)
+     * @param newAmount новое значение суммы операции (может быть null)
+     * @param newComment новое значение комментария операции (может быть null)
+     * @param newCategoryId новое значение ID категории (может быть null)
+     * @param newAccountId новое значение ID счета (может быть null)
+     * @param newCurrencyId новое значение ID валюты (может быть null)
+     * @param newToAccountId новое значение ID целевого счета (может быть null)
+     * @param newToCurrencyId новое значение ID целевой валюты (может быть null)
+     * @param newToAmount новое значение суммы в целевой валюте (может быть null)
+     * @return обновленная операция
+     */
+    public Operation update(Operation updatedOperation, 
+                           Integer newType,
+                           LocalDateTime newDate,
+                           Integer newAmount,
+                           String newComment,
+                           Integer newCategoryId,
+                           Integer newAccountId,
+                           Integer newCurrencyId,
+                           Integer newToAccountId,
+                           Integer newToCurrencyId,
+                           Integer newToAmount) {
+        BaseEntityValidator.validate(updatedOperation);
+        
+        if (newType != null) {
+            CommonValidator.validateOperationType(newType);
+            updatedOperation.setType(newType);
+        }
+        
+        if (newDate != null) {
+            updatedOperation.setDate(newDate);
+        }
+        
+        if (newAmount != null) {
+            CommonValidator.validateOperationAmount(newAmount);
+            updatedOperation.setAmount(newAmount);
+        }
+        
+        if (newComment != null) {
+            updatedOperation.setComment(newComment);
+        }
+        
+        if (newCategoryId != null) {
+            CommonValidator.validateCategoryId(newCategoryId);
+            updatedOperation.setCategoryId(newCategoryId);
+        }
+        
+        if (newAccountId != null) {
+            CommonValidator.validateAccountId(newAccountId);
+            updatedOperation.setAccountId(newAccountId);
+        }
+        
+        if (newCurrencyId != null) {
+            CommonValidator.validateCurrencyId(newCurrencyId);
+            updatedOperation.setCurrencyId(newCurrencyId);
+        }
+        
+        if (newToAccountId != null) {
+            CommonValidator.validateAccountId(newToAccountId);
+            updatedOperation.setToAccountId(newToAccountId);
+        }
+        
+        if (newToCurrencyId != null) {
+            CommonValidator.validateCurrencyId(newToCurrencyId);
+            updatedOperation.setToCurrencyId(newToCurrencyId);
+        }
+        
+        if (newToAmount != null) {
+            CommonValidator.validateOperationAmount(newToAmount);
+            updatedOperation.setToAmount(newToAmount);
+        }
+
+        if (updatedOperation.isDeleted()) {
+            return restore(updatedOperation);
+        }
+        
+        // Проверяем, был ли задан хотя бы один параметр для обновления
+        if (newType != null || newDate != null || newAmount != null || newComment != null || 
+            newCategoryId != null || newAccountId != null || newCurrencyId != null || 
+            newToAccountId != null || newToCurrencyId != null || newToAmount != null) {
+            return update(updatedOperation);
+        }
+        
+        // Если ни один параметр не задан, возвращаем null
+        return null;
+    }
+
+    
 
     /**
      * Получает счет по названию через AccountService
@@ -368,7 +313,6 @@ public class OperationService {
     public model.Account getAccount(String accountTitle) {
         return accountService.get(accountTitle);
     }
-
     
     /**
      * Получает валюту по названию через CurrencyService
@@ -384,7 +328,7 @@ public class OperationService {
      * @param currencyId ID валюты
      * @return валюта
      */
-    public model.Currency getCurrencyById(int currencyId) {
+    public model.Currency getCurrencyById(Integer currencyId) {
         return currencyService.get(currencyId);
     }
 

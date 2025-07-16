@@ -106,7 +106,7 @@ class TestAccountService(unittest.TestCase):
     def test_04_get_existing_account_by_title(self):
         """Тест 04: Получение существующего счета по названию"""
         title = "Существующий счет"
-        
+
         account_new = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account_new.getId())
 
@@ -128,7 +128,7 @@ class TestAccountService(unittest.TestCase):
     def test_05_get_deleted_account_by_title(self):
         """Тест 05: Получение удаленного счета по названию"""
         title = "Удаленный счет"
-        
+
         account_new = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account_new.getId())
         self.repository.deleteByTitle(title, "test_user")
@@ -170,7 +170,7 @@ class TestAccountService(unittest.TestCase):
         account = self.service.get("12123", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
         self.assertEqual(account.getTitle(), "12123")
-        
+
         account2 = self.service.get("Счет с цифрами 123", 0, 1, 1, 0)
         self.test_account_ids.append(account2.getId())
         self.assertEqual(account2.getTitle(), "Счет с цифрами 123")
@@ -259,17 +259,17 @@ class TestAccountService(unittest.TestCase):
         a2 = self.service.get("Счет типа 2", 2000, 2, 1, 0)
         self.test_account_ids.append(a1.getId())
         self.test_account_ids.append(a2.getId())
-        
+
         accounts_type_1 = self.service.getAllByType(1)
         accounts_type_2 = self.service.getAllByType(2)
-        
+
         self.assertGreater(len(accounts_type_1), 0)
         self.assertGreater(len(accounts_type_2), 0)
-        
+
         # Проверяем, что наши счета есть в соответствующих списках
         type_1_ids = [a.getId() for a in accounts_type_1]
         type_2_ids = [a.getId() for a in accounts_type_2]
-        
+
         self.assertIn(a1.getId(), type_1_ids)
         self.assertIn(a2.getId(), type_2_ids)
 
@@ -279,32 +279,32 @@ class TestAccountService(unittest.TestCase):
         a2 = self.service.get("Счет валюты 2", 2000, 1, 2, 0)
         self.test_account_ids.append(a1.getId())
         self.test_account_ids.append(a2.getId())
-        
+
         accounts_currency_1 = self.service.getAllByCurrencyId(1)
         accounts_currency_2 = self.service.getAllByCurrencyId(2)
-        
+
         self.assertGreater(len(accounts_currency_1), 0)
         self.assertGreater(len(accounts_currency_2), 0)
-        
+
         # Проверяем, что наши счета есть в соответствующих списках
         currency_1_ids = [a.getId() for a in accounts_currency_1]
         currency_2_ids = [a.getId() for a in accounts_currency_2]
-        
+
         self.assertIn(a1.getId(), currency_1_ids)
         self.assertIn(a2.getId(), currency_2_ids)
 
     def test_17_get_existing_account_with_different_parameters(self):
         """Тест 17: Получение существующего счета с другими параметрами (должно обновить)"""
         title = "Счет для обновления"
-        
+
         # Создаем счет с параметрами по умолчанию
         account1 = self.service.get(title, 0, 1, 1, 0)
         self.test_account_ids.append(account1.getId())
-        
+
         # Получаем тот же счет с другими параметрами
         account2 = self.service.get(title, 5000, 2, 2, 1)
         self.test_account_ids.append(account2.getId())
-        
+
         # Должен быть тот же счет, но с обновленными параметрами
         self.assertEqual(account1.getId(), account2.getId())
         self.assertEqual(account2.getAmount(), 5000)
@@ -314,14 +314,14 @@ class TestAccountService(unittest.TestCase):
 
     def test_18_update_account_with_all_parameters(self):
         """Тест 18: Обновление счета со всеми параметрами"""
-        
+
         # Создаем счет
         account = self.service.get("Счет для полного обновления", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
 
         # Обновляем все параметры
         updated = self.service.get("Счет для полного обновления", 15000, 2, 2, 1)
-        
+
         self.assertEqual(updated.getTitle(), "Счет для полного обновления")
         self.assertEqual(updated.getAmount(), 15000)
         self.assertEqual(updated.getType(), 2)
@@ -330,14 +330,14 @@ class TestAccountService(unittest.TestCase):
 
     def test_19_update_account_with_no_parameters(self):
         """Тест 19: Обновление счета без параметров (должно вернуть null)"""
-        
+
         # Создаем счет
         account = self.service.get("Счет без изменений", 0, 1, 1, 0)
         self.test_account_ids.append(account.getId())
 
         # Обновляем без параметров
         updated = self.service.update("Счет без изменений", None, None, None, None)
-        
+
         self.assertIsNone(updated)
 
     def test_20_delete_account_not_found(self):
@@ -436,18 +436,18 @@ class TestAccountService(unittest.TestCase):
         account2 = self.service.get("Счет 521", 0, 1, 1, 0)
         account3 = self.service.get("Счет 531", 0, 1, 1, 0)
         position = self.repository.getMaxPosition()
-    
+
         # Сохраняем ID для очистки сразу после создания
         self.test_account_ids.append(account1.getId())
         self.test_account_ids.append(account2.getId())
         self.test_account_ids.append(account3.getId())
 
         # Act
-        result = self.service.changePosition(position, position-2)
+        result = self.service.changePosition(position, position - 2)
 
         # Assert
         self.assertIsNotNone(result)
-        self.assertEqual(result.getPosition(), position-2)
+        self.assertEqual(result.getPosition(), position - 2)
 
     def test_26_change_position_by_old_new_not_found(self):
         """Тест 26: Изменение позиции по несуществующей старой позиции"""

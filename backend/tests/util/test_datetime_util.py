@@ -37,10 +37,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 01: Форматирование валидной даты для SQLite"""
         # Создаем LocalDateTime
         java_datetime = self.LocalDateTime.of(2024, 1, 15, 14, 30, 45, 123000000)
-        
+
         # Форматируем
         formatted = self.DateTimeUtil.formatForSqlite(java_datetime)
-        
+
         # Проверяем формат
         self.assertEqual(formatted, "2024-01-15 14:30:45.123")
 
@@ -48,7 +48,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 02: Форматирование null даты для SQLite"""
         # Форматируем null
         formatted = self.DateTimeUtil.formatForSqlite(None)
-        
+
         # Проверяем, что возвращается null
         self.assertIsNone(formatted)
 
@@ -58,12 +58,12 @@ class TestDateTimeUtil(unittest.TestCase):
         start_of_year = self.LocalDateTime.of(2024, 1, 1, 0, 0, 0, 0)
         formatted = self.DateTimeUtil.formatForSqlite(start_of_year)
         self.assertEqual(formatted, "2024-01-01 00:00:00.000")
-        
+
         # Конец года
         end_of_year = self.LocalDateTime.of(2024, 12, 31, 23, 59, 59, 999000000)
         formatted = self.DateTimeUtil.formatForSqlite(end_of_year)
         self.assertEqual(formatted, "2024-12-31 23:59:59.999")
-        
+
         # Високосный год
         leap_year = self.LocalDateTime.of(2024, 2, 29, 12, 0, 0, 0)
         formatted = self.DateTimeUtil.formatForSqlite(leap_year)
@@ -73,10 +73,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 04: Парсинг валидной строки из SQLite"""
         # Строка в формате SQLite
         sqlite_string = "2024-01-15 14:30:45.123"
-        
+
         # Парсим
         parsed = self.DateTimeUtil.parseFromSqlite(sqlite_string)
-        
+
         # Проверяем результат
         self.assertIsNotNone(parsed)
         self.assertEqual(parsed.getYear(), 2024)
@@ -91,7 +91,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 05: Парсинг null строки из SQLite"""
         # Парсим null
         parsed = self.DateTimeUtil.parseFromSqlite(None)
-        
+
         # Проверяем, что возвращается null
         self.assertIsNone(parsed)
 
@@ -99,7 +99,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 06: Парсинг пустой строки из SQLite"""
         # Парсим пустую строку
         parsed = self.DateTimeUtil.parseFromSqlite("")
-        
+
         # Проверяем, что возвращается null
         self.assertIsNone(parsed)
 
@@ -107,7 +107,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 07: Парсинг строки с пробелами из SQLite"""
         # Парсим строку с пробелами
         parsed = self.DateTimeUtil.parseFromSqlite("   ")
-        
+
         # Проверяем, что возвращается null
         self.assertIsNone(parsed)
 
@@ -115,13 +115,13 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 08: Цикл форматирование-парсинг"""
         # Создаем LocalDateTime
         original = self.LocalDateTime.of(2024, 6, 15, 12, 34, 56, 789000000)
-        
+
         # Форматируем
         formatted = self.DateTimeUtil.formatForSqlite(original)
-        
+
         # Парсим обратно
         parsed = self.DateTimeUtil.parseFromSqlite(formatted)
-        
+
         # Проверяем, что результат совпадает с исходным
         self.assertEqual(parsed.getYear(), original.getYear())
         self.assertEqual(parsed.getMonthValue(), original.getMonthValue())
@@ -143,7 +143,7 @@ class TestDateTimeUtil(unittest.TestCase):
         self.assertEqual(parsed.getMinute(), 0)
         self.assertEqual(parsed.getSecond(), 0)
         self.assertEqual(parsed.getNano(), 0)
-        
+
         # Конец года
         end_string = "2024-12-31 23:59:59.999"
         parsed = self.DateTimeUtil.parseFromSqlite(end_string)
@@ -159,7 +159,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 10: Парсинг неверного формата"""
         # Неверный формат даты
         invalid_string = "2024-13-45 25:70:80.999"
-        
+
         # Парсинг должен вызвать исключение
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(invalid_string)
@@ -168,7 +168,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 11: Парсинг некорректной строки"""
         # Некорректная строка
         malformed_string = "not a date"
-        
+
         # Парсинг должен вызвать исключение
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(malformed_string)
@@ -177,21 +177,21 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 12: Форматирование текущей даты"""
         # Создаем текущую дату
         now = self.LocalDateTime.now()
-        
+
         # Форматируем
         formatted = self.DateTimeUtil.formatForSqlite(now)
-        
+
         # Проверяем, что строка не пустая и имеет правильный формат
         self.assertIsNotNone(formatted)
         self.assertGreater(len(formatted), 0)
         self.assertIn("202", formatted)  # Должен содержать год
-        self.assertIn(":", formatted)    # Должен содержать двоеточия для времени
+        self.assertIn(":", formatted)  # Должен содержать двоеточия для времени
 
     def test_13_parse_from_sqlite_without_milliseconds(self):
         """Тест 13: Парсинг строки без миллисекунд"""
         # Строка без миллисекунд
         string_without_ms = "2024-01-15 14:30:45"
-        
+
         # Парсинг должен вызвать исключение (ожидается формат с миллисекундами)
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(string_without_ms)
@@ -200,7 +200,7 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 14: Парсинг строки с лишними пробелами"""
         # Строка с лишними пробелами
         string_with_spaces = "  2024-01-15 14:30:45.123  "
-        
+
         # Парсинг должен вызвать исключение
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(string_with_spaces)
@@ -209,10 +209,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 15: Форматирование даты с нулевыми наносекундами"""
         # Создаем LocalDateTime с нулевыми наносекундами
         java_datetime = self.LocalDateTime.of(2024, 1, 15, 14, 30, 45, 0)
-        
+
         # Форматируем
         formatted = self.DateTimeUtil.formatForSqlite(java_datetime)
-        
+
         # Проверяем формат
         self.assertEqual(formatted, "2024-01-15 14:30:45.000")
 
@@ -220,10 +220,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 16: Парсинг строки с нулевыми миллисекундами"""
         # Строка с нулевыми миллисекундами
         string_with_zero_ms = "2024-01-15 14:30:45.000"
-        
+
         # Парсим
         parsed = self.DateTimeUtil.parseFromSqlite(string_with_zero_ms)
-        
+
         # Проверяем результат
         self.assertIsNotNone(parsed)
         self.assertEqual(parsed.getNano(), 0)
@@ -232,10 +232,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 17: Форматирование даты с максимальными наносекундами"""
         # Создаем LocalDateTime с максимальными наносекундами
         java_datetime = self.LocalDateTime.of(2024, 1, 15, 14, 30, 45, 999999999)
-        
+
         # Форматируем
         formatted = self.DateTimeUtil.formatForSqlite(java_datetime)
-        
+
         # Проверяем формат
         self.assertEqual(formatted, "2024-01-15 14:30:45.999")
 
@@ -243,10 +243,10 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 18: Парсинг строки с максимальными миллисекундами"""
         # Строка с максимальными миллисекундами
         string_with_max_ms = "2024-01-15 14:30:45.999"
-        
+
         # Парсим
         parsed = self.DateTimeUtil.parseFromSqlite(string_with_max_ms)
-        
+
         # Проверяем результат
         self.assertIsNotNone(parsed)
         self.assertEqual(parsed.getNano(), 999000000)
@@ -260,14 +260,14 @@ class TestDateTimeUtil(unittest.TestCase):
             self.LocalDateTime.of(2024, 12, 31, 23, 59, 59, 999000000),
             self.LocalDateTime.of(2020, 2, 29, 12, 0, 0, 0),  # Високосный год
         ]
-        
+
         for original in test_dates:
             # Форматируем
             formatted = self.DateTimeUtil.formatForSqlite(original)
-            
+
             # Парсим обратно
             parsed = self.DateTimeUtil.parseFromSqlite(formatted)
-            
+
             # Проверяем, что результат совпадает с исходным
             self.assertEqual(parsed.getYear(), original.getYear())
             self.assertEqual(parsed.getMonthValue(), original.getMonthValue())
@@ -281,12 +281,12 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 20: Консистентность форматирования"""
         # Создаем LocalDateTime
         java_datetime = self.LocalDateTime.of(2024, 1, 15, 14, 30, 45, 123000000)
-        
+
         # Форматируем несколько раз
         formatted1 = self.DateTimeUtil.formatForSqlite(java_datetime)
         formatted2 = self.DateTimeUtil.formatForSqlite(java_datetime)
         formatted3 = self.DateTimeUtil.formatForSqlite(java_datetime)
-        
+
         # Все результаты должны быть одинаковыми
         self.assertEqual(formatted1, formatted2)
         self.assertEqual(formatted2, formatted3)
@@ -294,4 +294,4 @@ class TestDateTimeUtil(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

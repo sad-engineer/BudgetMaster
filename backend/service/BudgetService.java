@@ -243,8 +243,6 @@ public class BudgetService {
     private Budget restore(Budget restoredBudget) {
         restoredBudget.setDeletedBy(null);
         restoredBudget.setDeleteTime(null);
-        restoredBudget.setUpdateTime(LocalDateTime.now());
-        restoredBudget.setUpdatedBy(user);
         return update(restoredBudget);
     }    
 

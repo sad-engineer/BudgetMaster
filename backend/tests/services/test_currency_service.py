@@ -116,7 +116,7 @@ class TestCurrencyService(unittest.TestCase):
         self.assertIsNotNone(currency.getUpdateTime())
         self.assertIsNone(currency.getDeleteTime())
         self.assertNotEqual(currency.getCreateTime(), currency.getUpdateTime())
-    
+
     def test_04_get_currency_by_id(self):
         """Тест 04: Получение валюты по ID"""
         currency = self.service.get(self.Integer(1))
@@ -141,7 +141,7 @@ class TestCurrencyService(unittest.TestCase):
         currency = self.service.get("12123")
         self.test_currency_ids.append(currency.getId())
         self.assertEqual(currency.getTitle(), "12123")
-        
+
         currency2 = self.service.get("Валюта с цифрами 123")
         self.test_currency_ids.append(currency2.getId())
         self.assertEqual(currency2.getTitle(), "Валюта с цифрами 123")
@@ -269,8 +269,8 @@ class TestCurrencyService(unittest.TestCase):
         """Тест 19: Получение валюты со специальными символами"""
         title = "Валюта с символами: €$¥£₽"
         with self.assertRaises(Exception):
-            self.service.get(title)   
+            self.service.get(title)
 
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

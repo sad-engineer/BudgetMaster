@@ -119,6 +119,14 @@ public class Operation extends BaseEntity {
         return type == ModelConstants.DEFAULT_OPERATION_TYPE;
     }
 
+    /** 
+     * Проверяет, является ли операция удаленной
+     * @return true, если операция удалена
+     */
+    public boolean isDeleted() {
+        return deletedBy != null && deleteTime != null;
+    }
+
     /**
      * Проверяет, равны ли два объекта
      * @param o объект для сравнения

@@ -117,7 +117,7 @@ class TestCategoryService(unittest.TestCase):
         self.assertIsNotNone(category.getUpdateTime())
         self.assertIsNone(category.getDeleteTime())
         self.assertNotEqual(category.getCreateTime(), category.getUpdateTime())
-    
+
     def test_04_get_category_by_id(self):
         """Тест 04: Получение категории по ID"""
         category = self.service.get(self.Integer(1))
@@ -142,7 +142,7 @@ class TestCategoryService(unittest.TestCase):
         category = self.service.get("12123", 1, 0, None)
         self.test_category_ids.append(category.getId())
         self.assertEqual(category.getTitle(), "12123")
-        
+
         category2 = self.service.get("Категория с цифрами 123", 1, 0, None)
         self.test_category_ids.append(category2.getId())
         self.assertEqual(category2.getTitle(), "Категория с цифрами 123")
@@ -277,7 +277,7 @@ class TestCategoryService(unittest.TestCase):
         title = "Категория расходов"
         category = self.service.get(title, 1)  # Тип операций: расход
         self.test_category_ids.append(category.getId())
-        
+
         self.assertIsNotNone(category)
         self.assertEqual(category.getTitle(), title)
         self.assertEqual(category.getOperationType(), 1)
@@ -289,7 +289,7 @@ class TestCategoryService(unittest.TestCase):
         title = "Родительская категория доходов"
         category = self.service.get(title, 2, 0)  # Доход, родительская
         self.test_category_ids.append(category.getId())
-        
+
         self.assertIsNotNone(category)
         self.assertEqual(category.getTitle(), title)
         self.assertEqual(category.getOperationType(), 2)
@@ -301,11 +301,11 @@ class TestCategoryService(unittest.TestCase):
         parent_title = "Родительская категория"
         parent = self.service.get(parent_title, 1, 0, None)
         self.test_category_ids.append(parent.getId())
-        
+
         child_title = "Дочерняя категория"
         child = self.service.get(child_title, 1, 1, parent.getId())
         self.test_category_ids.append(child.getId())
-        
+
         self.assertIsNotNone(child)
         self.assertEqual(child.getTitle(), child_title)
         self.assertEqual(child.getOperationType(), 1)
@@ -315,15 +315,15 @@ class TestCategoryService(unittest.TestCase):
     def test_23_get_existing_category_with_different_parameters(self):
         """Тест 23: Получение существующей категории с другими параметрами (должно обновить)"""
         title = "Категория для обновления"
-        
+
         # Создаем категорию с параметрами по умолчанию
         category1 = self.service.get(title, 1, 0, None)
         self.test_category_ids.append(category1.getId())
-        
+
         # Получаем ту же категорию с другими параметрами
         category2 = self.service.get(title, 2, 1, self.Integer(1))
         self.test_category_ids.append(category2.getId())
-        
+
         # Должна быть та же категория, но с обновленными параметрами
         self.assertEqual(category1.getId(), category2.getId())
         self.assertEqual(category2.getOperationType(), 2)
@@ -337,17 +337,17 @@ class TestCategoryService(unittest.TestCase):
         c2 = self.service.get("Категория типа 2", 2)
         self.test_category_ids.append(c1.getId())
         self.test_category_ids.append(c2.getId())
-        
+
         categories_type_1 = self.service.getAllByOperationType(1)
         categories_type_2 = self.service.getAllByOperationType(2)
-        
+
         self.assertGreater(len(categories_type_1), 0)
         self.assertGreater(len(categories_type_2), 0)
-        
+
         # Проверяем, что наши категории есть в соответствующих списках
         type_1_ids = [c.getId() for c in categories_type_1]
         type_2_ids = [c.getId() for c in categories_type_2]
-        
+
         self.assertIn(c1.getId(), type_1_ids)
         self.assertIn(c2.getId(), type_2_ids)
 
@@ -358,17 +358,17 @@ class TestCategoryService(unittest.TestCase):
         c2 = self.service.get("Категория типа B", 1, 1)  # Дочерняя
         self.test_category_ids.append(c1.getId())
         self.test_category_ids.append(c2.getId())
-        
+
         categories_type_0 = self.service.getAllByType(0)
         categories_type_1 = self.service.getAllByType(1)
-        
+
         self.assertGreater(len(categories_type_0), 0)
         self.assertGreater(len(categories_type_1), 0)
-        
+
         # Проверяем, что наши категории есть в соответствующих списках
         type_0_ids = [c.getId() for c in categories_type_0]
         type_1_ids = [c.getId() for c in categories_type_1]
-        
+
         self.assertIn(c1.getId(), type_0_ids)
         self.assertIn(c2.getId(), type_1_ids)
 
@@ -379,48 +379,46 @@ class TestCategoryService(unittest.TestCase):
         child1 = self.service.get("Дочерняя категория 1", 1, 1, parent.getId())
         child2 = self.service.get("Дочерняя категория 2", 1, 1, parent.getId())
         self.test_category_ids.extend([parent.getId(), child1.getId(), child2.getId()])
-        
+
         children = self.service.getAllByParentId(parent.getId())
         self.assertGreater(len(children), 0)
-        
+
         # Проверяем, что дочерние категории есть в списке
         child_ids = [c.getId() for c in children]
-        
+
         self.assertIn(child1.getId(), child_ids)
         self.assertIn(child2.getId(), child_ids)
 
     def test_27_update_category_with_optional_parameters(self):
         """Тест 27: Обновление категории с Optional параметрами"""
-        
+
         # Создаем категорию
         category = self.service.get("Категория для обновления")
         self.test_category_ids.append(category.getId())
-        
+
         # Обновляем только название
-        updated = self.service.update(category, 
-            "Новое название",
-            None,
-            None,
-            None)
-        
+        updated = self.service.update(category, "Новое название", None, None, None)
+
         self.assertEqual(updated.getTitle(), "Новое название")
         self.assertEqual(updated.getOperationType(), category.getOperationType())  # Не изменилось
         self.assertEqual(updated.getType(), category.getType())  # Не изменилось
 
     def test_28_update_category_with_all_parameters(self):
         """Тест 28: Обновление категории со всеми параметрами"""
-        
+
         # Создаем категорию
         category = self.service.get("Категория для полного обновления", 1, 0, None)
         self.test_category_ids.append(category.getId())
-        
+
         # Обновляем все параметры
-        updated = self.service.update(category, 
+        updated = self.service.update(
+            category,
             "Полностью новое название",
             self.Integer(2),  # Доход - Integer
             self.Integer(1),  # Дочерняя - Integer
-            self.Integer(1))  # Родитель - Integer
-        
+            self.Integer(1),
+        )  # Родитель - Integer
+
         self.assertEqual(updated.getTitle(), "Полностью новое название")
         self.assertEqual(updated.getOperationType(), 2)
         self.assertEqual(updated.getType(), 1)
@@ -429,4 +427,3 @@ class TestCategoryService(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    
