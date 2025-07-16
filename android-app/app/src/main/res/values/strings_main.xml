@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">BudgetMaster</string>
-    <!-- Текстовые элементы -->
-    <string name="toolbar_title_main">Главная</string>
-    <string name="toolbar_title_income">Доходы</string>
-    <string name="toolbar_title_expense">Расходы</string>
-    <string name="toolbar_title_budget">Бюджет</string>
 
     <!-- Дэфолт-значения-->
     <!-- TODO: Удалить после отладки-->
@@ -19,7 +14,8 @@
     <string name="btn_target">До цели</string>
     <string name="btn_budget">Остаток бюджета</string>
     <string name="btn_reserve">Резерв</string>
-    <!-- Описания иконок -->
+    
+    <!-- Описания иконок главного экрана -->
     <string name="icon_home">Иконка заработка за месяц</string>
     <string name="icon_accounts">Иконка счетов</string>
     <string name="icon_savings">Иконка сбережений</string>
@@ -29,32 +25,5 @@
     <string name="icon_budget">Иконка бюджета</string>
     <string name="icon_reserve">Иконка резерва</string>
     <string name="icon_menu">Иконка меню</string>
-
-    <!-- Названия вкладок для доходов и расходов -->
-    <string name="tab_all">ВСЕ</string>
-    <string name="tab_days">ДНИ</string>
-    <string name="tab_categories">КАТЕГОРИИ</string>
-    <string name="tab_charts">ГРАФИКИ</string>
-
-    <!-- Названия вкладок для бюджета -->
-    <string name="tab_limits">Лимиты</string>
-    <string name="tab_remaining">Осталось</string>
-
-    <!-- Пункты меню -->
-    <string name="menu_main">Главная</string>
-    <string name="menu_instructions">Инструкции</string>
-    <string name="menu_accounts">Счета и переводы</string>
-    <string name="menu_income">Доходы</string>
-    <string name="menu_expense">Расходы</string>
-    <string name="menu_budget">Бюджет</string>
-    <string name="menu_statistics">Статистика</string>
-    <string name="menu_currencies">Валюты</string>
-    <string name="menu_income_categories">Категории доходов</string>
-    <string name="menu_expense_categories">Категории расходов</string>
-    <string name="menu_import_data">Загрузить данные</string>
-    <string name="menu_export_data">Выгрузить данные</string>
-    <string name="menu_settings">Настройки</string>
-    <string name="menu_version">Версия приложения</string>
-    <string name="menu_authors">Авторы</string>
 
 </resources>

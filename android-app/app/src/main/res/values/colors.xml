@@ -17,11 +17,24 @@
     <color name="background_content">#FF323232</color>
 
     <!-- Цвета иконок -->
-    <color name="icon_toolbar">#FFFFFF</color>
-    <color name="icon_activity_main">#FF0000FF</color>
+    <color name="icon_toolbar">#FF4FBF03</color>
+    <color name="icon_activity_main">#FF4FBF03</color>
 
     <!-- Цвета текста -->
     <color name="text_toolbar">#FFFFFF</color>
     <color name="text_activity_main">#FFFFFF</color>
+
+    <!-- Цвета для экрана валюты -->
+    <color name="currency_toolbar_icon">#FFFFFF</color>
+    <color name="currency_add_button_icon">#FFFFFF</color>
+    <color name="currency_delete_button_icon">#FFFFFF</color>
+    <color name="currency_toolbar_text">#FFFFFF</color>
+    <color name="currency_add_button_background">#FF646464</color>
+    <color name="currency_delete_button_background">#FF646464</color>
+
+
+
+
+
 
 </resources>

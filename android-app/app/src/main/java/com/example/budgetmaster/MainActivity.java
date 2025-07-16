@@ -37,11 +37,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
 
-        // Настройка ActionBarDrawerToggle
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.menu_main, R.string.menu_main);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // Настройка drawer без ActionBarDrawerToggle
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                // Анимация затемнения контента при открытии drawer
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                // Drawer открыт
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                // Drawer закрыт
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                // Состояние drawer изменилось
+            }
+        });
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -178,7 +195,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_currencies) {
-            Toast.makeText(this, "Валюты", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, com.example.budgetmaster.currencies.CurrenciesActivity.class);
+            startActivity(intent);
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_income_categories) {
             Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();

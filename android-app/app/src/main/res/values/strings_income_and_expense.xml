@@ -1,0 +1,7 @@
+<resources>
+    <!-- Названия вкладок для доходов и расходов -->
+    <string name="tab_all">ВСЕ</string>
+    <string name="tab_days">ДНИ</string>
+    <string name="tab_categories">КАТЕГОРИИ</string>
+    <string name="tab_charts">ГРАФИКИ</string>
+</resources>

@@ -5,13 +5,14 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/menu_padding"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView android:contentDescription="@string/app_name"
         android:layout_height="@dimen/icon_size"
         android:layout_width="@dimen/icon_size"
         android:src="@drawable/ic_budget"
-        android:tint="@color/text_toolbar" />
+        app:tint="@color/text_toolbar" />
 
     <TextView android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/main_margin"

@@ -1,0 +1,5 @@
+<resources>
+    <!-- Названия вкладок для бюджета -->
+    <string name="tab_limits">Лимиты</string>
+    <string name="tab_remaining">Осталось</string>
+</resources>

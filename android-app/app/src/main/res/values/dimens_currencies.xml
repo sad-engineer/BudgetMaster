@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Размеры кнопок валют -->
+    <dimen name="currency_button_size">60dp</dimen>
+    <dimen name="currency_button_margin">20dp</dimen>
+    <dimen name="currency_button_spacing">20dp</dimen>
+    <dimen name="currency_button_elevation">6dp</dimen>
+    <dimen name="currency_button_padding">8dp</dimen>
+</resources> 

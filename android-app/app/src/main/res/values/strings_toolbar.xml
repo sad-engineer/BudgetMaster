@@ -1,0 +1,15 @@
+<resources>
+    <!-- Заголовок тулбара -->
+    <string name="toolbar_title_main">Главная</string>
+    <string name="toolbar_title_currencies">Валюты</string>
+
+
+    <string name="toolbar_title_accounts">Счета</string>
+    <string name="toolbar_title_budget">Бюджет</string>
+    <string name="toolbar_title_income">Доходы</string>
+    <string name="toolbar_title_expense">Расходы</string>
+
+    <!-- Описания иконок -->
+    <string name="icon_income_toolbar">Кнопка дохода</string>
+    <string name="icon_expense_toolbar">Кнопка расхода</string>
+</resources> 

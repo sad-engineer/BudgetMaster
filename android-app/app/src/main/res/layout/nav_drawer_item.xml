@@ -6,14 +6,15 @@
     android:orientation="horizontal"
     android:paddingStart="@dimen/menu_padding"
     android:paddingEnd="@dimen/menu_padding"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView android:contentDescription=""
         android:id="@+id/menu_item_icon"
         android:layout_height="@dimen/menu_icon_size"
         android:layout_width="@dimen/menu_icon_size"
         android:src="@drawable/ic_home"
-        android:tint="@color/text_activity_main" />
+        app:tint="@color/text_activity_main" />
 
     <TextView android:gravity="center_vertical"
         android:id="@+id/menu_item_text"

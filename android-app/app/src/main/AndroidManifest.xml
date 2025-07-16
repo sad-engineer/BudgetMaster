@@ -24,6 +24,9 @@
             android:name=".budget.BudgetActivity"
             android:exported="false" />
         <activity
+            android:name=".currencies.CurrenciesActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>
