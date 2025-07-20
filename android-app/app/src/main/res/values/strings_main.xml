@@ -1,5 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BudgetMaster</string>
+    <string name="home">Главная</string>
+    <string name="accounts">Счета</string>
+    <string name="income">Доходы</string>
+    <string name="expense">Расходы</string>
+    <string name="budget">Бюджет</string>
+    <string name="currencies">Валюты</string>
+    <string name="settings">Настройки</string>
 
     <!-- Дэфолт-значения-->
     <!-- TODO: Удалить после отладки-->

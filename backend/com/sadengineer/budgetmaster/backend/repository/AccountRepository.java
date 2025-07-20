@@ -73,7 +73,7 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      */
     @Override
     public List<Account> findAll() {
-        return findAll(TABLE_ACCOUNTS, this::mapRowSafe);
+        return connection.executeQuery("SELECT * FROM " + TABLE_ACCOUNTS, this::mapRowSafe);
     }
 
     /**
@@ -86,7 +86,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @return список счетов с указанной валютой (может быть пустым, но не null)
      */
     public List<Account> findAllByCurrencyId(Integer currencyId) {
-        return findAll(TABLE_ACCOUNTS, COLUMN_CURRENCY_ID, currencyId, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_CURRENCY_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, currencyId);
     }
 
     /**
@@ -99,7 +100,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @return список счетов с указанным типом (может быть пустым, но не null)
      */
     public List<Account> findAllByType(Integer type) {
-        return findAll(TABLE_ACCOUNTS, COLUMN_TYPE, type, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_TYPE + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, type);
     }
 
     /**
@@ -112,7 +114,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @return список счетов с указанным статусом закрытия (может быть пустым, но не null)
      */
     public List<Account> findAllByClosed(Integer closed) {
-        return findAll(TABLE_ACCOUNTS, COLUMN_CLOSED, closed, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_CLOSED + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, closed);
     }
 
     /**
@@ -126,7 +129,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      */
     @Override
     public Optional<Account> findById(Integer id) {
-        return findByColumn(TABLE_ACCOUNTS, COLUMN_ID, id, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_ID + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, id);
     }
 
     /**
@@ -140,7 +144,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @return Optional с найденным счетом, если найден, иначе пустой Optional
      */
     public Optional<Account> findByTitle(String title) {
-        return findByColumn(TABLE_ACCOUNTS, COLUMN_TITLE, title, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_TITLE + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, title);
     }
 
     /**
@@ -153,7 +158,8 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @return счет, если найден, иначе null
      */
     public Optional<Account> findByPosition(Integer position) { 
-        return findByColumn(TABLE_ACCOUNTS, COLUMN_POSITION, position, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + COLUMN_POSITION + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, position);
     }
 
     /**
@@ -216,21 +222,24 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
         account.setClosed(rs.getInt(COLUMN_CLOSED));
         // Безопасное чтение полей кредитных карт с обработкой NULL значений
         try {
-            Integer creditCardLimit = rs.getObject(COLUMN_CREDIT_CARD_LIMIT, Integer.class);
+            Object creditCardLimitObj = rs.getObject(COLUMN_CREDIT_CARD_LIMIT);
+            Integer creditCardLimit = (creditCardLimitObj != null) ? (Integer) creditCardLimitObj : null;
             account.setCreditCardLimit(creditCardLimit);
         } catch (SQLException e) {
             account.setCreditCardLimit(null);
         }
         
         try {
-            Integer creditCardCategoryId = rs.getObject(COLUMN_CREDIT_CARD_CATEGORY_ID, Integer.class);
+            Object creditCardCategoryIdObj = rs.getObject(COLUMN_CREDIT_CARD_CATEGORY_ID);
+            Integer creditCardCategoryId = (creditCardCategoryIdObj != null) ? (Integer) creditCardCategoryIdObj : null;
             account.setCreditCardCategoryId(creditCardCategoryId);
         } catch (SQLException e) {
             account.setCreditCardCategoryId(null);
         }
         
         try {
-            Integer creditCardCommissionCategoryId = rs.getObject(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID, Integer.class);
+            Object creditCardCommissionCategoryIdObj = rs.getObject(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID);
+            Integer creditCardCommissionCategoryId = (creditCardCommissionCategoryIdObj != null) ? (Integer) creditCardCommissionCategoryIdObj : null;
             account.setCreditCardCommissionCategoryId(creditCardCommissionCategoryId);
         } catch (SQLException e) {
             account.setCreditCardCommissionCategoryId(null);
@@ -239,18 +248,55 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
-     * Безопасное преобразование строки ResultSet в объект Account
+     * Безопасное преобразование строки ResultRow в объект Account
      * 
      * <p>Обертка над mapRow с обработкой исключений.
      * Если при чтении данных возникает ошибка, метод возвращает null.
      * 
-     * @param rs ResultSet с данными из базы данных (не null)
+     * @param row ResultRow с данными из базы данных (не null)
      * @return объект Account с заполненными полями или null при ошибке
      */
-    public Account mapRowSafe(ResultSet rs) {
+    public Account mapRowSafe(database.DatabaseConnection.ResultRow row) {
         try {
-            return mapRow(rs);
-        } catch (SQLException e) {
+            Account account = new Account();
+            account.setId(row.getInt(COLUMN_ID));
+            account.setCreateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_CREATE_TIME)));
+            account.setUpdateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_UPDATE_TIME)));
+            account.setDeleteTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_DELETE_TIME)));
+            account.setCreatedBy(row.getString(COLUMN_CREATED_BY));
+            account.setUpdatedBy(row.getString(COLUMN_UPDATED_BY));
+            account.setDeletedBy(row.getString(COLUMN_DELETED_BY));
+            account.setPosition(row.getInt(COLUMN_POSITION));
+            account.setTitle(row.getString(COLUMN_TITLE));
+            account.setAmount(row.getInt(COLUMN_AMOUNT));
+            account.setType(row.getInt(COLUMN_TYPE));
+            account.setCurrencyId(row.getInt(COLUMN_CURRENCY_ID));
+            account.setClosed(row.getInt(COLUMN_CLOSED));
+            
+            // Безопасное чтение полей кредитных карт с обработкой NULL значений
+            try {
+                Integer creditCardLimit = row.getInt(COLUMN_CREDIT_CARD_LIMIT);
+                account.setCreditCardLimit(creditCardLimit);
+            } catch (Exception e) {
+                account.setCreditCardLimit(null);
+            }
+            
+            try {
+                Integer creditCardCategoryId = row.getInt(COLUMN_CREDIT_CARD_CATEGORY_ID);
+                account.setCreditCardCategoryId(creditCardCategoryId);
+            } catch (Exception e) {
+                account.setCreditCardCategoryId(null);
+            }
+            
+            try {
+                Integer creditCardCommissionCategoryId = row.getInt(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID);
+                account.setCreditCardCommissionCategoryId(creditCardCommissionCategoryId);
+            } catch (Exception e) {
+                account.setCreditCardCommissionCategoryId(null);
+            }
+            
+            return account;
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
     }
@@ -268,42 +314,31 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      */
     @Override
     public Account save(Account account) {
-        // Используем ACCOUNT_COLUMNS, исключая id (первый элемент)
-        String[] columns = new String[ACCOUNT_COLUMNS.length - 1];
-        System.arraycopy(ACCOUNT_COLUMNS, 1, columns, 0, ACCOUNT_COLUMNS.length - 1);
-        String sql = "INSERT INTO " + TABLE_ACCOUNTS + " (" +
-            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            // Форматируем даты
+        String sql = "INSERT INTO " + TABLE_ACCOUNTS + " (title, position, amount, type, currency_id, closed, credit_card_limit, credit_card_category_id, credit_card_commission_category_id, created_by, updated_by, deleted_by, create_time, update_time, delete_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
             String createTimeStr = account.getCreateTime() != null ? DateTimeUtil.formatForSqlite(account.getCreateTime()) : null;
             String updateTimeStr = account.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(account.getUpdateTime()) : null;
             String deleteTimeStr = account.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(account.getDeleteTime()) : null;
-            // Порядок параметров строго по ACCOUNT_COLUMNS (без id)
-            stmt.setString(1, account.getTitle());
-            stmt.setInt(2, account.getPosition());
-            stmt.setInt(3, account.getAmount());
-            stmt.setInt(4, account.getType());
-            stmt.setInt(5, account.getCurrencyId());
-            stmt.setInt(6, account.getClosed());
-            stmt.setObject(7, account.getCreditCardLimit());
-            stmt.setObject(8, account.getCreditCardCategoryId());
-            stmt.setObject(9, account.getCreditCardCommissionCategoryId());
-            stmt.setString(10, account.getCreatedBy());
-            stmt.setString(11, account.getUpdatedBy());
-            stmt.setString(12, account.getDeletedBy());
-            stmt.setString(13, createTimeStr);
-            stmt.setString(14, deleteTimeStr);
-            stmt.setString(15, updateTimeStr);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    account.setId(rs.getInt(1));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        
+        long id = connection.executeInsert(sql,
+            account.getTitle(),
+            account.getPosition(),
+            account.getAmount(),
+            account.getType(),
+            account.getCurrencyId(),
+            account.getClosed(),
+            account.getCreditCardLimit(),
+            account.getCreditCardCategoryId(),
+            account.getCreditCardCommissionCategoryId(),
+            account.getCreatedBy(),
+            account.getUpdatedBy(),
+            account.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr
+        );
+        
+        account.setId((int) id);
         return account;
     }
 
@@ -319,37 +354,31 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      */
     @Override
     public Account update(Account account) {
-        // Используем ACCOUNT_COLUMNS, исключая id (первый элемент)
-        String[] columns = new String[ACCOUNT_COLUMNS.length - 1];
-        System.arraycopy(ACCOUNT_COLUMNS, 1, columns, 0, ACCOUNT_COLUMNS.length - 1);
-        String setClause = String.join("=?, ", columns) + "=?";
-        String sql = "UPDATE " + TABLE_ACCOUNTS + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE " + TABLE_ACCOUNTS + " SET title=?, position=?, amount=?, type=?, currency_id=?, closed=?, credit_card_limit=?, credit_card_category_id=?, credit_card_commission_category_id=?, created_by=?, updated_by=?, deleted_by=?, create_time=?, update_time=?, delete_time=? WHERE id=?";
+        
             String createTimeStr = account.getCreateTime() != null ? DateTimeUtil.formatForSqlite(account.getCreateTime()) : null;
             String updateTimeStr = account.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(account.getUpdateTime()) : null;
             String deleteTimeStr = account.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(account.getDeleteTime()) : null;
-            // Порядок параметров строго по ACCOUNT_COLUMNS (без id)
-            stmt.setString(1, account.getTitle());
-            stmt.setInt(2, account.getPosition());
-            stmt.setInt(3, account.getAmount());
-            stmt.setInt(4, account.getType());
-            stmt.setInt(5, account.getCurrencyId());
-            stmt.setInt(6, account.getClosed());
-            stmt.setObject(7, account.getCreditCardLimit());
-            stmt.setObject(8, account.getCreditCardCategoryId());
-            stmt.setObject(9, account.getCreditCardCommissionCategoryId());
-            stmt.setString(10, account.getCreatedBy());
-            stmt.setString(11, account.getUpdatedBy());
-            stmt.setString(12, account.getDeletedBy());
-            stmt.setString(13, createTimeStr);
-            stmt.setString(14, deleteTimeStr);
-            stmt.setString(15, updateTimeStr);
-            stmt.setInt(16, account.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        
+        connection.executeUpdate(sql,
+            account.getTitle(),
+            account.getPosition(),
+            account.getAmount(),
+            account.getType(),
+            account.getCurrencyId(),
+            account.getClosed(),
+            account.getCreditCardLimit(),
+            account.getCreditCardCategoryId(),
+            account.getCreditCardCommissionCategoryId(),
+            account.getCreatedBy(),
+            account.getUpdatedBy(),
+            account.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr,
+            account.getId()
+        );
+        
         return account;
     }
 } 

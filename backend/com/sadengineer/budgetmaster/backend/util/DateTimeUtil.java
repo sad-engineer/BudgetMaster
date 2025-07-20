@@ -15,6 +15,13 @@ public class DateTimeUtil {
     private static final DateTimeFormatter SQLITE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     
     /**
+     * Получает текущую дату и время
+     */
+    public static LocalDateTime getCurrentDateTime() {
+        return LocalDateTime.now();
+    }
+    
+    /**
      * Форматирует LocalDateTime в строку для SQLite
      */
     public static String formatForSqlite(LocalDateTime dateTime) {

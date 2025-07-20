@@ -73,20 +73,21 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public List<Budget> findAll() {
-        return findAll(TABLE_BUDGETS, this::mapRowSafe);
+        return connection.executeQuery("SELECT * FROM " + TABLE_BUDGETS, this::mapRowSafe);
     }
         
     /**
-     * Поиск бюджета по ID категории
+     * Получение бюджетов по ID категории
      * 
-     * <p>Возвращает бюджет независимо от статуса удаления (активный или удаленный).
-     * Если бюджет не найден, возвращает пустой Optional.
+     * <p>Возвращает список всех бюджетов с указанной категорией.
+     * Поиск выполняется независимо от статуса удаления.
      * 
      * @param categoryId ID категории для поиска (положительное целое число)
-     * @return Optional с найденным бюджетом, если найден, иначе пустой Optional
+     * @return список бюджетов с указанной категорией (может быть пустым, но не null)
      */
-    public Optional<Budget> findByCategoryId(Integer categoryId) {
-        return findByColumn(TABLE_BUDGETS, COLUMN_CATEGORY_ID, categoryId, this::mapRowSafe);
+    public List<Budget> findAllByCategoryId(Integer categoryId) {
+        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_CATEGORY_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, categoryId);
     }
 
     /**
@@ -99,7 +100,8 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return список бюджетов с указанной валютой (может быть пустым, но не null)
      */
     public List<Budget> findAllByCurrencyId(Integer currencyId) {
-        return findAll(TABLE_BUDGETS, COLUMN_CURRENCY_ID, currencyId, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_CURRENCY_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, currencyId);
     }   
 
     /**
@@ -113,7 +115,8 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Optional<Budget> findById(Integer id) {
-        return findByColumn(TABLE_BUDGETS, COLUMN_ID, id, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_ID + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, id);
     }
 
     /**
@@ -126,7 +129,8 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @return бюджет, если найден, иначе null
      */
     public Optional<Budget> findByPosition(Integer position) { 
-        return findByColumn(TABLE_BUDGETS, COLUMN_POSITION, position, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_POSITION + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, position);
     }
 
     /**
@@ -181,7 +185,8 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
         budget.setCurrencyId(rs.getInt(COLUMN_CURRENCY_ID));
         // Безопасное чтение поля category_id с обработкой NULL значений
         try {
-            Integer categoryId = rs.getObject(COLUMN_CATEGORY_ID, Integer.class);
+            Object categoryIdObj = rs.getObject(COLUMN_CATEGORY_ID);
+            Integer categoryId = (categoryIdObj != null) ? (Integer) categoryIdObj : null;
             budget.setCategoryId(categoryId);
         } catch (SQLException e) {
             budget.setCategoryId(null);
@@ -190,18 +195,38 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     }
 
     /**
-     * Безопасное преобразование строки ResultSet в объект Budget
+     * Безопасное преобразование строки ResultRow в объект Budget
      * 
      * <p>Обертка над mapRow с обработкой исключений.
      * Если при чтении данных возникает ошибка, метод возвращает null.
      * 
-     * @param rs ResultSet с данными из базы данных (не null)
+     * @param row ResultRow с данными из базы данных (не null)
      * @return объект Budget с заполненными полями или null при ошибке
      */
-    public Budget mapRowSafe(ResultSet rs) {
+    public Budget mapRowSafe(database.DatabaseConnection.ResultRow row) {
         try {
-            return mapRow(rs);
-        } catch (SQLException e) {
+            Budget budget = new Budget();
+            budget.setId(row.getInt(COLUMN_ID));
+            budget.setCreateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_CREATE_TIME)));
+            budget.setUpdateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_UPDATE_TIME)));
+            budget.setDeleteTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_DELETE_TIME)));
+            budget.setCreatedBy(row.getString(COLUMN_CREATED_BY));
+            budget.setUpdatedBy(row.getString(COLUMN_UPDATED_BY));
+            budget.setDeletedBy(row.getString(COLUMN_DELETED_BY));
+            budget.setPosition(row.getInt(COLUMN_POSITION));
+            budget.setAmount(row.getInt(COLUMN_AMOUNT));
+            budget.setCurrencyId(row.getInt(COLUMN_CURRENCY_ID));
+            
+            // Безопасное чтение поля category_id с обработкой NULL значений
+            try {
+                Integer categoryId = row.getInt(COLUMN_CATEGORY_ID);
+                budget.setCategoryId(categoryId);
+            } catch (Exception e) {
+                budget.setCategoryId(null);
+            }
+            
+            return budget;
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -219,47 +244,26 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Budget save(Budget budget) {
-        // Используем BUDGET_COLUMNS, исключая id (первый элемент)
-        String[] columns = new String[BUDGET_COLUMNS.length - 1];
-        System.arraycopy(BUDGET_COLUMNS, 1, columns, 0, BUDGET_COLUMNS.length - 1);
+        String sql = "INSERT INTO " + TABLE_BUDGETS + " (amount, currency_id, category_id, position, created_by, updated_by, deleted_by, create_time, update_time, delete_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        String sql = "INSERT INTO " + TABLE_BUDGETS + " (" + 
-            String.join(", ", columns) + ") " +
-            "VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String createTimeStr = budget.getCreateTime() != null ? DateTimeUtil.formatForSqlite(budget.getCreateTime()) : null;
+        String updateTimeStr = budget.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(budget.getUpdateTime()) : null;
+        String deleteTimeStr = budget.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
             
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = budget.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getCreateTime()) : null;
-            String updateTimeStr = budget.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getUpdateTime()) : null;
-            String deleteTimeStr = budget.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
-            
-            // Порядок параметров соответствует BUDGET_COLUMNS (без id)
-            stmt.setInt(1, budget.getAmount());
-            stmt.setInt(2, budget.getCurrencyId());
-            stmt.setObject(3, budget.getCategoryId());
-            stmt.setInt(4, budget.getPosition());
-            stmt.setString(5, budget.getCreatedBy());
-            stmt.setString(6, budget.getUpdatedBy());
-            stmt.setString(7, budget.getDeletedBy());
-            stmt.setString(8, createTimeStr);
-            stmt.setString(9, deleteTimeStr);
-            stmt.setString(10, updateTimeStr);
-            stmt.executeUpdate();
-            
-            // Получаем сгенерированный id
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    budget.setId(rs.getInt(1));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        long id = connection.executeInsert(sql,
+            budget.getAmount(),
+            budget.getCurrencyId(),
+            budget.getCategoryId(),
+            budget.getPosition(),
+            budget.getCreatedBy(),
+            budget.getUpdatedBy(),
+            budget.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr
+        );
         
+        budget.setId((int) id);
         return budget;
     }
 
@@ -275,36 +279,26 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      */
     @Override
     public Budget update(Budget budget) {
-        // Используем BUDGET_COLUMNS, исключая id (первый элемент)
-        String[] columns = new String[BUDGET_COLUMNS.length - 1];
-        System.arraycopy(BUDGET_COLUMNS, 1, columns, 0, BUDGET_COLUMNS.length - 1);
-        String setClause = String.join("=?, ", columns) + "=?";
-        String sql = "UPDATE " + TABLE_BUDGETS + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Форматируем даты в совместимом с SQLite формате, обрабатываем null значения
-            String createTimeStr = budget.getCreateTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getCreateTime()) : null;
-            String updateTimeStr = budget.getUpdateTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getUpdateTime()) : null;
-            String deleteTimeStr = budget.getDeleteTime() != null ? 
-                DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
-            // Порядок параметров соответствует BUDGET_COLUMNS (без id)
-            stmt.setInt(1, budget.getAmount());
-            stmt.setInt(2, budget.getCurrencyId());
-            stmt.setObject(3, budget.getCategoryId());
-            stmt.setInt(4, budget.getPosition());
-            stmt.setString(5, budget.getCreatedBy());
-            stmt.setString(6, budget.getUpdatedBy());
-            stmt.setString(7, budget.getDeletedBy());
-            stmt.setString(8, createTimeStr);
-            stmt.setString(9, deleteTimeStr);
-            stmt.setString(10, updateTimeStr);
-            stmt.setInt(11, budget.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "UPDATE " + TABLE_BUDGETS + " SET amount=?, currency_id=?, category_id=?, position=?, created_by=?, updated_by=?, deleted_by=?, create_time=?, update_time=?, delete_time=? WHERE id=?";
+        
+        String createTimeStr = budget.getCreateTime() != null ? DateTimeUtil.formatForSqlite(budget.getCreateTime()) : null;
+        String updateTimeStr = budget.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(budget.getUpdateTime()) : null;
+        String deleteTimeStr = budget.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(budget.getDeleteTime()) : null;
+        
+        connection.executeUpdate(sql,
+            budget.getAmount(),
+            budget.getCurrencyId(),
+            budget.getCategoryId(),
+            budget.getPosition(),
+            budget.getCreatedBy(),
+            budget.getUpdatedBy(),
+            budget.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr,
+            budget.getId()
+        );
+        
         return budget;
     }
 

@@ -60,7 +60,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public List<Operation> findAll() {
-        return findAll(TABLE_OPERATIONS, this::mapRowSafe);
+        return connection.executeQuery("SELECT * FROM " + TABLE_OPERATIONS, this::mapRowSafe);
     }
 
     /**
@@ -73,10 +73,11 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанным счетом (может быть пустым, но не null)
      */
     public List<Operation> findAllByAccountId(Integer accountId) {
-        return findAll(TABLE_OPERATIONS, COLUMN_ACCOUNT_ID, accountId, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_ACCOUNT_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, accountId);
     }
 
-        /**
+    /**
      * Получение операций по ID категории
      * 
      * <p>Возвращает список всех операций с указанной категорией.
@@ -86,7 +87,8 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанной категорией (может быть пустым, но не null)
      */
     public List<Operation> findAllByCategoryId(Integer categoryId) {
-        return findAll(TABLE_OPERATIONS, COLUMN_CATEGORY_ID, categoryId, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_CATEGORY_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, categoryId);
     }
 
     /**
@@ -99,7 +101,8 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанным комментарием (может быть пустым, но не null)
      */
     public List<Operation> findAllByComment(String comment) {
-        return findAll(TABLE_OPERATIONS, COLUMN_COMMENT, comment, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_COMMENT + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, comment);
     }
 
     /**
@@ -112,14 +115,14 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @return список операций с указанной валютой (может быть пустым, но не null)
      */
     public List<Operation> findAllByCurrencyId(Integer currencyId) {
-        return findAll(TABLE_OPERATIONS, COLUMN_CURRENCY_ID, currencyId, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_CURRENCY_ID + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, currencyId);
     }
 
     /**
      * Получение операций по дате
      * 
      * <p>Возвращает список всех операций с указанной датой.
-     * Поиск выполняется за весь день (от 00:00:00 до 23:59:59).
      * Поиск выполняется независимо от статуса удаления.
      * 
      * @param date дата для поиска (не null)
@@ -128,46 +131,30 @@ public class OperationRepository extends BaseRepository implements Repository<Op
     public List<Operation> findAllByDate(LocalDateTime date) {
         List<Operation> result = new ArrayList<>();
         
-        // Получаем начало и конец дня
+        // Получаем начало и конец дня для поиска
         LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59, 999999999);
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
         
-        // Форматируем даты для SQLite
         String startDateStr = DateTimeUtil.formatForSqlite(startOfDay);
         String endDateStr = DateTimeUtil.formatForSqlite(endOfDay);
         
         String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_DATE + " >= ? AND " + COLUMN_DATE + " <= ?";
         
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, startDateStr);
-            stmt.setString(2, endDateStr);
-            
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Operation op = mapRowSafe(rs);
-                if (op != null) {
-                    result.add(op);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return result;
+        return connection.executeQuery(sql, this::mapRowSafe, startDateStr, endDateStr);
     }
 
     /**
      * Получение операций по типу
      * 
-     * <p>Возвращает список всех операций с указанным типом.
+     * <p>Возвращает список всех операций указанного типа.
      * Поиск выполняется независимо от статуса удаления.
      * 
      * @param type тип операции для поиска (положительное целое число)
      * @return список операций с указанным типом (может быть пустым, но не null)
      */
     public List<Operation> findAllByType(Integer type) {
-        return findAll(TABLE_OPERATIONS, COLUMN_TYPE, type, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_TYPE + " = ?";
+        return connection.executeQuery(sql, this::mapRowSafe, type);
     }
 
     /**
@@ -181,7 +168,8 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Optional<Operation> findById(Integer id) {
-        return findByColumn(TABLE_OPERATIONS, COLUMN_ID, id, this::mapRowSafe);
+        String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_ID + " = ?";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, id);
     }
        
     /**
@@ -315,23 +303,72 @@ public class OperationRepository extends BaseRepository implements Repository<Op
     }
 
     /**
-     * Безопасное преобразование строки ResultSet в объект Operation
+     * Безопасное преобразование строки ResultRow в объект Operation
      * 
-     * <p>Обрабатывает исключения SQLException и возвращает null при ошибке.
+     * <p>Обрабатывает исключения и возвращает null при ошибке.
      * Используется в методах findAll и findById для безопасного маппинга данных.
-     * Если происходит ошибка при чтении данных, она логируется в консоль.
      * 
-     * <p>Этот метод является оберткой над mapRow и обеспечивает безопасность
-     * при обработке больших наборов данных, где одна некорректная запись
-     * не должна прерывать обработку всего результата.
-     * 
-     * @param rs ResultSet с данными из базы (не null)
+     * @param row ResultRow с данными из базы (не null)
      * @return объект Operation с заполненными данными или null при ошибке
      */
-    public Operation mapRowSafe(ResultSet rs) {
+    public Operation mapRowSafe(database.DatabaseConnection.ResultRow row) {
         try {
-            return mapRow(rs);
-        } catch (SQLException e) {
+            Operation op = new Operation();
+            
+            // Безопасное чтение ID
+            op.setId(row.getInt(COLUMN_ID));
+            
+            // Читаем даты как строки и парсим их
+            String createTimeStr = row.getString(COLUMN_CREATE_TIME);
+            op.setCreateTime(DateTimeUtil.parseFromSqlite(createTimeStr));
+            
+            String updateTimeStr = row.getString(COLUMN_UPDATE_TIME);
+            op.setUpdateTime(DateTimeUtil.parseFromSqlite(updateTimeStr));
+            
+            String deleteTimeStr = row.getString(COLUMN_DELETE_TIME);
+            op.setDeleteTime(DateTimeUtil.parseFromSqlite(deleteTimeStr));
+            
+            op.setCreatedBy(row.getString(COLUMN_CREATED_BY));
+            op.setUpdatedBy(row.getString(COLUMN_UPDATED_BY));
+            op.setDeletedBy(row.getString(COLUMN_DELETED_BY));
+            
+            // Безопасное чтение числовых полей
+            op.setType(row.getInt(COLUMN_TYPE));
+            
+            // Безопасное чтение даты операции
+            String dateStr = row.getString(COLUMN_DATE);
+            op.setDate(DateTimeUtil.parseFromSqlite(dateStr));
+            
+            op.setAmount(row.getInt(COLUMN_AMOUNT));
+            op.setComment(row.getString(COLUMN_COMMENT));
+            op.setCategoryId(row.getInt(COLUMN_CATEGORY_ID));
+            op.setAccountId(row.getInt(COLUMN_ACCOUNT_ID));
+            op.setCurrencyId(row.getInt(COLUMN_CURRENCY_ID));
+            
+            // Обработка nullable полей
+            try {
+                Integer toAccountId = row.getInt(COLUMN_TO_ACCOUNT_ID);
+                op.setToAccountId(toAccountId);
+            } catch (Exception e) {
+                op.setToAccountId(null);
+            }
+            
+            try {
+                Integer toCurrencyId = row.getInt(COLUMN_TO_CURRENCY_ID);
+                op.setToCurrencyId(toCurrencyId);
+            } catch (Exception e) {
+                op.setToCurrencyId(null);
+            }
+            
+            try {
+                Integer toAmount = row.getInt(COLUMN_TO_AMOUNT);
+                op.setToAmount(toAmount);
+            } catch (Exception e) {
+                op.setToAmount(null);
+            }
+            
+            return op;
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -349,41 +386,33 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Operation save(Operation op) {
-        String[] columns = new String[OPERATION_COLUMNS.length - 1];
-        System.arraycopy(OPERATION_COLUMNS, 1, columns, 0, OPERATION_COLUMNS.length - 1);
-        String sql = "INSERT INTO " + TABLE_OPERATIONS + " (" +
-            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
-            String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
-            String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
-            String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
-            stmt.setInt(1, op.getType());
-            stmt.setString(2, dateStr);
-            stmt.setInt(3, op.getAmount());
-            stmt.setString(4, op.getComment());
-            stmt.setInt(5, op.getCategoryId());
-            stmt.setInt(6, op.getAccountId());
-            stmt.setInt(7, op.getCurrencyId());
-            stmt.setObject(8, op.getToAccountId());
-            stmt.setObject(9, op.getToCurrencyId());
-            stmt.setObject(10, op.getToAmount());
-            stmt.setString(11, op.getCreatedBy());
-            stmt.setString(12, op.getUpdatedBy());
-            stmt.setString(13, op.getDeletedBy());
-            stmt.setString(14, createTimeStr);
-            stmt.setString(15, deleteTimeStr);
-            stmt.setString(16, updateTimeStr);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    op.setId(rs.getInt(1));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "INSERT INTO " + TABLE_OPERATIONS + " (type, date, amount, comment, category_id, account_id, currency_id, to_account_id, to_currency_id, to_amount, created_by, updated_by, deleted_by, create_time, update_time, delete_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
+        String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
+        String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
+        String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
+        
+        long id = connection.executeInsert(sql,
+            op.getType(),
+            dateStr,
+            op.getAmount(),
+            op.getComment(),
+            op.getCategoryId(),
+            op.getAccountId(),
+            op.getCurrencyId(),
+            op.getToAccountId(),
+            op.getToCurrencyId(),
+            op.getToAmount(),
+            op.getCreatedBy(),
+            op.getUpdatedBy(),
+            op.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr
+        );
+        
+        op.setId((int) id);
         return op;
     }
 
@@ -399,37 +428,33 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      */
     @Override
     public Operation update(Operation op) {
-        String[] columns = new String[OPERATION_COLUMNS.length - 1];
-        System.arraycopy(OPERATION_COLUMNS, 1, columns, 0, OPERATION_COLUMNS.length - 1);
-        String setClause = String.join("=?, ", columns) + "=?";
-        String sql = "UPDATE " + TABLE_OPERATIONS + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
-            String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
-            String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
-            String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
-            stmt.setInt(1, op.getType());
-            stmt.setString(2, dateStr);
-            stmt.setInt(3, op.getAmount());
-            stmt.setString(4, op.getComment());
-            stmt.setInt(5, op.getCategoryId());
-            stmt.setInt(6, op.getAccountId());
-            stmt.setInt(7, op.getCurrencyId());
-            stmt.setObject(8, op.getToAccountId());
-            stmt.setObject(9, op.getToCurrencyId());
-            stmt.setObject(10, op.getToAmount());
-            stmt.setString(11, op.getCreatedBy());
-            stmt.setString(12, op.getUpdatedBy());
-            stmt.setString(13, op.getDeletedBy());
-            stmt.setString(14, createTimeStr);
-            stmt.setString(15, deleteTimeStr);
-            stmt.setString(16, updateTimeStr);
-            stmt.setInt(17, op.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "UPDATE " + TABLE_OPERATIONS + " SET type=?, date=?, amount=?, comment=?, category_id=?, account_id=?, currency_id=?, to_account_id=?, to_currency_id=?, to_amount=?, created_by=?, updated_by=?, deleted_by=?, create_time=?, update_time=?, delete_time=? WHERE id=?";
+        
+        String createTimeStr = op.getCreateTime() != null ? DateTimeUtil.formatForSqlite(op.getCreateTime()) : null;
+        String updateTimeStr = op.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(op.getUpdateTime()) : null;
+        String deleteTimeStr = op.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(op.getDeleteTime()) : null;
+        String dateStr = op.getDate() != null ? DateTimeUtil.formatForSqlite(op.getDate()) : null;
+        
+        connection.executeUpdate(sql,
+            op.getType(),
+            dateStr,
+            op.getAmount(),
+            op.getComment(),
+            op.getCategoryId(),
+            op.getAccountId(),
+            op.getCurrencyId(),
+            op.getToAccountId(),
+            op.getToCurrencyId(),
+            op.getToAmount(),
+            op.getCreatedBy(),
+            op.getUpdatedBy(),
+            op.getDeletedBy(),
+            createTimeStr,
+            updateTimeStr,
+            deleteTimeStr,
+            op.getId()
+        );
+        
         return op;
     }
 
