@@ -2,12 +2,7 @@ import os
 import sys
 import unittest
 
-from backend.tests.test_common import (
-    cleanup_example,
-    get_java_class,
-    setup_example,
-    test_data_manager,
-)
+from tests.backend.test_common import cleanup_example, get_java_class, setup_example
 
 # Добавляем путь к родительской директории для импорта
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -19,8 +14,12 @@ class TestOperationRepository(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Настройка окружения перед всеми тестами"""
-        if not setup_example():
+        result = setup_example()
+        if result is None:
             raise Exception("Не удалось настроить окружение для тестов")
+
+        # Получаем компоненты из setup_example
+        cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
         cls.Operation = get_java_class("model.Operation")
@@ -29,7 +28,7 @@ class TestOperationRepository(unittest.TestCase):
         cls.Integer = get_java_class("java.lang.Integer")
 
         # Создаем репозиторий
-        cls.repo = cls.OperationRepository(test_data_manager.db_manager.db_path)
+        cls.repo = cls.OperationRepository(cls.db_manager.db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_operation_ids = []
@@ -39,7 +38,7 @@ class TestOperationRepository(unittest.TestCase):
         """Очистка после всех тестов"""
         try:
             # Получаем менеджер базы данных
-            db_manager = test_data_manager.db_manager
+            db_manager = cls.db_manager
 
             # Удаляем тестовые записи по ID
             deleted_count = 0

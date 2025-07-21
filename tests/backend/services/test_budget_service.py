@@ -2,12 +2,7 @@ import os
 import sys
 import unittest
 
-from backend.tests.test_common import (
-    cleanup_example,
-    get_java_class,
-    setup_example,
-    test_data_manager,
-)
+from tests.backend.test_common import cleanup_example, get_java_class, setup_example
 
 # Добавляем путь к родительской директории для импорта
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -18,8 +13,12 @@ class TestBudgetService(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not setup_example():
+        result = setup_example()
+        if result is None:
             raise Exception("Не удалось настроить окружение для тестов")
+
+        # Получаем компоненты из setup_example
+        cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
         cls.BudgetService = get_java_class("service.BudgetService")
@@ -29,14 +28,14 @@ class TestBudgetService(unittest.TestCase):
         cls.Integer = get_java_class("java.lang.Integer")
 
         cls.test_budget_ids = []
-        cls.db_path = test_data_manager.db_manager.db_path
+        cls.db_path = cls.db_manager.db_path
         cls.repository = cls.BudgetRepository(cls.db_path)
         cls.service = cls.BudgetService(cls.repository, "test_user")
 
     @classmethod
     def tearDownClass(cls):
         try:
-            db_manager = test_data_manager.db_manager
+            db_manager = cls.db_manager
             deleted_count = 0
             for budget_id in cls.test_budget_ids:
                 try:

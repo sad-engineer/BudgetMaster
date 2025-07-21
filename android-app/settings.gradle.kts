@@ -21,3 +21,23 @@ dependencyResolutionManagement {
 
 rootProject.name = "BudgetMaster"
 include(":app")
+
+android {
+    defaultConfig {
+        // Читаем версию из файла
+        val versionFile = rootProject.file("android-app/VERSION")
+        val versionNameFromFile = versionFile.readText().trim()
+        versionName = versionNameFromFile
+        // Можно также задать versionCode, если нужно
+    }
+
+    buildTypes {
+        getByName("release") {
+            // ...
+        }
+    }
+    // Добавим в BuildConfig
+    buildTypes.all {
+        buildConfigField("String", "APP_VERSION", "\"${rootProject.file("android-app/VERSION").readText().trim()}\"")
+    }
+}

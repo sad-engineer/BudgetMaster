@@ -9,29 +9,14 @@ import shutil
 import sys
 from pathlib import Path
 
-import jpype
-
-
-def close_jvm_connections():
-    """Закрывает JVM и все соединения с базой данных"""
-    try:
-        if jpype.isJVMStarted():
-            print("🔌 Закрытие JVM и всех соединений...")
-            jpype.shutdownJVM()
-            print("✅ JVM успешно остановлена")
-            return True
-    except Exception as e:
-        print(f"⚠️  Ошибка при закрытии JVM: {e}")
-        return False
-
 
 def close_sqlite_connections():
     """Пытается закрыть SQLite соединения через Python"""
     try:
         import sqlite3
 
-        # Пытаемся подключиться и сразу закрыть соединение
-        db_path = Path(__file__).parent / "budget_master.db"
+        # Путь к базе данных
+        db_path = Path(__file__).parent.parent / "backend" / "budget_master.db"
         if db_path.exists():
             print("🔌 Закрытие SQLite соединений...")
             conn = sqlite3.connect(db_path)
@@ -47,9 +32,6 @@ def force_close_connections():
     """Принудительно закрывает все возможные соединения"""
     print("🔧 Принудительное закрытие соединений...")
 
-    # Закрываем JVM
-    close_jvm_connections()
-
     # Закрываем SQLite соединения
     close_sqlite_connections()
 
@@ -63,7 +45,7 @@ def delete_database():
     """Удаляет базу данных budget_master.db"""
 
     # Путь к базе данных
-    db_path = Path(__file__).parent / "budget_master.db"
+    db_path = Path(__file__).parent.parent / "backend" / "budget_master.db"
 
     print(f"🔍 Проверяем наличие базы данных: {db_path}")
 

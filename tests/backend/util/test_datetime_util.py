@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-from backend.tests.test_common import (
+from tests.backend.test_common import (
     cleanup_example,
     get_java_class,
     setup_example,
@@ -17,8 +17,12 @@ class TestDateTimeUtil(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not setup_example():
+        result = setup_example()
+        if result is None:
             raise Exception("Не удалось настроить окружение для тестов")
+
+        # Получаем компоненты из setup_example
+        cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
         cls.DateTimeUtil = get_java_class("util.DateTimeUtil")

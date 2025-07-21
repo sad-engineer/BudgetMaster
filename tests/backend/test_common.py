@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from typing import List, Optional
+from typing import List
 
 import jpype
 import jpype.imports
@@ -13,18 +13,20 @@ class JPypeSetup:
         # Путь к JDK (где лежит jvm.dll)
         self.JDK_PATH = r"C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12\bin"
 
-        # Путь к build, где лежат скомпилированные классы
-        self.BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "build"))
-
-        # Путь к библиотекам (SQLite драйвер)
+        # Путь к библиотекам (включая наш JAR файл)
         self.LIB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "lib"))
 
         # Путь к базе данных
-        self.DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "budget_master.db"))
+        self.DB_PATH = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "backend", "budget_master.db")
+        )
 
-        # Classpath с библиотеками
+        # Получаем версию из pyproject.toml
+        self.JAR_VERSION = self._get_jar_version()
+
+        # Classpath с библиотеками и нашим JAR файлом
         self.CLASSPATH = (
-            self.BUILD_PATH
+            os.path.join(self.LIB_PATH, f"budgetmaster-backend-{self.JAR_VERSION}.jar")
             + os.pathsep
             + os.path.join(self.LIB_PATH, "sqlite-jdbc-3.45.1.0.jar")
             + os.pathsep
@@ -36,13 +38,30 @@ class JPypeSetup:
         self.jvm_started = False
         self.java_classes = {}
 
+    def _get_jar_version(self) -> str:
+        """Получает версию из backend/VERSION"""
+        try:
+            version_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "VERSION")
+            with open(version_path, 'r', encoding='utf-8') as f:
+                version = f.read().strip()
+                return version
+        except Exception as e:
+            print(f"⚠️ Не удалось прочитать версию из backend/VERSION: {e}")
+            return "0.0.009"  # Версия по умолчанию
+
     def check_prerequisites(self) -> bool:
         """Проверяет наличие всех необходимых файлов"""
         print(f"Classpath: {self.CLASSPATH}")
         print(f"Database: {self.DB_PATH}")
+        print(f"JAR Version: {self.JAR_VERSION}")
 
         # Проверяем наличие всех необходимых JAR файлов
-        required_jars = ["sqlite-jdbc-3.45.1.0.jar", "slf4j-api-2.0.13.jar", "slf4j-simple-2.0.13.jar"]
+        required_jars = [
+            f"budgetmaster-backend-{self.JAR_VERSION}.jar",
+            "sqlite-jdbc-3.45.1.0.jar",
+            "slf4j-api-2.0.13.jar",
+            "slf4j-simple-2.0.13.jar",
+        ]
 
         for jar in required_jars:
             jar_path = os.path.join(self.LIB_PATH, jar)
@@ -83,6 +102,12 @@ class JPypeSetup:
     def start_jvm(self):
         """Запускает JVM и загружает необходимые классы"""
         if self.jvm_started:
+            return
+
+        # Проверяем, не запущена ли уже JVM
+        if jpype.isJVMStarted():
+            print("✅ JVM уже запущена")
+            self.jvm_started = True
             return
 
         # Запуск JVM
@@ -200,13 +225,6 @@ class DatabaseManager:
             tables = self.execute_query("SELECT name FROM sqlite_master WHERE type='table'")
             info['tables'] = [table[0] for table in tables]
 
-            # Получаем количество записей в каждой таблице
-            info['table_counts'] = {}
-            for table in info['tables']:
-                count_result = self.execute_query(f"SELECT COUNT(*) FROM {table}")
-                if count_result:
-                    info['table_counts'][table] = count_result[0][0]
-
         return info
 
 
@@ -215,142 +233,137 @@ class TestDataManager:
 
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
-        self.test_ids = {}  # {table_name: [id1, id2, ...]}
+        self.test_ids = []
 
     def add_test_id(self, table_name: str, entity_id: int):
-        """Добавляет ID тестовой записи"""
-        if table_name not in self.test_ids:
-            self.test_ids[table_name] = []
-        self.test_ids[table_name].append(entity_id)
+        """Добавляет ID тестовой сущности для последующей очистки"""
+        self.test_ids.append((table_name, entity_id))
 
     def cleanup_test_data(self):
-        """Физически удаляет все тестовые данные"""
-        print("\n--- Очистка тестовых данных ---")
+        """Очищает все тестовые данные"""
+        print("🧹 Очистка тестовых данных...")
 
-        for table_name, ids in self.test_ids.items():
-            if not ids:
-                continue
+        for table_name, entity_id in self.test_ids:
+            try:
+                # Мягкое удаление (soft delete)
+                self.db_manager.execute_update(
+                    f"UPDATE {table_name} SET deleted_time = datetime('now'), deleted_by = 'test' WHERE id = ?",
+                    (entity_id,),
+                )
+                print(f"✅ Удалена тестовая запись: {table_name}.id = {entity_id}")
+            except Exception as e:
+                print(f"❌ Ошибка при удалении тестовой записи {table_name}.id = {entity_id}: {e}")
 
-            print(f"Удаляем {len(ids)} тестовых записей из таблицы {table_name}: {ids}")
-
-            for entity_id in ids:
-                # Проверяем, что запись существует
-                result = self.db_manager.execute_query(f"SELECT * FROM {table_name} WHERE id = ?", (entity_id,))
-
-                if result:
-                    print(f"Физически удаляем запись: ID={entity_id}")
-                    self.db_manager.execute_update(f"DELETE FROM {table_name} WHERE id = ?", (entity_id,))
-                else:
-                    print(f"Запись с ID={entity_id} не найдена в таблице {table_name}")
-
-        # Очищаем список тестовых ID
         self.test_ids.clear()
         print("✅ Очистка тестовых данных завершена")
 
     def reset_database_to_defaults(self):
-        """Сбрасывает базу данных к дефолтным значениям"""
-        print("\n--- Сброс базы данных к дефолтам ---")
+        """Сбрасывает базу данных к состоянию по умолчанию"""
+        print("🔄 Сброс базы данных к состоянию по умолчанию...")
 
         try:
-            # Получаем DatabaseUtil класс
-            DatabaseUtil = jpype_setup.get_class("util.DatabaseUtil")
+            # Удаляем все данные из таблиц
+            tables = ['operations', 'budgets', 'categories', 'accounts', 'currencies']
 
-            # Восстанавливаем дефолтные значения
-            DatabaseUtil.restoreDefaults(jpype_setup.DB_PATH)
+            for table in tables:
+                self.db_manager.execute_update(f"DELETE FROM {table}")
+                print(f"✅ Очищена таблица: {table}")
 
-            print("✅ База данных сброшена к дефолтным значениям")
+            # Сбрасываем автоинкремент
+            for table in tables:
+                self.db_manager.execute_update(f"DELETE FROM sqlite_sequence WHERE name = '{table}'")
+
+            print("✅ База данных сброшена к состоянию по умолчанию")
 
         except Exception as e:
             print(f"❌ Ошибка при сбросе базы данных: {e}")
 
 
-# Глобальные экземпляры для использования в тестах
-jpype_setup = JPypeSetup()
-db_manager = DatabaseManager(jpype_setup.DB_PATH)
-test_data_manager = TestDataManager(db_manager)
-
-
 def setup_example():
-    """Настройка окружения для тестов"""
+    """Пример настройки тестового окружения"""
+    print("🚀 Настройка тестового окружения...")
+
+    # Создаем экземпляр JPypeSetup
+    jpype_setup = JPypeSetup()
+
+    # Проверяем наличие всех необходимых файлов
     if not jpype_setup.check_prerequisites():
-        return False
+        print("❌ Не все необходимые файлы найдены")
+        return None
 
-    try:
-        # Создаем базу данных если она не существует
-        if not jpype_setup.create_database_if_not_exists():
-            return False
+    # Создаем базу данных если нужно
+    if not jpype_setup.create_database_if_not_exists():
+        print("❌ Не удалось создать базу данных")
+        return None
 
-        jpype_setup.start_jvm()
+    # Создаем DatabaseManager
+    db_manager = DatabaseManager(jpype_setup.DB_PATH)
 
-        # Выводим информацию о базе данных
-        db_info = db_manager.get_database_info()
-        print(f"\n📊 Информация о базе данных:")
-        print(f"   Путь: {db_info['path']}")
-        print(f"   Размер: {db_info['size_bytes']} байт")
-        print(f"   Таблицы: {', '.join(db_info.get('tables', []))}")
+    # Создаем TestDataManager
+    test_data_manager = TestDataManager(db_manager)
 
-        if 'table_counts' in db_info:
-            print(f"   Записей в таблицах:")
-            for table, count in db_info['table_counts'].items():
-                print(f"     {table}: {count}")
-
-        return True
-
-    except Exception as e:
-        print(f"❌ Ошибка при настройке: {e}")
-        return False
+    print("✅ Тестовое окружение настроено")
+    return jpype_setup, db_manager, test_data_manager
 
 
 def cleanup_example():
-    """Очистка после выполнения тестов"""
-    test_data_manager.cleanup_test_data()
-    jpype_setup.shutdown_jvm()
+    """Пример очистки тестового окружения"""
+    print("🧹 Очистка тестового окружения...")
+    # Здесь можно добавить дополнительную очистку если нужно
+    print("✅ Тестовое окружение очищено")
+
+
+# Глобальный экземпляр JPypeSetup для переиспользования
+_global_jpype_setup = None
 
 
 def get_java_class(class_name: str):
     """Получает Java класс для использования в тестах"""
-    return jpype_setup.get_class(class_name)
+    global _global_jpype_setup
+    if _global_jpype_setup is None:
+        _global_jpype_setup = JPypeSetup()
+    return _global_jpype_setup.get_class(class_name)
 
 
 def create_test_entity(entity_class, **kwargs):
-    """Создает тестовую сущность с базовыми полями"""
-    entity = entity_class()
+    """Создает тестовую сущность с заданными параметрами"""
+    try:
+        # Получаем LocalDateTime для создания сущности
+        LocalDateTime = get_java_class("java.time.LocalDateTime")
 
-    # Устанавливаем базовые поля
-    entity.setCreatedBy("test_user")
-    entity.setUpdatedBy("test_user")
+        # Создаем сущность с текущим временем
+        entity = entity_class(
+            id=kwargs.get('id', 0),
+            createdTime=LocalDateTime.now(),
+            updatedTime=kwargs.get('updatedTime'),
+            deletedTime=kwargs.get('deletedTime'),
+            createdBy=kwargs.get('createdBy', 'test'),
+            updatedBy=kwargs.get('updatedBy'),
+            deletedBy=kwargs.get('deletedBy'),
+            **{
+                k: v
+                for k, v in kwargs.items()
+                if k not in ['id', 'createdTime', 'updatedTime', 'deletedTime', 'createdBy', 'updatedBy', 'deletedBy']
+            },
+        )
 
-    # Устанавливаем даты
-    LocalDateTime = get_java_class("java.time.LocalDateTime")
-    now = LocalDateTime.now()
-    entity.setCreateTime(now)
-    entity.setUpdateTime(now)
-    entity.setDeleteTime(None)
-
-    # Устанавливаем переданные поля
-    for key, value in kwargs.items():
-        method_name = f"set{key.capitalize()}"
-        if hasattr(entity, method_name):
-            getattr(entity, method_name)(value)
-
-    return entity
+        return entity
+    except Exception as e:
+        print(f"❌ Ошибка при создании тестовой сущности: {e}")
+        return None
 
 
 def print_database_status():
-    """Выводит текущий статус базы данных"""
-    db_info = db_manager.get_database_info()
+    """Выводит статус базы данных"""
+    db_manager = DatabaseManager(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend", "budget_master.db"))
+    )
+    info = db_manager.get_database_info()
 
-    print(f"\n📊 Статус базы данных:")
-    print(f"   Существует: {'✅' if db_info['exists'] else '❌'}")
-    print(f"   Путь: {db_info['path']}")
+    print("📊 Статус базы данных:")
+    print(f"   Существует: {info['exists']}")
+    print(f"   Путь: {info['path']}")
+    print(f"   Размер: {info['size_bytes']} байт")
 
-    if db_info['exists']:
-        print(f"   Размер: {db_info['size_bytes']} байт")
-        print(f"   Таблицы: {', '.join(db_info.get('tables', []))}")
-
-        if 'table_counts' in db_info:
-            print(f"   Записей:")
-            for table, count in db_info['table_counts'].items():
-                print(f"     {table}: {count}")
-    else:
-        print("   База данных не существует")
+    if info['exists'] and 'tables' in info:
+        print(f"   Таблицы: {', '.join(info['tables'])}")

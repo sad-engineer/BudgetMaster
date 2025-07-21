@@ -11,6 +11,9 @@ import java.util.Optional;
 
    public class Main {
        public static void main(String[] args) {
+        // Выводим версию backend
+        System.out.println("Backend version: " + BackendVersion.VERSION);
+
         // регистрируем JDBC-драйвер
         try {
             Class.forName("org.sqlite.JDBC");

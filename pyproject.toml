@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "BudgetMaster"
-version = "0.0.016"
+version = "0.0.025"
 description = "Планировщик необходимого уровня дохода на основе ежедневных затрат, целей, инфляции."
 authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
 readme = "README.md"

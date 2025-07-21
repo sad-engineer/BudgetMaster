@@ -1,13 +1,24 @@
 import os
 import subprocess
 
-# Папки с исходниками
-SRC_DIRS = ["model", "repository", "service", "util", "tools"]
+# Папки с исходниками (относительно backend)
+SRC_DIRS = [
+    "../backend/model",
+    "../backend/repository",
+    "../backend/service",
+    "../backend/util",
+    "../backend/tools",
+    "../backend/constants",
+    "../backend/validator",
+]
 # Явно указываем отдельные файлы для компиляции
-EXTRA_JAVA_FILES = ["Main.java"]
+EXTRA_JAVA_FILES = [
+    "../backend/Main.java",
+    "../backend/BackendVersion.java"
+]
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-BUILD_DIR = os.path.join(PROJECT_ROOT, "build")
+BUILD_DIR = os.path.join(PROJECT_ROOT, "../backend/build/backend")
 
 # JDK bin (если нужно явно)
 JDK_PATH = r"C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12\bin"
@@ -21,10 +32,11 @@ if not os.path.exists(BUILD_DIR):
 java_files = []
 for src in SRC_DIRS:
     src_path = os.path.join(PROJECT_ROOT, src)
-    for root, dirs, files in os.walk(src_path):
-        for file in files:
-            if file.endswith(".java"):
-                java_files.append(os.path.join(root, file))
+    if os.path.exists(src_path):
+        for root, dirs, files in os.walk(src_path):
+            for file in files:
+                if file.endswith(".java"):
+                    java_files.append(os.path.join(root, file))
 
 # Добавить явно указанные файлы
 for extra_file in EXTRA_JAVA_FILES:
@@ -40,7 +52,7 @@ if java_files:
     print(result.stdout)
     print(result.stderr)
     if result.returncode == 0:
-        print("✅ Компиляция завершена успешно. .class файлы в папке build/")
+        print("✅ Компиляция завершена успешно. .class файлы в папке build/backend/")
     else:
         print("❌ Ошибка компиляции.")
 else:

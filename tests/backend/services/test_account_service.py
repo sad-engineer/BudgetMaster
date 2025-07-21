@@ -2,11 +2,10 @@ import os
 import sys
 import unittest
 
-from backend.tests.test_common import (
+from tests.backend.test_common import (
     cleanup_example,
     get_java_class,
     setup_example,
-    test_data_manager,
 )
 
 # Добавляем путь к родительской директории для импорта
@@ -19,8 +18,12 @@ class TestAccountService(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Настройка окружения перед всеми тестами"""
-        if not setup_example():
+        result = setup_example()
+        if result is None:
             raise Exception("Не удалось настроить окружения для тестов")
+
+        # Получаем компоненты из setup_example
+        cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
         cls.AccountService = get_java_class("service.AccountService")
@@ -32,9 +35,8 @@ class TestAccountService(unittest.TestCase):
         # Список ID тестовых записей для очистки
         cls.test_account_ids = []
 
-        """Настройка перед каждым теста"""
         # Используем существующую базу данных
-        cls.db_path = test_data_manager.db_manager.db_path
+        cls.db_path = cls.db_manager.db_path
 
         # Создаем репозиторий и сервис
         cls.repository = cls.AccountRepository(cls.db_path)
@@ -44,14 +46,11 @@ class TestAccountService(unittest.TestCase):
     def tearDownClass(cls):
         """Очистка после всех тестов"""
         try:
-            # Получаем менеджер базы данных
-            db_manager = test_data_manager.db_manager
-
             # Удаляем тестовые записи по ID
             deleted_count = 0
             for account_id in cls.test_account_ids:
                 try:
-                    success = db_manager.execute_update("DELETE FROM accounts WHERE id = ?", (account_id,))
+                    success = cls.db_manager.execute_update("DELETE FROM accounts WHERE id = ?", (account_id,))
                     if success:
                         deleted_count += 1
                     else:
