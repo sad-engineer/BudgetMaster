@@ -1,29 +1,31 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
 }
 
 android {
     namespace = "com.example.budgetmaster"
-    compileSdk = 36
+    compileSdk = 34 // или ваша версия
 
     defaultConfig {
-        applicationId = "com.example.budgetmaster"
-        minSdk = 21
-        targetSdk = 36
+        applicationId = "com.example.budgetmaster" // замените на свой
+        minSdk = 24
+        targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Читаем версию из файла
+        val versionFile = rootProject.file("VERSION")
+        val versionNameFromFile = versionFile.readText().trim()
+        versionName = versionNameFromFile
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // ... другие настройки
         }
+    }
+    // Добавим в BuildConfig
+    buildTypes.all {
+        buildConfigField("String", "APP_VERSION", "\"${rootProject.file("VERSION").readText().trim()}\"")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -31,6 +33,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     
     // Настройки для отображения предупреждений о deprecated API
@@ -40,15 +43,7 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
-    implementation(libs.cardview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    // ваши зависимости
 }
