@@ -55,4 +55,6 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     // Подключаем backend JAR файл
     implementation(files("libs/budgetmaster-backend-0.0.011.jar"))
+    // Android SQLite (встроен в Android)
+    // implementation("org.xerial:sqlite-jdbc:3.44.1.0") // Убираем SQLite JDBC
 }

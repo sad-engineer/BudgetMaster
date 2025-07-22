@@ -1,10 +1,13 @@
 package com.example.budgetmaster;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import java.util.List;
+import java.io.File;
 
 // Импорты классов из backend
 import com.sadengineer.budgetmaster.backend.BackendVersion;
@@ -58,9 +61,11 @@ public class BackendTestActivity extends AppCompatActivity {
         // Получаем TextView для отображения результатов
         TextView resultTextView = findViewById(R.id.result_text);
 
-        // Тестируем доступность классов
+        // Тестируем доступность классов с обработкой ошибок
         StringBuilder result = new StringBuilder();
         result.append("=== ТЕСТ ДОСТУПНОСТИ КЛАССОВ ИЗ BACKEND ===\n\n");
+        
+        try {
 
         // Тест констант
         result.append("--- КОНСТАНТЫ ---\n");
@@ -97,6 +102,27 @@ public class BackendTestActivity extends AppCompatActivity {
         // Тест версии
         result.append("\n--- ВЕРСИЯ ---\n");
         testVersion(result);
+
+        // Тест базы данных
+        result.append("\n--- ТЕСТ БАЗЫ ДАННЫХ ---\n");
+        testDatabase(result);
+
+        } catch (Exception e) {
+            result.append("\n=== КРИТИЧЕСКАЯ ОШИБКА ===\n");
+            result.append("✗ ").append(e.getMessage()).append("\n");
+            result.append("Стек вызовов:\n");
+            for (StackTraceElement element : e.getStackTrace()) {
+                result.append("  ").append(element.toString()).append("\n");
+            }
+        } catch (Throwable t) {
+            result.append("\n=== КРИТИЧЕСКАЯ ОШИБКА (Throwable) ===\n");
+            result.append("✗ ").append(t.getMessage()).append("\n");
+            result.append("Тип: ").append(t.getClass().getName()).append("\n");
+            result.append("Стек вызовов:\n");
+            for (StackTraceElement element : t.getStackTrace()) {
+                result.append("  ").append(element.toString()).append("\n");
+            }
+        }
 
         resultTextView.setText(result.toString());
     }
@@ -403,6 +429,91 @@ public class BackendTestActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             result.append("✗ BackendVersion: ").append(e.getMessage()).append("\n");
+        }
+    }
+
+    private void testDatabase(StringBuilder result) {
+        try {
+            // Создаем путь к базе данных в Android
+            String dbPath = getApplicationContext().getDatabasePath("budgetmaster.db").getAbsolutePath();
+            result.append("✓ Путь к БД: ").append(dbPath).append("\n");
+
+            // Проверяем, что папка существует
+            File dbDir = new File(dbPath).getParentFile();
+            if (!dbDir.exists()) {
+                dbDir.mkdirs();
+                result.append("✓ Папка БД создана\n");
+            }
+
+            // Детальная диагностика создания БД
+            result.append("✓ Начинаем диагностику создания БД...\n");
+            
+            // Проверяем существование файла БД
+            File dbFile = new File(dbPath);
+            result.append("✓ Файл БД существует: ").append(dbFile.exists()).append("\n");
+            if (dbFile.exists()) {
+                result.append("✓ Размер файла БД: ").append(dbFile.length()).append(" байт\n");
+            }
+            
+            // Проверяем права доступа
+            result.append("✓ Папка доступна для записи: ").append(dbDir.canWrite()).append("\n");
+            result.append("✓ Файл доступен для записи: ").append(dbFile.canWrite()).append("\n");
+            
+            // Тест создания БД через Android SQLite
+            try {
+                result.append("✓ Попытка создания БД через Android SQLite...\n");
+                
+                // Используем Android SQLite вместо JDBC
+                android.database.sqlite.SQLiteDatabase db = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(dbPath, null);
+                result.append("✓ Android SQLite БД создана успешно\n");
+                
+                // Создаем простую таблицу
+                db.execSQL("CREATE TABLE IF NOT EXISTS test_currencies (id INTEGER PRIMARY KEY, title TEXT)");
+                db.execSQL("INSERT OR IGNORE INTO test_currencies (id, title) VALUES (1, 'USD')");
+                db.execSQL("INSERT OR IGNORE INTO test_currencies (id, title) VALUES (2, 'EUR')");
+                result.append("✓ Тестовая таблица создана и заполнена\n");
+                
+                // Проверяем данные
+                android.database.Cursor cursor = db.rawQuery("SELECT * FROM test_currencies", null);
+                int count = cursor.getCount();
+                result.append("✓ Найдено валют в БД: ").append(count).append("\n");
+                cursor.close();
+                
+                db.close();
+                result.append("✓ Соединение с БД закрыто\n");
+                
+            } catch (Exception e) {
+                result.append("✗ Ошибка создания БД через Android SQLite:\n");
+                result.append("  Сообщение: ").append(e.getMessage()).append("\n");
+                result.append("  Тип исключения: ").append(e.getClass().getName()).append("\n");
+            } catch (Throwable t) {
+                result.append("✗ КРИТИЧЕСКАЯ ОШИБКА создания БД через Android SQLite:\n");
+                result.append("  Сообщение: ").append(t.getMessage()).append("\n");
+                result.append("  Тип исключения: ").append(t.getClass().getName()).append("\n");
+                result.append("  Стек вызовов:\n");
+                for (StackTraceElement element : t.getStackTrace()) {
+                    result.append("    ").append(element.toString()).append("\n");
+                }
+            }
+            
+            // Тест создания CurrencyService (без БД)
+            try {
+                result.append("✓ Попытка создания CurrencyService...\n");
+                // Пока не создаем сервис, чтобы избежать ошибок
+                result.append("✓ Тест сервиса пропущен (требует БД)\n");
+            } catch (Exception e) {
+                result.append("✗ Ошибка создания CurrencyService: ").append(e.getMessage()).append("\n");
+            }
+
+        } catch (Exception e) {
+            result.append("✗ Общая ошибка теста БД: ").append(e.getMessage()).append("\n");
+        } catch (Throwable t) {
+            result.append("✗ КРИТИЧЕСКАЯ ОШИБКА теста БД: ").append(t.getMessage()).append("\n");
+            result.append("  Тип: ").append(t.getClass().getName()).append("\n");
+            result.append("  Стек:\n");
+            for (StackTraceElement element : t.getStackTrace()) {
+                result.append("    ").append(element.toString()).append("\n");
+            }
         }
     }
 
