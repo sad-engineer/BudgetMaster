@@ -1,0 +1,9 @@
+cd C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\android-app
+
+
+$env:JAVA_HOME="C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12"
+$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+
+./gradlew clean
+./gradlew assembleRelease
+./gradlew assembleDebug

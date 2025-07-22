@@ -211,7 +211,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_settings) {
-            Toast.makeText(this, "Настройки", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, BackendTestActivity.class);
+            startActivity(intent);
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_version) {
             Toast.makeText(this, "Версия приложения", Toast.LENGTH_SHORT).show();

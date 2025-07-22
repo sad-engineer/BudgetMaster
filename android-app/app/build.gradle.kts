@@ -40,10 +40,19 @@ android {
     tasks.withType<JavaCompile> {
         options.compilerArgs.add("-Xlint:deprecation")
     }
+    packaging {
+        resources {
+            pickFirsts.add("META-INF/MANIFEST.MF")
+            excludes.add("META-INF/*.SF")
+            excludes.add("META-INF/*.DSA")
+            excludes.add("META-INF/*.RSA")
+        }
+    }
 }
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
-    // ваши зависимости
+    // Подключаем backend JAR файл
+    implementation(files("libs/budgetmaster-backend-0.0.011.jar"))
 }

@@ -10,7 +10,7 @@ set JAVA_HOME=C:\Users\Korenyk.A\Documents\Prodjects\jdk-17.0.12
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 REM Чтение версии backend из файла VERSION
-for /f "usebackq delims=" %%i in ("..\\backend\\VERSION") do (
+for /f "usebackq delims=" %%i in ("..\\backend\\com\\sadengineer\\budgetmaster\\backend\\VERSION") do (
     set BACKEND_VERSION=%%i
 )
 REM Удаляем пробелы из версии
@@ -40,27 +40,24 @@ if exist "..\\backend\\build\\classes\\*" del /q ..\\backend\\build\\classes\\*
 if exist "..\\backend\\build\\libs\\*.jar" del /q ..\\backend\\build\\libs\\*.jar
 
 REM Переход в папку backend для компиляции
-cd ..\\backend
+cd ..\backend
 
-REM Компиляция всех Java файлов с указанием кодировки UTF-8
-echo Compiling Java files with UTF-8 encoding...
-javac -encoding UTF-8 -cp ".;*" -d build\classes ^
-    *.java ^
-    model\*.java ^
-    repository\*.java ^
-    service\*.java ^
-    util\*.java ^
-    validator\*.java ^
-    constants\*.java ^
-    BackendVersion.java
+REM Собираем список всех .java файлов рекурсивно
+dir /s /b com\sadengineer\budgetmaster\*.java > sources.txt
+
+REM Компилируем все найденные файлы
+javac -encoding UTF-8 -cp ".;*" -d build\classes @sources.txt
 
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Compilation failed!
     echo Please check your Java source files for errors.
-    cd ..\\utils
+    cd ..\utils
     pause
     exit /b 1
 )
+
+REM Удаляем временный файл
+del sources.txt
 
 echo Compilation completed successfully!
 
@@ -94,7 +91,7 @@ if exist "..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar" (
     
     echo.
     echo To run the JAR file, use:
-    echo java -cp "..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar;..\lib\*" Main
+    echo java -cp "..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar;..\lib\*" com.sadengineer.budgetmaster.Main
     echo.
     pushd ..\backend-jar
     set JAR_ABS_PATH=%CD%
