@@ -7,3 +7,7 @@ $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 ./gradlew clean
 ./gradlew assembleRelease
 ./gradlew assembleDebug
+./gradlew clean assembleRelease
+./gradlew clean assembleDebug
+
+

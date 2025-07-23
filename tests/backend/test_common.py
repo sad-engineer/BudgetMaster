@@ -18,15 +18,17 @@ class JPypeSetup:
 
         # Путь к базе данных
         self.DB_PATH = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "backend", "budget_master.db")
+            os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", "budgetmaster",
+                         "backend", "budget_master.db")
         )
 
         # Получаем версию из pyproject.toml
         self.JAR_VERSION = self._get_jar_version()
 
         # Classpath с библиотеками и нашим JAR файлом
+        backend_jar_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend-jar"))
         self.CLASSPATH = (
-            os.path.join(self.LIB_PATH, f"budgetmaster-backend-{self.JAR_VERSION}.jar")
+            os.path.join(backend_jar_path, f"budgetmaster-backend-{self.JAR_VERSION}.jar")
             + os.pathsep
             + os.path.join(self.LIB_PATH, "sqlite-jdbc-3.45.1.0.jar")
             + os.pathsep
@@ -39,15 +41,16 @@ class JPypeSetup:
         self.java_classes = {}
 
     def _get_jar_version(self) -> str:
-        """Получает версию из backend/VERSION"""
+        """Получает версию из backend/com/sadengineer/budgetmaster/backend/VERSION"""
         try:
-            version_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "VERSION")
+            version_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", 
+                                        "budgetmaster", "backend", "VERSION")
             with open(version_path, 'r', encoding='utf-8') as f:
                 version = f.read().strip()
                 return version
         except Exception as e:
-            print(f"⚠️ Не удалось прочитать версию из backend/VERSION: {e}")
-            return "0.0.009"  # Версия по умолчанию
+            print(f"⚠️ Не удалось прочитать версию из backend/com/sadengineer/budgetmaster/backend/VERSION: {e}")
+            return "0.0.012"  # Версия по умолчанию
 
     def check_prerequisites(self) -> bool:
         """Проверяет наличие всех необходимых файлов"""
@@ -56,8 +59,16 @@ class JPypeSetup:
         print(f"JAR Version: {self.JAR_VERSION}")
 
         # Проверяем наличие всех необходимых JAR файлов
+        backend_jar_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend-jar"))
+        
+        # Проверяем основной JAR файл
+        main_jar = os.path.join(backend_jar_path, f"budgetmaster-backend-{self.JAR_VERSION}.jar")
+        if not os.path.exists(main_jar):
+            print(f"❌ Основной JAR файл не найден: {main_jar}")
+            return False
+            
+        # Проверяем зависимости
         required_jars = [
-            f"budgetmaster-backend-{self.JAR_VERSION}.jar",
             "sqlite-jdbc-3.45.1.0.jar",
             "slf4j-api-2.0.13.jar",
             "slf4j-simple-2.0.13.jar",
@@ -87,7 +98,7 @@ class JPypeSetup:
                 self.start_jvm()
 
             # Получаем DatabaseUtil класс
-            DatabaseUtil = self.get_class("util.DatabaseUtil")
+            DatabaseUtil = self.get_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
 
             # Создаем базу данных
             DatabaseUtil.createDatabaseIfNotExists(self.DB_PATH)
@@ -124,8 +135,8 @@ class JPypeSetup:
             # Импортируем основные классы
             self.java_classes = {
                 'LocalDateTime': jpype.JClass("java.time.LocalDateTime"),
-                'DateTimeUtil': jpype.JClass("util.DateTimeUtil"),
-                'DatabaseUtil': jpype.JClass("util.DatabaseUtil"),
+                'DateTimeUtil': jpype.JClass("com.sadengineer.budgetmaster.backend.util.DateTimeUtil"),
+                'DatabaseUtil': jpype.JClass("com.sadengineer.budgetmaster.backend.util.DatabaseUtil"),
             }
 
             print("✅ Основные классы импортированы")

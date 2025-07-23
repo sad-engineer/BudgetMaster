@@ -19,7 +19,8 @@ def setup_jpype():
     current_dir = Path(__file__).parent
     project_root = current_dir.parent
     lib_path = project_root / "lib"
-    backend_path = project_root / "backend"
+    backend_jar_path = project_root / "backend-jar"
+    backend_path = project_root / "backend" / "com" / "sadengineer" / "budgetmaster" / "backend"
 
     # Получаем версию backend из файла VERSION
     version_file = backend_path / "VERSION"
@@ -28,7 +29,7 @@ def setup_jpype():
         return False
     with open(version_file, "r", encoding="utf-8") as f:
         backend_version = f.read().strip()
-    jar_path = lib_path / f"budgetmaster-backend-{backend_version}.jar"
+    jar_path = backend_jar_path / f"budgetmaster-backend-{backend_version}.jar"
 
     # Classpath с библиотеками
     classpath = (
@@ -82,12 +83,12 @@ def create_database():
 
     try:
         # Получаем Java классы
-        DatabaseUtil = jpype.JClass("util.DatabaseUtil")
+        DatabaseUtil = jpype.JClass("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
 
         # Путь к базе данных
         current_dir = Path(__file__).parent
         project_root = current_dir.parent
-        db_path = project_root / "backend" / "budget_master.db"
+        db_path = project_root / "backend" / "com" / "sadengineer" / "budgetmaster" / "backend" / "budget_master.db"
 
         print(f"🗄️  Создание базы данных: {db_path}")
 
@@ -135,7 +136,7 @@ def verify_database():
 
         current_dir = Path(__file__).parent
         project_root = current_dir.parent
-        db_path = project_root / "backend" / "budget_master.db"
+        db_path = project_root / "backend" / "com" / "sadengineer" / "budgetmaster" / "backend" / "budget_master.db"
 
         if not db_path.exists():
             print("❌ База данных не найдена для проверки")

@@ -20,7 +20,7 @@ public class BackendVersion {
 
     private static String loadVersion() {
         String version = "unknown";
-        try (InputStream is = BackendVersion.class.getResourceAsStream("/VERSION")) {
+        try (InputStream is = BackendVersion.class.getResourceAsStream("/com/sadengineer/budgetmaster/backend/VERSION")) {
             if (is != null) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                     String line = reader.readLine();

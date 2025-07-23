@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.budgetmaster"
+    namespace = "com.sadengineer.budgetmaster"
     compileSdk = 34 // или ваша версия
 
     defaultConfig {
-        applicationId = "com.example.budgetmaster" // замените на свой
+        applicationId = "com.sadengineer.budgetmaster" // замените на свой
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -48,13 +48,15 @@ android {
             excludes.add("META-INF/*.RSA")
         }
     }
+    
+
 }
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     // Подключаем backend JAR файл
-    implementation(files("libs/budgetmaster-backend-0.0.011.jar"))
+    implementation(files("libs/budgetmaster-backend-0.0.012.jar"))
     // Android SQLite (встроен в Android)
     // implementation("org.xerial:sqlite-jdbc:3.44.1.0") // Убираем SQLite JDBC
 }

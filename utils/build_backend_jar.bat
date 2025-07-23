@@ -79,7 +79,7 @@ REM Добавление ресурсов в JAR (если есть)
 echo Adding resources to JAR...
 if exist "*.properties" jar uf ..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar *.properties
 if exist "*.xml" jar uf ..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar *.xml
-if exist "VERSION" jar uf ..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar VERSION
+if exist "com\sadengineer\budgetmaster\backend\VERSION" jar uf ..\backend-jar\budgetmaster-backend-%BACKEND_VERSION%.jar com\sadengineer\budgetmaster\backend\VERSION
 
 REM Возврат в utils
 cd ..\utils

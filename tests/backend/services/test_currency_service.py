@@ -21,9 +21,9 @@ class TestCurrencyService(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.CurrencyService = get_java_class("service.CurrencyService")
-        cls.CurrencyRepository = get_java_class("repository.CurrencyRepository")
-        cls.Currency = get_java_class("model.Currency")
+        cls.CurrencyService = get_java_class("com.sadengineer.budgetmaster.backend.service.CurrencyService")
+        cls.CurrencyRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.CurrencyRepository")
+        cls.Currency = get_java_class("com.sadengineer.budgetmaster.backend.model.Currency")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
 

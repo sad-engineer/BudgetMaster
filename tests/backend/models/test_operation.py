@@ -26,7 +26,7 @@ class TestOperation(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.Operation = get_java_class("model.Operation")
+        cls.Operation = get_java_class("com.sadengineer.budgetmaster.backend.model.Operation")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
         cls.String = get_java_class("java.lang.String")

@@ -25,9 +25,9 @@ class TestCategoryService(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.CategoryService = get_java_class("service.CategoryService")
-        cls.CategoryRepository = get_java_class("repository.CategoryRepository")
-        cls.Category = get_java_class("model.Category")
+        cls.CategoryService = get_java_class("com.sadengineer.budgetmaster.backend.service.CategoryService")
+        cls.CategoryRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.CategoryRepository")
+        cls.Category = get_java_class("com.sadengineer.budgetmaster.backend.model.Category")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
         cls.Optional = get_java_class("java.util.Optional")

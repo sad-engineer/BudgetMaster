@@ -42,7 +42,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем класс BackendVersion
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
 
             # Проверяем, что класс не None
             self.assertIsNotNone(BackendVersion, "Класс BackendVersion должен существовать")
@@ -58,7 +58,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем класс BackendVersion
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
 
             # Проверяем, что константа VERSION существует
             version = BackendVersion.VERSION
@@ -77,7 +77,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем версию
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
             version = BackendVersion.VERSION
 
             # Проверяем формат версии (например: 0.0.009)
@@ -102,7 +102,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем версию
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
             version = BackendVersion.VERSION
 
             # Проверяем, что версия не пустая
@@ -121,13 +121,13 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем версию из JAR
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
             version = BackendVersion.VERSION
 
             # Читаем ожидаемую версию из файла backend/version.txt
             import os
 
-            version_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "VERSION")
+            version_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", "budgetmaster", "backend", "VERSION")
 
             with open(version_file_path, 'r', encoding='utf-8') as f:
                 expected_version = f.read().strip()
@@ -148,7 +148,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем класс BackendVersion
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
 
             # Проверяем, что метод main существует
             self.assertTrue(hasattr(BackendVersion, 'main'), "Класс BackendVersion должен иметь метод main")
@@ -167,7 +167,7 @@ class TestBackendVersion(unittest.TestCase):
 
         try:
             # Получаем версию
-            BackendVersion = get_java_class("BackendVersion")
+            BackendVersion = get_java_class("com.sadengineer.budgetmaster.backend.BackendVersion")
             version = BackendVersion.VERSION
 
             # Проверяем, что версия не пустая и корректная

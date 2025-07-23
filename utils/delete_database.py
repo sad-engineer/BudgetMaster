@@ -16,7 +16,7 @@ def close_sqlite_connections():
         import sqlite3
 
         # Путь к базе данных
-        db_path = Path(__file__).parent.parent / "backend" / "budget_master.db"
+        db_path = Path(__file__).parent.parent / "backend" / "com" / "sadengineer" / "budgetmaster" / "backend" / "budget_master.db"
         if db_path.exists():
             print("🔌 Закрытие SQLite соединений...")
             conn = sqlite3.connect(db_path)
@@ -45,7 +45,7 @@ def delete_database():
     """Удаляет базу данных budget_master.db"""
 
     # Путь к базе данных
-    db_path = Path(__file__).parent.parent / "backend" / "budget_master.db"
+    db_path = Path(__file__).parent.parent / "backend" / "com" / "sadengineer" / "budgetmaster" / "backend" / "budget_master.db"
 
     print(f"🔍 Проверяем наличие базы данных: {db_path}")
 

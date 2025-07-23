@@ -12,6 +12,8 @@ import com.sadengineer.budgetmaster.backend.model.Account;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
+import com.sadengineer.budgetmaster.backend.database.DatabaseProvider;
+import com.sadengineer.budgetmaster.backend.database.DatabaseInterface;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
 import static com.sadengineer.budgetmaster.backend.constants.ModelConstants.ACCOUNT_TYPE_CURRENT;
 import static com.sadengineer.budgetmaster.backend.constants.ModelConstants.DEFAULT_CURRENCY_ID;
@@ -87,24 +89,35 @@ public class DatabaseUtil {
             }
         }
     }
+
+    /**
+     * Создает базу данных, если она не существует
+     * @param dbPath путь к файлу базы данных
+     * @throws SQLException если операция с базой завершилась ошибкой
+     */
     public static void createDatabaseIfNotExists(String dbPath) throws SQLException {
-        String url = "jdbc:sqlite:" + dbPath;
-        try (Connection conn = DriverManager.getConnection(url)) {
+        DatabaseInterface db = DatabaseProvider.getDatabase();
+        db.connect(dbPath);
+        
+        try {
             // Устанавливаем кодировку UTF-8 для базы
-            try (Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA encoding = 'UTF-8'");
-                stmt.execute("PRAGMA foreign_keys = ON");
-            }
+            db.executeSQL("PRAGMA encoding = 'UTF-8'");
+            db.executeSQL("PRAGMA foreign_keys = ON");
+            db.executeSQL("PRAGMA case_sensitive_like = OFF");
+            
             // Создаем таблицы
-            createTables(conn);
+            createTables(db);
             // Инициализируем дефолтные валюты
-            initializeDefaultCurrencies(conn);
+            initializeDefaultCurrencies(db);
             // Инициализируем дефолтные категории
-            initializeDefaultCategories(conn);
+            initializeDefaultCategories(db);
             // Инициализируем дефолтные счета
-            initializeDefaultAccounts(conn);
+            initializeDefaultAccounts(db);
+        } finally {
+            db.close();
         }
     }
+
     /**
      * Получает количество записей в указанной таблице
      * @param dbPath путь к файлу базы данных
@@ -123,6 +136,7 @@ public class DatabaseUtil {
         }
         return 0;
     }
+
     /**
      * Получает общее количество записей во всех таблицах
      * @param dbPath путь к файлу базы данных
@@ -137,6 +151,7 @@ public class DatabaseUtil {
         }
         return total;
     }
+
     /**
      * Восстанавливает только дефолтные категории
      * @param dbPath путь к файлу базы данных
@@ -146,11 +161,15 @@ public class DatabaseUtil {
         // Очищаем таблицу категорий
         clearTable(dbPath, TABLE_CATEGORIES);
         // Переинициализируем категории
-        String url = "jdbc:sqlite:" + dbPath;
-        try (Connection conn = DriverManager.getConnection(url)) {
-            initializeDefaultCategories(conn);
+        DatabaseInterface db = DatabaseProvider.getDatabase();
+        db.connect(dbPath);
+        try {
+            initializeDefaultCategories(db);
+        } finally {
+            db.close();
         }
     }
+
     /**
      * Восстанавливает только дефолтные валюты
      * @param dbPath путь к файлу базы данных
@@ -160,11 +179,15 @@ public class DatabaseUtil {
         // Очищаем таблицу валют
         clearTable(dbPath, TABLE_CURRENCIES);
         // Переинициализируем валюты
-        String url = "jdbc:sqlite:" + dbPath;
-        try (Connection conn = DriverManager.getConnection(url)) {
-            initializeDefaultCurrencies(conn);
+        DatabaseInterface db = DatabaseProvider.getDatabase();
+        db.connect(dbPath);
+        try {
+            initializeDefaultCurrencies(db);
+        } finally {
+            db.close();
         }
     }
+    
     /**
      * Восстанавливает дефолтные значения во всей базе
      * @param dbPath путь к файлу базы данных
@@ -174,17 +197,25 @@ public class DatabaseUtil {
         // Сначала очищаем все данные
         clearAllData(dbPath);
         // Переинициализируем дефолтные значения
-        String url = "jdbc:sqlite:" + dbPath;
-        try (Connection conn = DriverManager.getConnection(url)) {
-            initializeDefaultCurrencies(conn);
-            initializeDefaultCategories(conn);
-            initializeDefaultAccounts(conn);
+        DatabaseInterface db = DatabaseProvider.getDatabase();
+        db.connect(dbPath);
+        try {
+            initializeDefaultCurrencies(db);
+            initializeDefaultCategories(db);
+            initializeDefaultAccounts(db);
+        } finally {
+            db.close();
         }
     }
-    private static void createTables(Connection conn) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
+
+    /**
+     * Создает таблицы в базе данных, если они не существуют
+     * @param db интерфейс для работы с базой данных
+     * @throws SQLException если операция с базой завершилась ошибкой
+     */
+    private static void createTables(DatabaseInterface db) throws SQLException {
             // Таблица валют
-            stmt.executeUpdate(
+        db.executeSQL(
                 "CREATE TABLE IF NOT EXISTS " + TABLE_CURRENCIES + " (" + 
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TITLE + " TEXT NOT NULL, " +
@@ -197,7 +228,7 @@ public class DatabaseUtil {
                 COLUMN_DELETE_TIME + " TIMESTAMP" +
                 ")");
             // Таблица счетов
-            stmt.executeUpdate(
+        db.executeSQL(
                 "CREATE TABLE IF NOT EXISTS " + TABLE_ACCOUNTS + " (" + 
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TITLE + " TEXT NOT NULL, " +
@@ -218,7 +249,7 @@ public class DatabaseUtil {
                 "FOREIGN KEY (" + COLUMN_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + ")" +
                 ")");
             // Таблица категорий
-            stmt.executeUpdate(
+        db.executeSQL(
                 "CREATE TABLE IF NOT EXISTS " + TABLE_CATEGORIES + " (" + 
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TITLE + " TEXT NOT NULL, " +
@@ -235,7 +266,7 @@ public class DatabaseUtil {
                 "FOREIGN KEY (" + COLUMN_PARENT_ID + ") REFERENCES " + TABLE_CATEGORIES + " (" + COLUMN_ID + ")" +
                 ")");
             // Таблица бюджетов
-            stmt.executeUpdate(
+        db.executeSQL(
                 "CREATE TABLE IF NOT EXISTS " + TABLE_BUDGETS + " (" + 
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_AMOUNT + " INTEGER NOT NULL, " +
@@ -252,7 +283,7 @@ public class DatabaseUtil {
                 "FOREIGN KEY (" + COLUMN_CATEGORY_ID + ") REFERENCES " + TABLE_CATEGORIES + " (" + COLUMN_ID + ")" +
                 ")");
             // Таблица операций
-            stmt.executeUpdate(
+        db.executeSQL(
                 "CREATE TABLE IF NOT EXISTS " + TABLE_OPERATIONS + " (" + 
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TYPE + " INTEGER NOT NULL, " +
@@ -278,117 +309,89 @@ public class DatabaseUtil {
                 "FOREIGN KEY (" + COLUMN_TO_CURRENCY_ID + ") REFERENCES " + TABLE_CURRENCIES + " (" + COLUMN_ID + ")" +
                 ")");
         }
-    }
     
-    private static void initializeDefaultCategories(Connection conn) throws SQLException {
+    /**
+     * Инициализирует дефолтные категории
+     * @param db интерфейс для работы с базой данных
+     * @throws SQLException если операция с базой завершилась ошибкой
+     */
+    private static void initializeDefaultCategories(DatabaseInterface db) throws SQLException {
         // Check if categories already exist in table
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_CATEGORIES)) {
-            if (rs.next() && rs.getInt(1) > 0) {
-                // Categories already exist, don't add
-                return;
+        ResultSet rs = db.query("SELECT COUNT(*) FROM " + TABLE_CATEGORIES);
+        if (rs.next() && rs.getInt(1) > 0) {
+            // Categories already exist, don't add
+            rs.close();
+            return;
+        }
+        rs.close();
+        
+        // Создаем родительские категории
+        db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('Доходы', 1, " + OPERATION_TYPE_INCOME + ", " + CATEGORY_TYPE_PARENT + ", NULL, 'initializer', datetime('now'))");
+        db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('Расходы', 2, " + OPERATION_TYPE_EXPENSE + ", " + CATEGORY_TYPE_PARENT + ", NULL, 'initializer', datetime('now'))");
+        
+        // Получаем ID созданных родительских категорий
+        // Используем более надежный подход - получаем все категории и ищем по позиции
+        ResultSet rsAllCategories = db.query("SELECT id, title, position FROM " + TABLE_CATEGORIES + " WHERE position IN (1, 2) ORDER BY position");
+        
+        int incomeParentId = 0, expenseParentId = 0;
+        while (rsAllCategories.next()) {
+            int id = rsAllCategories.getInt(1);
+            String title = rsAllCategories.getString(2);
+            int position = rsAllCategories.getInt(3);
+            
+            if (position == 1) {
+                incomeParentId = id;
+            } else if (position == 2) {
+                expenseParentId = id;
             }
         }
+        rsAllCategories.close();
         
-        // Use repository to add default categories with auto-position
-        String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
-        CategoryRepository categoryRepo = new CategoryRepository(dbPath);
-                
-        // Сначала создаем родительские категории
-        Category incomeParent = new Category();
-        incomeParent.setTitle("Доходы");
-        incomeParent.setPosition(1);
-        incomeParent.setOperationType(OPERATION_TYPE_INCOME); // Доходы
-        incomeParent.setType(CATEGORY_TYPE_PARENT); // Родительская
-        incomeParent.setParentId(null);
-        incomeParent.setCreatedBy("initializer");
-        incomeParent.setUpdatedBy(null);
-        incomeParent.setCreateTime(java.time.LocalDateTime.now());
-        incomeParent.setUpdateTime(null);
-        incomeParent.setDeleteTime(null);
-        
-        Category expenseParent = new Category();
-        expenseParent.setTitle("Расходы");
-        expenseParent.setPosition(2);
-        expenseParent.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
-        expenseParent.setType(CATEGORY_TYPE_PARENT); // Родительская
-        expenseParent.setParentId(null);
-        expenseParent.setCreatedBy("initializer");
-        expenseParent.setUpdatedBy(null);
-        expenseParent.setCreateTime(java.time.LocalDateTime.now());
-        expenseParent.setUpdateTime(null);
-        expenseParent.setDeleteTime(null);
-        
-        // Сохраняем родительские категории
-        Category savedIncomeParent = categoryRepo.save(incomeParent);
-        Category savedExpenseParent = categoryRepo.save(expenseParent);
+        // Проверяем, что ID получены корректно
+        if (incomeParentId == 0 || expenseParentId == 0) {
+            throw new SQLException("Не удалось получить ID родительских категорий");
+        }
         
         // Создаем дочерние категории доходов
         String[] incomeCategoryTitles = {"Работа", "Подработка", "Подарки"};
         int incomePosition = 3;
         for (String title : incomeCategoryTitles) {
-            Category category = new Category();
-            category.setTitle(title);
-            category.setPosition(incomePosition);
-            category.setOperationType(OPERATION_TYPE_INCOME); // Доходы
-            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
-            category.setParentId(savedIncomeParent.getId());
-            category.setCreatedBy("initializer");
-            category.setUpdatedBy(null);
-            category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(null);
-            category.setDeleteTime(null);
-            
-            categoryRepo.save(category);
+            db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('" + title + "', " + incomePosition + ", " + OPERATION_TYPE_INCOME + ", " + CATEGORY_TYPE_CHILD + ", " + incomeParentId + ", 'initializer', datetime('now'))");
             incomePosition++;
         }
 
         // Создаем промежуточные категории расходов
-        Category necessaryExpense = new Category();
-        necessaryExpense.setTitle("Необходимые");
-        necessaryExpense.setPosition(6);
-        necessaryExpense.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
-        necessaryExpense.setType(CATEGORY_TYPE_CHILD); // Дочерняя
-        necessaryExpense.setParentId(savedExpenseParent.getId());
-        necessaryExpense.setCreatedBy("initializer");
-        necessaryExpense.setUpdatedBy(null);
-        necessaryExpense.setCreateTime(java.time.LocalDateTime.now());
-        necessaryExpense.setUpdateTime(null);
-        necessaryExpense.setDeleteTime(null);
+        db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('Необходимые', 6, " + OPERATION_TYPE_EXPENSE + ", " + CATEGORY_TYPE_CHILD + ", " + expenseParentId + ", 'initializer', datetime('now'))");
+        db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('Дополнительные', 7, " + OPERATION_TYPE_EXPENSE + ", " + CATEGORY_TYPE_CHILD + ", " + expenseParentId + ", 'initializer', datetime('now'))");
         
-        Category additionalExpense = new Category();
-        additionalExpense.setTitle("Дополнительные");
-        additionalExpense.setPosition(7);
-        additionalExpense.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
-        additionalExpense.setType(CATEGORY_TYPE_CHILD); // Дочерняя
-        additionalExpense.setParentId(savedExpenseParent.getId());
-        additionalExpense.setCreatedBy("initializer");
-        additionalExpense.setUpdatedBy(null);
-        additionalExpense.setCreateTime(java.time.LocalDateTime.now());
-        additionalExpense.setUpdateTime(null);
-        additionalExpense.setDeleteTime(null);
+        // Получаем ID созданных промежуточных категорий
+        // Используем поиск по позиции для надежности
+        ResultSet rsIntermediateCategories = db.query("SELECT id, title, position FROM " + TABLE_CATEGORIES + " WHERE position IN (6, 7) ORDER BY position");
         
-        // Сохраняем промежуточные категории
-        Category savedNecessary = categoryRepo.save(necessaryExpense);
-        Category savedAdditional = categoryRepo.save(additionalExpense);
+        int necessaryId = 0, additionalId = 0;
+        while (rsIntermediateCategories.next()) {
+            int id = rsIntermediateCategories.getInt(1);
+            String title = rsIntermediateCategories.getString(2);
+            int position = rsIntermediateCategories.getInt(3);
+            
+            if (position == 6) {
+                necessaryId = id;
+            } else if (position == 7) {
+                additionalId = id;
+            }
+        }
+        rsIntermediateCategories.close();
+        
+        // Проверяем, что ID получены корректно
+        if (necessaryId == 0 || additionalId == 0) {
+            throw new SQLException("Не удалось получить ID промежуточных категорий");
+        }
         
         // Создаем дочерние категории необходимых расходов
         String[] necessaryCategoryTitles = {"Коммунальные", "Продукты", "Транспорт", "Медицина", "Одежда", "Налоги"};
         int necessaryPosition = 8;
         for (String title : necessaryCategoryTitles) {
-            Category category = new Category();
-            category.setTitle(title);
-            category.setPosition(necessaryPosition);
-            category.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
-            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
-            category.setParentId(savedNecessary.getId());
-            category.setCreatedBy("initializer");
-            category.setUpdatedBy(null);
-            category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(null);
-            category.setDeleteTime(null);
-            
-            categoryRepo.save(category);
+            db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('" + title + "', " + necessaryPosition + ", " + OPERATION_TYPE_EXPENSE + ", " + CATEGORY_TYPE_CHILD + ", " + necessaryId + ", 'initializer', datetime('now'))");
             necessaryPosition++;
         }
         
@@ -396,70 +399,52 @@ public class DatabaseUtil {
         String[] additionalCategoryTitles = {"Домашние нужды", "Кино", "Кафе и рестораны", "Подарки"};
         int additionalPosition = 14;
         for (String title : additionalCategoryTitles) {
-            Category category = new Category();
-            category.setTitle(title);
-            category.setPosition(additionalPosition);
-            category.setOperationType(OPERATION_TYPE_EXPENSE); // Расходы
-            category.setType(CATEGORY_TYPE_CHILD); // Дочерняя
-            category.setParentId(savedAdditional.getId());
-            category.setCreatedBy("initializer");
-            category.setUpdatedBy(null);
-            category.setCreateTime(java.time.LocalDateTime.now());
-            category.setUpdateTime(null);
-            category.setDeleteTime(null);
-            
-            categoryRepo.save(category);
+            db.executeSQL("INSERT INTO " + TABLE_CATEGORIES + " (title, position, operation_type, type, parent_id, created_by, create_time) VALUES ('" + title + "', " + additionalPosition + ", " + OPERATION_TYPE_EXPENSE + ", " + CATEGORY_TYPE_CHILD + ", " + additionalId + ", 'initializer', datetime('now'))");
             additionalPosition++;
         }
     }
     
-    private static void initializeDefaultCurrencies(Connection conn) throws SQLException {
+    /**
+     * Инициализирует дефолтные валюты
+     * @param db интерфейс для работы с базой данных
+     * @throws SQLException если операция с базой завершилась ошибкой
+     */
+    private static void initializeDefaultCurrencies(DatabaseInterface db) throws SQLException {
         // Check if currencies already exist in table
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_CURRENCIES)) {
+        ResultSet rs = db.query("SELECT COUNT(*) FROM " + TABLE_CURRENCIES);
             if (rs.next() && rs.getInt(1) > 0) {
                 // Currencies already exist, don't add
+            rs.close();
                 return;
             }
-        }
+        rs.close();
         
-        // Use repository to add default currencies with auto-position
-        String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
-        CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
-        
-        // Add default currencies
+        // Add default currencies through direct SQL
         Object[][] currencyData = {
             {"RUB", 1},
             {"USD", 2},
             {"EUR", 3}
         };
         for (Object[] currencyInfo : currencyData) {
-            Currency currency = new Currency();
-            currency.setTitle((String) currencyInfo[0]);
-            currency.setPosition((int) currencyInfo[1]);
-            currency.setCreatedBy("initializer");
-            currency.setUpdatedBy(null);
-            currency.setCreateTime(java.time.LocalDateTime.now());
-            currency.setUpdateTime(null);
-            currency.setDeleteTime(null);
-            
-            currencyRepo.save(currency);
+            db.executeSQL("INSERT INTO " + TABLE_CURRENCIES + " (title, position, created_by, create_time) VALUES ('" + currencyInfo[0] + "', " + currencyInfo[1] + ", 'initializer', datetime('now'))");
         }    
     }
 
-    private static void initializeDefaultAccounts(Connection conn) throws SQLException {
+    /**
+     * Инициализирует дефолтные счета
+     * @param db интерфейс для работы с базой данных
+     * @throws SQLException если операция с базой завершилась ошибкой
+     */
+    private static void initializeDefaultAccounts(DatabaseInterface db) throws SQLException {
         // Check if accounts already exist in table
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_ACCOUNTS)) {
+        ResultSet rs = db.query("SELECT COUNT(*) FROM " + TABLE_ACCOUNTS);
             if (rs.next() && rs.getInt(1) > 0) {
                 // Accounts already exist, don't add
+            rs.close();
                 return;
             }
-        }
-        String dbPath = conn.getMetaData().getURL().replace("jdbc:sqlite:", "");
-        AccountRepository accountRepo = new AccountRepository(dbPath);
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        // title, type, currencyId, closed, position
+        rs.close();
+        // Add default accounts through direct SQL
         Object[][] defaultAccounts = {
             {"Наличные", ACCOUNT_TYPE_CURRENT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 1},
             {"Зарплатная карта", ACCOUNT_TYPE_CURRENT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 2},
@@ -468,23 +453,7 @@ public class DatabaseUtil {
             {"Карта рассрочки", ACCOUNT_TYPE_CREDIT, DEFAULT_CURRENCY_ID, ACCOUNT_STATUS_OPEN, 5},
         };
         for (Object[] acc : defaultAccounts) {
-            Account account = new Account();
-            account.setTitle((String) acc[0]);
-            account.setAmount(0);
-            account.setType((int) acc[1]);
-            account.setCurrencyId((int) acc[2]);
-            account.setClosed((int) acc[3]);
-            account.setPosition((int) acc[4]);
-            account.setCreditCardLimit(null);
-            account.setCreditCardCategoryId(null);
-            account.setCreditCardCommissionCategoryId(null);
-            account.setCreatedBy("initializer");
-            account.setUpdatedBy(null);
-            account.setDeletedBy(null);
-            account.setCreateTime(now);
-            account.setUpdateTime(null);
-            account.setDeleteTime(null);
-            accountRepo.save(account);
+            db.executeSQL("INSERT INTO " + TABLE_ACCOUNTS + " (title, amount, type, currency_id, closed, position, created_by, create_time) VALUES ('" + acc[0] + "', 0, " + acc[1] + ", " + acc[2] + ", " + acc[3] + ", " + acc[4] + ", 'initializer', datetime('now'))");
         }
     }
 } 

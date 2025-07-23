@@ -26,7 +26,7 @@ class TestDatabaseUtil(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.DatabaseUtil = get_java_class("util.DatabaseUtil")
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
         cls.SQLException = get_java_class("java.sql.SQLException")
 
         # Создаем временную базу для тестов

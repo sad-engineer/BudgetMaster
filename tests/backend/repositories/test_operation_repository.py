@@ -22,10 +22,10 @@ class TestOperationRepository(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.Operation = get_java_class("model.Operation")
-        cls.OperationRepository = get_java_class("repository.OperationRepository")
+        cls.Operation = get_java_class("com.sadengineer.budgetmaster.backend.model.Operation")
+        cls.OperationRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.OperationRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
-        cls.Integer = get_java_class("java.lang.Integer")
+        cls.Integer = get_java_class("java.lang.Integer")   
 
         # Создаем репозиторий
         cls.repo = cls.OperationRepository(cls.db_manager.db_path)

@@ -25,7 +25,7 @@ class TestDateTimeUtil(unittest.TestCase):
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
-        cls.DateTimeUtil = get_java_class("util.DateTimeUtil")
+        cls.DateTimeUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DateTimeUtil")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
 
     @classmethod
