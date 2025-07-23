@@ -15,30 +15,35 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/authors_background"
+            android:background="@color/authors_toolbar_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
             android:layout_width="match_parent"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:contentInsetStart="0dp"
+            app:contentInsetEnd="0dp"
             app:title="">
 
             <LinearLayout 
                 android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp">
 
-                <ImageButton 
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="@dimen/menu_button_size"
+                    android:layout_height="match_parent"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/icon_back"
-                    android:id="@+id/back_button"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/menu_button_size"
+                    android:rotationX="2"
                     android:src="@drawable/ic_back"
                     app:tint="@color/authors_toolbar_icons" />
 
-                 <ImageButton 
+                 <ImageButton
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/icon_menu"
                     android:id="@+id/menu_button"
@@ -47,7 +52,7 @@
                     android:src="@drawable/ic_menu"
                     app:tint="@color/authors_toolbar_icons" />
 
-                <TextView 
+                <TextView
                     android:gravity="center"
                     android:id="@+id/toolbar_title"
                     android:layout_height="match_parent"
@@ -145,14 +150,14 @@
 
     <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/background_content"
+        android:background="@color/navigation_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/text_activity_main"
-        app:itemIconTint="@color/icon_activity_main" />
+        app:itemTextColor="@color/navigation_texts"
+        app:itemIconTint="@color/navigation_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout> 

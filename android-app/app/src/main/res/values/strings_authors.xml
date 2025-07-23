@@ -11,7 +11,7 @@
         <b>Все права защищены.</b>
         </string>
     <string name="authors_libraries_title">Используемые библиотеки</string>
-    <string name="authors_libraries_list">
+    <string name="authors_libraries_list">\n
         • Android SDK 34\n
         • AndroidX AppCompat 1.6.1\n
         • Google Material Design 1.11.0\n

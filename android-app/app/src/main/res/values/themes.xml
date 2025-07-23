@@ -10,11 +10,11 @@
     <!-- Стили для кнопок валют -->
     <style name="CurrencyButton.Add" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/circle_button_background</item>
-        <item name="android:colorAccent">@color/currency_add_button_background</item>
+        <item name="android:colorAccent">@color/currencies_add_button_background</item>
     </style>
 
     <style name="CurrencyButton.Delete" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/circle_button_background</item>
-        <item name="android:colorAccent">@color/currency_delete_button_background</item>
+        <item name="android:colorAccent">@color/currencies_delete_button_background</item>
     </style>
 </resources>

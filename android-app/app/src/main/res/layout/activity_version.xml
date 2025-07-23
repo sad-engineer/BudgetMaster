@@ -15,19 +15,23 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/version_background"
+            android:background="@color/version_toolbar_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
             android:layout_width="match_parent"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:contentInsetStart="0dp"
+            app:contentInsetEnd="0dp"
             app:title="">
 
             <LinearLayout 
                 android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp">
 
                 <ImageButton 
                     android:background="@android:color/transparent"
@@ -77,31 +81,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- App Icon and Name -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="24dp">
-
-                        <ImageView
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:src="@mipmap/ic_launcher"
-                            android:contentDescription="@string/icon_app" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:text="@string/app_name"
-                            android:textColor="@color/version_titles"
-                            android:textSize="@dimen/text_size" 
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
                     <!-- Version Information -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -123,7 +102,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:src="@drawable/ic_android"
                                 android:contentDescription="@string/icon_frontend"
-                                android:tint="?attr/colorPrimary" />
+                                android:tint="@color/version_content_icons" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -136,7 +115,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/frontend_version"
-                                    android:textColor="@color/version_titles"
+                                    android:textColor="@color/version_content_titles"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
@@ -147,7 +126,7 @@
                                     android:layout_marginTop="4dp"
                                     android:text="0.0.001"
                                     android:textSize="14sp"
-                                    android:textColor="@color/version_texts" />
+                                    android:textColor="@color/version_content_texts" />
 
                             </LinearLayout>
 
@@ -168,7 +147,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:src="@drawable/ic_server"
                                 android:contentDescription="@string/icon_backend"
-                                android:tint="?attr/colorPrimary" />
+                                android:tint="@color/version_content_icons" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -181,7 +160,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/backend_version"
-                                    android:textColor="@color/version_titles"
+                                    android:textColor="@color/version_content_titles"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
@@ -192,7 +171,7 @@
                                     android:layout_marginTop="4dp"
                                     android:text="0.0.001"
                                     android:textSize="14sp"
-                                    android:textColor="@color/version_texts" />
+                                    android:textColor="@color/version_content_texts" />
 
                             </LinearLayout>
 
@@ -212,7 +191,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/version_info_title"
-                            android:textColor="@color/version_titles"
+                            android:textColor="@color/version_content_titles"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="12dp" />
@@ -221,9 +200,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/version_info_description"
-                            android:textColor="@color/version_texts"
+                            android:textColor="@color/version_content_texts"
                             android:textSize="14sp"
-                            android:lineSpacingExtra="4dp" />
+                            android:lineSpacingExtra="4dp"
+                            android:textIsSelectable="false"
+                            android:autoLink="none"
+                            android:linksClickable="false" />
 
                     </LinearLayout>
                 
@@ -237,14 +219,14 @@
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/background_content"
+        android:background="@color/navigation_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/text_activity_main"
-        app:itemIconTint="@color/icon_activity_main" />
+        app:itemTextColor="@color/navigation_texts"
+        app:itemIconTint="@color/navigation_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout> 

@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Название"
-        android:textColor="@android:color/white"
+        android:textColor="@color/account_item_text"
         android:textSize="18sp"/>
 
     <TextView
@@ -22,6 +22,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0.00 RUB"
-        android:textColor="@android:color/white"
+        android:textColor="@color/account_item_text"
         android:textSize="18sp"/>
 </LinearLayout> 

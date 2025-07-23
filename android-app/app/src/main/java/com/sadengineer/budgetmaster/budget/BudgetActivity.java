@@ -25,13 +25,26 @@ public class BudgetActivity extends AppCompatActivity {
         setContentView(R.layout.activity_budget);
 
         // Обработчики кнопок toolbar
+        ImageButton backButton = findViewById(R.id.back_button);
         ImageButton menuButton = findViewById(R.id.menu_button);
         ImageButton incomeButton = findViewById(R.id.income_button);
         ImageButton expenseButton = findViewById(R.id.expense_button);
 
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Возвращаемся на главный экран
+                Intent intent = new Intent(BudgetActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Открываем меню (если есть drawer layout) или идем на главный экран
                 Intent intent = new Intent(BudgetActivity.this, MainActivity.class);
                 startActivity(intent);
             }
