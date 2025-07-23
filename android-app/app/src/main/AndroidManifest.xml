@@ -33,6 +33,12 @@
             android:name=".BackendTestActivity"
             android:exported="false" />
         <activity
+            android:name=".VersionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AuthorsActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>

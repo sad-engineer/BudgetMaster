@@ -215,10 +215,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_version) {
-            Toast.makeText(this, "Версия приложения", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, VersionActivity.class);
+            startActivity(intent);
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_authors) {
-            Toast.makeText(this, "Авторы", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, AuthorsActivity.class);
+            startActivity(intent);
             drawerLayout.closeDrawer(GravityCompat.START);
         }
 

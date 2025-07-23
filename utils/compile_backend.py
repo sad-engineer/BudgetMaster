@@ -12,10 +12,7 @@ SRC_DIRS = [
     "../backend/validator",
 ]
 # Явно указываем отдельные файлы для компиляции
-EXTRA_JAVA_FILES = [
-    "../backend/Main.java",
-    "../backend/BackendVersion.java"
-]
+EXTRA_JAVA_FILES = ["../backend/Main.java", "../backend/BackendVersion.java"]
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 BUILD_DIR = os.path.join(PROJECT_ROOT, "../backend/build/backend")

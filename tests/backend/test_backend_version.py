@@ -127,7 +127,17 @@ class TestBackendVersion(unittest.TestCase):
             # Читаем ожидаемую версию из файла backend/version.txt
             import os
 
-            version_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", "budgetmaster", "backend", "VERSION")
+            version_file_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "backend",
+                "com",
+                "sadengineer",
+                "budgetmaster",
+                "backend",
+                "VERSION",
+            )
 
             with open(version_file_path, 'r', encoding='utf-8') as f:
                 expected_version = f.read().strip()

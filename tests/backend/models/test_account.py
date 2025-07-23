@@ -27,7 +27,7 @@ class TestAccount(unittest.TestCase):
 
         # Импортируем Java классы
         cls.Account = get_java_class("com.sadengineer.budgetmaster.backend.model.Account")
-        cls.LocalDateTime = get_java_class("java.time.LocalDateTime")       
+        cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
 
     @classmethod

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout 
+    android:id="@+id/drawer_layout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".VersionActivity">
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <!-- Тулбар -->
+        <androidx.appcompat.widget.Toolbar 
+            android:background="@color/version_background"
+            android:id="@+id/toolbar"
+            android:layout_height="@dimen/toolbar_height"
+            android:layout_marginTop="@dimen/toolbar_margin_top"
+            android:layout_width="match_parent"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="">
+
+            <LinearLayout 
+                android:gravity="center_vertical"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:orientation="horizontal">
+
+                <ImageButton 
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/icon_back"
+                    android:id="@+id/back_button"
+                    android:layout_height="match_parent"
+                    android:layout_width="@dimen/menu_button_size"
+                    android:src="@drawable/ic_back"
+                    app:tint="@color/version_toolbar_icons" />
+
+                 <ImageButton 
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/icon_menu"
+                    android:id="@+id/menu_button"
+                    android:layout_height="match_parent"
+                    android:layout_width="@dimen/menu_button_size"
+                    android:src="@drawable/ic_menu"
+                    app:tint="@color/version_toolbar_icons" />
+
+                <TextView 
+                    android:gravity="center"
+                    android:id="@+id/toolbar_title"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:text="@string/toolbar_title_version"
+                    android:textColor="@color/version_toolbar_texts"
+                    android:textSize="@dimen/toolbar_text"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Контент -->
+        <FrameLayout android:background="@color/version_content_background"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:id="@+id/version_content_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- App Icon and Name -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <ImageView
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            android:src="@mipmap/ic_launcher"
+                            android:contentDescription="@string/icon_app" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/app_name"
+                            android:textColor="@color/version_titles"
+                            android:textSize="@dimen/text_size" 
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <!-- Version Information -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <!-- Frontend Version -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:background="@color/version_item_background">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_android"
+                                android:contentDescription="@string/icon_frontend"
+                                android:tint="?attr/colorPrimary" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/frontend_version"
+                                    android:textColor="@color/version_titles"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/frontend_version_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="0.0.001"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/version_texts" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- Backend Version -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:background="@color/version_item_background">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_server"
+                                android:contentDescription="@string/icon_backend"
+                                android:tint="?attr/colorPrimary" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/backend_version"
+                                    android:textColor="@color/version_titles"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/backend_version_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="0.0.001"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/version_texts" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Additional Info -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/version_info_title"
+                            android:textColor="@color/version_titles"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="12dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/version_info_description"
+                            android:textColor="@color/version_texts"
+                            android:textSize="14sp"
+                            android:lineSpacingExtra="4dp" />
+
+                    </LinearLayout>
+                
+                </LinearLayout>
+            
+            </ScrollView>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView 
+        android:background="@color/background_content"
+        android:id="@+id/nav_view"
+        android:layout_height="match_parent"
+        android:layout_width="@dimen/navigation_drawer_width"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_drawer_header"
+        app:menu="@menu/nav_drawer_menu"
+        app:itemTextColor="@color/text_activity_main"
+        app:itemIconTint="@color/icon_activity_main" />
+
+</androidx.drawerlayout.widget.DrawerLayout> 

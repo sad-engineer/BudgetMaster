@@ -18,8 +18,17 @@ class JPypeSetup:
 
         # Путь к базе данных
         self.DB_PATH = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", "budgetmaster",
-                         "backend", "budget_master.db")
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "backend",
+                "com",
+                "sadengineer",
+                "budgetmaster",
+                "backend",
+                "budget_master.db",
+            )
         )
 
         # Получаем версию из pyproject.toml
@@ -43,8 +52,17 @@ class JPypeSetup:
     def _get_jar_version(self) -> str:
         """Получает версию из backend/com/sadengineer/budgetmaster/backend/VERSION"""
         try:
-            version_path = os.path.join(os.path.dirname(__file__), "..", "..", "backend", "com", "sadengineer", 
-                                        "budgetmaster", "backend", "VERSION")
+            version_path = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "backend",
+                "com",
+                "sadengineer",
+                "budgetmaster",
+                "backend",
+                "VERSION",
+            )
             with open(version_path, 'r', encoding='utf-8') as f:
                 version = f.read().strip()
                 return version
@@ -60,13 +78,13 @@ class JPypeSetup:
 
         # Проверяем наличие всех необходимых JAR файлов
         backend_jar_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend-jar"))
-        
+
         # Проверяем основной JAR файл
         main_jar = os.path.join(backend_jar_path, f"budgetmaster-backend-{self.JAR_VERSION}.jar")
         if not os.path.exists(main_jar):
             print(f"❌ Основной JAR файл не найден: {main_jar}")
             return False
-            
+
         # Проверяем зависимости
         required_jars = [
             "sqlite-jdbc-3.45.1.0.jar",

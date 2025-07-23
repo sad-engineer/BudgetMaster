@@ -2,6 +2,8 @@
 <resources>
     <!-- Палитра цветов -->
     <color name="black">#FF000000</color>
+    <color name="dark_gray">#FF323232</color>
+    <color name="light_gray">#FF646464</color>
     <color name="white">#FFFFFFFF</color>
     <color name="green">#FF4FBF03</color>
     <color name="orange">#FFA00F0F</color>
@@ -13,27 +15,44 @@
 
 
     <!-- Цвета фона -->
-    <color name="background_toolbar">#FF000000</color>
-    <color name="background_content">#FF323232</color>
+    <color name="background_toolbar">@color/black</color>
+    <color name="background_content">@color/dark_gray</color>
 
     <!-- Цвета иконок -->
     <color name="icon_toolbar">#FF4FBF03</color>
     <color name="icon_activity_main">#FF4FBF03</color>
 
     <!-- Цвета текста -->
-    <color name="text_toolbar">#FFFFFF</color>
-    <color name="text_activity_main">#FFFFFF</color>
+    <color name="text_toolbar">@color/white</color>
+    <color name="text_activity_main">@color/white</color>
 
     <!-- Цвета для экрана валюты -->
-    <color name="currency_toolbar_icon">#FFFFFF</color>
-    <color name="currency_add_button_icon">#FFFFFF</color>
-    <color name="currency_delete_button_icon">#FFFFFF</color>
-    <color name="currency_toolbar_text">#FFFFFF</color>
-    <color name="currency_add_button_background">#FF646464</color>
-    <color name="currency_delete_button_background">#FF646464</color>
+    <color name="currency_toolbar_icon">@color/white</color>
+    <color name="currency_add_button_icon">@color/white</color>
+    <color name="currency_delete_button_icon">@color/white</color>
+    <color name="currency_toolbar_text">@color/white</color>
+    <color name="currency_add_button_background">@color/light_gray</color>
+    <color name="currency_delete_button_background">@color/light_gray</color>
 
 
 
+    <!-- Цвета для экрана версии приложения -->
+    <color name="version_toolbar_icons">@color/white</color>
+    <color name="version_toolbar_texts">@color/white</color>
+    <color name="version_titles">@color/white</color>
+    <color name="version_texts">@color/white</color>
+    <color name="version_background">@color/background_content</color>
+    <color name="version_content_background">@color/background_content</color>
+    <color name="version_item_background">@color/background_content</color>
+
+    <!-- Цвета для экрана авторов -->
+    <color name="authors_toolbar_icons">@color/white</color>
+    <color name="authors_toolbar_texts">@color/white</color>
+    <color name="authors_titles">@color/white</color>
+    <color name="authors_texts">@color/white</color>
+    <color name="authors_background">@color/background_content</color>
+    <color name="authors_content_background">@color/background_content</color>
+    <color name="authors_item_background">@color/background_content</color>
 
 
 

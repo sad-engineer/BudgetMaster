@@ -1,0 +1,28 @@
+<resources>
+    <!-- Заголовки -->
+    <string name="authors_info_title">Об авторах</string>
+    <string name="authors_info_description">BudgetMaster разработан группой разработчиков с использованием современных технологий и библиотек.</string>
+    
+    <!-- Строки -->
+    <string name="authors_copyright_text">
+        <b>© Коренюк А.Н.</b>,\n
+        и все ментальные проекции его подсознательного "я",\n
+        <b>2025</b>.\n
+        <b>Все права защищены.</b>
+        </string>
+    <string name="authors_libraries_title">Используемые библиотеки</string>
+    <string name="authors_libraries_list">
+        • Android SDK 34\n
+        • AndroidX AppCompat 1.6.1\n
+        • Google Material Design 1.11.0\n
+        • AndroidX Navigation 2.6.0\n
+        • AndroidX ConstraintLayout 2.1.4\n
+        • AndroidX CardView 1.0.0\n
+        • SQLite (встроенная база данных)\n
+        • Gradle 8.11.0 (система сборки)
+        </string>
+    <!-- Описания иконок -->    
+    <string name="authors_icon_author">Иконка автора</string>
+    <string name="authors_icon_library">Иконка библиотеки</string>
+    <string name="authors_icon_app">Иконка приложения</string>
+</resources> 
