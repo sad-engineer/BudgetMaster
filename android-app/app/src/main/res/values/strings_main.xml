@@ -14,7 +14,7 @@
     <string name="default_amount">2000.00 RUB</string>
     
     <!-- Кнопки -->
-    <string name="btn_earned">Заработанно/мес.</string>
+    <string name="btn_earned">Заработано/мес.</string>
     <string name="btn_accounts">На счетах</string>
     <string name="btn_savings">Сбережения</string>
     <string name="btn_income">Внести доход</string>
@@ -32,7 +32,5 @@
     <string name="icon_target">Иконка цели</string>
     <string name="icon_budget">Иконка бюджета</string>
     <string name="icon_reserve">Иконка резерва</string>
-    <string name="icon_menu">Иконка меню</string>
-    <string name="icon_back">Иконка назад</string>
     
 </resources>

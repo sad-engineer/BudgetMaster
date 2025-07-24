@@ -18,7 +18,7 @@ public class SavingsAccountsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_savings_accounts, container, false);
-        RecyclerView recycler = view.findViewById(R.id.savings_recycler);
+        RecyclerView recycler = view.findViewById(R.id.accounts_savings_recycler);
 
         List<AccountsAdapter.AccountItem> items = new ArrayList<>();
         items.add(new AccountsAdapter.AccountItem("Итого", "-53 224.00 RUB"));

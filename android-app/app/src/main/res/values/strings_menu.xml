@@ -18,5 +18,4 @@
     <string name="menu_settings">Настройки</string>
     <string name="menu_version">Версия приложения</string>
     <string name="menu_authors">Авторы</string>
-    <string name="backend_test_title">Тест Backend</string>
 </resources>

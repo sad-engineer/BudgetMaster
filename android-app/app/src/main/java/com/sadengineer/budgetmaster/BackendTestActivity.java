@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import java.util.List;
 import java.io.File;
 
@@ -47,43 +47,24 @@ import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
 import com.sadengineer.budgetmaster.backend.AndroidDatabaseAdapter;
 
-public class BackendTestActivity extends AppCompatActivity {
+public class BackendTestActivity extends BaseNavigationActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backend_test);
 
-        // Обработчики кнопок toolbar
-        ImageButton backButton = findViewById(R.id.back_button);
-        ImageButton menuButton = findViewById(R.id.menu_button);
-
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Возвращаемся на главный экран
-                Intent intent = new Intent(BackendTestActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Открываем меню (если есть drawer layout) или идем на главный экран
-                Intent intent = new Intent(BackendTestActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
+        // Инициализация навигации
+        initializeNavigation();
+        setupMenuButton(R.id.menu_button);
+        setupBackButton(R.id.back_button);
 
         // Настройка Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.backend_test_title);
+            getSupportActionBar().setTitle(R.string.toolbar_title_backend_test);
         }
 
         // Получаем TextView для отображения результатов

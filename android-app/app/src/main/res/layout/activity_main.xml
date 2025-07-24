@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout android:id="@+id/drawer_layout"
+<androidx.drawerlayout.widget.DrawerLayout 
+    android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -61,21 +62,16 @@
 
                 <ImageButton 
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_income"
+                    android:contentDescription="@string/icon_income_toolbar"
                     android:id="@+id/income_button"
                     android:layout_height="match_parent"
                     android:layout_width="@dimen/income_button_size"
                     android:src="@drawable/ic_income"
                     app:tint="@color/main_toolbar_icons" />
 
-                <View 
-                    android:id="@+id/toolbar_gap"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/toolbar_gap" />
-
                 <ImageButton 
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_expense"
+                    android:contentDescription="@string/icon_expense_toolbar"
                     android:id="@+id/expense_button"
                     android:layout_height="match_parent"
                     android:layout_width="@dimen/expense_button_size"

@@ -2,4 +2,8 @@
     <!-- Названия вкладок для бюджета -->
     <string name="tab_limits">Лимиты</string>
     <string name="tab_remaining">Осталось</string>
+
+    <!-- Кнопки действий -->
+    <string name="icon_add_budget">Добавить бюджет</string>
+    <string name="icon_delete_budget">Удалить бюджет</string>
 </resources>

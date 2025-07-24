@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:background="@color/fragment_background"
+<LinearLayout 
+    android:background="@color/fragment_background"
+    android:id="@+id/accounts_current_fragment_container"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/accounts_recycler"
+    <androidx.recyclerview.widget.RecyclerView 
+        android:id="@+id/accounts_current_recycler"
         android:layout_height="match_parent"
         android:layout_width="match_parent"/>
 </LinearLayout> 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:background="?android:attr/selectableItemBackground"
+<LinearLayout 
+    android:background="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:layout_height="@dimen/menu_item_height"
     android:layout_width="match_parent"
@@ -9,14 +10,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView android:contentDescription=""
+    <ImageView 
+        android:contentDescription=""
         android:id="@+id/menu_item_icon"
         android:layout_height="@dimen/menu_icon_size"
         android:layout_width="@dimen/menu_icon_size"
         android:src="@drawable/ic_home"
         app:tint="@color/navigation_item_icon" />
 
-    <TextView android:gravity="center_vertical"
+    <TextView 
+        android:gravity="center_vertical"
         android:id="@+id/menu_item_text"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/menu_padding"

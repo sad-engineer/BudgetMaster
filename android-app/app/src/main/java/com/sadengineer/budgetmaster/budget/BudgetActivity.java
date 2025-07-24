@@ -4,16 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
-import com.sadengineer.budgetmaster.MainActivity;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.income.IncomeActivity;
-import com.sadengineer.budgetmaster.expense.ExpenseActivity;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-public class BudgetActivity extends AppCompatActivity {
+public class BudgetActivity extends BaseNavigationActivity {
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
@@ -24,49 +21,34 @@ public class BudgetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget);
 
-        // Обработчики кнопок toolbar
-        ImageButton backButton = findViewById(R.id.back_button);
-        ImageButton menuButton = findViewById(R.id.menu_button);
-        ImageButton incomeButton = findViewById(R.id.income_button);
-        ImageButton expenseButton = findViewById(R.id.expense_button);
+        // Инициализация навигации
+        initializeNavigation();
+        setupMenuButton(R.id.menu_button);
+        setupBackButton(R.id.back_button);
 
-        backButton.setOnClickListener(new View.OnClickListener() {
+        // Обработчики кнопок бюджета
+        ImageButton addBudgetButton = findViewById(R.id.add_budget_button);
+        ImageButton deleteBudgetButton = findViewById(R.id.delete_budget_button);
+
+        addBudgetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Возвращаемся на главный экран
-                Intent intent = new Intent(BudgetActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                // TODO: Реализовать добавление бюджета
+                android.widget.Toast.makeText(BudgetActivity.this, "Добавить бюджет", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
 
-        menuButton.setOnClickListener(new View.OnClickListener() {
+        deleteBudgetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Открываем меню (если есть drawer layout) или идем на главный экран
-                Intent intent = new Intent(BudgetActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
-        incomeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(BudgetActivity.this, IncomeActivity.class);
-                startActivity(intent);
-            }
-        });
-        expenseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(BudgetActivity.this, ExpenseActivity.class);
-                startActivity(intent);
+                // TODO: Реализовать удаление бюджета
+                android.widget.Toast.makeText(BudgetActivity.this, "Удалить бюджет", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
 
         // Инициализация ViewPager2 и TabLayout
-        viewPager = findViewById(R.id.view_pager);
-        tabLayout = findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.budget_view_pager);
+        tabLayout = findViewById(R.id.budget_tab_layout);
 
         // Создание адаптера для ViewPager2
         pagerAdapter = new BudgetPagerAdapter(this);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:background="@color/navigation_header_background"
+<LinearLayout 
+    android:background="@color/navigation_header_background"
     android:gravity="bottom"
     android:layout_height="@dimen/menu_header_height"
     android:layout_width="match_parent"
@@ -8,13 +9,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView android:contentDescription="@string/app_name"
+    <ImageView 
+        android:contentDescription="@string/app_name"
         android:layout_height="@dimen/icon_size"
         android:layout_width="@dimen/icon_size"
         android:src="@drawable/ic_budget"
         app:tint="@color/navigation_header_icon" />
 
-    <TextView android:layout_height="wrap_content"
+    <TextView 
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/main_margin"
         android:layout_width="wrap_content"
         android:text="@string/app_name"

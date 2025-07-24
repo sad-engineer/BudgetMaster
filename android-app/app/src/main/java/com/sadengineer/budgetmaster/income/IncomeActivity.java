@@ -4,15 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
-import com.sadengineer.budgetmaster.MainActivity;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.expense.ExpenseActivity;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-public class IncomeActivity extends AppCompatActivity {
+public class IncomeActivity extends BaseNavigationActivity {
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
@@ -23,48 +21,34 @@ public class IncomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_income);
 
-        // Обработчики кнопок toolbar
-        ImageButton backButton = findViewById(R.id.back_button);
-        ImageButton menuButton = findViewById(R.id.menu_button);
-        ImageButton incomeButton = findViewById(R.id.income_button);
-        ImageButton expenseButton = findViewById(R.id.expense_button);
+        // Инициализация навигации
+        initializeNavigation();
+        setupMenuButton(R.id.menu_button);
+        setupBackButton(R.id.back_button);
 
-        backButton.setOnClickListener(new View.OnClickListener() {
+        // Обработчики кнопок доходов
+        ImageButton addIncomeButton = findViewById(R.id.add_income_button);
+        ImageButton deleteIncomeButton = findViewById(R.id.delete_income_button);
+
+        addIncomeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Возвращаемся на главный экран
-                Intent intent = new Intent(IncomeActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                // TODO: Реализовать добавление дохода
+                android.widget.Toast.makeText(IncomeActivity.this, "Добавить доход", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
 
-        menuButton.setOnClickListener(new View.OnClickListener() {
+        deleteIncomeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Открываем меню (если есть drawer layout) или идем на главный экран
-                Intent intent = new Intent(IncomeActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
-        incomeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Уже находимся на экране доходов
-            }
-        });
-        expenseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(IncomeActivity.this, ExpenseActivity.class);
-                startActivity(intent);
+                // TODO: Реализовать удаление дохода
+                android.widget.Toast.makeText(IncomeActivity.this, "Удалить доход", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
 
         // Инициализация ViewPager2 и TabLayout
-        viewPager = findViewById(R.id.view_pager);
-        tabLayout = findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.income_view_pager);
+        tabLayout = findViewById(R.id.income_tab_layout);
 
         // Создание адаптера для ViewPager2
         pagerAdapter = new IncomePagerAdapter(this);

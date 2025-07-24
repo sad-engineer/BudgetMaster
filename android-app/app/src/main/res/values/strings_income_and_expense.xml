@@ -4,4 +4,10 @@
     <string name="tab_days">ДНИ</string>
     <string name="tab_categories">КАТЕГОРИИ</string>
     <string name="tab_charts">ГРАФИКИ</string>
+
+    <!-- Кнопки действий -->
+    <string name="icon_add_income">Добавить доход</string>
+    <string name="icon_delete_income">Удалить доход</string>
+    <string name="icon_add_expense">Добавить расход</string>
+    <string name="icon_delete_expense">Удалить расход</string>
 </resources>

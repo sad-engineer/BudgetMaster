@@ -26,7 +26,7 @@ app:title=""
 
 ### 3. ID тулбара
 
-#### Главный экран:
+#### Главный экран и экраны с drawer layout:
 - ID: `@+id/toolbar`
 
 #### Все остальные экраны:
@@ -47,61 +47,74 @@ android:paddingEnd="0dp"
 ## Типы тулбаров
 
 ### 1. Главный экран (MainActivity)
-**Структура:** Меню → Заголовок → Доходы → Разрыв → Расходы
+**Структура:** Меню → Заголовок → Доходы → Расходы
 
 ```xml
 <ImageButton id="@+id/menu_button" />
 <TextView id="@+id/toolbar_title" />
 <ImageButton id="@+id/income_button" />
-<View id="@+id/toolbar_gap" />
 <ImageButton id="@+id/expense_button" />
 ```
+
+**Особенности:**
+- Использует ID `@+id/toolbar`
+- Имеет внутренний контейнер `@+id/toolbar_container`
+- Кнопки доход/расход остаются неизменными
 
 ### 2. Экраны с вкладками (Accounts, Budget, Income, Expense)
-**Структура:** Назад → Меню → Заголовок → Доходы → Разрыв → Расходы
+**Структура:** Назад → Меню → Заголовок → Добавить → Удалить
 
 ```xml
 <ImageButton id="@+id/back_button" />
 <ImageButton id="@+id/menu_button" />
 <TextView id="@+id/toolbar_title" />
-<ImageButton id="@+id/income_button" />
-<View id="@+id/toolbar_gap" />
-<ImageButton id="@+id/expense_button" />
+<ImageButton id="@+id/add_[type]_button" />
+<ImageButton id="@+id/delete_[type]_button" />
 ```
 
-### 3. Простые экраны (Currencies, Version, Authors)
-**Структура:** Назад → Меню → Заголовок
+**Типы кнопок:**
+- Accounts: `add_account_button`, `delete_account_button`
+- Budget: `add_budget_button`, `delete_budget_button`
+- Income: `add_income_button`, `delete_income_button`
+- Expense: `add_expense_button`, `delete_expense_button`
+
+### 3. Простые экраны с действиями (Currencies)
+**Структура:** Назад → Меню → Заголовок → Добавить → Удалить
 
 ```xml
 <ImageButton id="@+id/back_button" />
 <ImageButton id="@+id/menu_button" />
 <TextView id="@+id/toolbar_title" />
+<ImageButton id="@+id/add_currency_button" />
+<ImageButton id="@+id/delete_currency_button" />
 ```
 
-### 4. Служебные экраны (Settings, BackendTest)
-**Структура:** Назад → Меню → Заголовок
-*Примечание: Эти экраны могут использовать старую структуру с темой*
+### 4. Простые экраны без действий (Version, Authors, Settings, BackendTest)
+**Структура:** Назад → Меню → Заголовок → Пустая кнопка → Пустая кнопка
+
+```xml
+<ImageButton id="@+id/back_button" />
+<ImageButton id="@+id/menu_button" />
+<TextView id="@+id/toolbar_title" />
+<ImageButton id="@+id/empty_button_1" />
+<ImageButton id="@+id/empty_button_2" />
+```
+
+**Особенности:**
+- Используют ID `@+id/toolbar` (с drawer layout)
+- Имеют две пустые кнопки для центрирования заголовка
+- Пустые кнопки невидимы (`android:visibility="invisible"`)
+- Размер пустых кнопок: `@dimen/menu_button_size`
+
 
 ## Цветовая схема
 
-### 1. Цвета тулбара
-Каждый экран должен иметь свой блок цветов в `colors.xml`:
+Цветовая политика описана в android_colors_organization.md
 
-```xml
-<!-- Цвета для экрана [screen_name] -->
-<color name="[screen_name]_toolbar_background">@color/black</color>
-<color name="[screen_name]_toolbar_icons">@color/green</color>
-<color name="[screen_name]_toolbar_texts">@color/white</color>
-```
-
-### 2. Применение цветов
+### 1. Применение цветов
 - `android:background="@color/[screen_name]_toolbar_background"`
 - `app:tint="@color/[screen_name]_toolbar_icons"` для иконок
 - `android:textColor="@color/[screen_name]_toolbar_texts"` для текста
-
-### 3. Исключения
-- Settings и BackendTest используют белые иконки (`@color/white`)
-- Остальные экраны используют зеленые иконки (`@color/green`)
 
 ## Размеры элементов
 
@@ -115,16 +128,16 @@ android:paddingEnd="0dp"
 - `android:textSize="@dimen/toolbar_text"`
 - `android:textStyle="bold"`
 
-### 3. Разрыв (для экранов с вкладками)
-- `android:layout_width="@dimen/toolbar_gap"`
 
 ## Иконки
 
 ### 1. Обязательные иконки
 - `@drawable/ic_back` - кнопка назад
 - `@drawable/ic_menu` - кнопка меню
-- `@drawable/ic_income` - кнопка доходов
-- `@drawable/ic_expense` - кнопка расходов
+- `@drawable/ic_income` - кнопка доходов (только главный экран)
+- `@drawable/ic_expense` - кнопка расходов (только главный экран)
+- `@drawable/ic_add` - кнопка добавления
+- `@drawable/ic_delete` - кнопка удаления
 
 ### 2. Настройки иконок
 ```xml
@@ -132,6 +145,22 @@ android:background="@android:color/transparent"
 android:contentDescription="@string/icon_[name]"
 app:tint="@color/[screen_name]_toolbar_icons"
 ```
+
+## Строки для contentDescription
+
+### 1. Общие строки в `strings_toolbar.xml`:
+```xml
+<string name="icon_back">Кнопка назад</string>
+<string name="icon_menu">Кнопка меню</string>
+<string name="icon_income_toolbar">Кнопка дохода</string>
+<string name="icon_expense_toolbar">Кнопка расхода</string>
+```
+
+### 2. Строки по экранам:
+- **Accounts**: `strings_accounts.xml` - `icon_add_account`, `icon_delete_account`
+- **Income/Expense**: `strings_income_and_expense.xml` - `icon_add_income`, `icon_delete_income`, `icon_add_expense`, `icon_delete_expense`
+- **Budget**: `strings_budget.xml` - `icon_add_budget`, `icon_delete_budget`
+- **Currencies**: `strings_currency.xml` - `icon_add_currency`, `icon_delete_currency`
 
 ## Обработчики кнопок
 
@@ -182,6 +211,28 @@ menuButton.setOnClickListener(new View.OnClickListener() {
 });
 ```
 
+### 4. Кнопки действий
+**Назначение:** Добавление/удаление элементов
+**Логика:** Показ Toast сообщения с TODO комментарием
+
+```java
+addButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        // TODO: Реализовать добавление элемента
+        android.widget.Toast.makeText(CurrentActivity.this, "Добавить элемент", android.widget.Toast.LENGTH_SHORT).show();
+    }
+});
+
+deleteButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        // TODO: Реализовать удаление элемента
+        android.widget.Toast.makeText(CurrentActivity.this, "Удалить элемент", android.widget.Toast.LENGTH_SHORT).show();
+    }
+});
+```
+
 ## Проверочный список
 
 ### ✅ Обязательные проверки:
@@ -196,16 +247,13 @@ menuButton.setOnClickListener(new View.OnClickListener() {
 9. [ ] Заголовок имеет правильные размеры и стиль
 10. [ ] Кнопка "назад" ведет на главный экран
 11. [ ] Кнопка "меню" открывает drawer или ведет на главный экран
+12. [ ] Кнопки действий показывают соответствующие Toast сообщения
+13. [ ] Все contentDescription используют строки из `strings_toolbar.xml`
 
-### 🔧 Исправления для старых экранов:
-- Settings и BackendTest требуют обновления структуры
-- Убрать `android:theme` и `?attr/actionBarSize`
-- Добавить правильные отступы и цвета
-- Добавить обработчики кнопок "назад" и "меню"
 
 ## Примеры
 
-### Правильный тулбар для простого экрана:
+### Правильный тулбар для экрана с действиями:
 ```xml
 <androidx.appcompat.widget.Toolbar
     android:id="@+id/toolbar2"
@@ -256,6 +304,24 @@ menuButton.setOnClickListener(new View.OnClickListener() {
             android:textSize="@dimen/toolbar_text"
             android:textStyle="bold" />
 
+        <ImageButton
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/icon_add_item"
+            android:id="@+id/add_item_button"
+            android:layout_height="match_parent"
+            android:layout_width="@dimen/menu_button_size"
+            android:src="@drawable/ic_add"
+            app:tint="@color/screen_toolbar_icons" />
+
+        <ImageButton
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/icon_delete_item"
+            android:id="@+id/delete_item_button"
+            android:layout_height="match_parent"
+            android:layout_width="@dimen/menu_button_size"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/screen_toolbar_icons" />
+
     </LinearLayout>
 
 </androidx.appcompat.widget.Toolbar>
@@ -266,6 +332,8 @@ menuButton.setOnClickListener(new View.OnClickListener() {
 // Обработчики кнопок toolbar
 ImageButton backButton = findViewById(R.id.back_button);
 ImageButton menuButton = findViewById(R.id.menu_button);
+ImageButton addButton = findViewById(R.id.add_item_button);
+ImageButton deleteButton = findViewById(R.id.delete_item_button);
 
 backButton.setOnClickListener(new View.OnClickListener() {
     @Override
@@ -284,6 +352,22 @@ menuButton.setOnClickListener(new View.OnClickListener() {
         // Открываем меню (если есть drawer layout) или идем на главный экран
         Intent intent = new Intent(CurrentActivity.this, MainActivity.class);
         startActivity(intent);
+    }
+});
+
+addButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        // TODO: Реализовать добавление элемента
+        android.widget.Toast.makeText(CurrentActivity.this, "Добавить элемент", android.widget.Toast.LENGTH_SHORT).show();
+    }
+});
+
+deleteButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        // TODO: Реализовать удаление элемента
+        android.widget.Toast.makeText(CurrentActivity.this, "Удалить элемент", android.widget.Toast.LENGTH_SHORT).show();
     }
 });
 ``` 

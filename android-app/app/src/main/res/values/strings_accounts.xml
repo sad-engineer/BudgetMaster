@@ -7,5 +7,9 @@
     <!-- Элементы списка счетов -->
     <string name="account_name_example">Основной счет</string>
     <string name="account_balance_example">15,000.00 RUB</string>
+
+    <!-- Кнопки действий -->
+    <string name="icon_add_account">Добавить счет</string>
+    <string name="icon_delete_account">Удалить счет</string>
     
 </resources> 

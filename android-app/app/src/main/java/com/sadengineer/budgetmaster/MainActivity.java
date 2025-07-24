@@ -2,29 +2,22 @@ package com.sadengineer.budgetmaster;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.sadengineer.budgetmaster.accounts.Accounts;
 import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
-import com.google.android.material.navigation.NavigationView;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-    private DrawerLayout drawerLayout;
+public class MainActivity extends BaseNavigationActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,33 +27,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-        // Настройка drawer без ActionBarDrawerToggle
-        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-                // Анимация затемнения контента при открытии drawer
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-                // Drawer открыт
-            }
-
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                // Drawer закрыт
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-                // Состояние drawer изменилось
-            }
-        });
-
-        navigationView.setNavigationItemSelectedListener(this);
+        // Инициализация навигации
+        initializeNavigation();
+        setupMenuButton(R.id.menu_button);
 
         // Настройка обработки кнопки "Назад"
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -75,17 +44,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        // Обработчики кнопок
-        ImageButton menuButton = toolbar.findViewById(R.id.menu_button);
+        // Обработчики кнопок toolbar
         ImageButton incomeButton = toolbar.findViewById(R.id.income_button);
         ImageButton expenseButton = toolbar.findViewById(R.id.expense_button);
-
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
         incomeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -165,66 +126,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    // Переопределяем методы для показа Toast сообщений
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
+    protected void showInstructions() {
+        Toast.makeText(this, "Инструкции", Toast.LENGTH_SHORT).show();
+    }
 
-        if (id == R.id.nav_main) {
-            // Уже на главной странице
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_instructions) {
-            Toast.makeText(this, "Инструкции", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_accounts) {
-            Intent intent = new Intent(this, Accounts.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_income) {
-            Intent intent = new Intent(this, IncomeActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_expense) {
-            Intent intent = new Intent(this, ExpenseActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_budget) {
-            Intent intent = new Intent(this, BudgetActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_statistics) {
-            Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_currencies) {
-            Intent intent = new Intent(this, com.sadengineer.budgetmaster.currencies.CurrenciesActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_income_categories) {
-            Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_expense_categories) {
-            Toast.makeText(this, "Категории расходов", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_import_data) {
-            Toast.makeText(this, "Загрузить данные", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_export_data) {
-            Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(this, BackendTestActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_version) {
-            Intent intent = new Intent(this, VersionActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_authors) {
-            Intent intent = new Intent(this, AuthorsActivity.class);
-            startActivity(intent);
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }
+    @Override
+    protected void showStatistics() {
+        Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
+    }
 
-        return true;
+    @Override
+    protected void showIncomeCategories() {
+        Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void showExpenseCategories() {
+        Toast.makeText(this, "Категории расходов", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void showImportData() {
+        Toast.makeText(this, "Загрузить данные", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void showExportData() {
+        Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void navigateToSettings() {
+        Intent intent = new Intent(this, BackendTestActivity.class);
+        startActivity(intent);
     }
 
     @Override

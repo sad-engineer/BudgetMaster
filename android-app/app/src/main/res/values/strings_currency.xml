@@ -5,6 +5,6 @@
     <string name="currencies_inactive_empty">Список неактивных валют пуст</string>
     
     <!-- Кнопки действий -->
-    <string name="add_currency">Добавить валюту</string>
-    <string name="delete_currency">Удалить валюту</string>
+    <string name="icon_add_currency">Добавить валюту</string>
+    <string name="icon_delete_currency">Удалить валюту</string>
 </resources>

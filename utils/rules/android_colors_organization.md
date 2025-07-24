@@ -19,11 +19,15 @@
 <color name="white">#FFFFFFFF</color>
 <color name="green">#4FAF09</color>
 
-<!-- Цвета для экрана версии приложения -->
-<color name="version_toolbar_icons">@color/green</color>
-<color name="version_toolbar_texts">@color/white</color>
-<color name="version_titles">@color/white</color>
+<!-- Цвета для экрана -->
+<color name="[screen_name]_toolbar_icons">@color/green</color>
+<color name="[screen_name]_toolbar_texts">@color/white</color>
+<color name="[screen_name]_titles">@color/white</color>
 ```
+
+## Цветовая схема
+
+Цветовая политика описана в android_colors_organization.md
 
 ## Глобальные цвета навигации:
 - Навигационное меню должно быть глобальным и иметь единые цвета для всего приложения

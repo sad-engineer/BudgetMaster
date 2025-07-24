@@ -14,7 +14,7 @@
     <string name="backend_version">Версия бекенда</string>
     
     <!-- Описания иконок -->    
-    <string name="icon_frontend">Иконка Android</string>
-    <string name="icon_backend">Иконка сервера</string>
-    <string name="icon_app">Иконка приложения</string>
+    <string name="version_icon_frontend">Иконка Android</string>
+    <string name="version_icon_backend">Иконка сервера</string>
+    <string name="version_icon_app">Иконка приложения</string>
 </resources>

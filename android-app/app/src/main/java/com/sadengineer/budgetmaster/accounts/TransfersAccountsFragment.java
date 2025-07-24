@@ -18,7 +18,7 @@ public class TransfersAccountsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_transfers_accounts, container, false);
-        RecyclerView recycler = view.findViewById(R.id.transfers_recycler);
+        RecyclerView recycler = view.findViewById(R.id.accounts_transfers_recycler);
 
         List<AccountsAdapter.AccountItem> items = new ArrayList<>();
         items.add(new AccountsAdapter.AccountItem("июль 2025", ""));
