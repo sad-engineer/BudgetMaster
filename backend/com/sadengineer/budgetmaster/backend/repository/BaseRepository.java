@@ -1,8 +1,8 @@
 // -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.repository;
 
-import database.DatabaseConnection;
-import database.DatabaseFactory;
+import com.sadengineer.budgetmaster.backend.database.DatabaseConnection;
+import com.sadengineer.budgetmaster.backend.database.DatabaseFactory;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -178,7 +178,7 @@ public abstract class BaseRepository {
      * @deprecated Используйте DatabaseConnection напрямую
      */
     @Deprecated
-    protected database.DatabaseConnection getConnection() {
+    protected com.sadengineer.budgetmaster.backend.database.DatabaseConnection getConnection() {
         return connection;
     }  
 } 

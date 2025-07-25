@@ -1,8 +1,8 @@
 // -*- coding: utf-8 -*-
-package database.jdbc;
+package com.sadengineer.budgetmaster.backend.database.jdbc;
 
-import database.DatabaseConnection;
-import database.DatabaseFactory;
+import com.sadengineer.budgetmaster.backend.database.DatabaseConnection;
+import com.sadengineer.budgetmaster.backend.database.DatabaseFactory;
 import java.sql.SQLException;
 
 /**

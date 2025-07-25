@@ -256,7 +256,7 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
      * @param row ResultRow с данными из базы данных (не null)
      * @return объект Account с заполненными полями или null при ошибке
      */
-    public Account mapRowSafe(database.DatabaseConnection.ResultRow row) {
+    public Account mapRowSafe(com.sadengineer.budgetmaster.backend.database.DatabaseConnection.ResultRow row) {
         try {
             Account account = new Account();
             account.setId(row.getInt(COLUMN_ID));

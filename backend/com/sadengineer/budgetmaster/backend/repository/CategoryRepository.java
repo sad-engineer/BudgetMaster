@@ -234,7 +234,7 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
      * @param row ResultRow с данными из базы данных (не null)
      * @return объект Category с заполненными полями или null при ошибке
      */
-    public Category mapRowSafe(database.DatabaseConnection.ResultRow row) {
+    public Category mapRowSafe(com.sadengineer.budgetmaster.backend.database.DatabaseConnection.ResultRow row) {
         try {
             Category category = new Category();
             category.setId(row.getInt(COLUMN_ID));

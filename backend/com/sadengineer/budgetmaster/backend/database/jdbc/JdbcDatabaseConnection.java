@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
-package database.jdbc;
+package com.sadengineer.budgetmaster.backend.database.jdbc;
 
-import database.DatabaseConnection;
+import com.sadengineer.budgetmaster.backend.database.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

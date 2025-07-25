@@ -3,7 +3,6 @@ package com.sadengineer.budgetmaster.backend.repository;
 
 import com.sadengineer.budgetmaster.backend.model.Currency;
 import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
-import java.sql.*;
 import java.util.*;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
 
@@ -130,69 +129,35 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         return getMaxValue(TABLE_CURRENCIES, COLUMN_POSITION, null);
     }
     
-    /**
-     * Преобразование строки ResultSet в объект Currency
-     * 
-     * <p>Парсит все поля из базы данных в соответствующие поля объекта Currency.
-     * Метод обрабатывает преобразование дат из строкового формата SQLite в LocalDateTime.
-     * 
-     * <p>Ожидаемая структура ResultSet:
-     * <ul>
-     *   <li>id (INTEGER) - уникальный идентификатор</li>
-     *   <li>create_time (TEXT) - дата создания в формате SQLite</li>
-     *   <li>update_time (TEXT) - дата обновления в формате SQLite</li>
-     *   <li>delete_time (TEXT) - дата удаления в формате SQLite</li>
-     *   <li>created_by (TEXT) - пользователь, создавший запись</li>
-     *   <li>updated_by (TEXT) - пользователь, обновивший запись</li>
-     *   <li>deleted_by (TEXT) - пользователь, удаливший запись</li>
-     *   <li>position (INTEGER) - позиция в списке</li>
-     *   <li>title (TEXT) - название валюты</li>
-     * </ul>
-     * 
-     * @param rs ResultSet с данными из базы (не null, должен содержать все необходимые поля)
-     * @return объект Currency с заполненными данными
-     * @throws SQLException при ошибке чтения данных из ResultSet или несоответствии типов данных
-     */
-    private Currency mapRow(ResultSet rs) throws SQLException {
-        Currency currency = new Currency();
-        currency.setId(rs.getInt(COLUMN_ID));
-        
-        // Читаем даты как строки и парсим их
-        String createTimeStr = rs.getString("create_time");
-        currency.setCreateTime(DateTimeUtil.parseFromSqlite(createTimeStr));
-        
-        String updateTimeStr = rs.getString("update_time");
-        currency.setUpdateTime(DateTimeUtil.parseFromSqlite(updateTimeStr));
-        
-        String deleteTimeStr = rs.getString("delete_time");
-        currency.setDeleteTime(DateTimeUtil.parseFromSqlite(deleteTimeStr));
-        
-        currency.setCreatedBy(rs.getString("created_by"));
-        currency.setUpdatedBy(rs.getString("updated_by"));
-        currency.setDeletedBy(rs.getString("deleted_by"));
-        currency.setPosition(rs.getInt(COLUMN_POSITION));
-        currency.setTitle(rs.getString(COLUMN_TITLE));
-        return currency;
-    }
+
 
     /**
-     * Безопасное преобразование строки ResultSet в объект Currency
+     * Безопасное преобразование строки ResultRow в объект Currency
      * 
-     * <p>Обрабатывает исключения SQLException и возвращает null при ошибке.
+     * <p>Обрабатывает исключения и возвращает null при ошибке.
      * Используется в методах findAll и findById для безопасного маппинга данных.
      * Если происходит ошибка при чтении данных, она логируется в консоль.
      * 
-     * <p>Этот метод является оберткой над mapRow и обеспечивает безопасность
-     * при обработке больших наборов данных, где одна некорректная запись
-     * не должна прерывать обработку всего результата.
+     * <p>Этот метод обеспечивает безопасность при обработке больших наборов данных,
+     * где одна некорректная запись не должна прерывать обработку всего результата.
      * 
-     * @param rs ResultSet с данными из базы (не null)
+     * @param row ResultRow с данными из базы (не null)
      * @return объект Currency с заполненными данными или null при ошибке
      */
-    public Currency mapRowSafe(ResultSet rs) {
+    public Currency mapRowSafe(com.sadengineer.budgetmaster.backend.database.DatabaseConnection.ResultRow row) {
         try {
-            return mapRow(rs);
-        } catch (SQLException e) {
+            Currency currency = new Currency();
+            currency.setId(row.getInt(COLUMN_ID));
+            currency.setCreateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_CREATE_TIME)));
+            currency.setUpdateTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_UPDATE_TIME)));
+            currency.setDeleteTime(DateTimeUtil.parseFromSqlite(row.getString(COLUMN_DELETE_TIME)));
+            currency.setCreatedBy(row.getString(COLUMN_CREATED_BY));
+            currency.setUpdatedBy(row.getString(COLUMN_UPDATED_BY));
+            currency.setDeletedBy(row.getString(COLUMN_DELETED_BY));
+            currency.setPosition(row.getInt(COLUMN_POSITION));
+            currency.setTitle(row.getString(COLUMN_TITLE));
+            return currency;
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -200,59 +165,47 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
 
     @Override
     public Currency save(Currency currency) {
-        String[] columns = new String[CURRENCY_COLUMNS.length - 1];
-        System.arraycopy(CURRENCY_COLUMNS, 1, columns, 0, CURRENCY_COLUMNS.length - 1);
-        String sql = "INSERT INTO " + TABLE_CURRENCIES + " (" +
-            String.join(", ", columns) + ") VALUES (" + "?, ".repeat(columns.length - 1) + "?)";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
-            String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
-            String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
-            stmt.setString(1, currency.getTitle());
-            stmt.setInt(2, currency.getPosition());
-            stmt.setString(3, currency.getCreatedBy());
-            stmt.setString(4, currency.getUpdatedBy());
-            stmt.setString(5, currency.getDeletedBy());
-            stmt.setString(6, createTimeStr);
-            stmt.setString(7, deleteTimeStr);
-            stmt.setString(8, updateTimeStr);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    currency.setId(rs.getInt(1));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "INSERT INTO " + TABLE_CURRENCIES + " (title, position, created_by, updated_by, deleted_by, create_time, delete_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
+        String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
+        String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
+        
+        long id = connection.executeInsert(sql,
+            currency.getTitle(),
+            currency.getPosition(),
+            currency.getCreatedBy(),
+            currency.getUpdatedBy(),
+            currency.getDeletedBy(),
+            createTimeStr,
+            deleteTimeStr,
+            updateTimeStr
+        );
+        
+        currency.setId((int) id);
         return currency;
     }
 
     @Override
     public Currency update(Currency currency) {
-        String[] columns = new String[CURRENCY_COLUMNS.length - 1];
-        System.arraycopy(CURRENCY_COLUMNS, 1, columns, 0, CURRENCY_COLUMNS.length - 1);
-        String setClause = String.join("=?, ", columns) + "=?";
-        String sql = "UPDATE " + TABLE_CURRENCIES + " SET " + setClause + " WHERE " + COLUMN_ID + "=?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
-            String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
-            String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
-            stmt.setString(1, currency.getTitle());
-            stmt.setInt(2, currency.getPosition());
-            stmt.setString(3, currency.getCreatedBy());
-            stmt.setString(4, currency.getUpdatedBy());
-            stmt.setString(5, currency.getDeletedBy());
-            stmt.setString(6, createTimeStr);
-            stmt.setString(7, deleteTimeStr);
-            stmt.setString(8, updateTimeStr);
-            stmt.setInt(9, currency.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "UPDATE " + TABLE_CURRENCIES + " SET title=?, position=?, created_by=?, updated_by=?, deleted_by=?, create_time=?, delete_time=?, update_time=? WHERE " + COLUMN_ID + "=?";
+        
+        String createTimeStr = currency.getCreateTime() != null ? DateTimeUtil.formatForSqlite(currency.getCreateTime()) : null;
+        String updateTimeStr = currency.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(currency.getUpdateTime()) : null;
+        String deleteTimeStr = currency.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(currency.getDeleteTime()) : null;
+        
+        connection.executeUpdate(sql,
+            currency.getTitle(),
+            currency.getPosition(),
+            currency.getCreatedBy(),
+            currency.getUpdatedBy(),
+            currency.getDeletedBy(),
+            createTimeStr,
+            deleteTimeStr,
+            updateTimeStr,
+            currency.getId()
+        );
+        
         return currency;
     }
 } 

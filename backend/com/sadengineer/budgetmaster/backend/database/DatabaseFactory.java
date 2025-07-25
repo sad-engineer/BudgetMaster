@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-package database;
+package com.sadengineer.budgetmaster.backend.database;
 
 /**
  * Фабрика для создания соединений с базой данных

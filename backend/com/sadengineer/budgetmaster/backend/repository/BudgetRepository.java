@@ -203,7 +203,7 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
      * @param row ResultRow с данными из базы данных (не null)
      * @return объект Budget с заполненными полями или null при ошибке
      */
-    public Budget mapRowSafe(database.DatabaseConnection.ResultRow row) {
+    public Budget mapRowSafe(com.sadengineer.budgetmaster.backend.database.DatabaseConnection.ResultRow row) {
         try {
             Budget budget = new Budget();
             budget.setId(row.getInt(COLUMN_ID));

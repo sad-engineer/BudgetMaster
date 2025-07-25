@@ -311,7 +311,7 @@ public class OperationRepository extends BaseRepository implements Repository<Op
      * @param row ResultRow с данными из базы (не null)
      * @return объект Operation с заполненными данными или null при ошибке
      */
-    public Operation mapRowSafe(database.DatabaseConnection.ResultRow row) {
+    public Operation mapRowSafe(com.sadengineer.budgetmaster.backend.database.DatabaseConnection.ResultRow row) {
         try {
             Operation op = new Operation();
             

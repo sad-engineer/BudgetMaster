@@ -1,5 +1,5 @@
 // -*- coding: utf-8 -*-
-package database;
+package com.sadengineer.budgetmaster.backend.database;
 
 import java.util.List;
 import java.util.Optional;

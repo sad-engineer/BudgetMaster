@@ -5,6 +5,7 @@ import com.sadengineer.budgetmaster.backend.model.*;
 import com.sadengineer.budgetmaster.backend.repository.*;
 import com.sadengineer.budgetmaster.backend.service.*;
 import com.sadengineer.budgetmaster.backend.util.DatabaseUtil;
+import com.sadengineer.budgetmaster.backend.database.jdbc.JdbcDatabaseFactory;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -24,6 +25,9 @@ import java.util.Optional;
             e.printStackTrace();
             return;
         }
+
+        // Инициализируем JDBC провайдер
+        JdbcDatabaseFactory.initialize();
 
         String dbPath = "BudgetMasterDB.db";
         String user = "admin";
