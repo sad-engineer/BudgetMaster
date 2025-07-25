@@ -26,9 +26,20 @@ class TestOperationRepository(unittest.TestCase):
         cls.OperationRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.OperationRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
 
-        # Создаем репозиторий
-        cls.repo = cls.OperationRepository(cls.db_manager.db_path)
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repo = cls.OperationRepository(cls.test_db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_operation_ids = []
@@ -64,7 +75,8 @@ class TestOperationRepository(unittest.TestCase):
 
     def setUp(self):
         """Настройка перед каждым тестом"""
-        pass
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
 
     def create_test_operation(
         self,

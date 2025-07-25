@@ -2,10 +2,11 @@
 """
 Тест для проверки версии backend пакета
 """
+import os
 
 import unittest
 
-from test_common import JPypeSetup, get_java_class
+from tests.backend.test_common import JPypeSetup, get_java_class
 
 
 class TestBackendVersion(unittest.TestCase):
@@ -33,8 +34,15 @@ class TestBackendVersion(unittest.TestCase):
     def tearDownClass(cls):
         """Очистка тестового окружения"""
         print("🧹 ОЧИСТКА ТЕСТОВОГО ОКРУЖЕНИЯ")
-        cls.jpype_setup.shutdown_jvm()
-        print("✅ Тестовое окружение очищено")
+        try:
+            cls.jpype_setup.shutdown_jvm()
+            print("✅ Тестовое окружение очищено")
+        except Exception as e:
+            print(f"⚠️ Предупреждение при очистке: {e}")
+        finally:
+            # Принудительно очищаем глобальный экземпляр
+            import tests.backend.test_common as test_common
+            test_common._GLOBAL_JPYPE_SETUP = None
 
     def test_01_backend_version_exists(self):
         """Тест 01: проверяем, что класс BackendVersion существует"""
@@ -125,7 +133,6 @@ class TestBackendVersion(unittest.TestCase):
             version = BackendVersion.VERSION
 
             # Читаем ожидаемую версию из файла backend/version.txt
-            import os
 
             version_file_path = os.path.join(
                 os.path.dirname(__file__),
@@ -194,33 +201,5 @@ class TestBackendVersion(unittest.TestCase):
             self.fail(f"❌ Ошибка при проверке версии в JAR: {e}")
 
 
-def run_backend_version_tests():
-    """Запуск всех тестов версии backend"""
-    print("🚀 ЗАПУСК ТЕСТОВ ВЕРСИИ BACKEND")
-    print("=" * 50)
-
-    # Создаем тестовый набор
-    loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestBackendVersion)
-
-    # Запускаем тесты
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
-
-    # Выводим результат
-    print("\n📊 РЕЗУЛЬТАТЫ ТЕСТОВ:")
-    print(f"   Тестов выполнено: {result.testsRun}")
-    print(f"   Успешно: {result.testsRun - len(result.failures) - len(result.errors)}")
-    print(f"   Ошибок: {len(result.errors)}")
-    print(f"   Провалов: {len(result.failures)}")
-
-    if result.wasSuccessful():
-        print("✅ Все тесты прошли успешно!")
-    else:
-        print("❌ Некоторые тесты провалились")
-
-    return result.wasSuccessful()
-
-
 if __name__ == '__main__':
-    run_backend_version_tests()
+    unittest.main()

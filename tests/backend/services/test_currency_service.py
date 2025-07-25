@@ -26,16 +26,40 @@ class TestCurrencyService(unittest.TestCase):
         cls.Currency = get_java_class("com.sadengineer.budgetmaster.backend.model.Currency")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
+
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
 
         cls.test_currency_ids = []
-        cls.db_path = cls.db_manager.db_path
-        cls.repository = cls.CurrencyRepository(cls.db_path)
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repository = cls.CurrencyRepository(cls.test_db_path)
         cls.service = cls.CurrencyService(cls.repository, "test_user")
+
+    def setUp(self):
+        """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
+
+        # Принудительно восстанавливаем дефолтные данные для тестов
+        # Это гарантирует, что у нас всегда есть базовые данные
+        self.DatabaseUtil.restoreDefaults(self.test_db_path)
 
     @classmethod
     def tearDownClass(cls):
+        """Очистка после всех тестов"""
         try:
+            # Получаем менеджер базы данных
             db_manager = cls.db_manager
+
+            # Удаляем тестовые записи по ID
             deleted_count = 0
             for currency_id in cls.test_currency_ids:
                 try:
@@ -46,12 +70,15 @@ class TestCurrencyService(unittest.TestCase):
                         print(f"Ошибка при удалении валюты {currency_id}")
                 except Exception as e:
                     print(f"Ошибка при удалении валюты {currency_id}: {e}")
+
             if deleted_count > 0:
                 print(f"Удалено {deleted_count} тестовых валют из базы данных")
+
             cleanup_example()
         except Exception as e:
             print(f"Ошибка при очистке: {e}")
         finally:
+            # Не завершаем JVM здесь - пусть это делает atexit
             pass
 
     def test_01_create_currency(self):

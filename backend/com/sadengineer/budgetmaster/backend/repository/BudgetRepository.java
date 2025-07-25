@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.backend.repository;
 
 import com.sadengineer.budgetmaster.backend.model.Budget;
 import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
-import java.sql.*;
+
 import java.util.*;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
 
@@ -75,19 +75,20 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     public List<Budget> findAll() {
         return connection.executeQuery("SELECT * FROM " + TABLE_BUDGETS, this::mapRowSafe);
     }
-        
+    
     /**
-     * Получение бюджетов по ID категории
+     * Поиск бюджета по ID категории
      * 
-     * <p>Возвращает список всех бюджетов с указанной категорией.
+     * <p>Возвращает первый найденный бюджет с указанной категорией.
      * Поиск выполняется независимо от статуса удаления.
+     * Если бюджет не найден, возвращает пустой Optional.
      * 
      * @param categoryId ID категории для поиска (положительное целое число)
-     * @return список бюджетов с указанной категорией (может быть пустым, но не null)
+     * @return Optional с найденным бюджетом, если найден, иначе пустой Optional
      */
-    public List<Budget> findAllByCategoryId(Integer categoryId) {
-        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_CATEGORY_ID + " = ?";
-        return connection.executeQuery(sql, this::mapRowSafe, categoryId);
+    public Optional<Budget> findByCategoryId(Integer categoryId) {
+        String sql = "SELECT * FROM " + TABLE_BUDGETS + " WHERE " + COLUMN_CATEGORY_ID + " = ? LIMIT 1";
+        return connection.executeQuerySingle(sql, this::mapRowSafe, categoryId);
     }
 
     /**
@@ -146,55 +147,6 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
     }
 
     /**
-     * Преобразование строки ResultSet в объект Budget
-     * 
-     * <p>Парсит все поля из базы данных в соответствующие поля объекта Budget.
-     * Метод обрабатывает преобразование дат из строкового формата SQLite в LocalDateTime.
-     * Обеспечивает безопасное чтение числовых полей с поддержкой типов Long и Integer.
-     * 
-     * <p>Ожидаемая структура ResultSet:
-     * <ul>
-     *   <li>id (INTEGER) - уникальный идентификатор</li>
-     *   <li>create_time (TEXT) - дата создания в формате SQLite</li>
-     *   <li>update_time (TEXT) - дата обновления в формате SQLite</li>
-     *   <li>delete_time (TEXT) - дата удаления в формате SQLite</li>
-     *   <li>created_by (TEXT) - пользователь, создавший запись</li>
-     *   <li>updated_by (TEXT) - пользователь, обновивший запись</li>
-     *   <li>deleted_by (TEXT) - пользователь, удаливший запись</li>
-     *   <li>position (INTEGER) - позиция в списке</li>
-     *   <li>amount (INTEGER) - сумма бюджета в копейках</li>
-     *   <li>currency_id (INTEGER) - ID валюты бюджета</li>
-     *   <li>category_id (INTEGER) - ID категории бюджета</li>
-     * </ul>
-     * 
-     * @param rs ResultSet с данными из базы данных (не null)
-     * @return объект Budget с заполненными полями (не null)
-     * @throws SQLException при ошибке чтения данных из ResultSet
-     */
-    private Budget mapRow(ResultSet rs) throws SQLException {
-        Budget budget = new Budget();
-        budget.setId(rs.getInt(COLUMN_ID));
-        budget.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_CREATE_TIME)));
-        budget.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_UPDATE_TIME)));
-        budget.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_DELETE_TIME)));
-        budget.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
-        budget.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
-        budget.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
-        budget.setPosition(rs.getInt(COLUMN_POSITION));
-        budget.setAmount(rs.getInt(COLUMN_AMOUNT));
-        budget.setCurrencyId(rs.getInt(COLUMN_CURRENCY_ID));
-        // Безопасное чтение поля category_id с обработкой NULL значений
-        try {
-            Object categoryIdObj = rs.getObject(COLUMN_CATEGORY_ID);
-            Integer categoryId = (categoryIdObj != null) ? (Integer) categoryIdObj : null;
-            budget.setCategoryId(categoryId);
-        } catch (SQLException e) {
-            budget.setCategoryId(null);
-        }
-        return budget;
-    }
-
-    /**
      * Безопасное преобразование строки ResultRow в объект Budget
      * 
      * <p>Обертка над mapRow с обработкой исключений.
@@ -218,12 +170,8 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
             budget.setCurrencyId(row.getInt(COLUMN_CURRENCY_ID));
             
             // Безопасное чтение поля category_id с обработкой NULL значений
-            try {
-                Integer categoryId = row.getInt(COLUMN_CATEGORY_ID);
-                budget.setCategoryId(categoryId);
-            } catch (Exception e) {
-                budget.setCategoryId(null);
-            }
+            Integer categoryId = row.getInt(COLUMN_CATEGORY_ID);
+            budget.setCategoryId(categoryId);
             
             return budget;
         } catch (Exception e) {
@@ -300,7 +248,5 @@ public class BudgetRepository extends BaseRepository implements Repository<Budge
         );
         
         return budget;
-    }
-
-    
+    }   
 } 

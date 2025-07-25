@@ -128,8 +128,6 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
     public int getMaxPosition() {
         return getMaxValue(TABLE_CURRENCIES, COLUMN_POSITION, null);
     }
-    
-
 
     /**
      * Безопасное преобразование строки ResultRow в объект Currency
@@ -163,6 +161,15 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         }
     }
 
+    /**
+     * Обновление существующей валюты
+     * 
+     * <p>Обновляет существующую запись в базе данных по ID валюты.
+     * Объект currency должен содержать валидный ID существующей записи.
+     * Все поля записи будут заменены значениями из объекта currency.
+     * 
+     * @param currency объект валюты с обновленными данными (не null, должен содержать валидный ID)
+     */
     @Override
     public Currency save(Currency currency) {
         String sql = "INSERT INTO " + TABLE_CURRENCIES + " (title, position, created_by, updated_by, deleted_by, create_time, delete_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -186,6 +193,16 @@ public class CurrencyRepository extends BaseRepository implements Repository<Cur
         return currency;
     }
 
+    /**
+     * Обновление существующей валюты
+     * 
+     * <p>Обновляет существующую запись в базе данных по ID валюты.
+     * Объект currency должен содержать валидный ID существующей записи.
+     * Все поля записи будут заменены значениями из объекта currency.   
+     * 
+     * @param currency объект валюты с обновленными данными (не null, должен содержать валидный ID)
+     * @return объект валюты с обновленными данными (не null)
+     */
     @Override
     public Currency update(Currency currency) {
         String sql = "UPDATE " + TABLE_CURRENCIES + " SET title=?, position=?, created_by=?, updated_by=?, deleted_by=?, create_time=?, delete_time=?, update_time=? WHERE " + COLUMN_ID + "=?";

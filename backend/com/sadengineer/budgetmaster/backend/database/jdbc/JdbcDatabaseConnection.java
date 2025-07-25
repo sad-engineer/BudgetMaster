@@ -42,7 +42,7 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Ошибка выполнения SQL: " + sql, e);
         }
         
         return results;
@@ -60,7 +60,7 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Ошибка выполнения SQL: " + sql, e);
         }
         
         return Optional.empty();
@@ -72,8 +72,7 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
             setParameters(stmt, params);
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new RuntimeException("Ошибка выполнения SQL: " + sql, e);
         }
     }
     
@@ -220,7 +219,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Integer getInt(String columnName) {
             try {
-                return rs.getInt(columnName);
+                Object value = rs.getObject(columnName);
+                return value == null ? null : rs.getInt(columnName);
             } catch (SQLException e) {
                 return null;
             }
@@ -229,7 +229,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Integer getInt(int columnIndex) {
             try {
-                return rs.getInt(columnIndex);
+                Object value = rs.getObject(columnIndex);
+                return value == null ? null : rs.getInt(columnIndex);
             } catch (SQLException e) {
                 return null;
             }
@@ -238,7 +239,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Long getLong(String columnName) {
             try {
-                return rs.getLong(columnName);
+                Object value = rs.getObject(columnName);
+                return value == null ? null : rs.getLong(columnName);
             } catch (SQLException e) {
                 return null;
             }
@@ -247,7 +249,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Long getLong(int columnIndex) {
             try {
-                return rs.getLong(columnIndex);
+                Object value = rs.getObject(columnIndex);
+                return value == null ? null : rs.getLong(columnIndex);
             } catch (SQLException e) {
                 return null;
             }
@@ -256,7 +259,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Boolean getBoolean(String columnName) {
             try {
-                return rs.getBoolean(columnName);
+                Object value = rs.getObject(columnName);
+                return value == null ? null : rs.getBoolean(columnName);
             } catch (SQLException e) {
                 return null;
             }
@@ -265,7 +269,8 @@ public class JdbcDatabaseConnection implements DatabaseConnection {
         @Override
         public Boolean getBoolean(int columnIndex) {
             try {
-                return rs.getBoolean(columnIndex);
+                Object value = rs.getObject(columnIndex);
+                return value == null ? null : rs.getBoolean(columnIndex);
             } catch (SQLException e) {
                 return null;
             }

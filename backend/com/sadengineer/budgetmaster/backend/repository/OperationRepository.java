@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.backend.repository;
 
 import com.sadengineer.budgetmaster.backend.model.Operation;
 import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
-import java.sql.*;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
@@ -171,136 +171,6 @@ public class OperationRepository extends BaseRepository implements Repository<Op
         String sql = "SELECT * FROM " + TABLE_OPERATIONS + " WHERE " + COLUMN_ID + " = ?";
         return connection.executeQuerySingle(sql, this::mapRowSafe, id);
     }
-       
-    /**
-     * Преобразование строки ResultSet в объект Operation
-     * 
-     * <p>Парсит все поля из базы данных в соответствующие поля объекта Operation.
-     * Метод обрабатывает преобразование дат из строкового формата SQLite в LocalDateTime.
-     * Обеспечивает безопасное чтение числовых полей с поддержкой типов Long и Integer.
-     * 
-     * <p>Ожидаемая структура ResultSet:
-     * <ul>
-     *   <li>id (INTEGER) - уникальный идентификатор</li>
-     *   <li>create_time (TEXT) - дата создания в формате SQLite</li>
-     *   <li>update_time (TEXT) - дата обновления в формате SQLite</li>
-     *   <li>delete_time (TEXT) - дата удаления в формате SQLite</li>
-     *   <li>created_by (TEXT) - пользователь, создавший запись</li>
-     *   <li>updated_by (TEXT) - пользователь, обновивший запись</li>
-     *   <li>deleted_by (TEXT) - пользователь, удаливший запись</li>
-     *   <li>type (INTEGER) - тип операции</li>
-     *   <li>date (TEXT) - дата операции в формате SQLite</li>
-     *   <li>amount (INTEGER) - сумма операции в копейках</li>
-     *   <li>comment (TEXT) - комментарий к операции</li>
-     *   <li>category_id (INTEGER) - ID категории операции</li>
-     *   <li>account_id (INTEGER) - ID счета операции</li>
-     *   <li>currency_id (INTEGER) - ID валюты операции</li>
-     *   <li>to_account_id (INTEGER) - ID целевого счета (может быть null)</li>
-     *   <li>to_currency_id (INTEGER) - ID целевой валюты (может быть null)</li>
-     *   <li>to_amount (INTEGER) - целевая сумма (может быть null)</li>
-     * </ul>
-     * 
-     * @param rs ResultSet с данными из базы (не null, должен содержать все необходимые поля)
-     * @return объект Operation с заполненными данными
-     * @throws SQLException при ошибке чтения данных из ResultSet или несоответствии типов данных
-     */
-    private Operation mapRow(ResultSet rs) throws SQLException {
-        Operation op = new Operation();
-        
-        // Безопасное чтение ID
-        Object idObj = rs.getObject(COLUMN_ID);
-        if (idObj instanceof Long) {
-            op.setId(((Long) idObj).intValue());
-        } else {
-            op.setId((Integer) idObj);
-        }
-        
-        // Читаем даты как строки и парсим их
-        String createTimeStr = rs.getString(COLUMN_CREATE_TIME);
-        op.setCreateTime(DateTimeUtil.parseFromSqlite(createTimeStr));
-        
-        String updateTimeStr = rs.getString(COLUMN_UPDATE_TIME);
-        op.setUpdateTime(DateTimeUtil.parseFromSqlite(updateTimeStr));
-        
-        String deleteTimeStr = rs.getString(COLUMN_DELETE_TIME);
-        op.setDeleteTime(DateTimeUtil.parseFromSqlite(deleteTimeStr));
-        
-        op.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
-        op.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
-        op.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
-        
-        // Безопасное чтение числовых полей
-        Object typeObj = rs.getObject(COLUMN_TYPE);
-        if (typeObj instanceof Long) {
-            op.setType(((Long) typeObj).intValue());
-        } else {
-            op.setType((Integer) typeObj);
-        }
-        
-        // Безопасное чтение даты операции
-        String dateStr = rs.getString(COLUMN_DATE);
-        op.setDate(DateTimeUtil.parseFromSqlite(dateStr));
-        
-        Object amountObj = rs.getObject(COLUMN_AMOUNT);
-        if (amountObj instanceof Long) {
-            op.setAmount(((Long) amountObj).intValue());
-        } else {
-            op.setAmount((Integer) amountObj);
-        }
-        
-        op.setComment(rs.getString(COLUMN_COMMENT));
-        
-        Object categoryIdObj = rs.getObject(COLUMN_CATEGORY_ID);
-        if (categoryIdObj instanceof Long) {
-            op.setCategoryId(((Long) categoryIdObj).intValue());
-        } else {
-            op.setCategoryId((Integer) categoryIdObj);
-        }
-        
-        Object accountIdObj = rs.getObject(COLUMN_ACCOUNT_ID);
-        if (accountIdObj instanceof Long) {
-            op.setAccountId(((Long) accountIdObj).intValue());
-        } else {
-            op.setAccountId((Integer) accountIdObj);
-        }
-        
-        Object currencyIdObj = rs.getObject(COLUMN_CURRENCY_ID);
-        if (currencyIdObj instanceof Long) {
-            op.setCurrencyId(((Long) currencyIdObj).intValue());
-        } else {
-            op.setCurrencyId((Integer) currencyIdObj);
-        }
-        
-        // Обработка nullable полей
-        Object toAccountIdObj = rs.getObject(COLUMN_TO_ACCOUNT_ID);
-        if (toAccountIdObj == null) {
-            op.setToAccountId(null);
-        } else if (toAccountIdObj instanceof Long) {
-            op.setToAccountId(((Long) toAccountIdObj).intValue());
-        } else {
-            op.setToAccountId((Integer) toAccountIdObj);
-        }
-        
-        Object toCurrencyIdObj = rs.getObject(COLUMN_TO_CURRENCY_ID);
-        if (toCurrencyIdObj == null) {
-            op.setToCurrencyId(null);
-        } else if (toCurrencyIdObj instanceof Long) {
-            op.setToCurrencyId(((Long) toCurrencyIdObj).intValue());
-        } else {
-            op.setToCurrencyId((Integer) toCurrencyIdObj);
-        }
-        
-        Object toAmountObj = rs.getObject(COLUMN_TO_AMOUNT);
-        if (toAmountObj == null) {
-            op.setToAmount(null);
-        } else if (toAmountObj instanceof Long) {
-            op.setToAmount(((Long) toAmountObj).intValue());
-        } else {
-            op.setToAmount((Integer) toAmountObj);
-        }
-        
-        return op;
-    }
 
     /**
      * Безопасное преобразование строки ResultRow в объект Operation
@@ -346,26 +216,14 @@ public class OperationRepository extends BaseRepository implements Repository<Op
             op.setCurrencyId(row.getInt(COLUMN_CURRENCY_ID));
             
             // Обработка nullable полей
-            try {
-                Integer toAccountId = row.getInt(COLUMN_TO_ACCOUNT_ID);
-                op.setToAccountId(toAccountId);
-            } catch (Exception e) {
-                op.setToAccountId(null);
-            }
+            Integer toAccountId = row.getInt(COLUMN_TO_ACCOUNT_ID);
+            op.setToAccountId(toAccountId);
             
-            try {
-                Integer toCurrencyId = row.getInt(COLUMN_TO_CURRENCY_ID);
-                op.setToCurrencyId(toCurrencyId);
-            } catch (Exception e) {
-                op.setToCurrencyId(null);
-            }
+            Integer toCurrencyId = row.getInt(COLUMN_TO_CURRENCY_ID);
+            op.setToCurrencyId(toCurrencyId);
             
-            try {
-                Integer toAmount = row.getInt(COLUMN_TO_AMOUNT);
-                op.setToAmount(toAmount);
-            } catch (Exception e) {
-                op.setToAmount(null);
-            }
+            Integer toAmount = row.getInt(COLUMN_TO_AMOUNT);
+            op.setToAmount(toAmount);
             
             return op;
         } catch (Exception e) {

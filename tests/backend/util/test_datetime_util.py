@@ -3,9 +3,8 @@ import sys
 import unittest
 
 from tests.backend.test_common import (
-    cleanup_example,
+    setup_test_environment,
     get_java_class,
-    setup_example,
 )
 
 # Добавляем путь к родительской директории для импорта
@@ -17,11 +16,11 @@ class TestDateTimeUtil(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        result = setup_example()
+        result = setup_test_environment()
         if result is None:
             raise Exception("Не удалось настроить окружение для тестов")
 
-        # Получаем компоненты из setup_example
+        # Получаем компоненты из setup_test_environment
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
@@ -31,7 +30,10 @@ class TestDateTimeUtil(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cleanup_example()
+            if hasattr(cls, 'test_data_manager'):
+                cls.test_data_manager.cleanup_test_data()
+            if hasattr(cls, 'jpype_setup'):
+                cls.jpype_setup.shutdown_jvm()
         except Exception as e:
             print(f"Ошибка при очистке: {e}")
         finally:
@@ -77,8 +79,6 @@ class TestDateTimeUtil(unittest.TestCase):
         """Тест 04: Парсинг валидной строки из SQLite"""
         # Строка в формате SQLite
         sqlite_string = "2024-01-15 14:30:45.123"
-
-        # Парсим
         parsed = self.DateTimeUtil.parseFromSqlite(sqlite_string)
 
         # Проверяем результат
@@ -104,7 +104,7 @@ class TestDateTimeUtil(unittest.TestCase):
         # Парсим пустую строку
         parsed = self.DateTimeUtil.parseFromSqlite("")
 
-        # Проверяем, что возвращается null
+        # Проверяем, что возвращается null (Java реализация проверяет isEmpty())
         self.assertIsNone(parsed)
 
     def test_07_parse_from_sqlite_whitespace_string(self):
@@ -112,7 +112,7 @@ class TestDateTimeUtil(unittest.TestCase):
         # Парсим строку с пробелами
         parsed = self.DateTimeUtil.parseFromSqlite("   ")
 
-        # Проверяем, что возвращается null
+        # Проверяем, что возвращается null (Java реализация проверяет trim().isEmpty())
         self.assertIsNone(parsed)
 
     def test_08_round_trip_format_parse(self):
@@ -164,7 +164,7 @@ class TestDateTimeUtil(unittest.TestCase):
         # Неверный формат даты
         invalid_string = "2024-13-45 25:70:80.999"
 
-        # Парсинг должен вызвать исключение
+        # Парсинг должен вызвать исключение из-за неверных значений
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(invalid_string)
 
@@ -196,7 +196,7 @@ class TestDateTimeUtil(unittest.TestCase):
         # Строка без миллисекунд
         string_without_ms = "2024-01-15 14:30:45"
 
-        # Парсинг должен вызвать исключение (ожидается формат с миллисекундами)
+        # Парсинг должен вызвать исключение (ожидается строгий формат с миллисекундами)
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(string_without_ms)
 
@@ -205,7 +205,7 @@ class TestDateTimeUtil(unittest.TestCase):
         # Строка с лишними пробелами
         string_with_spaces = "  2024-01-15 14:30:45.123  "
 
-        # Парсинг должен вызвать исключение
+        # Парсинг должен вызвать исключение (строгий формат не допускает пробелы)
         with self.assertRaises(Exception):
             self.DateTimeUtil.parseFromSqlite(string_with_spaces)
 

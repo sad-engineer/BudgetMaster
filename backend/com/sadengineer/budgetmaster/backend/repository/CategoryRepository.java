@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.backend.repository;
 
 import com.sadengineer.budgetmaster.backend.model.Category;
 import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
-import java.sql.*;
+
 import java.util.*;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
 
@@ -175,57 +175,6 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
     }
 
     /**
-     * Преобразование строки ResultSet в объект Category
-     * 
-     * <p>Парсит все поля из базы данных в соответствующие поля объекта Category.
-     * Метод обрабатывает преобразование дат из строкового формата SQLite в LocalDateTime.
-     * Обеспечивает безопасное чтение числовых полей с поддержкой типов Long и Integer.
-     * 
-     * <p>Ожидаемая структура ResultSet:
-     * <ul>
-     *   <li>id (INTEGER) - уникальный идентификатор</li>
-     *   <li>create_time (TEXT) - дата создания в формате SQLite</li>
-     *   <li>update_time (TEXT) - дата обновления в формате SQLite</li>
-     *   <li>delete_time (TEXT) - дата удаления в формате SQLite</li>
-     *   <li>created_by (TEXT) - пользователь, создавший запись</li>
-     *   <li>updated_by (TEXT) - пользователь, обновивший запись</li>
-     *   <li>deleted_by (TEXT) - пользователь, удаливший запись</li>
-     *   <li>position (INTEGER) - позиция в списке</li>
-     *   <li>title (TEXT) - название категории</li>
-     *   <li>operation_type (INTEGER) - тип операции категории</li>
-     *   <li>type (INTEGER) - тип категории</li>
-     *   <li>parent_id (INTEGER) - ID родительской категории</li>
-     * </ul>
-     * 
-     * @param rs ResultSet с данными из базы данных (не null)
-     * @return объект Category с заполненными полями (не null)
-     * @throws SQLException при ошибке чтения данных из ResultSet
-     */
-    private Category mapRow(ResultSet rs) throws SQLException {
-        Category category = new Category();
-        category.setId(rs.getInt(COLUMN_ID));
-        category.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_CREATE_TIME)));
-        category.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_UPDATE_TIME)));
-        category.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_DELETE_TIME)));
-        category.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
-        category.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
-        category.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
-        category.setPosition(rs.getInt(COLUMN_POSITION));
-        category.setTitle(rs.getString(COLUMN_TITLE));
-        category.setOperationType(rs.getInt(COLUMN_OPERATION_TYPE));
-        category.setType(rs.getInt(COLUMN_TYPE));
-        // Безопасное чтение поля parent_id с обработкой NULL значений
-        try {
-            Object parentIdObj = rs.getObject(COLUMN_PARENT_ID);
-            Integer parentId = (parentIdObj != null) ? (Integer) parentIdObj : null;
-            category.setParentId(parentId);
-        } catch (SQLException e) {
-            category.setParentId(null);
-        }
-        return category;
-    }
-
-    /**
      * Безопасное преобразование строки ResultRow в объект Category
      * 
      * <p>Обертка над mapRow с обработкой исключений.
@@ -250,12 +199,13 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
             category.setType(row.getInt(COLUMN_TYPE));
             
             // Безопасное чтение поля parent_id с обработкой NULL значений
-            try {
-                Integer parentId = row.getInt(COLUMN_PARENT_ID);
-                category.setParentId(parentId);
-            } catch (Exception e) {
-                category.setParentId(null);
-            }
+            Integer parentId = row.getInt(COLUMN_PARENT_ID);
+            
+            // Отладочная информация
+            System.out.println("🔍 DEBUG: Reading parent_id from DB: " + parentId);
+            System.out.println("🔍 DEBUG: parent_id type: " + (parentId != null ? parentId.getClass().getName() : "null"));
+            
+            category.setParentId(parentId);
             
             return category;
         } catch (Exception e) {
@@ -279,6 +229,10 @@ public class CategoryRepository extends BaseRepository implements Repository<Cat
             String createTimeStr = category.getCreateTime() != null ? DateTimeUtil.formatForSqlite(category.getCreateTime()) : null;
             String updateTimeStr = category.getUpdateTime() != null ? DateTimeUtil.formatForSqlite(category.getUpdateTime()) : null;
             String deleteTimeStr = category.getDeleteTime() != null ? DateTimeUtil.formatForSqlite(category.getDeleteTime()) : null;
+        
+        // Отладочная информация
+        System.out.println("🔍 DEBUG: Saving category with parent_id: " + category.getParentId());
+        System.out.println("🔍 DEBUG: parent_id type: " + (category.getParentId() != null ? category.getParentId().getClass().getName() : "null"));
         
         long id = connection.executeInsert(sql,
             category.getTitle(),

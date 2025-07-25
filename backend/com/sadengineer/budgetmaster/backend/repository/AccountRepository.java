@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.backend.repository;
 
 import com.sadengineer.budgetmaster.backend.model.Account;
 import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
-import java.sql.*;
+
 import java.util.*;
 import static com.sadengineer.budgetmaster.backend.constants.RepositoryConstants.*;
 
@@ -175,79 +175,6 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
     }
 
     /**
-     * Преобразование строки ResultSet в объект Account
-     * 
-     * <p>Парсит все поля из базы данных в соответствующие поля объекта Account.
-     * Метод обрабатывает преобразование дат из строкового формата SQLite в LocalDateTime.
-     * Обеспечивает безопасное чтение числовых полей с поддержкой типов Long и Integer.
-     * 
-     * <p>Ожидаемая структура ResultSet:
-     * <ul>
-     *   <li>id (INTEGER) - уникальный идентификатор</li>
-     *   <li>create_time (TEXT) - дата создания в формате SQLite</li>
-     *   <li>update_time (TEXT) - дата обновления в формате SQLite</li>
-     *   <li>delete_time (TEXT) - дата удаления в формате SQLite</li>
-     *   <li>created_by (TEXT) - пользователь, создавший запись</li>
-     *   <li>updated_by (TEXT) - пользователь, обновивший запись</li>
-     *   <li>deleted_by (TEXT) - пользователь, удаливший запись</li>
-     *   <li>position (INTEGER) - позиция в списке</li>
-     *   <li>title (TEXT) - название счета</li>
-     *   <li>amount (INTEGER) - баланс счета в копейках</li>
-     *   <li>type (INTEGER) - тип счета</li>
-     *   <li>currency_id (INTEGER) - ID валюты счета</li>
-     *   <li>closed (INTEGER) - статус закрытия счета (0 - открыт, 1 - закрыт)</li>
-     *   <li>credit_card_limit (INTEGER) - лимит кредитной карты в копейках</li>
-     *   <li>credit_card_category_id (INTEGER) - ID категории кредитной карты</li>
-     *   <li>credit_card_commission_category_id (INTEGER) - ID категории комиссии кредитной карты</li>
-     * </ul>
-     * 
-     * @param rs ResultSet с данными из базы данных (не null)
-     * @return объект Account с заполненными полями (не null)
-     * @throws SQLException при ошибке чтения данных из ResultSet
-     */
-    private Account mapRow(ResultSet rs) throws SQLException {
-        Account account = new Account();
-        account.setId(rs.getInt(COLUMN_ID));
-        account.setCreateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_CREATE_TIME)));
-        account.setUpdateTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_UPDATE_TIME)));
-        account.setDeleteTime(DateTimeUtil.parseFromSqlite(rs.getString(COLUMN_DELETE_TIME)));
-        account.setCreatedBy(rs.getString(COLUMN_CREATED_BY));
-        account.setUpdatedBy(rs.getString(COLUMN_UPDATED_BY));
-        account.setDeletedBy(rs.getString(COLUMN_DELETED_BY));
-        account.setPosition(rs.getInt(COLUMN_POSITION));
-        account.setTitle(rs.getString(COLUMN_TITLE));
-        account.setAmount(rs.getInt(COLUMN_AMOUNT));
-        account.setType(rs.getInt(COLUMN_TYPE));
-        account.setCurrencyId(rs.getInt(COLUMN_CURRENCY_ID));
-        account.setClosed(rs.getInt(COLUMN_CLOSED));
-        // Безопасное чтение полей кредитных карт с обработкой NULL значений
-        try {
-            Object creditCardLimitObj = rs.getObject(COLUMN_CREDIT_CARD_LIMIT);
-            Integer creditCardLimit = (creditCardLimitObj != null) ? (Integer) creditCardLimitObj : null;
-            account.setCreditCardLimit(creditCardLimit);
-        } catch (SQLException e) {
-            account.setCreditCardLimit(null);
-        }
-        
-        try {
-            Object creditCardCategoryIdObj = rs.getObject(COLUMN_CREDIT_CARD_CATEGORY_ID);
-            Integer creditCardCategoryId = (creditCardCategoryIdObj != null) ? (Integer) creditCardCategoryIdObj : null;
-            account.setCreditCardCategoryId(creditCardCategoryId);
-        } catch (SQLException e) {
-            account.setCreditCardCategoryId(null);
-        }
-        
-        try {
-            Object creditCardCommissionCategoryIdObj = rs.getObject(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID);
-            Integer creditCardCommissionCategoryId = (creditCardCommissionCategoryIdObj != null) ? (Integer) creditCardCommissionCategoryIdObj : null;
-            account.setCreditCardCommissionCategoryId(creditCardCommissionCategoryId);
-        } catch (SQLException e) {
-            account.setCreditCardCommissionCategoryId(null);
-        }
-        return account;
-    }
-
-    /**
      * Безопасное преобразование строки ResultRow в объект Account
      * 
      * <p>Обертка над mapRow с обработкой исключений.
@@ -274,32 +201,17 @@ public class AccountRepository extends BaseRepository implements Repository<Acco
             account.setClosed(row.getInt(COLUMN_CLOSED));
             
             // Безопасное чтение полей кредитных карт с обработкой NULL значений
-            try {
-                Integer creditCardLimit = row.getInt(COLUMN_CREDIT_CARD_LIMIT);
-                account.setCreditCardLimit(creditCardLimit);
-            } catch (Exception e) {
-                account.setCreditCardLimit(null);
-            }
-            
-            try {
-                Integer creditCardCategoryId = row.getInt(COLUMN_CREDIT_CARD_CATEGORY_ID);
-                account.setCreditCardCategoryId(creditCardCategoryId);
-            } catch (Exception e) {
-                account.setCreditCardCategoryId(null);
-            }
-            
-            try {
-                Integer creditCardCommissionCategoryId = row.getInt(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID);
-                account.setCreditCardCommissionCategoryId(creditCardCommissionCategoryId);
-            } catch (Exception e) {
-                account.setCreditCardCommissionCategoryId(null);
-            }
+            // Используем getInt() который уже обрабатывает NULL как null
+            account.setCreditCardLimit(row.getInt(COLUMN_CREDIT_CARD_LIMIT));
+            account.setCreditCardCategoryId(row.getInt(COLUMN_CREDIT_CARD_CATEGORY_ID));
+            account.setCreditCardCommissionCategoryId(row.getInt(COLUMN_CREDIT_CARD_COMMISSION_CATEGORY_ID));
             
             return account;
         } catch (Exception e) {
+            System.err.println("❌ Ошибка в mapRowSafe: " + e.getMessage());
             e.printStackTrace();
             return null;
-    }
+        }
     }
 
     /**

@@ -26,9 +26,20 @@ class TestCurrencyRepository(unittest.TestCase):
         cls.CurrencyRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.CurrencyRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
 
-        # Создаем репозиторий
-        cls.repo = cls.CurrencyRepository(cls.db_manager.db_path)
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repo = cls.CurrencyRepository(cls.test_db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_currency_ids = []
@@ -64,6 +75,17 @@ class TestCurrencyRepository(unittest.TestCase):
 
     def setUp(self):
         """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        print(f"🔧 Инициализируем базу: {self.test_db_path}")
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
+
+        # Проверяем, что база создана
+        if os.path.exists(self.test_db_path):
+            file_size = os.path.getsize(self.test_db_path)
+            print(f"✅ База создана, размер: {file_size} байт")
+        else:
+            print(f"❌ База не создана: {self.test_db_path}")
+
         self.max_position = self.repo.getMaxPosition()
 
     def create_test_currency(self, title="Тестовая валюта", position=None):

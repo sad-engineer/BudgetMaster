@@ -26,9 +26,20 @@ class TestBudgetRepository(unittest.TestCase):
         cls.BudgetRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.BudgetRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
 
-        # Создаем репозиторий
-        cls.repo = cls.BudgetRepository(cls.db_manager.db_path)
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repo = cls.BudgetRepository(cls.test_db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_budget_ids = []
@@ -64,6 +75,8 @@ class TestBudgetRepository(unittest.TestCase):
 
     def setUp(self):
         """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
         self.max_position = self.repo.getMaxPosition()
 
     def create_test_budget(self, amount=100000, currency_id=1, category_id=None, position=None):
@@ -274,7 +287,7 @@ class TestBudgetRepository(unittest.TestCase):
         self.assertEqual(found_budget.getCategoryId(), 2)
 
     def test_10_budget_with_null_category_id(self):
-        """Тест 10: Создание бюджета с NULL category_id (mapRowSafe)"""
+        """Тест 10: Создание бюджета с category_id=0"""
         # Arrange
         budget = self.create_test_budget(100000, category_id=None)
 

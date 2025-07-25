@@ -45,7 +45,7 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
-import com.sadengineer.budgetmaster.backend.AndroidDatabaseAdapter;
+import com.sadengineer.budgetmaster.database.AndroidPlatformUtil;
 
 public class BackendTestActivity extends BaseNavigationActivity {
 
@@ -53,6 +53,9 @@ public class BackendTestActivity extends BaseNavigationActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backend_test);
+
+        // Инициализируем Android провайдер БД
+        AndroidPlatformUtil.initializeDatabaseProvider(this);
 
         // Инициализация навигации
         initializeNavigation();
@@ -524,11 +527,26 @@ public class BackendTestActivity extends BaseNavigationActivity {
                 }
             }
             
-            // Тест создания CurrencyService (без БД)
+            // Тест создания CurrencyService с новой архитектурой
             try {
-                result.append("✓ Попытка создания CurrencyService...\n");
-                // Пока не создаем сервис, чтобы избежать ошибок
-                result.append("✓ Тест сервиса пропущен (требует БД)\n");
+                result.append("✓ Попытка создания CurrencyService с новой архитектурой...\n");
+                
+                // Создаем репозиторий и сервис
+                CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
+                CurrencyService currencyService = new CurrencyService(currencyRepo, "test_user");
+                result.append("✓ CurrencyService создан успешно\n");
+                
+                // Получаем все валюты
+                List<Currency> currencies = currencyService.getAll();
+                result.append("✓ Получено валют: ").append(currencies.size()).append("\n");
+                
+                // Создаем новую валюту
+                Currency newCurrency = new Currency();
+                newCurrency.setTitle("TEST");
+                newCurrency.setPosition(999);
+                currencyService.create(newCurrency);
+                result.append("✓ Новая валюта создана\n");
+                
             } catch (Exception e) {
                 result.append("✗ Ошибка создания CurrencyService: ").append(e.getMessage()).append("\n");
             }
@@ -546,46 +564,50 @@ public class BackendTestActivity extends BaseNavigationActivity {
     }
     
     private void testDatabaseArchitecture(StringBuilder result) {
-        result.append("Тестирование Android SQLite адаптера...\n");
+        result.append("Тестирование новой Android архитектуры БД...\n");
         
         try {
-            result.append("✓ AndroidDatabaseAdapter доступен\n");
+            result.append("✓ AndroidPlatformUtil доступен\n");
             
-            // Тестируем Android адаптер
-            AndroidDatabaseAdapter androidDb = new AndroidDatabaseAdapter();
-            result.append("✓ AndroidDatabaseAdapter создан\n");
+            // Тестируем создание базы данных через backend
+            String dbPath = "test_architecture.db";
             
-            // Тестируем подключение к базе данных через Android адаптер
-            File dbFile = new File(getFilesDir(), "test_architecture.db");
-            String dbPath = dbFile.getAbsolutePath();
+            // Создаем базу данных через DatabaseUtil
+            DatabaseUtil.createDatabaseIfNotExists(dbPath);
+            result.append("✓ База данных создана через DatabaseUtil\n");
             
-            androidDb.connect(dbPath);
-            result.append("✓ Подключение к базе данных через Android адаптер\n");
+            // Тестируем получение статистики
+            int currenciesCount = DatabaseUtil.getTableRecordCount(dbPath, "currencies");
+            int categoriesCount = DatabaseUtil.getTableRecordCount(dbPath, "categories");
+            int accountsCount = DatabaseUtil.getTableRecordCount(dbPath, "accounts");
             
-            // Тестируем выполнение SQL
-            androidDb.executeSQL("CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)");
-            result.append("✓ Создание таблицы через Android адаптер\n");
+            result.append("✓ Статистика БД:\n");
+            result.append("  - Валюты: ").append(currenciesCount).append(" записей\n");
+            result.append("  - Категории: ").append(categoriesCount).append(" записей\n");
+            result.append("  - Счета: ").append(accountsCount).append(" записей\n");
             
-            // Тестируем запрос
-            android.database.Cursor cursor = androidDb.query("SELECT COUNT(*) FROM test_table");
-            if (cursor.moveToFirst()) {
-                result.append("✓ Запрос через Android адаптер: " + cursor.getInt(0) + " записей\n");
+            // Тестируем создание репозитория
+            try {
+                CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
+                result.append("✓ CurrencyRepository создан успешно\n");
+                
+                // Тестируем создание сервиса
+                CurrencyService currencyService = new CurrencyService(currencyRepo, "test_user");
+                result.append("✓ CurrencyService создан успешно\n");
+                
+                // Получаем все валюты
+                List<Currency> currencies = currencyService.getAll();
+                result.append("✓ Получено валют из БД: ").append(currencies.size()).append("\n");
+                
+            } catch (Exception e) {
+                result.append("✗ Ошибка создания репозитория/сервиса: ").append(e.getMessage()).append("\n");
             }
-            cursor.close();
             
-            // Проверяем соединение
-            boolean isConnected = androidDb.isConnected();
-            result.append("✓ Проверка соединения: " + (isConnected ? "подключено" : "отключено") + "\n");
-            
-            // Закрываем соединение
-            androidDb.close();
-            result.append("✓ Соединение закрыто\n");
-            
-            result.append("✓ Android SQLite адаптер работает корректно\n");
+            result.append("✓ Новая Android архитектура БД работает корректно\n");
             
         } catch (Exception e) {
-            result.append("✗ Ошибка в Android SQLite адаптере: " + e.getMessage() + "\n");
-            Log.e("BackendTest", "Android database adapter error", e);
+            result.append("✗ Ошибка в новой Android архитектуре БД: ").append(e.getMessage()).append("\n");
+            Log.e("BackendTest", "Android database architecture error", e);
         }
     }
 

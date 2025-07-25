@@ -26,9 +26,20 @@ class TestCategoryRepository(unittest.TestCase):
         cls.CategoryRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.CategoryRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
 
-        # Создаем репозиторий
-        cls.repo = cls.CategoryRepository(cls.db_manager.db_path)
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repo = cls.CategoryRepository(cls.test_db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_category_ids = []
@@ -64,6 +75,8 @@ class TestCategoryRepository(unittest.TestCase):
 
     def setUp(self):
         """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
         self.max_position = self.repo.getMaxPosition()
 
     def create_test_category(self, title="Тестовая категория", position=None, operation_type=1, type=1, parent_id=None):
@@ -345,7 +358,7 @@ class TestCategoryRepository(unittest.TestCase):
         self.assertEqual(found_category.getParentId(), saved_parent.getId())
 
     def test_13_category_with_null_parent_id(self):
-        """Тест 13: Создание категории с NULL parent_id (mapRowSafe)"""
+        """Тест 13: Создание категории с None parent_id (mapRowSafe)"""
         # Arrange
         category = self.create_test_category("Категория без родителя")
         category.setParentId(None)
@@ -419,8 +432,17 @@ class TestCategoryRepository(unittest.TestCase):
         # Arrange
         # Создаем корневую категорию
         root_category = self.create_test_category("Корневая категория", parent_id=None)
+
+        # Отладочная информация
+        print(f"🔍 Python parent_id: {root_category.getParentId()}")
+        print(f"🔍 Python parent_id type: {type(root_category.getParentId())}")
+
         saved_root = self.repo.save(root_category)
         self.test_category_ids.append(saved_root.getId())
+
+        # Отладочная информация после сохранения
+        print(f"🔍 Java saved parent_id: {saved_root.getParentId()}")
+        print(f"🔍 Java saved parent_id type: {type(saved_root.getParentId())}")
 
         # Создаем дочерние категории
         child1 = self.create_test_category("Дочерняя 1", parent_id=saved_root.getId())
@@ -442,7 +464,13 @@ class TestCategoryRepository(unittest.TestCase):
         # Проверяем корневую категорию
         root_found = self.repo.findById(saved_root.getId())
         self.assertTrue(root_found.isPresent())
-        self.assertIsNone(root_found.get().getParentId())
+
+        # Отладочная информация при чтении из БД
+        found_parent_id = root_found.get().getParentId()
+        print(f"🔍 Java found parent_id: {found_parent_id}")
+        print(f"🔍 Java found parent_id type: {type(found_parent_id)}")
+
+        self.assertIsNone(found_parent_id)
 
         # Проверяем дочерние категории
         children = self.repo.findAllByParentId(self.Integer(saved_root.getId()))

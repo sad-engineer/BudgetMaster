@@ -191,9 +191,9 @@ public class BudgetService {
      */
     public Budget getByCategoryId(Integer categoryId) {
         CommonValidator.validateCategoryId(categoryId);
-        List<Budget> budgets = budgetRepository.findAllByCategoryId(categoryId);
-        if (!budgets.isEmpty()) {
-            Budget budgetObj = budgets.get(0);
+        Optional<Budget> budgetOpt = budgetRepository.findByCategoryId(categoryId);
+        if (budgetOpt.isPresent()) {
+            Budget budgetObj = budgetOpt.get();
             if (budgetObj.isDeleted()) {
                 return restore(budgetObj);
             }
@@ -218,9 +218,9 @@ public class BudgetService {
         CommonValidator.validateBudgetAmount(amount);
         CommonValidator.validateCurrencyId(currencyId);
 
-        List<Budget> budgets = budgetRepository.findAllByCategoryId(categoryId);
-        if (!budgets.isEmpty()) {
-            Budget budgetObj = budgets.get(0);
+        Optional<Budget> budgetOpt = budgetRepository.findByCategoryId(categoryId);
+        if (budgetOpt.isPresent()) {
+            Budget budgetObj = budgetOpt.get();
             
             if (budgetObj.getCategoryId() == categoryId &&
                 budgetObj.getAmount() == amount &&

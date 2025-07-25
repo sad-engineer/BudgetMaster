@@ -5,9 +5,9 @@ import com.sadengineer.budgetmaster.backend.model.*;
 import com.sadengineer.budgetmaster.backend.repository.*;
 import com.sadengineer.budgetmaster.backend.service.*;
 import com.sadengineer.budgetmaster.backend.util.DatabaseUtil;
-import com.sadengineer.budgetmaster.backend.database.jdbc.JdbcDatabaseFactory;
+import com.sadengineer.budgetmaster.backend.util.PlatformUtil;
 
-import java.sql.SQLException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,17 +17,8 @@ import java.util.Optional;
         // Выводим версию backend
         System.out.println("Backend version: " + BackendVersion.VERSION);
 
-        // регистрируем JDBC-драйвер
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            System.err.println("JDBC driver not found!");
-            e.printStackTrace();
-            return;
-        }
-
-        // Инициализируем JDBC провайдер
-        JdbcDatabaseFactory.initialize();
+        // Инициализируем соответствующий провайдер БД в зависимости от платформы
+        PlatformUtil.initializeDatabaseProvider(null);
 
         String dbPath = "BudgetMasterDB.db";
         String user = "admin";
@@ -71,7 +62,7 @@ import java.util.Optional;
             // 5. Аналогично можно делать CRUD для других сущностей через сервисы
             // ...
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.err.println("Ошибка при работе с базой данных: " + e.getMessage());
             e.printStackTrace();
         }

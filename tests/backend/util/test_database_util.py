@@ -4,9 +4,8 @@ import tempfile
 import unittest
 
 from tests.backend.test_common import (
-    cleanup_example,
     get_java_class,
-    setup_example,
+    setup_test_environment,
 )
 
 # Добавляем путь к родительской директории для импорта
@@ -18,40 +17,52 @@ class TestDatabaseUtil(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        result = setup_example()
+        result = setup_test_environment()
         if result is None:
             raise Exception("Не удалось настроить окружение для тестов")
 
-        # Получаем компоненты из setup_example
+        # Получаем компоненты из setup_test_environment
         cls.jpype_setup, cls.db_manager, cls.test_data_manager = result
 
         # Импортируем Java классы
         cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
         cls.SQLException = get_java_class("java.sql.SQLException")
+        cls.SQLiteException = get_java_class("org.sqlite.SQLiteException")
 
-        # Создаем временную базу для тестов
-        cls.temp_db_path = tempfile.mktemp(suffix='.db')
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.temp_db_path = cls.db_manager.db_path
+        print(f"🔍 Тестовая база будет создана по пути: {cls.temp_db_path}")
+        print(f"🔍 Директория существует: {os.path.exists(os.path.dirname(cls.temp_db_path))}")
+
+        # Создаем директорию если её нет
+        db_dir = os.path.dirname(cls.temp_db_path)
+        if not os.path.exists(db_dir):
+            os.makedirs(db_dir)
+            print(f"📁 Создана директория: {db_dir}")
+        else:
+            print(f"📁 Директория уже существует: {db_dir}")
 
     @classmethod
     def tearDownClass(cls):
         try:
-            # Удаляем временную базу
-            if os.path.exists(cls.temp_db_path):
-                os.remove(cls.temp_db_path)
-            cleanup_example()
+            # Очистка тестовых данных если есть
+            if hasattr(cls, 'test_data_manager'):
+                cls.test_data_manager.cleanup_test_data()
         except Exception as e:
             print(f"Ошибка при очистке: {e}")
         finally:
             pass
 
-    def setUp(self):
-        """Подготовка перед каждым тестом"""
-        # Удаляем временную базу если она существует
+    def test_01_create_database_if_not_exists(self):
+        """Тест 01: Создание базы данных если не существует"""
+
         if os.path.exists(self.temp_db_path):
             os.remove(self.temp_db_path)
 
-    def test_01_create_database_if_not_exists(self):
-        """Тест 01: Создание базы данных если не существует"""
         # Проверяем, что файл не существует
         self.assertFalse(os.path.exists(self.temp_db_path))
 
@@ -77,11 +88,11 @@ class TestDatabaseUtil(unittest.TestCase):
         operations_count = self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "operations")
 
         # Проверяем, что дефолтные данные созданы
-        self.assertGreater(currencies_count, 0)
-        self.assertGreater(categories_count, 0)
-        self.assertGreater(accounts_count, 0)
-        self.assertEqual(budgets_count, 0)  # Бюджеты не создаются по умолчанию
-        self.assertEqual(operations_count, 0)  # Операции не создаются по умолчанию
+        self.assertEqual(currencies_count, 3)
+        self.assertEqual(categories_count, 17)
+        self.assertEqual(accounts_count, 5)
+        self.assertEqual(budgets_count, 0)
+        self.assertEqual(operations_count, 0)
 
     def test_03_get_table_record_count(self):
         """Тест 03: Получение количества записей в таблице"""
@@ -155,7 +166,7 @@ class TestDatabaseUtil(unittest.TestCase):
 
         # Проверяем, что валюты восстановлены
         currencies_count = self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "currencies")
-        self.assertGreater(currencies_count, 0)
+        self.assertEqual(currencies_count, 3)
 
     def test_08_restore_default_categories(self):
         """Тест 08: Восстановление дефолтных категорий"""
@@ -170,7 +181,7 @@ class TestDatabaseUtil(unittest.TestCase):
 
         # Проверяем, что категории восстановлены
         categories_count = self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "categories")
-        self.assertGreater(categories_count, 0)
+        self.assertEqual(categories_count, 17)
 
     def test_09_restore_defaults(self):
         """Тест 09: Восстановление всех дефолтных значений"""
@@ -201,16 +212,24 @@ class TestDatabaseUtil(unittest.TestCase):
         self.DatabaseUtil.createDatabaseIfNotExists(self.temp_db_path)
 
         # Попытка очистить несуществующую таблицу должна вызвать исключение
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as context:
             self.DatabaseUtil.clearTable(self.temp_db_path, "nonexistent_table")
+
+        # Проверяем, что исключение содержит правильное сообщение
+        self.assertIn("Ошибка выполнения SQL", str(context.exception))
+        self.assertIn("DELETE FROM nonexistent_table", str(context.exception))
 
     def test_11_get_table_record_count_nonexistent(self):
         """Тест 11: Получение количества записей несуществующей таблицы"""
         self.DatabaseUtil.createDatabaseIfNotExists(self.temp_db_path)
 
         # Попытка получить количество записей несуществующей таблицы должна вызвать исключение
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as context:
             self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "nonexistent_table")
+
+        # Проверяем, что исключение содержит правильное сообщение
+        self.assertIn("Ошибка выполнения SQL", str(context.exception))
+        self.assertIn("SELECT COUNT(*) FROM nonexistent_table", str(context.exception))
 
     def test_12_database_encoding_utf8(self):
         """Тест 12: Проверка кодировки UTF-8 базы данных"""
@@ -219,9 +238,29 @@ class TestDatabaseUtil(unittest.TestCase):
         # Проверяем, что база создана и доступна
         self.assertTrue(os.path.exists(self.temp_db_path))
 
-        # Проверяем размер файла (должен быть больше 0)
-        file_size = os.path.getsize(self.temp_db_path)
-        self.assertGreater(file_size, 0)
+        # Проверяем кодировку базы данных через SQLite
+        import sqlite3
+        conn = sqlite3.connect(self.temp_db_path)
+        cursor = conn.cursor()
+        
+        # Проверяем, что база поддерживает UTF-8
+        cursor.execute("PRAGMA encoding")
+        encoding = cursor.fetchone()[0]
+        self.assertEqual(encoding, "UTF-8")
+        
+        # Проверяем, что можем сохранить и прочитать русский текст
+        test_text = "Тест русских символов: ₽€$¥"
+        cursor.execute("CREATE TABLE IF NOT EXISTS encoding_test (id INTEGER PRIMARY KEY, text TEXT)")
+        cursor.execute("INSERT INTO encoding_test (text) VALUES (?)", (test_text,))
+        conn.commit()
+        
+        cursor.execute("SELECT text FROM encoding_test WHERE id = 1")
+        result = cursor.fetchone()
+        self.assertEqual(result[0], test_text)
+        
+        # Очищаем тестовую таблицу
+        cursor.execute("DROP TABLE encoding_test")
+        conn.close()
 
     def test_13_multiple_database_creation(self):
         """Тест 13: Множественное создание базы данных"""
@@ -265,7 +304,8 @@ class TestDatabaseUtil(unittest.TestCase):
 
         # Проверяем количество дефолтных валют
         currencies_count = self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "currencies")
-        self.assertEqual(currencies_count, 3)  # RUB, USD, EUR
+        print(f"🔍 Количество валют в базе: {currencies_count}")
+        self.assertEqual(currencies_count, 3)  # Рубль, Доллар, Евро
 
     def test_16_default_categories_structure(self):
         """Тест 16: Проверка структуры дефолтных категорий"""
@@ -281,7 +321,10 @@ class TestDatabaseUtil(unittest.TestCase):
 
         # Проверяем количество дефолтных счетов
         accounts_count = self.DatabaseUtil.getTableRecordCount(self.temp_db_path, "accounts")
-        self.assertEqual(accounts_count, 5)  # 5 дефолтных счетов
+        print(f"🔍 Количество счетов в базе: {accounts_count}")
+        self.assertEqual(
+            accounts_count, 5
+        )  # 5 дефолтных счетов: Наличные, Зарплатная карта, Сберегательный счет, Кредитная карта, Карта рассрочки
 
     def test_18_database_file_permissions(self):
         """Тест 18: Проверка прав доступа к файлу базы данных"""

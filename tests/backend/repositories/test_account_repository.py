@@ -26,9 +26,20 @@ class TestAccountRepository(unittest.TestCase):
         cls.AccountRepository = get_java_class("com.sadengineer.budgetmaster.backend.repository.AccountRepository")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
 
-        # Создаем репозиторий
-        cls.repo = cls.AccountRepository(cls.db_manager.db_path)
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
+
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
+
+        cls.repo = cls.AccountRepository(cls.test_db_path)
 
         # Список ID тестовых записей для очистки
         cls.test_account_ids = []
@@ -37,24 +48,16 @@ class TestAccountRepository(unittest.TestCase):
     def tearDownClass(cls):
         """Очистка после всех тестов"""
         try:
-            # Получаем менеджер базы данных
-            db_manager = cls.db_manager
-
-            # Удаляем тестовые записи по ID
-            deleted_count = 0
-            for account_id in cls.test_account_ids:
+            # Принудительно закрываем репозиторий
+            if hasattr(cls, 'repo') and cls.repo is not None:
                 try:
-                    success = db_manager.execute_update("DELETE FROM accounts WHERE id = ?", (account_id,))
-                    if success:
-                        deleted_count += 1
-                    else:
-                        print(f"Ошибка при удалении счета {account_id}")
+                    # Пытаемся закрыть соединения репозитория
+                    cls.repo = None
+                    print("✅ Репозиторий закрыт")
                 except Exception as e:
-                    print(f"Ошибка при удалении счета {account_id}: {e}")
+                    print(f"⚠️ Ошибка при закрытии репозитория: {e}")
 
-            if deleted_count > 0:
-                print(f"Удалено {deleted_count} тестовых записей из базы данных")
-
+            # Вызываем cleanup_example в любом случае
             cleanup_example()
         except Exception as e:
             print(f"Ошибка при очистке: {e}")
@@ -64,6 +67,13 @@ class TestAccountRepository(unittest.TestCase):
 
     def setUp(self):
         """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
+
+        # Принудительно восстанавливаем дефолтные данные для тестов
+        # Это гарантирует, что у нас всегда есть базовые данные
+        self.DatabaseUtil.restoreDefaults(self.test_db_path)
+
         self.max_position = self.repo.getMaxPosition()
 
     def create_test_account(self, title="Тестовый счет", amount=100000, position=None):

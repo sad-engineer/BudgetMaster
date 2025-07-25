@@ -3,8 +3,7 @@ package com.sadengineer.budgetmaster.backend.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import com.sadengineer.budgetmaster.backend.
-constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 /**
  * Модель валюты

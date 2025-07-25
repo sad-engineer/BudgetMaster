@@ -31,26 +31,77 @@ class TestAccountService(unittest.TestCase):
         cls.Account = get_java_class("com.sadengineer.budgetmaster.backend.model.Account")
         cls.LocalDateTime = get_java_class("java.time.LocalDateTime")
         cls.Integer = get_java_class("java.lang.Integer")
+        cls.PlatformUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.PlatformUtil")
+
+        # Инициализируем DatabaseProvider для тестов
+        cls.PlatformUtil.initializeDatabaseProvider(None)
 
         # Список ID тестовых записей для очистки
         cls.test_account_ids = []
 
-        # Используем существующую базу данных
-        cls.db_path = cls.db_manager.db_path
+        # Используем DB_PATH из test_common.py
+        cls.test_db_path = cls.db_manager.db_path
+
+        # Инициализируем базу данных с таблицами
+        cls.DatabaseUtil = get_java_class("com.sadengineer.budgetmaster.backend.util.DatabaseUtil")
+        cls.DatabaseUtil.createDatabaseIfNotExists(cls.test_db_path)
+        print(f"✅ База данных инициализирована: {cls.test_db_path}")
 
         # Создаем репозиторий и сервис
-        cls.repository = cls.AccountRepository(cls.db_path)
+        cls.repository = cls.AccountRepository(cls.test_db_path)
         cls.service = cls.AccountService(cls.repository, "test_user")
+
+    def setUp(self):
+        """Настройка перед каждым тестом"""
+        # Инициализируем базу данных перед первым использованием
+        self.DatabaseUtil.createDatabaseIfNotExists(self.test_db_path)
+
+        # Отладочная информация для test_06
+        if hasattr(self, '_testMethodName') and self._testMethodName == 'test_06_get_account_by_id':
+            print(f"🔧 setUp: База данных инициализирована: {self.test_db_path}")
+
+            # Проверяем количество счетов после createDatabaseIfNotExists
+            account_count = self.DatabaseUtil.getTableRecordCount(self.test_db_path, "accounts")
+            print(f"🔧 setUp: Количество счетов после createDatabaseIfNotExists: {account_count}")
+
+            # Проверяем количество валют
+            currency_count = self.DatabaseUtil.getTableRecordCount(self.test_db_path, "currencies")
+            print(f"🔧 setUp: Количество валют после createDatabaseIfNotExists: {currency_count}")
+
+            # Проверяем количество категорий
+            category_count = self.DatabaseUtil.getTableRecordCount(self.test_db_path, "categories")
+            print(f"🔧 setUp: Количество категорий после createDatabaseIfNotExists: {category_count}")
+
+            # Если счетов нет, попробуем восстановить дефолтные данные
+            if account_count == 0:
+                print(f"🔧 setUp: Счетов нет, восстанавливаем дефолтные данные")
+                self.DatabaseUtil.restoreDefaults(self.test_db_path)
+
+                # Проверяем результат
+                account_count_after = self.DatabaseUtil.getTableRecordCount(self.test_db_path, "accounts")
+                print(f"🔧 setUp: Количество счетов после restoreDefaults: {account_count_after}")
 
     @classmethod
     def tearDownClass(cls):
         """Очистка после всех тестов"""
         try:
+            # Принудительно закрываем репозиторий
+            if hasattr(cls, 'repository') and cls.repository is not None:
+                try:
+                    # Пытаемся закрыть соединения репозитория
+                    cls.repository = None
+                    print("✅ Репозиторий закрыт")
+                except Exception as e:
+                    print(f"⚠️ Ошибка при закрытии репозитория: {e}")
+
+            # Получаем менеджер базы данных
+            db_manager = cls.db_manager
+
             # Удаляем тестовые записи по ID
             deleted_count = 0
             for account_id in cls.test_account_ids:
                 try:
-                    success = cls.db_manager.execute_update("DELETE FROM accounts WHERE id = ?", (account_id,))
+                    success = db_manager.execute_update("DELETE FROM accounts WHERE id = ?", (account_id,))
                     if success:
                         deleted_count += 1
                     else:
@@ -72,14 +123,6 @@ class TestAccountService(unittest.TestCase):
         """Тест 01: Конструктор с репозиторием"""
         # Act
         service = self.AccountService(self.repository, "test_user")
-
-        # Assert
-        self.assertIsNotNone(service)
-
-    def test_02_constructor_with_user_only(self):
-        """Тест 02: Конструктор только с пользователем"""
-        # Act
-        service = self.AccountService("test_user")
 
         # Assert
         self.assertIsNotNone(service)
@@ -150,7 +193,33 @@ class TestAccountService(unittest.TestCase):
 
     def test_06_get_account_by_id(self):
         """Тест 06: Получение счета по ID"""
+        # Отладочная информация
+        print(f"🔍 Проверяем счет с ID 1")
+        print(f"🔍 Путь к БД: {self.test_db_path}")
+
+        # Проверяем, что база данных существует и содержит данные
+        all_accounts = self.service.getAll()
+        print(f"🔍 Всего счетов в БД: {len(all_accounts)}")
+        for acc in all_accounts:
+            print(f"🔍 Счет ID={acc.getId()}, Title='{acc.getTitle()}', CreatedBy='{acc.getCreatedBy()}'")
+
+        # Проверяем напрямую через репозиторий
+        all_accounts_repo = self.repository.findAll()
+        print(f"🔍 Всего счетов через репозиторий: {all_accounts_repo.size()}")
+        for acc in all_accounts_repo:
+            print(f"🔍 Репозиторий счет ID={acc.getId()}, Title='{acc.getTitle()}', CreatedBy='{acc.getCreatedBy()}'")
+
+        # Пробуем найти счет напрямую через репозиторий
+        found_direct = self.repository.findById(self.Integer(1))
+        print(f"🔍 Прямой поиск через репозиторий: {found_direct.isPresent()}")
+        if found_direct.isPresent():
+            acc = found_direct.get()
+            print(f"🔍 Найденный счет: ID={acc.getId()}, Title='{acc.getTitle()}'")
+
+        # Теперь пробуем через сервис
         account = self.service.get(self.Integer(1))
+        print(f"🔍 Результат через сервис: {account is not None}")
+
         self.assertIsNotNone(account)
         self.assertEqual(account.getId(), 1)
         self.assertEqual(account.getTitle(), "Наличные")
@@ -586,7 +655,7 @@ class TestAccountService(unittest.TestCase):
     def test_37_repository_independence(self):
         """Тест 37: Независимость репозиториев"""
         # Arrange
-        repository2 = self.AccountRepository(self.db_path)
+        repository2 = self.AccountRepository(self.test_db_path)
         service2 = self.AccountService(repository2, "user2")
 
         # Act
