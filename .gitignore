@@ -206,3 +206,5 @@ BudgetMasterBackend/budget_master.db
 # System files
 .DS_Store
 Thumbs.db
+
+temp/

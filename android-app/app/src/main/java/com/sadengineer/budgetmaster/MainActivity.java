@@ -16,7 +16,7 @@ import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
-import com.sadengineer.budgetmaster.database.AndroidPlatformUtil;
+// Удаляем импорт старого backend - теперь используем Room ORM
 
 public class MainActivity extends BaseNavigationActivity {
 
@@ -25,8 +25,7 @@ public class MainActivity extends BaseNavigationActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Инициализируем Android провайдер БД
-        AndroidPlatformUtil.initializeDatabaseProvider(this);
+        // Room ORM автоматически инициализирует базу данных
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

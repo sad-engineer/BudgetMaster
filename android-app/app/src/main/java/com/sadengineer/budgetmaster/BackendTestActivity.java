@@ -12,32 +12,26 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import java.util.List;
 import java.io.File;
 
-// Импорты классов из backend
-import com.sadengineer.budgetmaster.backend.BackendVersion;
+// Импорты классов из нового backend
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.constants.ValidationConstants;
-import com.sadengineer.budgetmaster.backend.model.Account;
-import com.sadengineer.budgetmaster.backend.model.BaseEntity;
-import com.sadengineer.budgetmaster.backend.model.Budget;
-import com.sadengineer.budgetmaster.backend.model.Category;
-import com.sadengineer.budgetmaster.backend.model.Currency;
-import com.sadengineer.budgetmaster.backend.model.Operation;
+import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.Category;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
-import com.sadengineer.budgetmaster.backend.repository.BaseRepository;
 import com.sadengineer.budgetmaster.backend.repository.BudgetRepository;
 import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.repository.OperationRepository;
-import com.sadengineer.budgetmaster.backend.repository.Repository;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
-import com.sadengineer.budgetmaster.backend.util.DatabaseUtil;
-import com.sadengineer.budgetmaster.backend.util.DateTimeUtil;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
 import com.sadengineer.budgetmaster.backend.validator.BaseEntityValidator;
 import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
@@ -45,7 +39,6 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
-import com.sadengineer.budgetmaster.database.AndroidPlatformUtil;
 
 public class BackendTestActivity extends BaseNavigationActivity {
 
@@ -54,8 +47,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backend_test);
 
-        // Инициализируем Android провайдер БД
-        AndroidPlatformUtil.initializeDatabaseProvider(this);
+        // Room ORM автоматически инициализирует базу данных
 
         // Инициализация навигации
         initializeNavigation();
@@ -103,18 +95,14 @@ public class BackendTestActivity extends BaseNavigationActivity {
         result.append("\n--- СОЗДАНИЕ СЕРВИСОВ ---\n");
         testServiceCreation(result);
 
-        // Тест утилит
-        result.append("\n--- УТИЛИТЫ ---\n");
-        testUtils(result);
+        // Утилиты больше не нужны - используем Room ORM
 
         // Тест валидаторов
         result.append("\n--- ВАЛИДАТОРЫ ---\n");
         testValidators(result);
         
 
-        // Тест версии
-        result.append("\n--- ВЕРСИЯ БЕКЕНДА ---\n");
-        testBackendVersion(result);
+        // Версия backend теперь определяется через Room ORM
 
         result.append("\n--- ВЕРСИЯ ФРОНТЕНДА ---\n");
         testFrontendVersion(result);        
@@ -124,9 +112,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
         result.append("\n--- ТЕСТ БАЗЫ ДАННЫХ ---\n");
         testDatabase(result);
 
-        // Тест новой архитектуры базы данных
-        result.append("\n--- АРХИТЕКТУРА БАЗЫ ДАННЫХ ---\n");
-        testDatabaseArchitecture(result);
+        // Новая архитектура использует Room ORM
 
         } catch (Exception e) {
             result.append("\n=== КРИТИЧЕСКАЯ ОШИБКА ===\n");
@@ -182,12 +168,6 @@ public class BackendTestActivity extends BaseNavigationActivity {
         }
 
         try {
-            result.append("✓ BaseEntity: ").append(BaseEntity.class.getName()).append("\n");
-        } catch (Exception e) {
-            result.append("✗ BaseEntity: ").append(e.getMessage()).append("\n");
-        }
-
-        try {
             result.append("✓ Budget: ").append(Budget.class.getName()).append("\n");
         } catch (Exception e) {
             result.append("✗ Budget: ").append(e.getMessage()).append("\n");
@@ -220,12 +200,6 @@ public class BackendTestActivity extends BaseNavigationActivity {
         }
 
         try {
-            result.append("✓ BaseRepository: ").append(BaseRepository.class.getName()).append("\n");
-        } catch (Exception e) {
-            result.append("✗ BaseRepository: ").append(e.getMessage()).append("\n");
-        }
-
-        try {
             result.append("✓ BudgetRepository: ").append(BudgetRepository.class.getName()).append("\n");
         } catch (Exception e) {
             result.append("✗ BudgetRepository: ").append(e.getMessage()).append("\n");
@@ -247,12 +221,6 @@ public class BackendTestActivity extends BaseNavigationActivity {
             result.append("✓ OperationRepository: ").append(OperationRepository.class.getName()).append("\n");
         } catch (Exception e) {
             result.append("✗ OperationRepository: ").append(e.getMessage()).append("\n");
-        }
-
-        try {
-            result.append("✓ Repository: ").append(Repository.class.getName()).append("\n");
-        } catch (Exception e) {
-            result.append("✗ Repository: ").append(e.getMessage()).append("\n");
         }
     }
 
@@ -288,19 +256,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
         }
     }
 
-    private void testUtils(StringBuilder result) {
-        try {
-            result.append("✓ DatabaseUtil: ").append(DatabaseUtil.class.getName()).append("\n");
-        } catch (Exception e) {
-            result.append("✗ DatabaseUtil: ").append(e.getMessage()).append("\n");
-        }
 
-        try {
-            result.append("✓ DateTimeUtil: ").append(DateTimeUtil.class.getName()).append("\n");
-        } catch (Exception e) {
-            result.append("✗ DateTimeUtil: ").append(e.getMessage()).append("\n");
-        }
-    }
 
     private void testValidators(StringBuilder result) {
         try {
@@ -370,7 +326,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Тест создания Category
             Category category = new Category();
             category.setTitle("Продукты");
-            category.setType(1); // например, 1 - расход
+            category.setType("expense"); // тип расход
             result.append("✓ Category создан: ").append(category.getTitle()).append(" (тип: ").append(category.getType()).append(")\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания Category: ").append(e.getMessage()).append("\n");
@@ -389,8 +345,8 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Тест создания Operation
             Operation operation = new Operation();
             operation.setAmount(100);
-            operation.setComment("Покупка продуктов");
-            result.append("✓ Operation создан: ").append(operation.getComment()).append(" (сумма: ").append(operation.getAmount()).append(")\n");
+            operation.setDescription("Покупка продуктов");
+            result.append("✓ Operation создан: ").append(operation.getDescription()).append(" (сумма: ").append(operation.getAmount()).append(")\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания Operation: ").append(e.getMessage()).append("\n");
         }
@@ -399,7 +355,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
     private void testServiceCreation(StringBuilder result) {
         try {
             // Тест создания AccountService
-            AccountService accountService = new AccountService("test_user");
+            AccountService accountService = new AccountService(this, "test_user");
             result.append("✓ AccountService создан\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания AccountService: ").append(e.getMessage()).append("\n");
@@ -407,7 +363,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
 
         try {
             // Тест создания CurrencyService
-            CurrencyService currencyService = new CurrencyService("test_user");
+            CurrencyService currencyService = new CurrencyService(this, "test_user");
             result.append("✓ CurrencyService создан\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания CurrencyService: ").append(e.getMessage()).append("\n");
@@ -415,7 +371,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
 
         try {
             // Тест создания CategoryService
-            CategoryService categoryService = new CategoryService("test_user");
+            CategoryService categoryService = new CategoryService(this, "test_user");
             result.append("✓ CategoryService создан\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания CategoryService: ").append(e.getMessage()).append("\n");
@@ -423,7 +379,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
 
         try {
             // Тест создания BudgetService
-            BudgetService budgetService = new BudgetService("test_user");
+            BudgetService budgetService = new BudgetService(this, "test_user");
             result.append("✓ BudgetService создан\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания BudgetService: ").append(e.getMessage()).append("\n");
@@ -431,27 +387,14 @@ public class BackendTestActivity extends BaseNavigationActivity {
 
         try {
             // Тест создания OperationService
-            OperationService operationService = new OperationService("test_user");
+            OperationService operationService = new OperationService(this, "test_user");
             result.append("✓ OperationService создан\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания OperationService: ").append(e.getMessage()).append("\n");
         }
     }
 
-    private void testBackendVersion(StringBuilder result) {
-        try {
-            result.append("✓ BackendVersion: ").append(BackendVersion.class.getName()).append("\n");
-            // Попробуем получить версию
-            try {
-                String version = BackendVersion.VERSION;
-                result.append("  Версия: ").append(version).append("\n");
-            } catch (Exception e) {
-                result.append("  Ошибка получения версии: ").append(e.getMessage()).append("\n");
-            }
-        } catch (Exception e) {
-            result.append("✗ BackendVersion: ").append(e.getMessage()).append("\n");
-        }
-    }
+
 
     private void testFrontendVersion(StringBuilder result) {
         try {
@@ -527,25 +470,17 @@ public class BackendTestActivity extends BaseNavigationActivity {
                 }
             }
             
-            // Тест создания CurrencyService с новой архитектурой
+            // Тест создания CurrencyService с Room ORM
             try {
-                result.append("✓ Попытка создания CurrencyService с новой архитектурой...\n");
+                result.append("✓ Попытка создания CurrencyService с Room ORM...\n");
                 
-                // Создаем репозиторий и сервис
-                CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
-                CurrencyService currencyService = new CurrencyService(currencyRepo, "test_user");
+                // Создаем сервис с Room ORM
+                CurrencyService currencyService = new CurrencyService(this, "test_user");
                 result.append("✓ CurrencyService создан успешно\n");
                 
                 // Получаем все валюты
-                List<Currency> currencies = currencyService.getAll();
-                result.append("✓ Получено валют: ").append(currencies.size()).append("\n");
-                
-                // Создаем новую валюту
-                Currency newCurrency = new Currency();
-                newCurrency.setTitle("TEST");
-                newCurrency.setPosition(999);
-                currencyService.create(newCurrency);
-                result.append("✓ Новая валюта создана\n");
+                LiveData<List<Currency>> currenciesLiveData = currencyService.getAllCurrencies();
+                result.append("✓ CurrencyService готов к работе\n");
                 
             } catch (Exception e) {
                 result.append("✗ Ошибка создания CurrencyService: ").append(e.getMessage()).append("\n");
@@ -563,53 +498,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
         }
     }
     
-    private void testDatabaseArchitecture(StringBuilder result) {
-        result.append("Тестирование новой Android архитектуры БД...\n");
-        
-        try {
-            result.append("✓ AndroidPlatformUtil доступен\n");
-            
-            // Тестируем создание базы данных через backend
-            String dbPath = "test_architecture.db";
-            
-            // Создаем базу данных через DatabaseUtil
-            DatabaseUtil.createDatabaseIfNotExists(dbPath);
-            result.append("✓ База данных создана через DatabaseUtil\n");
-            
-            // Тестируем получение статистики
-            int currenciesCount = DatabaseUtil.getTableRecordCount(dbPath, "currencies");
-            int categoriesCount = DatabaseUtil.getTableRecordCount(dbPath, "categories");
-            int accountsCount = DatabaseUtil.getTableRecordCount(dbPath, "accounts");
-            
-            result.append("✓ Статистика БД:\n");
-            result.append("  - Валюты: ").append(currenciesCount).append(" записей\n");
-            result.append("  - Категории: ").append(categoriesCount).append(" записей\n");
-            result.append("  - Счета: ").append(accountsCount).append(" записей\n");
-            
-            // Тестируем создание репозитория
-            try {
-                CurrencyRepository currencyRepo = new CurrencyRepository(dbPath);
-                result.append("✓ CurrencyRepository создан успешно\n");
-                
-                // Тестируем создание сервиса
-                CurrencyService currencyService = new CurrencyService(currencyRepo, "test_user");
-                result.append("✓ CurrencyService создан успешно\n");
-                
-                // Получаем все валюты
-                List<Currency> currencies = currencyService.getAll();
-                result.append("✓ Получено валют из БД: ").append(currencies.size()).append("\n");
-                
-            } catch (Exception e) {
-                result.append("✗ Ошибка создания репозитория/сервиса: ").append(e.getMessage()).append("\n");
-            }
-            
-            result.append("✓ Новая Android архитектура БД работает корректно\n");
-            
-        } catch (Exception e) {
-            result.append("✗ Ошибка в новой Android архитектуре БД: ").append(e.getMessage()).append("\n");
-            Log.e("BackendTest", "Android database architecture error", e);
-        }
-    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
