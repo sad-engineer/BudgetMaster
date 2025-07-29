@@ -1,7 +1,9 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -17,7 +19,15 @@ import java.time.LocalDateTime;
                 @ForeignKey(entity = Category.class,
                         parentColumns = "id",
                         childColumns = "categoryId",
+                        onDelete = ForeignKey.CASCADE),
+                @ForeignKey(entity = Currency.class,
+                        parentColumns = "id",
+                        childColumns = "currencyId",
                         onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index("categoryId"),
+                @Index("currencyId")
         })
 @TypeConverters(DateTimeConverter.class)
 public class Budget {
@@ -25,14 +35,9 @@ public class Budget {
     @PrimaryKey(autoGenerate = true)
     private int id;
     
-    private String name;
     private int amount; // Сумма в копейках
-    private String currency;
-    private LocalDateTime startDate; // Изменено с Date на LocalDateTime
-    private LocalDateTime endDate;   // Изменено с Date на LocalDateTime
+    private int currencyId; // ID валюты
     private Integer categoryId; // может быть null для общего бюджета
-    private String period; // "monthly", "yearly", "custom"
-    private boolean isActive;
     private int position; // Позиция для сортировки
     
     // Поля из BaseEntity
@@ -43,20 +48,8 @@ public class Budget {
     private String updatedBy;
     private String deletedBy;
     
-    // Конструкторы
+    // Конструктор для Room
     public Budget() {}
-    
-    public Budget(String name, int amount, String currency, LocalDateTime startDate, 
-                 LocalDateTime endDate, Integer categoryId, String period, boolean isActive) {
-        this.name = name;
-        this.amount = amount;
-        this.currency = currency;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.categoryId = categoryId;
-        this.period = period;
-        this.isActive = isActive;
-    }
     
     // Геттеры и сеттеры
     public int getId() {
@@ -67,14 +60,6 @@ public class Budget {
         this.id = id;
     }
     
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
     public int getAmount() {
         return amount;
     }
@@ -83,28 +68,12 @@ public class Budget {
         this.amount = amount;
     }
     
-    public String getCurrency() {
-        return currency;
+    public int getCurrencyId() {
+        return currencyId;
     }
     
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-    
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-    
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-    
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-    
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
+    public void setCurrencyId(int currencyId) {
+        this.currencyId = currencyId;
     }
     
     public Integer getCategoryId() {
@@ -115,20 +84,12 @@ public class Budget {
         this.categoryId = categoryId;
     }
     
-    public String getPeriod() {
-        return period;
+    public int getPosition() {
+        return position;
     }
     
-    public void setPeriod(String period) {
-        this.period = period;
-    }
-    
-    public boolean isActive() {
-        return isActive;
-    }
-    
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setPosition(int position) {
+        this.position = position;
     }
     
     // Геттеры и сеттеры для полей BaseEntity
@@ -178,14 +139,6 @@ public class Budget {
     
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
-    }
-    
-    public int getPosition() {
-        return position;
-    }
-    
-    public void setPosition(int position) {
-        this.position = position;
     }
     
     // Методы для проверки статуса

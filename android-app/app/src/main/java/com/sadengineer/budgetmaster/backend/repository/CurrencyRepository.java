@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
@@ -33,6 +34,16 @@ public class CurrencyRepository {
         MutableLiveData<List<Currency>> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
             List<Currency> currencies = currencyDao.getAllActiveCurrencies();
+            liveData.postValue(currencies);
+        });
+        return liveData;
+    }
+    
+    // Получить все валюты
+    public LiveData<List<Currency>> getAllCurrencies() {
+        MutableLiveData<List<Currency>> liveData = new MutableLiveData<>();
+        executorService.execute(() -> {
+            List<Currency> currencies = currencyDao.getAllCurrencies();
             liveData.postValue(currencies);
         });
         return liveData;

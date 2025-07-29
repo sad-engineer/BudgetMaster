@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -21,8 +22,8 @@ public class Currency {
     private String title; // Название валюты
     private String code; // Код валюты (USD, EUR, RUB)
     private String symbol; // Символ валюты ($, €, ₽)
-    private int position; // Позиция для сортировки
     private boolean isDefault; // Валюта по умолчанию
+    private int position; // Позиция для сортировки
     
     // Поля из BaseEntity
     private LocalDateTime createTime;
@@ -32,16 +33,8 @@ public class Currency {
     private String updatedBy;
     private String deletedBy;
     
-    // Конструкторы
+    // Конструктор для Room
     public Currency() {}
-    
-    public Currency(String title, String code, String symbol, int position, boolean isDefault) {
-        this.title = title;
-        this.code = code;
-        this.symbol = symbol;
-        this.position = position;
-        this.isDefault = isDefault;
-    }
     
     // Геттеры и сеттеры
     public int getId() {
@@ -76,20 +69,20 @@ public class Currency {
         this.symbol = symbol;
     }
     
+    public boolean isDefault() {
+        return isDefault;
+    }
+    
+    public void setDefault(boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+    
     public int getPosition() {
         return position;
     }
     
     public void setPosition(int position) {
         this.position = position;
-    }
-    
-    public boolean isDefault() {
-        return isDefault;
-    }
-    
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
     }
     
     // Геттеры и сеттеры для полей BaseEntity

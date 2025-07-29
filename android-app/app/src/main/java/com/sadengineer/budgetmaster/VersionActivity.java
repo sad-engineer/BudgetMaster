@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
-import com.sadengineer.budgetmaster.backend.BackendVersion;
+// BackendVersion больше не используется - используем Room ORM
 
 public class VersionActivity extends BaseNavigationActivity {
 
@@ -38,9 +38,9 @@ public class VersionActivity extends BaseNavigationActivity {
             frontendVersionText.setText("Неизвестно");
         }
 
-        // Устанавливаем версию бекенда
+        // Устанавливаем версию бекенда из BuildConfig
         try {
-            String backendVersion = BackendVersion.VERSION;
+            String backendVersion = BuildConfig.BACKEND_VERSION;
             backendVersionText.setText(backendVersion);
         } catch (Exception e) {
             backendVersionText.setText("Неизвестно");

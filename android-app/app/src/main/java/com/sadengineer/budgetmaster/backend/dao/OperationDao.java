@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -77,6 +78,9 @@ public interface OperationDao {
     
     @Query("UPDATE operations SET deleteTime = NULL, deletedBy = NULL, updateTime = :updateTime, updatedBy = :updatedBy WHERE id = :id")
     void restoreOperation(int id, String updateTime, String updatedBy);
+    
+    @Query("DELETE FROM operations")
+    void deleteAll();
     
     @Query("SELECT SUM(amount) FROM operations WHERE type = :type AND deleteTime IS NULL")
     Integer getTotalAmountByType(String type);

@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
@@ -34,8 +35,8 @@ public class CategoryService {
     }
     
     // Получить категории по типу
-    public LiveData<List<Category>> getCategoriesByType(String type) {
-        return categoryRepository.getCategoriesByType(type);
+    public LiveData<List<Category>> getCategoriesByType(int operationType) {
+        return categoryRepository.getCategoriesByType(operationType);
     }
     
     // Получить категории по родительской категории
@@ -59,14 +60,11 @@ public class CategoryService {
     }
     
     // Создать новую категорию
-    public void createCategory(String name, String type, Integer parentId, String color, String icon) {
+    public void createCategory(String title, int operationType, Integer parentId) {
         Category category = new Category();
-        category.setName(name);
-        category.setType(type);
+        category.setTitle(title);
+        category.setOperationType(operationType);
         category.setParentId(parentId);
-        category.setColor(color);
-        category.setIcon(icon);
-        category.setDefault(false);
         category.setPosition(1); // TODO: Получить следующую позицию
         
         categoryRepository.insertCategory(category, user);
@@ -177,11 +175,11 @@ public class CategoryService {
     }
     
     // Получить или создать категорию
-    public LiveData<Category> getOrCreateCategory(String name, String type, Integer parentId) {
+    public LiveData<Category> getOrCreateCategory(String title, int operationType, Integer parentId) {
         MutableLiveData<Category> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
             // Поиск по названию
-            Category existingCategory = categoryRepository.getCategoryByName(name).getValue();
+            Category existingCategory = categoryRepository.getCategoryByName(title).getValue();
             if (existingCategory != null) {
                 liveData.postValue(existingCategory);
                 return;
@@ -189,12 +187,9 @@ public class CategoryService {
             
             // Если не найден - создаем новый
             Category newCategory = new Category();
-            newCategory.setName(name);
-            newCategory.setType(type);
+            newCategory.setTitle(title);
+            newCategory.setOperationType(operationType);
             newCategory.setParentId(parentId);
-            newCategory.setColor("#FF0000"); // TODO: Получить цвет по умолчанию
-            newCategory.setIcon("default_icon"); // TODO: Получить иконку по умолчанию
-            newCategory.setDefault(false);
             newCategory.setPosition(1); // TODO: Получить следующую позицию
             
             categoryRepository.insertCategory(newCategory, user);
@@ -202,48 +197,7 @@ public class CategoryService {
         });
         return liveData;
     }
-    
-    // Получить или создать категорию с полными параметрами
-    public LiveData<Category> getOrCreateCategory(String name, String type, Integer parentId, String color, String icon) {
-        MutableLiveData<Category> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Поиск по названию
-            Category existingCategory = categoryRepository.getCategoryByName(name).getValue();
-            if (existingCategory != null) {
-                // Проверяем, совпадают ли параметры
-                if (existingCategory.getType().equals(type) && 
-                    (existingCategory.getParentId() == null && parentId == null || 
-                     existingCategory.getParentId() != null && existingCategory.getParentId().equals(parentId))) {
-                    liveData.postValue(existingCategory);
-                    return;
-                }
-                
-                // Если параметры не совпадают, обновляем категорию
-                existingCategory.setType(type);
-                existingCategory.setParentId(parentId);
-                existingCategory.setColor(color);
-                existingCategory.setIcon(icon);
-                categoryRepository.updateCategory(existingCategory, user);
-                liveData.postValue(existingCategory);
-                return;
-            }
-            
-            // Если не найден - создаем новый
-            Category newCategory = new Category();
-            newCategory.setName(name);
-            newCategory.setType(type);
-            newCategory.setParentId(parentId);
-            newCategory.setColor(color);
-            newCategory.setIcon(icon);
-            newCategory.setDefault(false);
-            newCategory.setPosition(1); // TODO: Получить следующую позицию
-            
-            categoryRepository.insertCategory(newCategory, user);
-            liveData.postValue(newCategory);
-        });
-        return liveData;
-    }
-    
+        
     // Получить количество активных категорий
     public LiveData<Integer> getActiveCategoriesCount() {
         return categoryRepository.getActiveCategoriesCount();
@@ -251,13 +205,10 @@ public class CategoryService {
     
     // Валидация категории
     public boolean validateCategory(Category category) {
-        if (category.getName() == null || category.getName().trim().isEmpty()) {
+        if (category.getTitle() == null || category.getTitle().trim().isEmpty()) {
             return false;
         }
-        if (category.getType() == null || category.getType().trim().isEmpty()) {
-            return false;
-        }
-        if (!category.getType().equals("income") && !category.getType().equals("expense")) {
+        if (category.getOperationType() != 1 && category.getOperationType() != 2) {
             return false;
         }
         return true;

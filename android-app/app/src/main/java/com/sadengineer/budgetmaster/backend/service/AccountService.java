@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
@@ -51,6 +52,11 @@ public class AccountService {
     // Получить счет по ID
     public LiveData<Account> getAccountById(int id) {
         return accountRepository.getAccountById(id);
+    }
+    
+    // Получить счет по названию
+    public LiveData<Account> getAccountByTitle(String title) {
+        return accountRepository.getAccountByTitle(title);
     }
     
     // Получить счета по валюте

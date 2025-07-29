@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
@@ -39,10 +40,10 @@ public class BudgetRepository {
     }
     
     // Получить бюджеты по периоду
-    public LiveData<List<Budget>> getBudgetsByPeriod(String period) {
+    public LiveData<List<Budget>> getBudgetsByPeriod() {
         MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getBudgetsByPeriod(period);
+            List<Budget> budgets = budgetDao.getBudgetsByPeriod();
             liveData.postValue(budgets);
         });
         return liveData;
@@ -79,20 +80,20 @@ public class BudgetRepository {
     }
     
     // Получить бюджеты по валюте
-    public LiveData<List<Budget>> getBudgetsByCurrency(String currency) {
+    public LiveData<List<Budget>> getBudgetsByCurrency(int currencyId) {
         MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getBudgetsByCurrency(currency);
+            List<Budget> budgets = budgetDao.getBudgetsByCurrency(currencyId);
             liveData.postValue(budgets);
         });
         return liveData;
     }
     
     // Получить общую сумму бюджетов по валюте
-    public LiveData<Integer> getTotalAmountByCurrency(String currency) {
+    public LiveData<Integer> getTotalAmountByCurrency(int currencyId) {
         MutableLiveData<Integer> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            Integer total = budgetDao.getTotalAmountByCurrency(currency);
+            Integer total = budgetDao.getTotalAmountByCurrency(currencyId);
             liveData.postValue(total != null ? total : 0);
         });
         return liveData;
@@ -135,15 +136,7 @@ public class BudgetRepository {
         return liveData;
     }
     
-    // Получить бюджет по названию
-    public LiveData<Budget> getBudgetByName(String name) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Budget budget = budgetDao.getBudgetByName(name);
-            liveData.postValue(budget);
-        });
-        return liveData;
-    }
+
     
     // Получить максимальную позицию
     public LiveData<Integer> getMaxPosition() {

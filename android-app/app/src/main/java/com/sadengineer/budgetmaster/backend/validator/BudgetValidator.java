@@ -26,7 +26,7 @@ public class BudgetValidator {
 
         // Валидация специфичных полей
         CommonValidator.validateBudgetAmount(budget.getAmount());
-        CommonValidator.validateCurrency(budget.getCurrency());
+        CommonValidator.validateCurrencyId(budget.getCurrencyId());
         CommonValidator.validateCategoryId(budget.getCategoryId());
         CommonValidator.validatePosition(budget.getPosition());
     }
@@ -42,7 +42,7 @@ public class BudgetValidator {
         }
         
         CommonValidator.validateBudgetAmount(budget.getAmount());
-        CommonValidator.validateCurrency(budget.getCurrency());
+        CommonValidator.validateCurrencyId(budget.getCurrencyId());
         CommonValidator.validateCategoryId(budget.getCategoryId());
         CommonValidator.validatePosition(budget.getPosition());
     }
@@ -58,7 +58,7 @@ public class BudgetValidator {
         }
         
         CommonValidator.validateBudgetAmount(budget.getAmount());
-        CommonValidator.validateCurrency(budget.getCurrency());
+        CommonValidator.validateCurrencyId(budget.getCurrencyId());
         CommonValidator.validateCategoryId(budget.getCategoryId());
         CommonValidator.validatePosition(budget.getPosition());
     }

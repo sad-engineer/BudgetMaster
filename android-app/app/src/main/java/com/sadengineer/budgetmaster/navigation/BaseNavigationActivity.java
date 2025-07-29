@@ -112,6 +112,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void onBackPressed() {
         if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);

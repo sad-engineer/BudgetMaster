@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -20,6 +21,9 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE deleteTime IS NULL ORDER BY position ASC")
     List<Account> getAllActiveAccounts();
     
+    @Query("SELECT * FROM accounts WHERE deleteTime IS NULL ORDER BY position ASC")
+    List<Account> getAllAccounts();
+    
     @Query("SELECT * FROM accounts WHERE type = :type AND deleteTime IS NULL ORDER BY position ASC")
     List<Account> getAccountsByType(String type);
     
@@ -34,6 +38,9 @@ public interface AccountDao {
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertAccount(Account account);
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    long insert(Account account);
     
     @Update
     void updateAccount(Account account);
@@ -61,4 +68,7 @@ public interface AccountDao {
     
     @Query("SELECT * FROM accounts WHERE position = :position AND deleteTime IS NULL")
     Account getAccountByPosition(int position);
+    
+    @Query("DELETE FROM accounts")
+    void deleteAll();
 } 

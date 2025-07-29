@@ -12,7 +12,7 @@ android {
         targetSdk = 34
         versionCode = 1
         // Читаем версию из файла
-        val versionFile = rootProject.file("VERSION")
+        val versionFile = rootProject.file("APP_VERSION")
         val versionNameFromFile = versionFile.readText().trim()
         versionName = versionNameFromFile
     }
@@ -25,7 +25,8 @@ android {
     }
     // Добавим в BuildConfig
     buildTypes.all {
-        buildConfigField("String", "APP_VERSION", "\"${rootProject.file("VERSION").readText().trim()}\"")
+        buildConfigField("String", "APP_VERSION", "\"${rootProject.file("APP_VERSION").readText().trim()}\"")
+        buildConfigField("String", "BACKEND_VERSION", "\"${rootProject.file("BACKEND_VERSION").readText().trim()}\"")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -55,8 +56,6 @@ android {
 dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
-    // Подключаем backend JAR файл
-    implementation(files("libs/budgetmaster-backend-0.0.012.jar"))
     
     // Android Room dependencies
     implementation("androidx.room:room-runtime:2.6.1")

@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
@@ -39,10 +40,10 @@ public class CategoryRepository {
     }
     
     // Получить категории по типу
-    public LiveData<List<Category>> getCategoriesByType(String type) {
+    public LiveData<List<Category>> getCategoriesByType(int operationType) {
         MutableLiveData<List<Category>> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            List<Category> categories = categoryDao.getCategoriesByType(type);
+            List<Category> categories = categoryDao.getCategoriesByType(operationType);
             liveData.postValue(categories);
         });
         return liveData;

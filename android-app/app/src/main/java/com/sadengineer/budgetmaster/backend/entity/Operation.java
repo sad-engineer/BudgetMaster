@@ -1,7 +1,9 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -22,6 +24,10 @@ import java.time.LocalDateTime;
                         parentColumns = "id",
                         childColumns = "categoryId",
                         onDelete = ForeignKey.RESTRICT)
+        },
+        indices = {
+                @Index("accountId"),
+                @Index("categoryId")
         })
 @TypeConverters(DateTimeConverter.class)
 public class Operation {
@@ -48,18 +54,8 @@ public class Operation {
     private String updatedBy;
     private String deletedBy;
     
-    // Конструкторы
+    // Конструктор для Room
     public Operation() {}
-    
-    public Operation(int accountId, int categoryId, int amount, String description, 
-                   LocalDateTime operationDate, String type) {
-        this.accountId = accountId;
-        this.categoryId = categoryId;
-        this.amount = amount;
-        this.description = description;
-        this.operationDate = operationDate;
-        this.type = type;
-    }
     
     // Геттеры и сеттеры
     public int getId() {

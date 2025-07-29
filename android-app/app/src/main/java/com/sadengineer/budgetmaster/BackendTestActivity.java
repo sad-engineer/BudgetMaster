@@ -11,6 +11,8 @@ import androidx.appcompat.widget.Toolbar;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import java.util.List;
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
+import androidx.lifecycle.LiveData;
 
 // Импорты классов из нового backend
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
@@ -39,6 +41,9 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
+import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
+import com.sadengineer.budgetmaster.backend.database.DatabaseInitializer;
+import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 
 public class BackendTestActivity extends BaseNavigationActivity {
 
@@ -326,8 +331,8 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Тест создания Category
             Category category = new Category();
             category.setTitle("Продукты");
-            category.setType("expense"); // тип расход
-            result.append("✓ Category создан: ").append(category.getTitle()).append(" (тип: ").append(category.getType()).append(")\n");
+            category.setOperationType(2); // тип расход
+            result.append("✓ Category создан: ").append(category.getTitle()).append(" (тип: ").append(category.getOperationType()).append(")\n");
         } catch (Exception e) {
             result.append("✗ Ошибка создания Category: ").append(e.getMessage()).append("\n");
         }
@@ -407,93 +412,123 @@ public class BackendTestActivity extends BaseNavigationActivity {
     }
 
     private void testDatabase(StringBuilder result) {
+        DatabaseManager databaseManager = null;
         try {
-            // Создаем путь к базе данных в Android
-            String dbPath = getApplicationContext().getDatabasePath("budgetmaster.db").getAbsolutePath();
-            result.append("✓ Путь к БД: ").append(dbPath).append("\n");
+            result.append("✓ Начинаем тест базы данных с новым подходом...\n");
 
-            // Проверяем, что папка существует
-            File dbDir = new File(dbPath).getParentFile();
-            if (!dbDir.exists()) {
-                dbDir.mkdirs();
-                result.append("✓ Папка БД создана\n");
-            }
-
-            // Детальная диагностика создания БД
-            result.append("✓ Начинаем диагностику создания БД...\n");
+            // Создаем менеджер базы данных
+            databaseManager = new DatabaseManager(this);
+            result.append("✓ DatabaseManager создан\n");
             
-            // Проверяем существование файла БД
-            File dbFile = new File(dbPath);
-            result.append("✓ Файл БД существует: ").append(dbFile.exists()).append("\n");
-            if (dbFile.exists()) {
-                result.append("✓ Размер файла БД: ").append(dbFile.length()).append(" байт\n");
+            // Инициализируем базу данных
+            result.append("✓ Инициализация базы данных...\n");
+            CompletableFuture<Boolean> initFuture = databaseManager.initializeDatabase();
+            Boolean initResult = initFuture.get();
+            
+            if (initResult) {
+                result.append("✅ База данных инициализирована успешно\n");
+            } else {
+                result.append("❌ Ошибка инициализации базы данных\n");
+                return;
             }
             
-            // Проверяем права доступа
-            result.append("✓ Папка доступна для записи: ").append(dbDir.canWrite()).append("\n");
-            result.append("✓ Файл доступен для записи: ").append(dbFile.canWrite()).append("\n");
+            // Тестируем получение данных через Callable
+            result.append("✓ Тестируем получение данных...\n");
             
-            // Тест создания БД через Android SQLite
-            try {
-                result.append("✓ Попытка создания БД через Android SQLite...\n");
+            // Получаем валюты
+            CompletableFuture<List<Currency>> currenciesFuture = databaseManager.executeDatabaseOperation(() -> {
+                BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+                List<Currency> currencies = database.currencyDao().getAllActiveCurrencies();
+                database.close();
+                return currencies;
+            });
                 
-                // Используем Android SQLite вместо JDBC
-                android.database.sqlite.SQLiteDatabase db = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(dbPath, null);
-                result.append("✓ Android SQLite БД создана успешно\n");
+            // Получаем категории
+            CompletableFuture<List<Category>> categoriesFuture = databaseManager.executeDatabaseOperation(() -> {
+                BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+                List<Category> categories = database.categoryDao().getAllActiveCategories();
+                database.close();
+                return categories;
+            });
                 
-                // Создаем простую таблицу
-                db.execSQL("CREATE TABLE IF NOT EXISTS test_currencies (id INTEGER PRIMARY KEY, title TEXT)");
-                db.execSQL("INSERT OR IGNORE INTO test_currencies (id, title) VALUES (1, 'USD')");
-                db.execSQL("INSERT OR IGNORE INTO test_currencies (id, title) VALUES (2, 'EUR')");
-                result.append("✓ Тестовая таблица создана и заполнена\n");
+            // Получаем счета
+            CompletableFuture<List<Account>> accountsFuture = databaseManager.executeDatabaseOperation(() -> {
+                BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+                List<Account> accounts = database.accountDao().getAllActiveAccounts();
+                database.close();
+                return accounts;
+            });
                 
-                // Проверяем данные
-                android.database.Cursor cursor = db.rawQuery("SELECT * FROM test_currencies", null);
-                int count = cursor.getCount();
-                result.append("✓ Найдено валют в БД: ").append(count).append("\n");
-                cursor.close();
-                
-                db.close();
-                result.append("✓ Соединение с БД закрыто\n");
-                
-            } catch (Exception e) {
-                result.append("✗ Ошибка создания БД через Android SQLite:\n");
-                result.append("  Сообщение: ").append(e.getMessage()).append("\n");
-                result.append("  Тип исключения: ").append(e.getClass().getName()).append("\n");
-            } catch (Throwable t) {
-                result.append("✗ КРИТИЧЕСКАЯ ОШИБКА создания БД через Android SQLite:\n");
-                result.append("  Сообщение: ").append(t.getMessage()).append("\n");
-                result.append("  Тип исключения: ").append(t.getClass().getName()).append("\n");
-                result.append("  Стек вызовов:\n");
-                for (StackTraceElement element : t.getStackTrace()) {
-                    result.append("    ").append(element.toString()).append("\n");
+            // Ждем результаты
+            List<Currency> currencies = currenciesFuture.get();
+            List<Category> categories = categoriesFuture.get();
+            List<Account> accounts = accountsFuture.get();
+            
+            // Выводим результаты
+            int currencyCount = currencies != null ? currencies.size() : 0;
+            result.append("✓ Найдено валют в БД: ").append(currencyCount).append("\n");
+            
+            if (currencies != null && !currencies.isEmpty()) {
+                result.append("✓ Список валют:\n");
+                for (Currency currency : currencies) {
+                    result.append("  - ").append(currency.getTitle()).append(" (ID: ").append(currency.getId()).append(")\n");
                 }
             }
             
-            // Тест создания CurrencyService с Room ORM
-            try {
-                result.append("✓ Попытка создания CurrencyService с Room ORM...\n");
+            int categoryCount = categories != null ? categories.size() : 0;
+            result.append("✓ Найдено категорий в БД: ").append(categoryCount).append("\n");
+            
+            int accountCount = accounts != null ? accounts.size() : 0;
+            result.append("✓ Найдено счетов в БД: ").append(accountCount).append("\n");
+            
+            // Тестируем сервисы
+            result.append("✓ Тестируем сервисы...\n");
+            
+            CurrencyService currencyService = new CurrencyService(this, "test_user");
+            result.append("✓ CurrencyService создан\n");
+            
+            result.append("✓ Примечание: LiveData.getValue() в тестах может возвращать null\n");
+            result.append("  потому что LiveData работает асинхронно. Для тестов лучше\n");
+            result.append("  использовать прямые DAO вызовы через Callable.\n");
                 
-                // Создаем сервис с Room ORM
-                CurrencyService currencyService = new CurrencyService(this, "test_user");
-                result.append("✓ CurrencyService создан успешно\n");
+            // Тестируем через репозиторий - используем прямые DAO вызовы вместо LiveData
+            CompletableFuture<List<Currency>> repoCurrenciesFuture = databaseManager.executeDatabaseOperation(() -> {
+                BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+                List<Currency> repoCurrencies = database.currencyDao().getAllActiveCurrencies();
+                database.close();
+                return repoCurrencies;
+            });
+
+            
+            List<Currency> repoCurrencies = repoCurrenciesFuture.get();
+            int repoCurrencyCount = repoCurrencies != null ? repoCurrencies.size() : 0;
+            result.append("✓ Валют через DAO (синхронно): ").append(repoCurrencyCount).append("\n");
                 
-                // Получаем все валюты
-                LiveData<List<Currency>> currenciesLiveData = currencyService.getAllCurrencies();
-                result.append("✓ CurrencyService готов к работе\n");
-                
-            } catch (Exception e) {
-                result.append("✗ Ошибка создания CurrencyService: ").append(e.getMessage()).append("\n");
-            }
+            // Демонстрируем проблему с LiveData.getValue()
+            result.append("✓ Демонстрация проблемы с LiveData.getValue()...\n");
+            CurrencyRepository currencyRepository = new CurrencyRepository(this);
+            LiveData<List<Currency>> liveData = currencyRepository.getAllCurrencies();
+            List<Currency> liveDataCurrencies = liveData.getValue();
+            int liveDataCount = liveDataCurrencies != null ? liveDataCurrencies.size() : 0;
+            result.append("✓ LiveData.getValue() вернул: ").append(liveDataCount).append(" валют\n");
+            result.append("  (Это нормально - LiveData работает асинхронно)\n");
+            
+            result.append("✅ Тест базы данных завершен успешно\n");
 
         } catch (Exception e) {
-            result.append("✗ Общая ошибка теста БД: ").append(e.getMessage()).append("\n");
+            result.append("✗ Ошибка теста БД: ").append(e.getMessage()).append("\n");
+            result.append("  Тип исключения: ").append(e.getClass().getName()).append("\n");
         } catch (Throwable t) {
             result.append("✗ КРИТИЧЕСКАЯ ОШИБКА теста БД: ").append(t.getMessage()).append("\n");
             result.append("  Тип: ").append(t.getClass().getName()).append("\n");
             result.append("  Стек:\n");
             for (StackTraceElement element : t.getStackTrace()) {
                 result.append("    ").append(element.toString()).append("\n");
+            }
+        } finally {
+            // Закрываем менеджер
+            if (databaseManager != null) {
+                databaseManager.shutdown();
             }
         }
     }

@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -20,6 +21,9 @@ public interface CurrencyDao {
     @Query("SELECT * FROM currencies WHERE deleteTime IS NULL ORDER BY position ASC")
     List<Currency> getAllActiveCurrencies();
     
+    @Query("SELECT * FROM currencies WHERE deleteTime IS NULL ORDER BY position ASC")
+    List<Currency> getAllCurrencies();
+    
     @Query("SELECT * FROM currencies WHERE id = :id AND deleteTime IS NULL")
     Currency getCurrencyById(int id);
     
@@ -31,12 +35,15 @@ public interface CurrencyDao {
     
     @Query("SELECT * FROM currencies WHERE isDefault = 1 AND deleteTime IS NULL LIMIT 1")
     Currency getDefaultCurrency();
-    
+        
     @Query("SELECT * FROM currencies WHERE position = :position AND deleteTime IS NULL")
     Currency getCurrencyByPosition(int position);
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertCurrency(Currency currency);
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    long insert(Currency currency);
     
     @Update
     void updateCurrency(Currency currency);
@@ -61,4 +68,7 @@ public interface CurrencyDao {
     
     @Query("UPDATE currencies SET deleteTime = NULL, deletedBy = NULL, updateTime = :updateTime, updatedBy = :updatedBy WHERE id = :id")
     void restoreCurrency(int id, String updateTime, String updatedBy);
+    
+    @Query("DELETE FROM currencies")
+    void deleteAll();
 } 

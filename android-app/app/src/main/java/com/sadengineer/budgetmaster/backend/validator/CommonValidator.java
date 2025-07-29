@@ -46,6 +46,20 @@ public class CommonValidator {
     }
     
     /**
+     * Валидирует тип операции (String)
+     * @param type тип для валидации
+     * @throws IllegalArgumentException если тип некорректный
+     */
+    public static void validateOperationType(String type) {
+        if (type == null || type.trim().isEmpty()) {
+            throw new IllegalArgumentException("Тип операции не может быть пустым");
+        }
+        if (!type.equals("expense") && !type.equals("income") && !type.equals("transfer")) {
+            throw new IllegalArgumentException("Некорректный тип операции: " + type);
+        }
+    }
+    
+    /**
      * Валидирует статус закрытия
      * @param status статус для валидации
      * @throws IllegalArgumentException если статус некорректный
@@ -78,6 +92,17 @@ public class CommonValidator {
     }
     
     /**
+     * Валидирует валюту (String)
+     * @param currency валюта для валидации
+     * @throws IllegalArgumentException если валюта некорректная
+     */
+    public static void validateCurrency(String currency) {
+        if (currency == null || currency.trim().isEmpty()) {
+            throw new IllegalArgumentException("Валюта не может быть пустой");
+        }
+    }
+    
+    /**
      * Валидирует ID категории
      * @param categoryId ID категории для валидации
      * @throws IllegalArgumentException если ID некорректный
@@ -94,6 +119,31 @@ public class CommonValidator {
     public static void validateCategoryId(Integer categoryId) {
         if (categoryId != null) {
             BaseEntityValidator.validatePositiveId(categoryId.intValue(), "ID категории");
+        }
+    }
+    
+    /**
+     * Валидирует тип категории (String)
+     * @param type тип категории для валидации
+     * @throws IllegalArgumentException если тип некорректный
+     */
+    public static void validateCategoryType(String type) {
+        if (type == null || type.trim().isEmpty()) {
+            throw new IllegalArgumentException("Тип категории не может быть пустым");
+        }
+        if (!type.equals("expense") && !type.equals("income")) {
+            throw new IllegalArgumentException("Некорректный тип категории: " + type);
+        }
+    }
+    
+    /**
+     * Валидирует тип операции категории (int)
+     * @param operationType тип операции для валидации
+     * @throws IllegalArgumentException если тип некорректный
+     */
+    public static void validateCategoryType(int operationType) {
+        if (operationType != 1 && operationType != 2) {
+            throw new IllegalArgumentException("Некорректный тип операции категории: " + operationType);
         }
     }
     

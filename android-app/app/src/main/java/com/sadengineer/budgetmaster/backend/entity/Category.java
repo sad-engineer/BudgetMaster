@@ -1,7 +1,10 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.entity;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -18,20 +21,21 @@ import java.time.LocalDateTime;
                         parentColumns = "id",
                         childColumns = "parentId",
                         onDelete = ForeignKey.CASCADE)
+        },
+        indices = {
+                @Index("parentId")
         })
 @TypeConverters(DateTimeConverter.class)
 public class Category {
     
     @PrimaryKey(autoGenerate = true)
     private int id;
-    
-    private String name;
-    private String type; // "income" или "expense"
-    private Integer parentId; // для иерархии категорий
-    private String color; // цвет категории
-    private String icon; // иконка категории
-    private boolean isDefault;
+    private String title;
     private int position; // Позиция для сортировки
+    private int operationType; // 1 - доход, 2 - расход
+    private int type; // 0-родительская категория, 1-дочерняя категория
+    private Integer parentId; // для иерархии категорий
+
     
     // Поля из BaseEntity
     private LocalDateTime createTime;
@@ -41,17 +45,8 @@ public class Category {
     private String updatedBy;
     private String deletedBy;
     
-    // Конструкторы
+    // Конструктор для Room
     public Category() {}
-    
-    public Category(String name, String type, Integer parentId, String color, String icon, boolean isDefault) {
-        this.name = name;
-        this.type = type;
-        this.parentId = parentId;
-        this.color = color;
-        this.icon = icon;
-        this.isDefault = isDefault;
-    }
     
     // Геттеры и сеттеры
     public int getId() {
@@ -62,19 +57,36 @@ public class Category {
         this.id = id;
     }
     
+    public String getTitle() {
+        return title;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    // Алиас для совместимости с валидаторами
     public String getName() {
-        return name;
+        return title;
     }
     
     public void setName(String name) {
-        this.name = name;
+        this.title = name;
     }
     
-    public String getType() {
+    public int getOperationType() {
+        return operationType;
+    }
+    
+    public void setOperationType(int operationType) {
+        this.operationType = operationType;
+    }
+    
+    public int getType() {
         return type;
     }
     
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
     
@@ -84,30 +96,6 @@ public class Category {
     
     public void setParentId(Integer parentId) {
         this.parentId = parentId;
-    }
-    
-    public String getColor() {
-        return color;
-    }
-    
-    public void setColor(String color) {
-        this.color = color;
-    }
-    
-    public String getIcon() {
-        return icon;
-    }
-    
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-    
-    public boolean isDefault() {
-        return isDefault;
-    }
-    
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
     }
     
     // Геттеры и сеттеры для полей BaseEntity

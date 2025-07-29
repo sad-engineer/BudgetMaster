@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
@@ -33,6 +34,11 @@ public class CurrencyService {
         return currencyRepository.getAllActiveCurrencies();
     }
     
+    // Алиас для совместимости
+    public LiveData<List<Currency>> getAllCurrencies() {
+        return currencyRepository.getAllActiveCurrencies();
+    }
+    
     // Получить валюту по ID
     public LiveData<Currency> getCurrencyById(int id) {
         return currencyRepository.getCurrencyById(id);
@@ -43,23 +49,12 @@ public class CurrencyService {
         return currencyRepository.getCurrencyByTitle(title);
     }
     
-    // Получить валюту по коду
-    public LiveData<Currency> getCurrencyByCode(String code) {
-        return currencyRepository.getCurrencyByCode(code);
-    }
-    
-    // Получить валюту по умолчанию
-    public LiveData<Currency> getDefaultCurrency() {
-        return currencyRepository.getDefaultCurrency();
-    }
+
     
     // Создать новую валюту
-    public void createCurrency(String title, String code, String symbol) {
+    public void createCurrency(String title) {
         Currency currency = new Currency();
         currency.setTitle(title);
-        currency.setCode(code);
-        currency.setSymbol(symbol);
-        currency.setDefault(false);
         currency.setPosition(1); // TODO: Получить следующую позицию
         
         currencyRepository.insertCurrency(currency, user);
@@ -183,9 +178,6 @@ public class CurrencyService {
             // Если не найден - создаем новый
             Currency newCurrency = new Currency();
             newCurrency.setTitle(title);
-            newCurrency.setCode(title.toUpperCase()); // TODO: Получить код валюты
-            newCurrency.setSymbol(""); // TODO: Получить символ валюты
-            newCurrency.setDefault(false);
             newCurrency.setPosition(1); // TODO: Получить следующую позицию
             
             currencyRepository.insertCurrency(newCurrency, user);
@@ -194,65 +186,8 @@ public class CurrencyService {
         return liveData;
     }
     
-    // Получить или создать валюту с полными параметрами
-    public LiveData<Currency> getOrCreateCurrency(String title, String code, String symbol) {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Поиск по названию
-            Currency existingCurrency = currencyRepository.getCurrencyByTitle(title).getValue();
-            if (existingCurrency != null) {
-                // Проверяем, совпадают ли параметры
-                if (existingCurrency.getCode().equals(code) && 
-                    existingCurrency.getSymbol().equals(symbol)) {
-                    liveData.postValue(existingCurrency);
-                    return;
-                }
-                
-                // Если параметры не совпадают, обновляем валюту
-                existingCurrency.setCode(code);
-                existingCurrency.setSymbol(symbol);
-                currencyRepository.updateCurrency(existingCurrency, user);
-                liveData.postValue(existingCurrency);
-                return;
-            }
-            
-            // Если не найден - создаем новый
-            Currency newCurrency = new Currency();
-            newCurrency.setTitle(title);
-            newCurrency.setCode(code);
-            newCurrency.setSymbol(symbol);
-            newCurrency.setDefault(false);
-            newCurrency.setPosition(1); // TODO: Получить следующую позицию
-            
-            currencyRepository.insertCurrency(newCurrency, user);
-            liveData.postValue(newCurrency);
-        });
-        return liveData;
-    }
-    
-    // Установить валюту по умолчанию
-    public void setDefaultCurrency(int currencyId) {
-        executorService.execute(() -> {
-            // Сначала сбрасываем все валюты как не по умолчанию
-            List<Currency> allCurrencies = currencyRepository.getAllActiveCurrencies().getValue();
-            if (allCurrencies != null) {
-                for (Currency currency : allCurrencies) {
-                    if (currency.isDefault()) {
-                        currency.setDefault(false);
-                        currencyRepository.updateCurrency(currency, user);
-                    }
-                }
-            }
-            
-            // Устанавливаем выбранную валюту как валюту по умолчанию
-            Currency defaultCurrency = currencyRepository.getCurrencyById(currencyId).getValue();
-            if (defaultCurrency != null) {
-                defaultCurrency.setDefault(true);
-                currencyRepository.updateCurrency(defaultCurrency, user);
-            }
-        });
-    }
-    
+   
+
     // Получить количество активных валют
     public LiveData<Integer> getActiveCurrenciesCount() {
         return currencyRepository.getActiveCurrenciesCount();
@@ -263,33 +198,23 @@ public class CurrencyService {
         if (currency.getTitle() == null || currency.getTitle().trim().isEmpty()) {
             return false;
         }
-        if (currency.getCode() == null || currency.getCode().trim().isEmpty()) {
-            return false;
-        }
         return true;
-    }
-    
-    // Проверить, является ли валюта валютой по умолчанию
-    public boolean isDefaultCurrency(Currency currency) {
-        return currency != null && currency.isDefault();
     }
     
     // Получить валюту по умолчанию или создать рубль
     public LiveData<Currency> getDefaultCurrencyOrCreate() {
         MutableLiveData<Currency> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            Currency defaultCurrency = currencyRepository.getDefaultCurrency().getValue();
-            if (defaultCurrency != null) {
-                liveData.postValue(defaultCurrency);
+            // Получаем первую валюту или создаем рубль
+            List<Currency> currencies = currencyRepository.getAllActiveCurrencies().getValue();
+            if (currencies != null && !currencies.isEmpty()) {
+                liveData.postValue(currencies.get(0));
                 return;
             }
             
-            // Если валюты по умолчанию нет, создаем рубль
+            // Если валют нет, создаем рубль
             Currency ruble = new Currency();
             ruble.setTitle("Рубль");
-            ruble.setCode("RUB");
-            ruble.setSymbol("₽");
-            ruble.setDefault(true);
             ruble.setPosition(1);
             
             currencyRepository.insertCurrency(ruble, user);

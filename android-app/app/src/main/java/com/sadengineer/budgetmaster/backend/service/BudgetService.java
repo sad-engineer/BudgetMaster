@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
@@ -34,8 +35,8 @@ public class BudgetService {
     }
     
     // Получить бюджеты по периоду
-    public LiveData<List<Budget>> getBudgetsByPeriod(String period) {
-        return budgetRepository.getBudgetsByPeriod(period);
+    public LiveData<List<Budget>> getBudgetsByPeriod() {
+        return budgetRepository.getBudgetsByPeriod();
     }
     
     // Получить бюджеты по категории
@@ -49,28 +50,21 @@ public class BudgetService {
     }
     
     // Получить бюджеты по валюте
-    public LiveData<List<Budget>> getBudgetsByCurrency(String currency) {
-        return budgetRepository.getBudgetsByCurrency(currency);
+    public LiveData<List<Budget>> getBudgetsByCurrency(int currencyId) {
+        return budgetRepository.getBudgetsByCurrency(currencyId);
     }
     
     // Получить общую сумму бюджетов по валюте
-    public LiveData<Integer> getTotalAmountByCurrency(String currency) {
-        return budgetRepository.getTotalAmountByCurrency(currency);
+    public LiveData<Integer> getTotalAmountByCurrency(int currencyId) {
+        return budgetRepository.getTotalAmountByCurrency(currencyId);
     }
     
     // Создать новый бюджет
-    public void createBudget(String name, int amount, String currency, 
-                           LocalDateTime startDate, LocalDateTime endDate, 
-                           Integer categoryId, String period) {
+    public void createBudget(int amount, int currencyId, Integer categoryId) {
         Budget budget = new Budget();
-        budget.setName(name);
         budget.setAmount(amount);
-        budget.setCurrency(currency);
-        budget.setStartDate(startDate);
-        budget.setEndDate(endDate);
+        budget.setCurrencyId(currencyId);
         budget.setCategoryId(categoryId);
-        budget.setPeriod(period);
-        budget.setActive(true);
         budget.setPosition(1); // TODO: Получить следующую позицию
         
         budgetRepository.insertBudget(budget, user);
@@ -161,7 +155,7 @@ public class BudgetService {
     }
     
     // Получить или создать бюджет по категории
-    public LiveData<Budget> getOrCreateBudgetByCategory(int categoryId, int amount, String currency) {
+    public LiveData<Budget> getOrCreateBudgetByCategory(int categoryId, int amount, int currencyId) {
         MutableLiveData<Budget> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
             // Поиск по ID категории
@@ -173,14 +167,9 @@ public class BudgetService {
             
             // Если не найден - создаем новый
             Budget newBudget = new Budget();
-            newBudget.setName("Бюджет категории " + categoryId);
             newBudget.setAmount(amount);
-            newBudget.setCurrency(currency);
-            newBudget.setStartDate(LocalDateTime.now());
-            newBudget.setEndDate(LocalDateTime.now().plusMonths(1));
+            newBudget.setCurrencyId(currencyId);
             newBudget.setCategoryId(categoryId);
-            newBudget.setPeriod("monthly");
-            newBudget.setActive(true);
             newBudget.setPosition(1); // TODO: Получить следующую позицию
             
             budgetRepository.insertBudget(newBudget, user);
@@ -190,16 +179,16 @@ public class BudgetService {
     }
     
     // Получить или создать бюджет
-    public LiveData<Budget> getOrCreateBudget(String name, int amount, String currency, 
-                                            LocalDateTime startDate, LocalDateTime endDate, 
-                                            Integer categoryId, String period) {
+    public LiveData<Budget> getOrCreateBudget(int amount, int currencyId, Integer categoryId) {
         MutableLiveData<Budget> liveData = new MutableLiveData<>();
         executorService.execute(() -> {
-            // Поиск по названию
+            // Поиск по параметрам
             List<Budget> budgets = budgetRepository.getAllActiveBudgets().getValue();
             if (budgets != null) {
                 for (Budget budget : budgets) {
-                    if (budget.getName().equals(name)) {
+                    if (budget.getAmount() == amount && 
+                        budget.getCurrencyId() == currencyId && 
+                        budget.getCategoryId() == categoryId) {
                         liveData.postValue(budget);
                         return;
                     }
@@ -208,14 +197,9 @@ public class BudgetService {
             
             // Если не найден - создаем новый
             Budget newBudget = new Budget();
-            newBudget.setName(name);
             newBudget.setAmount(amount);
-            newBudget.setCurrency(currency);
-            newBudget.setStartDate(startDate);
-            newBudget.setEndDate(endDate);
+            newBudget.setCurrencyId(currencyId);
             newBudget.setCategoryId(categoryId);
-            newBudget.setPeriod(period);
-            newBudget.setActive(true);
             newBudget.setPosition(1); // TODO: Получить следующую позицию
             
             budgetRepository.insertBudget(newBudget, user);
@@ -231,22 +215,10 @@ public class BudgetService {
     
     // Валидация бюджета
     public boolean validateBudget(Budget budget) {
-        if (budget.getName() == null || budget.getName().trim().isEmpty()) {
-            return false;
-        }
-        if (budget.getCurrency() == null || budget.getCurrency().trim().isEmpty()) {
+        if (budget.getCurrencyId() <= 0) {
             return false;
         }
         if (budget.getAmount() <= 0) {
-            return false;
-        }
-        if (budget.getStartDate() == null || budget.getEndDate() == null) {
-            return false;
-        }
-        if (budget.getStartDate().isAfter(budget.getEndDate())) {
-            return false;
-        }
-        if (budget.getPeriod() == null || budget.getPeriod().trim().isEmpty()) {
             return false;
         }
         return true;
@@ -254,12 +226,11 @@ public class BudgetService {
     
     // Проверить, активен ли бюджет
     public boolean isBudgetActive(Budget budget) {
-        if (budget == null || !budget.isActive()) {
+        if (budget == null || budget.isDeleted()) {
             return false;
         }
         
-        LocalDateTime now = LocalDateTime.now();
-        return !budget.getStartDate().isAfter(now) && !budget.getEndDate().isBefore(now);
+        return true;
     }
     
     // Получить прогресс бюджета

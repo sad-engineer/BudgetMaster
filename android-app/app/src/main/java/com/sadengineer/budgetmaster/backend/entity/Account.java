@@ -1,3 +1,4 @@
+// -*- coding: utf-8 -*-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -18,7 +19,7 @@ public class Account {
     @PrimaryKey(autoGenerate = true)
     private int id;
     
-    private String title; // Название счета (как в вашем backend)
+    private String title; // Название счета
     private int position; // Позиция для сортировки
     private int amount; // Сумма в копейках // Баланс счета
     private int type; // Тип счета (1=current, 2=savings, 3=credit)
@@ -38,17 +39,8 @@ public class Account {
     private String updatedBy;
     private String deletedBy;
     
-    // Конструкторы
+    // Конструктор для Room
     public Account() {}
-    
-    public Account(String title, int position, int amount, int type, int currencyId, int closed) {
-        this.title = title;
-        this.position = position;
-        this.amount = amount;
-        this.type = type;
-        this.currencyId = currencyId;
-        this.closed = closed;
-    }
     
     // Геттеры и сеттеры
     public int getId() {

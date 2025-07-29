@@ -27,7 +27,7 @@ public class CategoryValidator {
         // Валидация специфичных полей
         CommonValidator.validatePosition(category.getPosition());
         CommonValidator.validateTitle(category.getTitle(), "Название категории");
-        CommonValidator.validateCategoryType(category.getType());
+        CommonValidator.validateCategoryType(category.getOperationType());
         CommonValidator.validateParentId(category.getParentId());
         CommonValidator.validateNotSelfParent(category.getId(), category.getParentId());
     }
@@ -44,7 +44,7 @@ public class CategoryValidator {
         
         CommonValidator.validatePosition(category.getPosition());
         CommonValidator.validateTitle(category.getTitle(), "Название категории");
-        CommonValidator.validateCategoryType(category.getType());
+        CommonValidator.validateCategoryType(category.getOperationType());
         CommonValidator.validateParentId(category.getParentId());
         CommonValidator.validateNotSelfParent(category.getId(), category.getParentId());
     }
@@ -61,7 +61,7 @@ public class CategoryValidator {
         
         CommonValidator.validatePosition(category.getPosition());
         CommonValidator.validateTitle(category.getTitle(), "Название категории");
-        CommonValidator.validateCategoryType(category.getType());
+        CommonValidator.validateCategoryType(category.getOperationType());
         CommonValidator.validateParentId(category.getParentId());
         CommonValidator.validateNotSelfParent(category.getId(), category.getParentId());
     }
