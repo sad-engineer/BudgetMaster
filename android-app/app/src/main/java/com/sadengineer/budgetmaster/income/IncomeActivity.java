@@ -33,8 +33,9 @@ public class IncomeActivity extends BaseNavigationActivity {
         addIncomeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать добавление дохода
-                android.widget.Toast.makeText(IncomeActivity.this, "Добавить доход", android.widget.Toast.LENGTH_SHORT).show();
+                // Открываем экран добавления дохода
+                                    Intent intent = new Intent(IncomeActivity.this, AddIncomeActivity.class);
+                startActivity(intent);
             }
         });
 

@@ -18,16 +18,31 @@
             android:name=".accounts.Accounts"
             android:exported="false" />
         <activity
+            android:name=".accounts.AddAccountActivity"
+            android:exported="false" />
+        <activity
             android:name=".income.IncomeActivity"
             android:exported="false" />
         <activity
+            android:name=".income.AddIncomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".income.AddIncomeCategoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".expense.ExpenseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".expense.AddExpenseActivity"
             android:exported="false" />
         <activity
             android:name=".budget.BudgetActivity"
             android:exported="false" />
         <activity
             android:name=".currencies.CurrenciesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".currencies.AddCurrencyActivity"
             android:exported="false" />
         <activity
             android:name=".BackendTestActivity"

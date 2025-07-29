@@ -33,8 +33,9 @@ public class ExpenseActivity extends BaseNavigationActivity {
         addExpenseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать добавление расхода
-                android.widget.Toast.makeText(ExpenseActivity.this, "Добавить расход", android.widget.Toast.LENGTH_SHORT).show();
+                // Открываем экран добавления расхода
+                Intent intent = new Intent(ExpenseActivity.this, AddExpenseActivity.class);
+                startActivity(intent);
             }
         });
 

@@ -53,8 +53,9 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать добавление валюты
-                Toast.makeText(CurrenciesActivity.this, "Добавить валюту", Toast.LENGTH_SHORT).show();
+                // Открываем экран добавления валюты
+                Intent intent = new Intent(CurrenciesActivity.this, AddCurrencyActivity.class);
+                startActivity(intent);
             }
         });
 

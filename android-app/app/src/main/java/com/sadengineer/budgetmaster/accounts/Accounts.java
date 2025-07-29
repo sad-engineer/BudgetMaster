@@ -41,8 +41,9 @@ public class Accounts extends BaseNavigationActivity {
         addAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать добавление счета
-                android.widget.Toast.makeText(Accounts.this, "Добавить счет", android.widget.Toast.LENGTH_SHORT).show();
+                // Открываем экран добавления счета
+                Intent intent = new Intent(Accounts.this, AddAccountActivity.class);
+                startActivity(intent);
             }
         });
 
