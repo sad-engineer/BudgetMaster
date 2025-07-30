@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
@@ -21,31 +22,20 @@ public class AddIncomeActivity extends BaseNavigationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_income);
+        setContentView(R.layout.activity_add_income_and_expense);
         
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButtonForAddIncome(R.id.back_button);
         
-        // Инициализация элементов интерфейса
-        initializeViews();
-        
+        // Настройка заголовка
+        setupToolbarTitle();
+       
         // Настройка обработчиков кнопок
         setupButtonHandlers();
     }
 
-    /**
-     * Инициализация элементов интерфейса
-     */
-    private void initializeViews() {
-        dateEditText = findViewById(R.id.income_date_edit_text);
-        amountEditText = findViewById(R.id.income_amount_edit_text);
-        categorySpinner = findViewById(R.id.income_category_spinner);
-        accountSpinner = findViewById(R.id.income_account_spinner);
-        commentEditText = findViewById(R.id.income_comment_edit_text);
-    }
-    
     /**
      * Настройка кнопки "назад" для возврата на экран доходов
      * @param backButtonId ID кнопки назад в toolbar
@@ -60,6 +50,16 @@ public class AddIncomeActivity extends BaseNavigationActivity {
                 startActivity(intent);
                 finish();
             });
+        }
+    }
+    
+    /**
+     * Настройка заголовка тулбара
+     */
+    private void setupToolbarTitle() {
+        TextView toolbarTitle = findViewById(R.id.toolbar_title);
+        if (toolbarTitle != null) {
+            toolbarTitle.setText(R.string.toolbar_title_add_income);
         }
     }
     

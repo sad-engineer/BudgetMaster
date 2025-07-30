@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
@@ -19,27 +20,15 @@ public class AddIncomeCategoryActivity extends BaseNavigationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_income_category);
+        setContentView(R.layout.activity_add_category);
         
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButtonForAddIncomeCategory(R.id.back_button);
-        
-        // Инициализация элементов интерфейса
-        initializeViews();
-        
+                
         // Настройка обработчиков кнопок
         setupButtonHandlers();
-    }
-
-    /**
-     * Инициализация элементов интерфейса
-     */
-    private void initializeViews() {
-        nameEditText = findViewById(R.id.income_category_name_edit_text);
-        typeSpinner = findViewById(R.id.income_category_type_spinner);
-        parentCategorySpinner = findViewById(R.id.income_category_parent_spinner);
     }
     
     /**

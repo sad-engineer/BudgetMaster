@@ -11,37 +11,31 @@ import android.widget.Toast;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
-public class AddExpenseActivity extends BaseNavigationActivity {
+public class AddExpenseCategoryActivity extends BaseNavigationActivity {
     
-    private EditText dateEditText;
-    private EditText amountEditText;
-    private Spinner categorySpinner;
-    private Spinner accountSpinner;
-    private EditText commentEditText;
+    private EditText nameEditText;
+    private Spinner typeSpinner;
+    private Spinner parentCategorySpinner;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_income_and_expense);
+        setContentView(R.layout.activity_add_category);
         
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
-        setupBackButtonForAddExpense(R.id.back_button);
-        
-        // Настройка заголовка
-        setupToolbarTitle();
-        
+        setupBackButtonForAddExpenseCategory(R.id.back_button);
+                
         // Настройка обработчиков кнопок
         setupButtonHandlers();
     }
-
     
     /**
      * Настройка кнопки "назад" для возврата на экран расходов
      * @param backButtonId ID кнопки назад в toolbar
      */
-    private void setupBackButtonForAddExpense(int backButtonId) {
+    private void setupBackButtonForAddExpenseCategory(int backButtonId) {
         ImageButton backButton = findViewById(backButtonId);
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
@@ -52,17 +46,7 @@ public class AddExpenseActivity extends BaseNavigationActivity {
                 finish();
             });
         }
-    }
-    
-    /**
-     * Настройка заголовка тулбара
-     */
-    private void setupToolbarTitle() {
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        if (toolbarTitle != null) {
-            toolbarTitle.setText(R.string.toolbar_title_add_expense);
-        }
-    }
+    }    
     
     /**
      * Настройка обработчиков кнопок
@@ -73,8 +57,8 @@ public class AddExpenseActivity extends BaseNavigationActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать сохранение расхода
-                Toast.makeText(AddExpenseActivity.this, "Сохранить расход", Toast.LENGTH_SHORT).show();
+                // TODO: Реализовать сохранение категории расхода
+                Toast.makeText(AddExpenseCategoryActivity.this, "Сохранить категорию расхода", Toast.LENGTH_SHORT).show();
             }
         });
     }

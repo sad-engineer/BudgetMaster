@@ -3,7 +3,6 @@
   <component name="dataSourceStorageLocal" created-in="PY-221.5921.27">
     <data-source name="test_budget_master" uuid="8eea94a2-44e1-49bb-8e7c-46067536491c">
       <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" exact-version="0" />
-      <auth-provider>no-auth</auth-provider>
       <schema-mapping />
     </data-source>
   </component>

@@ -123,4 +123,44 @@
     <color name="authors_content_background">@color/dark_gray</color>
     <color name="authors_item_background">@color/dark_gray</color>
 
+    <!-- Цвета для экрана добавления валюты -->
+    <color name="add_currency_toolbar_background">@color/black</color>
+    <color name="add_currency_toolbar_icons">@color/green</color>
+    <color name="add_currency_toolbar_texts">@color/white</color>
+    <color name="add_currency_content_background">@color/dark_gray</color>
+    <color name="add_currency_content_texts">@color/white</color>
+    <color name="add_currency_content_hint">@color/gray</color>
+    <color name="add_currency_edit_text_background">@color/dark_gray</color>
+    <color name="add_currency_divider">@color/black</color>
+
+    <!-- Цвета для экрана добавления дохода или расхода -->
+    <color name="add_income_expense_toolbar_background">@color/black</color>
+    <color name="add_income_expense_toolbar_icons">@color/green</color>
+    <color name="add_income_expense_toolbar_texts">@color/white</color>
+    <color name="add_income_expense_content_background">@color/dark_gray</color>
+    <color name="add_income_expense_content_texts">@color/white</color>
+    <color name="add_income_expense_content_hint">@color/gray</color>
+    <color name="add_income_expense_edit_text_background">@color/dark_gray</color>
+    <color name="add_income_expense_divider">@color/black</color>
+
+    <!-- Цвета для экрана добавления счета -->
+    <color name="add_account_toolbar_background">@color/black</color>
+    <color name="add_account_toolbar_icons">@color/green</color>
+    <color name="add_account_toolbar_texts">@color/white</color>
+    <color name="add_account_content_background">@color/dark_gray</color>
+    <color name="add_account_content_texts">@color/white</color>
+    <color name="add_account_content_hint">@color/gray</color>
+    <color name="add_account_edit_text_background">@color/dark_gray</color>
+    <color name="add_account_divider">@color/black</color>
+
+    <!-- Цвета для экрана добавления категории доходов -->
+    <color name="add_category_toolbar_background">@color/black</color>
+    <color name="add_category_toolbar_icons">@color/green</color>
+    <color name="add_category_toolbar_texts">@color/white</color>
+    <color name="add_category_content_background">@color/dark_gray</color>
+    <color name="add_category_content_texts">@color/white</color>
+    <color name="add_category_content_hint">@color/gray</color>
+    <color name="add_category_edit_text_background">@color/dark_gray</color>
+    <color name="add_category_divider">@color/black</color>
+
 </resources>

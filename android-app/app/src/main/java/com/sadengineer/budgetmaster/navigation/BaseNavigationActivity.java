@@ -73,6 +73,8 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         // Обработка выбора пунктов меню
         if (id == R.id.nav_main) {
             navigateToMain();
+        } else if (id == R.id.nav_instructions) {
+            showInstructions();
         } else if (id == R.id.nav_currencies) {
             navigateToCurrencies();
         } else if (id == R.id.nav_accounts) {
@@ -83,16 +85,6 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             navigateToExpense();
         } else if (id == R.id.nav_budget) {
             navigateToBudget();
-        } else if (id == R.id.nav_settings) {
-            navigateToSettings();
-        } else if (id == R.id.nav_version) {
-            navigateToVersion();
-        } else if (id == R.id.nav_authors) {
-            navigateToAuthors();
-        } else if (id == R.id.nav_instructions) {
-            showInstructions();
-        } else if (id == R.id.nav_statistics) {
-            showStatistics();
         } else if (id == R.id.nav_income_categories) {
             showIncomeCategories();
         } else if (id == R.id.nav_expense_categories) {
@@ -101,6 +93,16 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             showImportData();
         } else if (id == R.id.nav_export_data) {
             showExportData();
+        } else if (id == R.id.nav_settings) {
+            navigateToSettings();
+        } else if (id == R.id.nav_about) {
+            navigateToVersion();
+        } else if (id == R.id.nav_authors) {
+            navigateToAuthors();
+        } else if (id == R.id.nav_statistics) {
+            showStatistics();
+        } else if (id == R.id.nav_backend_test) {
+            showBackendTest();
         }
         
         // Закрываем боковое меню
@@ -196,5 +198,9 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
 
     protected void showExportData() {
         // Показываем Toast или переходим на экран экспорта данных
+    }
+
+    protected void showBackendTest() {
+        // Показываем Toast или переходим на экран теста Backend
     }
 } 

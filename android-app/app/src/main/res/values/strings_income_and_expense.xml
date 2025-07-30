@@ -10,4 +10,20 @@
     <string name="icon_delete_income">Удалить доход</string>
     <string name="icon_add_expense">Добавить расход</string>
     <string name="icon_delete_expense">Удалить расход</string>
+    
+    <!-- Строки для экрана добавления дохода или расхода -->
+    <string name="add_income_expense_date_label">Дата</string>
+    <string name="add_income_expense_date_hint">Выберите дату</string>
+    <string name="add_income_expense_amount_label">Сумма</string>
+    <string name="add_income_expense_amount_hint">Введите сумму</string>
+    <string name="add_income_expense_category_label">Категория</string>
+    <string name="add_income_expense_account_label">Счет</string>
+    <string name="add_income_expense_comment_label">Комментарий</string>
+    <string name="add_income_expense_comment_hint">Введите комментарий</string>
+    
+    <!-- Строки для экрана добавления категории дохода -->
+    <string name="add_category_name_label">Название</string>
+    <string name="add_category_name_hint">Введите название категории</string>
+    <string name="add_category_type_label">Тип</string>
+    <string name="add_category_parent_label">Родительская категория</string>
 </resources>

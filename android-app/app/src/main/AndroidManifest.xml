@@ -30,6 +30,9 @@
             android:name=".income.AddIncomeCategoryActivity"
             android:exported="false" />
         <activity
+            android:name=".expense.AddExpenseCategoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".expense.ExpenseActivity"
             android:exported="false" />
         <activity

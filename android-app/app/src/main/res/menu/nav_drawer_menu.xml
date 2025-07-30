@@ -6,18 +6,18 @@
             android:id="@+id/nav_main"
             android:icon="@drawable/ic_home"
             android:title="@string/menu_main" />
+        
+        <!-- Инструкции -->
+        <item
+            android:id="@+id/nav_instructions"
+            android:icon="@drawable/ic_menu"
+            android:title="@string/menu_instructions" />
 
         <!-- Валюты -->
         <item
             android:id="@+id/nav_currencies"
             android:icon="@drawable/ic_currency"
             android:title="@string/menu_currencies" />
-
-        <!-- Инструкции -->
-        <item
-            android:id="@+id/nav_instructions"
-            android:icon="@drawable/ic_menu"
-            android:title="@string/menu_instructions" />
 
         <!-- Счета -->
         <item
@@ -43,14 +43,6 @@
             android:icon="@drawable/ic_budget"
             android:title="@string/menu_budget" />
         
-        <!-- Статистика -->
-        <item
-            android:id="@+id/nav_statistics"
-            android:icon="@drawable/ic_target"
-            android:title="@string/menu_statistics" />
-        
-        
-        
         <!-- Категории доходов -->
         <item
             android:id="@+id/nav_income_categories"
@@ -62,18 +54,30 @@
             android:id="@+id/nav_expense_categories"
             android:icon="@drawable/ic_expense"
             android:title="@string/menu_expense_categories" />
-        
-        <!-- Импорт данных -->
+
+        <!-- Загрузить данные -->
         <item
             android:id="@+id/nav_import_data"
             android:icon="@drawable/ic_accounts"
             android:title="@string/menu_import_data" />
-        
-        <!-- Экспорт данных -->
+
+        <!-- Выгрузить данные -->
         <item
             android:id="@+id/nav_export_data"
             android:icon="@drawable/ic_accounts"
             android:title="@string/menu_export_data" />
+
+        <!-- Статистика -->
+        <item
+            android:id="@+id/nav_statistics"
+            android:icon="@drawable/ic_target"
+            android:title="@string/menu_statistics" />
+        
+        <!-- Тест Backend -->
+        <item
+            android:id="@+id/nav_backend_test"
+            android:icon="@drawable/ic_menu"
+            android:title="@string/menu_backend_test" />
         
         <!-- Настройки -->
         <item
@@ -81,11 +85,11 @@
             android:icon="@drawable/ic_menu"
             android:title="@string/menu_settings" />
         
-        <!-- Версия -->
+        <!-- О приложении -->
         <item
-            android:id="@+id/nav_version"
+            android:id="@+id/nav_about"
             android:icon="@drawable/ic_budget"
-            android:title="@string/menu_version" />
+            android:title="@string/menu_about" />
         
         <!-- Авторы -->
         <item

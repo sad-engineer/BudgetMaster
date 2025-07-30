@@ -12,4 +12,13 @@
     <string name="icon_add_account">Добавить счет</string>
     <string name="icon_delete_account">Удалить счет</string>
     
+    <!-- Строки для экрана добавления счета -->
+    <string name="account_name_label">Название</string>
+    <string name="account_name_hint">Введите название счета</string>
+    <string name="account_balance_label">Баланс</string>
+    <string name="account_balance_hint">Введите баланс</string>
+    <string name="account_currency_label">Валюта</string>
+    <string name="account_type_label">Тип</string>
+    <string name="account_closed_label">Закрыт</string>
+    
 </resources> 
