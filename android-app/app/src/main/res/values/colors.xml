@@ -85,7 +85,17 @@
     <color name="currencies_add_button_background">@color/light_gray</color>
     <color name="currencies_delete_button_icon">@color/white</color>
     <color name="currencies_delete_button_background">@color/light_gray</color>
-
+    
+    <!-- Цвета для экрана редактирования валюты -->
+    <color name="currency_edit_toolbar_background">@color/black</color>
+    <color name="currency_edit_toolbar_icons">@color/green</color>
+    <color name="currency_edit_toolbar_texts">@color/white</color>
+    <color name="currency_edit_content_background">@color/dark_gray</color>
+    <color name="currency_edit_titles">@color/white</color>
+    <color name="currency_edit_input_background">@color/white</color>
+    <color name="currency_edit_input_text">@color/black</color>
+    <color name="currency_edit_input_hint">@color/gray</color>
+    
     <!-- Цвета для экрана настроек -->
     <color name="settings_toolbar_background">@color/black</color>
     <color name="settings_toolbar_icons">@color/white</color>

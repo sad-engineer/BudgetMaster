@@ -4,7 +4,6 @@ package com.sadengineer.budgetmaster.backend.repository;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.CurrencyDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
@@ -12,161 +11,123 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Repository класс для работы с Currency Entity
  */
 public class CurrencyRepository {
     
-    private final CurrencyDao currencyDao;
-    private final ExecutorService executorService;
+    private final CurrencyDao dao;
     
     public CurrencyRepository(Context context) {
         BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(context);
-        this.currencyDao = database.currencyDao();
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.dao = database.currencyDao();
     }
     
-    // Получить все активные валюты
-    public LiveData<List<Currency>> getAllActiveCurrencies() {
-        MutableLiveData<List<Currency>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Currency> currencies = currencyDao.getAllActiveCurrencies();
-            liveData.postValue(currencies);
-        });
-        return liveData;
+    /**
+     * Получить все валюты (включая удаленные)
+     * @return LiveData со списком всех валют
+     */
+    public LiveData<List<Currency>> getAll() {
+        return dao.getAll();
     }
     
-    // Получить все валюты
-    public LiveData<List<Currency>> getAllCurrencies() {
-        MutableLiveData<List<Currency>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Currency> currencies = currencyDao.getAllCurrencies();
-            liveData.postValue(currencies);
-        });
-        return liveData;
+    /**
+     * Получить все активные валюты
+     * @return LiveData со списком активных валют
+     */
+    public LiveData<List<Currency>> getAllActive() {
+        return dao.getAllActive();
     }
     
-    // Получить валюту по ID
-    public LiveData<Currency> getCurrencyById(int id) {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Currency currency = currencyDao.getCurrencyById(id);
-            liveData.postValue(currency);
-        });
-        return liveData;
+    /**
+     * Получить все удаленные валюты
+     * @return LiveData со списком удаленных валют
+     */
+    public LiveData<List<Currency>> getAllDeleted() {
+        return dao.getAllDeleted();
     }
     
-    // Получить валюту по названию
-    public LiveData<Currency> getCurrencyByTitle(String title) {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Currency currency = currencyDao.getCurrencyByTitle(title);
-            liveData.postValue(currency);
-        });
-        return liveData;
+    /**
+     * Получить валюту по ID (включая удаленные)
+     * @param id ID валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getById(int id) {
+        return dao.getById(id);
     }
     
-    // Получить валюту по коду
-    public LiveData<Currency> getCurrencyByCode(String code) {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Currency currency = currencyDao.getCurrencyByCode(code);
-            liveData.postValue(currency);
-        });
-        return liveData;
+    /**
+     * Получить валюту по названию (включая удаленные)
+     * @param title название валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getByTitle(String title) {
+        return dao.getByTitle(title);
     }
     
-    // Получить валюту по умолчанию
-    public LiveData<Currency> getDefaultCurrency() {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Currency currency = currencyDao.getDefaultCurrency();
-            liveData.postValue(currency);
-        });
-        return liveData;
+    /**
+     * Получить валюту по позиции (включая удаленные)
+     * @param position позиция валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getByPosition(int position) {
+        return dao.getByPosition(position);
     }
     
-    // Получить валюту по позиции
-    public LiveData<Currency> getCurrencyByPosition(int position) {
-        MutableLiveData<Currency> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Currency currency = currencyDao.getCurrencyByPosition(position);
-            liveData.postValue(currency);
-        });
-        return liveData;
+    /**
+     * Вставить новую валюту
+     * @param currency валюта для вставки
+     * @return ID вставленной валюты или -1 при конфликте
+     */
+    public long insert(Currency currency) {
+        return dao.insert(currency);
     }
     
-    // Вставить новую валюту
-    public void insertCurrency(Currency currency, String createdBy) {
-        executorService.execute(() -> {
-            currency.setCreateTime(LocalDateTime.now());
-            currency.setCreatedBy(createdBy);
-            currency.setUpdateTime(LocalDateTime.now());
-            currency.setUpdatedBy(createdBy);
-            currencyDao.insertCurrency(currency);
-        });
+    /**
+     * Обновить валюту
+     * @param currency валюта для обновления
+     */
+    public void update(Currency currency) {
+        dao.update(currency);
     }
     
-    // Обновить валюту
-    public void updateCurrency(Currency currency, String updatedBy) {
-        executorService.execute(() -> {
-            currency.setUpdateTime(LocalDateTime.now());
-            currency.setUpdatedBy(updatedBy);
-            currencyDao.updateCurrency(currency);
-        });
+    /**
+     * Удалить валюту (полное удаление из БД)
+     * @param currency валюта для удаления
+     */
+    public void delete(Currency currency) {
+        dao.delete(currency);
     }
     
-    // Удалить валюту (soft delete)
-    public void deleteCurrency(int currencyId, String deletedBy) {
-        executorService.execute(() -> {
-            currencyDao.softDeleteCurrency(currencyId, LocalDateTime.now().toString(), deletedBy);
-        });
+    /**
+     * Удалить все валюты
+     */
+    public void deleteAll() {
+        dao.deleteAll();
     }
     
-    // Удалить валюту по названию
-    public void deleteCurrencyByTitle(String title, String deletedBy) {
-        executorService.execute(() -> {
-            currencyDao.softDeleteCurrencyByTitle(title, LocalDateTime.now().toString(), deletedBy);
-        });
+    /**
+     * Получить максимальную позицию среди всех валют
+     * @return LiveData с максимальной позицией
+     */
+    public int getMaxPosition() {
+        return dao.getMaxPosition();
     }
     
-    // Получить все удаленные валюты
-    public LiveData<List<Currency>> getAllDeletedCurrencies() {
-        MutableLiveData<List<Currency>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Currency> currencies = currencyDao.getAllDeletedCurrencies();
-            liveData.postValue(currencies);
-        });
-        return liveData;
+    /**
+     * Получить количество активных валют
+     * @return LiveData с количеством активных валют
+     */
+    public int getActiveCount() {
+        return dao.countActive();
     }
     
-    // Получить максимальную позицию
-    public LiveData<Integer> getMaxPosition() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Integer maxPos = currencyDao.getMaxPosition();
-            liveData.postValue(maxPos != null ? maxPos : 0);
-        });
-        return liveData;
-    }
-    
-    // Восстановить валюту
-    public void restoreCurrency(int currencyId, String updatedBy) {
-        executorService.execute(() -> {
-            currencyDao.restoreCurrency(currencyId, LocalDateTime.now().toString(), updatedBy);
-        });
-    }
-    
-    // Получить количество активных валют
-    public LiveData<Integer> getActiveCurrenciesCount() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            int count = currencyDao.getActiveCurrenciesCount();
-            liveData.postValue(count);
-        });
-        return liveData;
+    /**
+     * Получить общее количество валют
+     * @return LiveData с общим количеством валют
+     */
+    public int getCount() {
+        return dao.count();
     }
 } 

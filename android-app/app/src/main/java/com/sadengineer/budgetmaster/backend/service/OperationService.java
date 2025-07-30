@@ -210,10 +210,6 @@ public class OperationService {
         return currencyService.getCurrencyByTitle(currencyTitle);
     }
     
-    // Получить валюту по ID через CurrencyService
-    public LiveData<Currency> getCurrencyById(int currencyId) {
-        return currencyService.getCurrencyById(currencyId);
-    }
     
     // Получить общую сумму операций по типу
     public LiveData<Integer> getTotalAmountByType(String type) {

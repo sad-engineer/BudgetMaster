@@ -22,7 +22,7 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private RecyclerView recyclerView;
     private CurrencyAdapter adapter;
     private DatabaseManager databaseManager;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +53,9 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Реализовать добавление валюты
-                Toast.makeText(CurrenciesActivity.this, "Добавить валюту", Toast.LENGTH_SHORT).show();
+                // Запускаем окно создания валюты
+                Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
+                startActivity(intent);
             }
         });
 

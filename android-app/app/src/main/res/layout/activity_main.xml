@@ -416,13 +416,13 @@
                         android:text="@string/default_amount"
                         android:textColor="@color/main_content_texts"
                         android:textSize="@dimen/text_size" />
+                </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
+        </FrameLayout>
 
-    </FrameLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView 

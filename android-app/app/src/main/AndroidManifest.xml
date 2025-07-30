@@ -30,6 +30,9 @@
             android:name=".currencies.CurrenciesActivity"
             android:exported="false" />
         <activity
+            android:name=".currencies.CurrencyEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".BackendTestActivity"
             android:exported="false" />
         <activity

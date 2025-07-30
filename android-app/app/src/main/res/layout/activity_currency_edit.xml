@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout 
-    android:id="@+id/drawer_layout"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".currencies.CurrenciesActivity">
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".currencies.CurrencyEditActivity">
 
     <LinearLayout 
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/currencies_content_background"
+        android:background="@color/currency_edit_content_background"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
@@ -22,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
-            android:background="@color/currencies_toolbar_background"
+            android:background="@color/currency_edit_toolbar_background"
             android:elevation="4dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:contentInsetStart="0dp"
@@ -44,7 +42,7 @@
                     android:layout_height="match_parent"
                     android:layout_width="@dimen/menu_button_size"
                     android:src="@drawable/ic_back"
-                    app:tint="@color/currencies_toolbar_icons" />
+                    app:tint="@color/currency_edit_toolbar_icons" />
 
                 <ImageButton
                     android:background="@android:color/transparent"
@@ -53,7 +51,7 @@
                     android:layout_height="match_parent"
                     android:layout_width="@dimen/menu_button_size"
                     android:src="@drawable/ic_menu"
-                    app:tint="@color/currencies_toolbar_icons" />
+                    app:tint="@color/currency_edit_toolbar_icons" />
 
                 <TextView
                     android:gravity="center"
@@ -61,51 +59,67 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:text="@string/toolbar_title_currencies"
-                    android:textColor="@color/currencies_toolbar_texts"
+                    android:text="@string/toolbar_title_currency_edit"
+                    android:textColor="@color/currency_edit_toolbar_texts"
                     android:textSize="@dimen/toolbar_text"
                     android:textStyle="bold" />
 
                 <ImageButton
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_add_currency"
-                    android:id="@+id/add_currency_button"
+                    android:contentDescription="@string/icon_save_currency"
+                    android:id="@+id/save_currency_button"
                     android:layout_height="match_parent"
                     android:layout_width="@dimen/menu_button_size"
-                    android:src="@drawable/ic_add"
-                    app:tint="@color/currencies_toolbar_icons" />
-
-                <ImageButton
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_delete_currency"
-                    android:id="@+id/delete_currency_button"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/menu_button_size"
-                    android:src="@drawable/ic_delete"
-                    app:tint="@color/currencies_toolbar_icons" />
+                    android:src="@drawable/ic_save"
+                    app:tint="@color/currency_edit_toolbar_icons" />
 
             </LinearLayout>
 
         </androidx.appcompat.widget.Toolbar>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/currencies_recycler_view"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp" />
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/currency_name_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/currency_name_label"
+                android:textColor="@color/currency_edit_titles"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/currency_name_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/currency_name_hint"
+                android:textColor="@color/currency_edit_input_text"
+                android:textColorHint="@color/currency_edit_input_hint"
+                android:background="@color/currency_edit_input_background"
+                android:padding="12dp"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
-    <com.google.android.material.navigation.NavigationView 
+    <com.google.android.material.navigation.NavigationView
         android:background="@color/navigation_background"
         android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
-        app:menu="@menu/nav_drawer_menu"
+        app:menu="@menu/nav_drawer_menu" 
         app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemIconTint="@color/navigation_icons"/>
 
 </androidx.drawerlayout.widget.DrawerLayout> 

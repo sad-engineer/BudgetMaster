@@ -2,6 +2,7 @@
     <!-- Заголовок тулбара -->
     <string name="toolbar_title_main">Главная</string>
     <string name="toolbar_title_currencies">Валюты</string>
+    <string name="toolbar_title_currency_edit">Валюта</string>
     <string name="toolbar_title_version">О приложении</string>
     <string name="toolbar_title_authors">Авторы</string>
 

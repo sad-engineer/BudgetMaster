@@ -4,6 +4,7 @@ package com.sadengineer.budgetmaster.backend.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
+import androidx.room.Index;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 
@@ -19,10 +20,11 @@ public class Currency {
     @PrimaryKey(autoGenerate = true)
     private int id;
     
+    @Index(value = "title", unique = true)
     private String title; // Название валюты
-    private String code; // Код валюты (USD, EUR, RUB)
-    private String symbol; // Символ валюты ($, €, ₽)
-    private boolean isDefault; // Валюта по умолчанию
+    //private String code; // Код валюты (USD, EUR, RUB)
+    //private String symbol; // Символ валюты ($, €, ₽)
+    //private boolean isDefault; // Валюта по умолчанию
     private int position; // Позиция для сортировки
     
     // Поля из BaseEntity
@@ -53,29 +55,7 @@ public class Currency {
         this.title = title;
     }
     
-    public String getCode() {
-        return code;
-    }
-    
-    public void setCode(String code) {
-        this.code = code;
-    }
-    
-    public String getSymbol() {
-        return symbol;
-    }
-    
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-    
-    public boolean isDefault() {
-        return isDefault;
-    }
-    
-    public void setDefault(boolean isDefault) {
-        this.isDefault = isDefault;
-    }
+
     
     public int getPosition() {
         return position;

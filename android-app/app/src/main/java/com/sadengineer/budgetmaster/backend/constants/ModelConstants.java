@@ -97,4 +97,5 @@ public class ModelConstants {
     
     // Значения по умолчанию для валют
     public static final int DEFAULT_CURRENCY_ID = 1;  // Рубли по умолчанию
+    public static final String DEFAULT_CURRENCY_TITLE = "RUB";
 } 
