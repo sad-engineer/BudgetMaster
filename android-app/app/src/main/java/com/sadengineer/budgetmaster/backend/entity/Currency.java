@@ -13,14 +13,21 @@ import java.time.LocalDateTime;
 /**
  * Entity класс для валют
  */
-@Entity(tableName = "currencies")
+@Entity(
+    tableName = "currencies", 
+    indices = {
+        @Index(
+            value = "title", 
+            unique = true
+            )
+        }
+    )
 @TypeConverters(DateTimeConverter.class)
 public class Currency {
     
     @PrimaryKey(autoGenerate = true)
     private int id;
     
-    @Index(value = "title", unique = true)
     private String title; // Название валюты
     //private String code; // Код валюты (USD, EUR, RUB)
     //private String symbol; // Символ валюты ($, €, ₽)

@@ -52,8 +52,8 @@ public class DatabaseInitializer {
         Log.d(TAG, "🔄 initializeDefaultCurrencies: Начинаем инициализацию валют");
         
         // Проверяем, есть ли уже валюты
-        List<Currency> existingCurrencies = database.currencyDao().getAllActiveCurrencies();
-        if (existingCurrencies != null && !existingCurrencies.isEmpty()) {
+        int currencyCount = database.currencyDao().count();
+        if (currencyCount > 0) {
             Log.d(TAG, "🔄 initializeDefaultCurrencies: Валюты уже существуют, пропускаем");
             return;
         }

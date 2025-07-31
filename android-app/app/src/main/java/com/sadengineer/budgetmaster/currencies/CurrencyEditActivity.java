@@ -102,7 +102,7 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         
         try {
             // Используем CurrencyService для создания валюты
-            currencyService.createCurrency(currencyName);
+            currencyService.create(currencyName);
             
             Toast.makeText(this, "Валюта сохранена", Toast.LENGTH_SHORT).show();
             

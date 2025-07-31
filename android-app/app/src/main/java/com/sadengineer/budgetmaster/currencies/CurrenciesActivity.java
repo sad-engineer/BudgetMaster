@@ -12,6 +12,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -93,17 +94,12 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
                     Toast.makeText(this, "База данных инициализирована", Toast.LENGTH_SHORT).show();
                 });
                 
-                // Затем загружаем валюты
-                databaseManager.executeDatabaseOperation(() -> {
-                    com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase database = 
-                        com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase.getDatabase(this);
-                    List<Currency> currencies = database.currencyDao().getAllActiveCurrencies();
-                    database.close();
-                    return currencies;
-                }).thenAccept(currencies -> {
-                    Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
-                    
-                    runOnUiThread(() -> {
+                // Затем загружаем валюты через Observer на главном потоке
+                runOnUiThread(() -> {
+                    BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+                    database.currencyDao().getAllActive().observe(this, currencies -> {
+                        Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
+                        
                         if (currencies != null && !currencies.isEmpty()) {
                             adapter.setCurrencies(currencies);
                             Log.d(TAG, "✅ Валюты отображены в списке");
@@ -113,12 +109,6 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
                             Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
                         }
                     });
-                }).exceptionally(throwable -> {
-                    Log.e(TAG, "❌ Ошибка загрузки валют: " + throwable.getMessage(), throwable);
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Ошибка загрузки валют: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-                    return null;
                 });
             } else {
                 Log.e(TAG, "❌ Ошибка инициализации базы данных");

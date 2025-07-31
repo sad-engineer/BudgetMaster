@@ -438,7 +438,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Получаем валюты
             CompletableFuture<List<Currency>> currenciesFuture = databaseManager.executeDatabaseOperation(() -> {
                 BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-                List<Currency> currencies = database.currencyDao().getAllActiveCurrencies();
+                List<Currency> currencies = database.currencyDao().getAll().getValue();
                 database.close();
                 return currencies;
             });
@@ -494,7 +494,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Тестируем через репозиторий - используем прямые DAO вызовы вместо LiveData
             CompletableFuture<List<Currency>> repoCurrenciesFuture = databaseManager.executeDatabaseOperation(() -> {
                 BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-                List<Currency> repoCurrencies = database.currencyDao().getAllActiveCurrencies();
+                List<Currency> repoCurrencies = database.currencyDao().getAll().getValue();
                 database.close();
                 return repoCurrencies;
             });
@@ -507,7 +507,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Демонстрируем проблему с LiveData.getValue()
             result.append("✓ Демонстрация проблемы с LiveData.getValue()...\n");
             CurrencyRepository currencyRepository = new CurrencyRepository(this);
-            LiveData<List<Currency>> liveData = currencyRepository.getAllCurrencies();
+            LiveData<List<Currency>> liveData = currencyRepository.getAll();
             List<Currency> liveDataCurrencies = liveData.getValue();
             int liveDataCount = liveDataCurrencies != null ? liveDataCurrencies.size() : 0;
             result.append("✓ LiveData.getValue() вернул: ").append(liveDataCount).append(" валют\n");

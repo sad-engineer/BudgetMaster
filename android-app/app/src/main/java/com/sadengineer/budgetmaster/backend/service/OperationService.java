@@ -145,7 +145,7 @@ public class OperationService {
         executorService.execute(() -> {
             // Получаем счет и валюту по названиям
             Account account = accountService.getAccountByTitle(accountTitle).getValue();
-            Currency currency = currencyService.getCurrencyByTitle(currencyTitle).getValue();
+            Currency currency = currencyService.getByTitle(currencyTitle).getValue();
             
             if (account != null && currency != null) {
                 Operation operation = new Operation();
@@ -172,9 +172,9 @@ public class OperationService {
         executorService.execute(() -> {
             // Получаем счета и валюты по названиям
             Account account = accountService.getAccountByTitle(accountTitle).getValue();
-            Currency currency = currencyService.getCurrencyByTitle(currencyTitle).getValue();
+            Currency currency = currencyService.getByTitle(currencyTitle).getValue();
             Account toAccount = accountService.getAccountByTitle(toAccountTitle).getValue();
-            Currency toCurrency = currencyService.getCurrencyByTitle(toCurrencyTitle).getValue();
+            Currency toCurrency = currencyService.getByTitle(toCurrencyTitle).getValue();
             
             if (account != null && currency != null && toAccount != null && toCurrency != null) {
                 Operation operation = new Operation();
@@ -207,7 +207,7 @@ public class OperationService {
     
     // Получить валюту по названию через CurrencyService
     public LiveData<Currency> getCurrency(String currencyTitle) {
-        return currencyService.getCurrencyByTitle(currencyTitle);
+        return currencyService.getByTitle(currencyTitle);
     }
     
     

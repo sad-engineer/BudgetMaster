@@ -53,11 +53,11 @@ public class DatabaseManager {
                     Log.d(TAG, "📁 База данных не существует, создаем новую...");
                     
                     // Проверяем, есть ли дефолтные данные
-                    List<Currency> currencies = database.currencyDao().getAllActiveCurrencies();
+                    int currencyCount = database.currencyDao().count();
                     List<Category> categories = database.categoryDao().getAllActiveCategories();
                     List<Account> accounts = database.accountDao().getAllActiveAccounts();
                     
-                    if (currencies.isEmpty() && categories.isEmpty() && accounts.isEmpty()) {
+                    if (currencyCount == 0 && categories.isEmpty() && accounts.isEmpty()) {
                         Log.d(TAG, "📝 Создаем дефолтные данные...");
                         DatabaseInitializer.initializeDefaultData(database);
                         Log.d(TAG, "✅ Дефолтные данные созданы успешно");
@@ -68,12 +68,12 @@ public class DatabaseManager {
                     Log.d(TAG, "📁 База данных уже существует");
                     
                     // Проверяем, есть ли данные
-                    List<Currency> currencies = database.currencyDao().getAllActiveCurrencies();
+                    int currencyCount = database.currencyDao().count();
                     List<Category> categories = database.categoryDao().getAllActiveCategories();
                     List<Account> accounts = database.accountDao().getAllActiveAccounts();
                     
                     Log.d(TAG, "📊 Статистика данных: " + 
-                          currencies.size() + " валют, " + 
+                          currencyCount + " валют, " + 
                           categories.size() + " категорий, " + 
                           accounts.size() + " счетов");
                 }
