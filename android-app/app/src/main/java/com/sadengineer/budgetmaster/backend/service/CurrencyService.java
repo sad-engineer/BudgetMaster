@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service класс для бизнес-логики работы с Currency
@@ -102,23 +103,26 @@ public class CurrencyService {
     }
 
     // Создать новую валюту
-    public void create(String title) {
-        executorService.execute(() -> {
-            // создаем новую валюту
-            Currency currency = new Currency();
-            // получаем максимальную позицию и увеличиваем на 1
-            int maxPos = repo.getMaxPosition();
-            int position = maxPos + 1;
-            // устанавливаем значения
-            currency.setTitle(title);
-            currency.setPosition(position);
-            currency.setCreateTime(LocalDateTime.now());
-            currency.setCreatedBy(user);
+    public CompletableFuture<Long> create(String title) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // создаем новую валюту
+                Currency currency = new Currency();
+                // получаем максимальную позицию и увеличиваем на 1
+                int maxPos = repo.getMaxPosition();
+                int position = maxPos + 1;
+                // устанавливаем значения
+                currency.setTitle(title);
+                currency.setPosition(position);
+                currency.setCreateTime(LocalDateTime.now());
+                currency.setCreatedBy(user);
 
-            // сохраняем валюту
-            repo.insert(currency);
-
-        });
+                // сохраняем валюту и возвращаем ID
+                return repo.insert(currency);
+            } catch (Exception e) {
+                throw new RuntimeException("Ошибка создания валюты: " + e.getMessage(), e);
+            }
+        }, executorService);
     }
 
     // Удалить валюту (полное удаление - удаление строки из БД)

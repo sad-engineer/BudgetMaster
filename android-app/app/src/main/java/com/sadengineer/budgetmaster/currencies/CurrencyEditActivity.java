@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import java.util.concurrent.CompletableFuture;
 
 // import androidx.appcompat.widget.Toolbar;
 
@@ -99,25 +100,35 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         }
         
         Log.d(TAG, "🔄 Сохраняем валюту: " + currencyName);
+        Toast.makeText(this, "Сохраняем валюту...", Toast.LENGTH_SHORT).show();
         
         try {
             // Используем CurrencyService для создания валюты
-            currencyService.create(currencyName);
-            
-            Toast.makeText(this, "Валюта сохранена", Toast.LENGTH_SHORT).show();
-            
-            // // Даем время на сохранение в БД
-            // new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            //     // Возвращаемся к списку валют
-            //     Intent intent = new Intent(this, CurrenciesActivity.class);
-            //     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            //     startActivity(intent);
-            //     finish();
-            // }, 500); // 500ms задержка
+            currencyService.create(currencyName).thenAccept(currencyId -> {
+                runOnUiThread(() -> {
+                    if (currencyId > 0) {
+                        Toast.makeText(this, "Валюта сохранена (ID: " + currencyId + ")", Toast.LENGTH_SHORT).show();
+                        
+                        // Возвращаемся к списку валют
+                        Intent intent = new Intent(this, CurrenciesActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Ошибка: валюта не была сохранена", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }).exceptionally(throwable -> {
+                runOnUiThread(() -> {
+                    Log.e(TAG, "❌ Ошибка сохранения валюты: " + throwable.getMessage(), throwable);
+                    Toast.makeText(this, "Ошибка сохранения: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+                });
+                return null;
+            });
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка сохранения валюты: " + e.getMessage(), e);
-            Toast.makeText(this, "Ошибка сохранения: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "❌ Ошибка вызова создания валюты: " + e.getMessage(), e);
+            Toast.makeText(this, "Ошибка вызова создания валюты: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     

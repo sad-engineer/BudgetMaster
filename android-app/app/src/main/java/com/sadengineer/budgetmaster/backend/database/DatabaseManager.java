@@ -78,7 +78,6 @@ public class DatabaseManager {
                           accounts.size() + " счетов");
                 }
                 
-                database.close();
                 Log.d(TAG, "✅ Инициализация базы данных завершена");
                 return true;
                 
