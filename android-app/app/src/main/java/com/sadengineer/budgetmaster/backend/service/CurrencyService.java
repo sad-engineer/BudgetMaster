@@ -33,7 +33,11 @@ public class CurrencyService {
         this.defaultCurrencyID = ModelConstants.DEFAULT_CURRENCY_ID;
     }
 
-    // Изменить позицию валюты (сложная логика)
+    /**
+     * Изменить позицию валюты (сложная логика)
+     * @param currency валюта
+     * @param newPosition новая позиция
+     */
     public void changePosition(Currency currency, int newPosition) {
         executorService.execute(() -> {
             int oldPosition = currency.getPosition();
@@ -45,7 +49,9 @@ public class CurrencyService {
             
             // Получаем все валюты для переупорядочивания
             List<Currency> allCurrencies = repo.getAll().getValue();
-            if (allCurrencies == null) return;
+            if (allCurrencies == null) {
+                throw new RuntimeException("Не удалось получить список валют");
+            }
             
             // Проверяем, что новая позиция валидна
             int maxPosition = allCurrencies.size();
@@ -82,7 +88,11 @@ public class CurrencyService {
         });
     }
     
-    // Изменить позицию валюты по старой позиции
+    /**
+     * Изменить позицию валюты по старой позиции
+     * @param oldPosition старая позиция
+     * @param newPosition новая позиция
+     */
     public void changePosition(int oldPosition, int newPosition) {
         executorService.execute(() -> {
             Currency currency = repo.getByPosition(oldPosition).getValue();
@@ -92,7 +102,11 @@ public class CurrencyService {
         });
     }
     
-    // Изменить позицию валюты по названию
+    /**
+     * Изменить позицию валюты по названию
+     * @param title название валюты
+     * @param newPosition новая позиция
+     */
     public void changePosition(String title, int newPosition) {
         executorService.execute(() -> {
             Currency currency = repo.getByTitle(title).getValue();
@@ -102,30 +116,48 @@ public class CurrencyService {
         });
     }
 
-    // Создать новую валюту
-    public CompletableFuture<Long> create(String title) {
+    /**
+     * Создать новую валюту
+     * @param title название валюты
+     * @return CompletableFuture с созданной валютой
+     */
+    public CompletableFuture<Currency> create(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Название валюты не может быть пустым");
+        }
         return CompletableFuture.supplyAsync(() -> {
             try {
-                // создаем новую валюту
-                Currency currency = new Currency();
-                // получаем максимальную позицию и увеличиваем на 1
-                int maxPos = repo.getMaxPosition();
-                int position = maxPos + 1;
-                // устанавливаем значения
-                currency.setTitle(title);
-                currency.setPosition(position);
-                currency.setCreateTime(LocalDateTime.now());
-                currency.setCreatedBy(user);
-
-                // сохраняем валюту и возвращаем ID
-                return repo.insert(currency);
+                return createCurrencySync(title);
             } catch (Exception e) {
                 throw new RuntimeException("Ошибка создания валюты: " + e.getMessage(), e);
             }
         }, executorService);
     }
 
-    // Удалить валюту (полное удаление - удаление строки из БД)
+    /**
+     * Приватный метод для создания валюты
+     * @param title название валюты
+     * @return валюта
+     */
+    private Currency createCurrencySync(String title) {
+        Currency currency = new Currency();
+        currency.setTitle(title);
+        currency.setPosition(repo.getMaxPosition() + 1);
+        currency.setCreateTime(LocalDateTime.now());
+        currency.setCreatedBy(user);
+        
+        LiveData<Currency> insertedCurrency = repo.insert(currency);
+        Currency result = insertedCurrency.getValue();
+        if (result == null) {
+            throw new RuntimeException("Не удалось создать валюту");
+        }
+        return result;
+    }
+
+    /**
+     * Удалить валюту (полное удаление - удаление строки из БД)
+     * @param currency валюта
+     */
     public void delete(Currency currency) {
         executorService.execute(() -> {
             if (currency != null) {
@@ -134,17 +166,61 @@ public class CurrencyService {
         });
     }     
     
-    // Получить все валюты
+    /**
+     * Получить все валюты
+     * @return LiveData с списком всех валют
+     */
     public LiveData<List<Currency>> getAll() {
         return repo.getAll();
     }
 
-    // Получить валюту по названию
+    /**
+     * Получить валюту по названию
+     * @param title название валюты
+     * @return LiveData с валютой
+     */
     public LiveData<Currency> getByTitle(String title) {
         return repo.getByTitle(title);
     }
 
-    // Восстановить удаленную валюту (soft delete)
+    /**
+     * Получить валюту по названию или создать новую
+     * @param title название валюты
+     * @return CompletableFuture с валютой
+     */
+    public CompletableFuture<Currency> getByTitleOrCreate(String title) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (title == null || title.trim().isEmpty()) {
+                throw new IllegalArgumentException("Название валюты не может быть пустым");
+            }
+            
+            // Поиск валют по подстроке в названии (включая удаленные)
+            List<Currency> currencies = repo.searchByTitle(title).getValue();
+            if (currencies != null) {
+                // Поиск по точному совпадению
+                for (Currency currency : currencies) {
+                    if (currency.getTitle().equals(title)) {
+                        return currency;
+                    }
+                }
+                
+                // Поиск по подстроке (без учета регистра)
+                for (Currency currency : currencies) {
+                    if (currency.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                        return currency;
+                    }
+                }
+            }
+            
+            // Создание новой валюты
+            return createCurrencySync(title);
+        }, executorService);
+    }
+
+    /**
+     * Восстановить удаленную валюту (soft delete)
+     * @param deletedCurrency удаленная валюта
+     */
     public void restore(Currency deletedCurrency) {
         executorService.execute(() -> {
             if (deletedCurrency != null) {
@@ -159,7 +235,10 @@ public class CurrencyService {
         });
     }
 
-    // Удалить валюту (soft delete)
+    /**
+     * Удалить валюту (soft delete)
+     * @param currency валюта
+     */
     public void softDelete(Currency currency) {
         executorService.execute(() -> {
             if (currency != null) {
@@ -170,7 +249,10 @@ public class CurrencyService {
         });
     }
     
-    // Обновить валюту
+    /**
+     * Обновить валюту
+     * @param currency валюта
+     */
     public void update(Currency currency) {
         executorService.execute(() -> {
             if (currency != null) {
@@ -181,7 +263,10 @@ public class CurrencyService {
         });
     }
     
-    // Получить валюту по умолчанию 
+    /**
+     * Получить валюту по умолчанию 
+     * @return LiveData с валютой
+     */
     public LiveData<Currency> getDefaultCurrency() {
         return repo.getById(defaultCurrencyID);
     }

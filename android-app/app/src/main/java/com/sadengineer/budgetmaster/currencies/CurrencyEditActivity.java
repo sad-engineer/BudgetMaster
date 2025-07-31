@@ -10,12 +10,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import java.util.concurrent.CompletableFuture;
 
-// import androidx.appcompat.widget.Toolbar;
-
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
-// import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
 
 /**
  * Activity для создания/изменения валюты
@@ -29,7 +27,6 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
     private ImageButton backButton;
     private ImageButton menuButton;
     private CurrencyService currencyService;
-    // private Currency editingCurrency; // null для создания новой валюты
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +62,7 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "Нажата кнопка 'Сохранить'");
                 Toast.makeText(CurrencyEditActivity.this, "Кнопка сохранения нажата!", android.widget.Toast.LENGTH_SHORT).show();
                 saveCurrency();
             }
@@ -78,6 +76,7 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
     protected void setupBackButton(int backButtonId) {
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
+                Log.d(TAG, "Нажата кнопка 'Назад'");
                 // Возвращаемся к списку валют
                 Intent intent = new Intent(this, CurrenciesActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -95,19 +94,32 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         
         // Валидация
         if (TextUtils.isEmpty(currencyName)) {
+            Log.d(TAG, "Передано пустое название валюты");
             Toast.makeText(this, "Введите название валюты", Toast.LENGTH_SHORT).show();
             return;
-        }
-        
-        Log.d(TAG, "🔄 Сохраняем валюту: " + currencyName);
-        Toast.makeText(this, "Сохраняем валюту...", Toast.LENGTH_SHORT).show();
-        
+        }   
+
         try {
-            // Используем CurrencyService для создания валюты
-            currencyService.create(currencyName).thenAccept(currencyId -> {
+            //запрос из БД на наличие валюты с таким названием
+            Currency existingCurrency = currencyService.getByTitle(currencyName).getValue();
+            if (existingCurrency != null) {
+                Log.d(TAG, "Передано название валюты, существующей в БД: " + currencyName);
+                Toast.makeText(this, "Валюта с таким названием уже существует", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Убираем эту строку - она вызывает NullPointerException
+            // String existingCurrencyTitle = existingCurrency.getTitle();
+
+
+            
+            Log.d(TAG, "🔄 Попытка сохранения валюты '" + currencyName + "'");
+            Toast.makeText(this, "Сохраняем валюту...", Toast.LENGTH_SHORT).show();
+
+            currencyService.create(currencyName).thenAccept(currency -> {
                 runOnUiThread(() -> {
-                    if (currencyId > 0) {
-                        Toast.makeText(this, "Валюта сохранена (ID: " + currencyId + ")", Toast.LENGTH_SHORT).show();
+                    if (currency != null && currency.getId() > 0) {
+                        Log.d(TAG, "✅ Валюта сохранена (ID: " + currency.getId() + ")");
+                        Toast.makeText(this, "Валюта сохранена (ID: " + currency.getId() + ")", Toast.LENGTH_SHORT).show();
                         
                         // Возвращаемся к списку валют
                         Intent intent = new Intent(this, CurrenciesActivity.class);

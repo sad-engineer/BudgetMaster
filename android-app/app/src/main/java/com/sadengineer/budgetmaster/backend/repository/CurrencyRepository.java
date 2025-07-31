@@ -78,10 +78,14 @@ public class CurrencyRepository {
     /**
      * Вставить новую валюту
      * @param currency валюта для вставки
-     * @return ID вставленной валюты или -1 при конфликте
+     * @return LiveData с вставленной валютой. Если валюта не была вставлена, то будет выброшено исключение.
      */
-    public long insert(Currency currency) {
-        return dao.insert(currency);
+    public LiveData<Currency> insert(Currency currency) {
+        long id = dao.insert(currency);
+        if (id == -1) {
+            throw new IllegalArgumentException("Не удалось вставить валюту");
+        }
+        return dao.getById((int)id);
     }
     
     /**
@@ -112,7 +116,8 @@ public class CurrencyRepository {
      * @return LiveData с максимальной позицией
      */
     public int getMaxPosition() {
-        return dao.getMaxPosition();
+        Integer maxPos = dao.getMaxPosition();
+        return maxPos != null ? maxPos : 0;
     }
     
     /**
@@ -121,6 +126,15 @@ public class CurrencyRepository {
      */
     public int getActiveCount() {
         return dao.countActive();
+    }
+
+    /**
+     * Получить валюты по подстроке в названии
+     * @param searchQuery подстрока для поиска
+     * @return LiveData с списком валют
+     */
+    public LiveData<List<Currency>> searchByTitle(String searchQuery) {
+        return dao.searchByTitle(searchQuery);
     }
     
     /**

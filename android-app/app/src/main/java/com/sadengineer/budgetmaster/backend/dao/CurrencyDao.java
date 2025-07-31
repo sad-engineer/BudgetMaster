@@ -107,9 +107,19 @@ public interface CurrencyDao {
     long insert(Currency currency);
     
     /**
+     * Получает валюты по подстроке в названии (включая удаленные)
+     * @param searchQuery подстрока для поиска
+     * @return список валют, содержащих подстроку в названии
+     */
+    @Query("SELECT * FROM currencies WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
+    LiveData<List<Currency>> searchByTitle(String searchQuery);
+    
+    /**
      * Обновляет существующую валюту в базе данных
      * @param currency валюта для обновления
      */
     @Update
     void update(Currency currency);     
+
+    
 } 
