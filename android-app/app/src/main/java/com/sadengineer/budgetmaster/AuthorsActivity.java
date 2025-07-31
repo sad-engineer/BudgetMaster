@@ -8,8 +8,15 @@ import android.widget.ImageButton;
 import androidx.appcompat.widget.Toolbar;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
+/**
+ * Экран авторов
+ */
 public class AuthorsActivity extends BaseNavigationActivity {
 
+    /**
+     * Создает экран авторов
+     * @param savedInstanceState - сохраненное состояние
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -17,8 +17,8 @@
     <string name="btn_earned">Заработано/мес.</string>
     <string name="btn_accounts">На счетах</string>
     <string name="btn_savings">Сбережения</string>
-    <string name="btn_income">Внести доход</string>
-    <string name="btn_expenditure">Внести расход</string>
+    <string name="btn_income">Доходы</string>
+    <string name="btn_expenditure">Расходы</string>
     <string name="btn_target">До цели</string>
     <string name="btn_budget">Остаток бюджета</string>
     <string name="btn_reserve">Резерв</string>

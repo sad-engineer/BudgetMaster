@@ -2,6 +2,7 @@ package com.sadengineer.budgetmaster;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -16,10 +17,26 @@ import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
-// Удаляем импорт старого backend - теперь используем Room ORM
 
+/**
+ * Экран главной страницы
+ */
 public class MainActivity extends BaseNavigationActivity {
 
+    /**
+     * Тег для логирования
+     */
+    private static final String TAG = "MainActivity";
+
+    /**
+     * Флаг активности MainActivity
+     */
+    private boolean isActivityActive = true;
+
+    /**
+     * Создает экран главной страницы
+     * @param savedInstanceState - сохраненное состояние
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,51 +146,89 @@ public class MainActivity extends BaseNavigationActivity {
         });
     }
 
-    // Переопределяем методы для показа Toast сообщений
     @Override
     protected void showInstructions() {
-        Toast.makeText(this, "Инструкции", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Инструкции", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void showStatistics() {
-        Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void showIncomeCategories() {
-        Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void showExpenseCategories() {
-        Toast.makeText(this, "Категории расходов", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Категории расходов", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void showImportData() {
-        Toast.makeText(this, "Загрузить данные", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Загрузить данные", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void showExportData() {
-        Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
+        if (isActivityActive) {
+            Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void navigateToSettings() {
-        Intent intent = new Intent(this, BackendTestActivity.class);
-        startActivity(intent);
+        if (isActivityActive) {
+            Intent intent = new Intent(this, BackendTestActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "🚀" + TAG + " запущена");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        isActivityActive = true;
+        Log.d(TAG, "▶️" + TAG + " возобновлена");
     }
-
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isActivityActive = false;
+        Log.d(TAG, "⏸️" + TAG + " приостановлена");
+        // Останавливаем обновления UI когда приложение не активно
+    }
+    
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityActive = false;
+        Log.d(TAG, "🛑" + TAG + " остановлена");
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isActivityActive = false;
+        Log.d(TAG, "🛑" + TAG + " уничтожена");
+        // Освобождаем ресурсы
+    }
 }

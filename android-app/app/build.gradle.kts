@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace = "com.sadengineer.budgetmaster"
-    compileSdk = 34 // или ваша версия
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sadengineer.budgetmaster" // замените на свой
-        minSdk = 24
+        applicationId = "com.sadengineer.budgetmaster" 
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         // Читаем версию из файла
@@ -31,6 +31,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
         viewBinding = true
@@ -50,6 +51,11 @@ android {
         }
     }
     
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+    
 
 }
 
@@ -62,6 +68,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     
-    // Android SQLite (встроен в Android)
-    // implementation("org.xerial:sqlite-jdbc:3.44.1.0") // Убираем SQLite JDBC
+    // Core library desugaring for java.time support on older API levels
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
 }

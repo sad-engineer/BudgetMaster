@@ -26,8 +26,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<AccountsAdapter.Accoun
     @Override
     public void onBindViewHolder(@NonNull AccountViewHolder holder, int position) {
         AccountItem item = items.get(position);
-        holder.name.setText(item.name);
-        holder.sum.setText(item.sum);
+        
+        // Безопасная установка текста
+        holder.name.setText(item.name != null ? item.name : "");
+        holder.sum.setText(item.sum != null ? item.sum : "");
     }
 
     @Override

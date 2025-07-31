@@ -2,6 +2,7 @@ package com.sadengineer.budgetmaster.currencies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -11,12 +12,16 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
 public class AddCurrencyActivity extends BaseNavigationActivity {
     
+    private static final String TAG = "AddCurrencyActivity";
+    
     private EditText currencyNameEditText;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_currency);
+        
+        Log.d(TAG, "🚀 AddCurrencyActivity создана");
         
         // Инициализация навигации
         initializeNavigation();
@@ -32,9 +37,11 @@ public class AddCurrencyActivity extends BaseNavigationActivity {
 
     /**
      * Инициализация элементов интерфейса
+     * @param currencyNameEditText - поле ввода названия валюты
      */
     private void initializeViews() {
         currencyNameEditText = findViewById(R.id.currency_name_edit_text);
+        Log.d(TAG, "✅ Элементы интерфейса инициализированы");
     }
     
     /**
@@ -45,6 +52,7 @@ public class AddCurrencyActivity extends BaseNavigationActivity {
         ImageButton backButton = findViewById(backButtonId);
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
+                Log.d(TAG, "👆 Нажата кнопка назад");
                 // Возвращаемся на экран валют
                 Intent intent = new Intent(this, CurrenciesActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -56,6 +64,7 @@ public class AddCurrencyActivity extends BaseNavigationActivity {
     
     /**
      * Настройка обработчиков кнопок
+     * @param saveButton - кнопка сохранения валюты
      */
     private void setupButtonHandlers() {
         // Кнопка "Сохранить"
@@ -63,9 +72,57 @@ public class AddCurrencyActivity extends BaseNavigationActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "👆 Нажата кнопка сохранить");
                 // TODO: Реализовать сохранение валюты
-                Toast.makeText(AddCurrencyActivity.this, "Сохранить валюту", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddCurrencyActivity.this, "Сохранить валюту (текстовая заглушка)", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Запускается при запуске Activity
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "🚀 AddCurrencyActivity запущена");
+    }
+    
+    /**
+     * Возобновляется при возобновлении Activity
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "▶️ AddCurrencyActivity возобновлена");
+        // Возобновляем работу когда приложение снова активно
+    }
+    
+    /**
+     * Приостанавливается при паузе Activity
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "⏸️ AddCurrencyActivity приостановлена");
+        // Останавливаем обновления UI когда приложение не активно
+    }
+    
+    /**
+     * Останавливается при остановке Activity
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "🛑 AddCurrencyActivity остановлена");
+    }
+    
+    /**
+     * Уничтожается при уничтожении Activity
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "🛑 AddCurrencyActivity уничтожена");
     }
 }

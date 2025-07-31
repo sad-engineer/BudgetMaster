@@ -22,7 +22,12 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private RecyclerView recyclerView;
     private CurrencyAdapter adapter;
     private DatabaseManager databaseManager;
+    private boolean isActivityActive = true;
     
+    /**
+     * Создает экран валют
+     * @param savedInstanceState - сохраненное состояние
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +88,11 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
      * Загружает валюты из базы данных
      */
     private void loadCurrenciesFromDatabase() {
+        if (!isActivityActive) {
+            Log.d(TAG, "⚠️ Activity не активна, пропускаем загрузку");
+            return;
+        }
+        
         Log.d(TAG, "🔄 Загружаем валюты из базы данных...");
         
         // Сначала инициализируем базу данных
@@ -104,19 +114,35 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
                     Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
                     
                     runOnUiThread(() -> {
-                        if (currencies != null && !currencies.isEmpty()) {
-                            adapter.setCurrencies(currencies);
-                            Log.d(TAG, "✅ Валюты отображены в списке");
-                            Toast.makeText(this, "Загружено валют: " + currencies.size(), Toast.LENGTH_LONG).show();
-                        } else {
-                            Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
-                            Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
+                        try {
+                            if (!isActivityActive || isFinishing() || isDestroyed()) {
+                                Log.d(TAG, "⚠️ Activity не активна или уничтожается, пропускаем обновление UI");
+                                return;
+                            }
+                            if (currencies != null && !currencies.isEmpty()) {
+                                adapter.setCurrencies(currencies);
+                                Log.d(TAG, "✅ Валюты отображены в списке");
+                                Toast.makeText(this, "Загружено валют: " + currencies.size(), Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
+                                Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "❌ Ошибка обновления UI: " + e.getMessage(), e);
                         }
                     });
                 }).exceptionally(throwable -> {
                     Log.e(TAG, "❌ Ошибка загрузки валют: " + throwable.getMessage(), throwable);
                     runOnUiThread(() -> {
-                        Toast.makeText(this, "Ошибка загрузки валют: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+                        try {
+                            if (!isActivityActive || isFinishing() || isDestroyed()) {
+                                Log.d(TAG, "⚠️ Activity не активна или уничтожается, пропускаем обновление UI");
+                                return;
+                            }
+                            Toast.makeText(this, "Ошибка загрузки валют: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            Log.e(TAG, "❌ Ошибка обновления UI: " + e.getMessage(), e);
+                        }
                     });
                     return null;
                 });
@@ -135,17 +161,86 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         });
     }
     
+    /**
+     * Обрабатывает клик на элементе списка
+     * @param currency - выбранная валюта
+     */
     @Override
     public void onCurrencyClick(Currency currency) {
         Log.d(TAG, "👆 Выбрана валюта: " + currency.getTitle() + " (ID: " + currency.getId() + ")");
         Toast.makeText(this, "Выбрана валюта: " + currency.getTitle(), Toast.LENGTH_SHORT).show();
     }
     
+    /**
+     * Запускается при активации Activity
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, " CurrenciesActivity запущена");
+    }
+
+    /**
+     * Останавливается при остановке Activity
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActivityActive = false;
+        Log.d(TAG, " CurrenciesActivity остановлена");
+        // Останавливаем все асинхронные операции
+        if (databaseManager != null) {
+            try {
+                // Отменяем текущие операции с БД
+                databaseManager.shutdown();
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка остановки DatabaseManager: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Приостанавливается при паузе Activity
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isActivityActive = false;
+        Log.d(TAG, "⏸️ CurrenciesActivity приостановлена");
+        // Останавливаем обновления UI когда приложение не активно
+        if (databaseManager != null) {
+            // Отменяем текущие операции с БД
+        }
+    }
+
+    /**
+     * Возобновляется при возобновлении Activity
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityActive = true;
+        Log.d(TAG, "▶️ CurrenciesActivity возобновлена");
+        // Возобновляем работу когда приложение снова активно
+        if (adapter != null && adapter.getItemCount() == 0) {
+            loadCurrenciesFromDatabase();
+        }
+    }
+    
+    /**
+     * Уничтожается при уничтожении Activity
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        isActivityActive = false;
+        Log.d(TAG, " CurrenciesActivity уничтожена");
         if (databaseManager != null) {
-            databaseManager.shutdown();
+            try {
+                databaseManager.shutdown();
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка уничтожения DatabaseManager: " + e.getMessage(), e);
+            }
         }
     }
 } 
