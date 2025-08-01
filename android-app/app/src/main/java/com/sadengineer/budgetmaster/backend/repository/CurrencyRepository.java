@@ -2,6 +2,7 @@
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * Repository класс для работы с Currency Entity
  */
 public class CurrencyRepository {
+    private static final String TAG = "CurrencyRepository";
     
     private final CurrencyDao dao;
     
@@ -81,11 +83,45 @@ public class CurrencyRepository {
      * @return LiveData с вставленной валютой. Если валюта не была вставлена, то будет выброшено исключение.
      */
     public LiveData<Currency> insert(Currency currency) {
-        long id = dao.insert(currency);
-        if (id == -1) {
-            throw new IllegalArgumentException("Не удалось вставить валюту");
+        try {
+            if (currency == null) {
+                throw new IllegalArgumentException("Валюта не может быть null");
+            }
+            
+            if (currency.getTitle() == null || currency.getTitle().trim().isEmpty()) {
+                throw new IllegalArgumentException("Название валюты не может быть пустым");
+            }
+            
+            // Проверяем, что база данных доступна
+            if (dao == null) {
+                throw new RuntimeException("DAO не инициализирован");
+            }
+            
+            // Проверяем, что валюта с таким названием уже не существует
+            Currency existingCurrency = getByTitle(currency.getTitle().trim()).getValue();
+            if (existingCurrency != null) {
+                throw new IllegalArgumentException("Валюта с названием '" + currency.getTitle().trim() + "' уже существует");
+            }
+            
+            long id = dao.insert(currency);
+            if (id == -1) {
+                // Если вставка не удалась, попробуем получить существующую валюту
+                Log.w(TAG, "Попытка вставить валюту с названием '" + currency.getTitle().trim() + "'");
+
+                Currency existing = getByTitle(currency.getTitle().trim()).getValue();
+                if (existing != null) {
+                    Log.w(TAG, "Валюта с названием '" + currency.getTitle().trim() + "' уже существует (ID: " + existing.getId() + ")");
+                    return getByTitle(currency.getTitle().trim());
+                } else {
+                    throw new RuntimeException("Не удалось вставить валюту в базу данных");
+                }
+            }
+            
+            return dao.getById((int)id);
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при вставке валюты: " + e.getMessage(), e);
+            throw e;
         }
-        return dao.getById((int)id);
     }
     
     /**

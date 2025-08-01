@@ -10,11 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
-import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class CurrenciesActivity extends BaseNavigationActivity implements CurrencyAdapter.OnCurrencyClickListener {
     
@@ -22,7 +20,6 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     
     private RecyclerView recyclerView;
     private CurrencyAdapter adapter;
-    private DatabaseManager databaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +34,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         // Инициализация RecyclerView
         setupRecyclerView();
         
-        // Инициализация DatabaseManager
-        databaseManager = new DatabaseManager(this);
-        Log.d(TAG, "✅ DatabaseManager создан");
-        Toast.makeText(this, "DatabaseManager создан", Toast.LENGTH_SHORT).show();
-        
         // Загружаем валюты из базы данных
         Log.d(TAG, "🔄 Начинаем загрузку валют...");
-        Toast.makeText(this, "Начинаем загрузку валют...", Toast.LENGTH_SHORT).show();
         loadCurrenciesFromDatabase();
 
         // Обработчики кнопок валют
@@ -86,56 +77,32 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private void loadCurrenciesFromDatabase() {
         Log.d(TAG, "🔄 Загружаем валюты из базы данных...");
         
-        // Сначала инициализируем базу данных
-        databaseManager.initializeDatabase().thenAccept(initResult -> {
-            if (initResult) {
-                Log.d(TAG, "✅ База данных инициализирована");
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "База данных инициализирована", Toast.LENGTH_SHORT).show();
-                });
+        try {
+            // Получаем базу данных (уже инициализирована в MainActivity)
+            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
+            
+            // Загружаем валюты через Observer
+            database.currencyDao().getAllActive().observe(this, currencies -> {
+                Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
                 
-                // Затем загружаем валюты через Observer на главном потоке
-                runOnUiThread(() -> {
-                    BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-                    database.currencyDao().getAllActive().observe(this, currencies -> {
-                        Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
-                        
-                        if (currencies != null && !currencies.isEmpty()) {
-                            adapter.setCurrencies(currencies);
-                            Log.d(TAG, "✅ Валюты отображены в списке");
-                            Toast.makeText(this, "Загружено валют: " + currencies.size(), Toast.LENGTH_LONG).show();
-                        } else {
-                            Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
-                            Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                });
-            } else {
-                Log.e(TAG, "❌ Ошибка инициализации базы данных");
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Ошибка инициализации базы данных", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).exceptionally(throwable -> {
-            Log.e(TAG, "❌ Ошибка инициализации: " + throwable.getMessage(), throwable);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Ошибка инициализации: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+                if (currencies != null && !currencies.isEmpty()) {
+                    adapter.setCurrencies(currencies);
+                    Log.d(TAG, "✅ Валюты отображены в списке");
+                } else {
+                    Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
+                    Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
+                }
             });
-            return null;
-        });
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Ошибка загрузки валют: " + e.getMessage(), e);
+            Toast.makeText(this, "Ошибка загрузки валют: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
     
     @Override
     public void onCurrencyClick(Currency currency) {
         Log.d(TAG, "👆 Выбрана валюта: " + currency.getTitle() + " (ID: " + currency.getId() + ")");
         Toast.makeText(this, "Выбрана валюта: " + currency.getTitle(), Toast.LENGTH_SHORT).show();
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (databaseManager != null) {
-            databaseManager.shutdown();
-        }
     }
 } 

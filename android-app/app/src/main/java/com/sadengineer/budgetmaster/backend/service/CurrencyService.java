@@ -2,6 +2,7 @@
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -20,7 +21,8 @@ import java.util.concurrent.CompletableFuture;
  * Service класс для бизнес-логики работы с Currency
  */
 public class CurrencyService {
-    
+    private static final String TAG = "CurrencyService";
+
     private final CurrencyRepository repo;
     private final ExecutorService executorService;
     private final String user;
@@ -119,39 +121,48 @@ public class CurrencyService {
     /**
      * Создать новую валюту
      * @param title название валюты
-     * @return CompletableFuture с созданной валютой
      */
-    public CompletableFuture<Currency> create(String title) {
+    public void create(String title) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Название валюты не может быть пустым");
         }
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return createCurrencySync(title);
-            } catch (Exception e) {
-                throw new RuntimeException("Ошибка создания валюты: " + e.getMessage(), e);
-            }
-        }, executorService);
-    }
-
-    /**
-     * Приватный метод для создания валюты
-     * @param title название валюты
-     * @return валюта
-     */
-    private Currency createCurrencySync(String title) {
-        Currency currency = new Currency();
-        currency.setTitle(title);
-        currency.setPosition(repo.getMaxPosition() + 1);
-        currency.setCreateTime(LocalDateTime.now());
-        currency.setCreatedBy(user);
         
-        LiveData<Currency> insertedCurrency = repo.insert(currency);
-        Currency result = insertedCurrency.getValue();
-        if (result == null) {
-            throw new RuntimeException("Не удалось создать валюту");
-        }
-        return result;
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "🔄 Запрос на создание валюты: " + title);
+                
+                // Проверяем, что база данных доступна
+                if (repo == null) {
+                    throw new RuntimeException("Repository не инициализирован");
+                }
+                
+                String trimmedTitle = title.trim();
+                
+                // Проверяем, что валюта с таким названием уже не существует
+                Currency existingCurrency = repo.getByTitle(trimmedTitle).getValue();
+                if (existingCurrency != null) {
+                    Log.w(TAG, "⚠️ Валюта с названием '" + trimmedTitle + "' уже существует (ID: " + existingCurrency.getId() + ")");
+                    return;
+                }
+                
+                // Создаем новую валюту
+                Currency currency = new Currency();
+                currency.setTitle(trimmedTitle);
+                currency.setPosition(repo.getMaxPosition() + 1);
+                currency.setCreateTime(LocalDateTime.now());
+                currency.setCreatedBy(user);
+                
+                Log.d(TAG, "📝 Создана валюта: " + currency.getTitle() + " (позиция: " + currency.getPosition() + ")");
+                
+                // Вставляем валюту в базу данных
+                repo.insert(currency);
+                
+                Log.d(TAG, "✅ Запрос на создание валюты успешно отправлен: " + currency.getTitle());
+                
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
+            }
+        });
     }
 
     /**
@@ -181,40 +192,6 @@ public class CurrencyService {
      */
     public LiveData<Currency> getByTitle(String title) {
         return repo.getByTitle(title);
-    }
-
-    /**
-     * Получить валюту по названию или создать новую
-     * @param title название валюты
-     * @return CompletableFuture с валютой
-     */
-    public CompletableFuture<Currency> getByTitleOrCreate(String title) {
-        return CompletableFuture.supplyAsync(() -> {
-            if (title == null || title.trim().isEmpty()) {
-                throw new IllegalArgumentException("Название валюты не может быть пустым");
-            }
-            
-            // Поиск валют по подстроке в названии (включая удаленные)
-            List<Currency> currencies = repo.searchByTitle(title).getValue();
-            if (currencies != null) {
-                // Поиск по точному совпадению
-                for (Currency currency : currencies) {
-                    if (currency.getTitle().equals(title)) {
-                        return currency;
-                    }
-                }
-                
-                // Поиск по подстроке (без учета регистра)
-                for (Currency currency : currencies) {
-                    if (currency.getTitle().toLowerCase().contains(title.toLowerCase())) {
-                        return currency;
-                    }
-                }
-            }
-            
-            // Создание новой валюты
-            return createCurrencySync(title);
-        }, executorService);
     }
 
     /**

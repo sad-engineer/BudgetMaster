@@ -10,4 +10,28 @@ $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 ./gradlew clean assembleRelease
 ./gradlew clean assembleDebug
 
+./gradlew installDebug
 
+
+cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
+./adb devices
+./adb kill-server
+./adb start-server
+./adb uninstall com.sadengineer.budgetmaster
+
+# Все логи
+./adb logcat
+
+# Фильтрация по приложению
+./adb logcat | Select-String "BudgetMaster"
+./adb logcat | Select-String "com.sadengineer.budgetmaster"
+
+# Только ошибки
+./adb logcat *:E
+
+# Сохранение логов в файл
+./adb logcat > C:\logs.txt
+
+# Фильтрация и сохранение
+./adb logcat | Select-String "BudgetMaster" > C:\budgetmaster_logs.txt
+./adb logcat | Select-String "BudgetMaster" > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.txt"
