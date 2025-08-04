@@ -71,36 +71,6 @@ public class CommonValidator {
         }
     }
     
-    /**
-     * Валидирует ID валюты
-     * @param currencyId ID валюты для валидации
-     * @throws IllegalArgumentException если ID некорректный
-     */
-    public static void validateId(int currencyId) {
-        BaseEntityValidator.validatePositiveId(currencyId, "ID валюты");
-    }
-    
-    /**
-     * Валидирует ID валюты (может быть null)
-     * @param currencyId ID валюты для валидации
-     * @throws IllegalArgumentException если ID некорректный
-     */
-    public static void validateCurrencyId(Integer currencyId) {
-        if (currencyId != null) {
-            validateId(currencyId.intValue());
-        }
-    }
-    
-    /**
-     * Валидирует валюту (String)
-     * @param currency валюта для валидации
-     * @throws IllegalArgumentException если валюта некорректная
-     */
-    public static void validateCurrency(String currency) {
-        if (currency == null || currency.trim().isEmpty()) {
-            throw new IllegalArgumentException("Валюта не может быть пустой");
-        }
-    }
     
     /**
      * Валидирует ID категории
@@ -242,15 +212,7 @@ public class CommonValidator {
     public static void validateTitle(String title, String fieldName) {
         BaseEntityValidator.validateTitle(title, fieldName);
     }
-    
-    /**
-     * Валидирует название валюты
-     * @param title название для валидации
-     * @throws IllegalArgumentException если название некорректное
-     */
-    public static void validateCurrencyTitle(String title) {
-        BaseEntityValidator.validateCurrencyTitle(title, "Название валюты");
-    }
+        
     
     /**
      * Валидирует название категории

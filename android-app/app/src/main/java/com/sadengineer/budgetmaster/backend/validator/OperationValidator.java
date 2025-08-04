@@ -32,7 +32,7 @@ public class OperationValidator {
         CommonValidator.validateComment(operation.getDescription());
         CommonValidator.validateCategoryId(operation.getCategoryId());
         CommonValidator.validateAccountId(operation.getAccountId());
-        CommonValidator.validateCurrencyId(operation.getCurrencyId());
+        CurrencyValidator.validateId(operation.getCurrencyId());
         // TODO: Сделать валидацию полей для перевода между счетами после реализации логики
         //validateToAccountId(operation.getToAccountId());
         //validateToCurrencyId(operation.getToCurrencyId());
@@ -56,7 +56,7 @@ public class OperationValidator {
         CommonValidator.validateComment(operation.getDescription());
         CommonValidator.validateCategoryId(operation.getCategoryId());
         CommonValidator.validateAccountId(operation.getAccountId());
-        CommonValidator.validateCurrencyId(operation.getCurrencyId());
+        CurrencyValidator.validateId(operation.getCurrencyId());
         // TODO: Сделать валидацию полей для перевода между счетами после реализации логики
         //validateToAccountId(operation.getToAccountId());
         //validateToCurrencyId(operation.getToCurrencyId());
@@ -80,7 +80,7 @@ public class OperationValidator {
         CommonValidator.validateComment(operation.getDescription());
         CommonValidator.validateCategoryId(operation.getCategoryId());
         CommonValidator.validateAccountId(operation.getAccountId());
-        CommonValidator.validateCurrencyId(operation.getCurrencyId());
+        CurrencyValidator.validateId(operation.getCurrencyId());
         // TODO: Сделать валидацию полей для перевода между счетами после реализации логики
         //validateToAccountId(operation.getToAccountId());
         //validateToCurrencyId(operation.getToCurrencyId());

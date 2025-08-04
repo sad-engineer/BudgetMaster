@@ -103,6 +103,10 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     @Override
     public void onCurrencyClick(Currency currency) {
         Log.d(TAG, "👆 Выбрана валюта: " + currency.getTitle() + " (ID: " + currency.getId() + ")");
-        Toast.makeText(this, "Выбрана валюта: " + currency.getTitle(), Toast.LENGTH_SHORT).show();
+        
+        // Открываем экран редактирования с передачей выбранной валюты
+        Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
+        intent.putExtra("currency", currency);
+        startActivity(intent);
     }
 } 

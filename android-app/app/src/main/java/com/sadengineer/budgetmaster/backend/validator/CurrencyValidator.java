@@ -27,7 +27,7 @@ public class CurrencyValidator {
         
         // Валидация специфичных полей
         CommonValidator.validatePositivePosition(currency.getPosition());
-        CommonValidator.validateCurrencyTitle(currency.getTitle());
+        validateTitle(currency.getTitle());
     }
 
     /**
@@ -45,7 +45,7 @@ public class CurrencyValidator {
 
         // Валидация специфичных полей
         CommonValidator.validatePositivePosition(currency.getPosition());
-        CommonValidator.validateCurrencyTitle(currency.getTitle());
+        validateTitle(currency.getTitle());
         CommonValidator.validateCreateTime(currency.getCreateTime());
         CommonValidator.validateUser(currency.getCreatedBy(), "Пользователь, создавший валюту");
     }
@@ -65,8 +65,30 @@ public class CurrencyValidator {
 
         // Валидация специфичных полей
         CommonValidator.validatePositivePosition(currency.getPosition());
-        CommonValidator.validateCurrencyTitle(currency.getTitle());
+        validateTitle(currency.getTitle());
         CommonValidator.validateUpdateTime(currency.getUpdateTime());
         CommonValidator.validateUser(currency.getUpdatedBy(), "Пользователь, обновивший валюту");
     }
+
+    /**
+     * Валидирует название валюты с специфичными правилами
+     * @param title название для валидации
+     * @param fieldName название поля для сообщения об ошибке
+     * @throws IllegalArgumentException если название некорректное
+     */
+    public static void validateTitle(String title) {
+        BaseEntityValidator.validateNotEmpty(title, "Название валюты");
+        //BaseEntityValidator.validateMaxLength(title, 70, "Название валюты");
+        BaseEntityValidator.validatePattern(title, "^[a-zA-Zа-яА-Я\\s\\-]+$", "Название валюты");
+    }
+
+    /**
+     * Валидирует ID валюты
+     * @param currencyId ID валюты для валидации
+     * @throws IllegalArgumentException если ID некорректный
+     */
+    public static void validateId(int currencyId) {
+        BaseEntityValidator.validatePositiveId(currencyId, "ID валюты");
+    }
+    
 } 

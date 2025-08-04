@@ -120,17 +120,6 @@ public class BaseEntityValidator {
         validatePattern(title, "^[a-zA-Zа-яА-Я0-9\\s\\-_.,!?()]+$", fieldName);
     }
     
-    /**
-     * Валидирует название валюты с специфичными правилами
-     * @param title название для валидации
-     * @param fieldName название поля для сообщения об ошибке
-     * @throws IllegalArgumentException если название некорректное
-     */
-    public static void validateCurrencyTitle(String title, String fieldName) {
-        validateNotEmpty(title, fieldName);
-        validateMaxLength(title, 10, fieldName);
-        validatePattern(title, "^[A-Z]{3}$", fieldName);
-    }
     
     /**
      * Валидирует комментарий

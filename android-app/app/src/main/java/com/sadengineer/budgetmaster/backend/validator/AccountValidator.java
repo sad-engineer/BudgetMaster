@@ -5,6 +5,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.constants.ValidationConstants;
 import com.sadengineer.budgetmaster.backend.validator.BaseEntityValidator;
 import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
+import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 
 /**
  * Валидатор для счета
@@ -29,7 +30,7 @@ public class AccountValidator {
         CommonValidator.validatePosition(account.getPosition());
         CommonValidator.validateAccountAmount(account.getAmount());
         CommonValidator.validateAccountType(account.getType());
-        CommonValidator.validateCurrencyId(account.getCurrencyId());
+        CurrencyValidator.validateId(account.getCurrencyId());
         CommonValidator.validateClosedStatus(account.getClosed());
         // TODO: Сделать валидацию полей для кредитной карты после реализации логики 
         //validateCreditCardLimit(account.getCreditCardLimit());
@@ -51,7 +52,7 @@ public class AccountValidator {
         CommonValidator.validatePosition(account.getPosition());
         CommonValidator.validateAccountAmount(account.getAmount());
         CommonValidator.validateAccountType(account.getType());
-        CommonValidator.validateCurrencyId(account.getCurrencyId());
+        CurrencyValidator.validateId(account.getCurrencyId());
         CommonValidator.validateClosedStatus(account.getClosed());
         // TODO: Сделать валидацию полей для кредитной карты после реализации логики 
         //validateCreditCardLimit(account.getCreditCardLimit());
@@ -73,7 +74,7 @@ public class AccountValidator {
         CommonValidator.validatePosition(account.getPosition());
         CommonValidator.validateAccountAmount(account.getAmount());
         CommonValidator.validateAccountType(account.getType());
-        CommonValidator.validateCurrencyId(account.getCurrencyId());
+        CurrencyValidator.validateId(account.getCurrencyId());
         CommonValidator.validateClosedStatus(account.getClosed());
         // TODO: Сделать валидацию полей для кредитной карты после реализации логики 
         //validateCreditCardLimit(account.getCreditCardLimit());

@@ -13,6 +13,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 
 /**
  * Activity для создания/изменения валюты
@@ -26,7 +27,16 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
     private ImageButton backButton;
     private ImageButton menuButton;
     private CurrencyService currencyService;
+    private CurrencyValidator currencyValidator;
     
+    // Поля для хранения данных валюты
+    private Currency currentCurrency;
+    private boolean isEditMode = false;
+    
+    /**
+     * Метод вызывается при создании Activity
+     * @param savedInstanceState - сохраненное состояние Activity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +56,39 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         // Инициализация CurrencyService
         currencyService = new CurrencyService(this, "default_user");
         
+        // Получаем данные из Intent и заполняем поля
+        loadCurrencyData();
+        
         // Обработчики кнопок
         setupButtonHandlers();
+    }
+    
+    /**
+     * Загружает данные валюты из Intent и заполняет поля
+     */
+    private void loadCurrencyData() {
+        try {
+            // Получаем валюту из Intent
+            currentCurrency = (Currency) getIntent().getSerializableExtra("currency");
+            
+            if (currentCurrency != null) {
+                // Режим редактирования
+                isEditMode = true;
+                Log.d(TAG, "Режим редактирования валюты: " + currentCurrency.getTitle());
+                
+                // Заполняем поля данными валюты
+                currencyNameEdit.setText(currentCurrency.getTitle());
+                
+            } else {
+                // Режим создания новой валюты
+                isEditMode = false;
+                Log.d(TAG, "Режим создания новой валюты");
+            }
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка загрузки данных валюты: " + e.getMessage(), e);
+            isEditMode = false;
+        }
     }
     
     /**
@@ -73,10 +114,7 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
             backButton.setOnClickListener(v -> {
                 Log.d(TAG, "Нажата кнопка 'Назад'");
                 // Возвращаемся к списку валют
-                Intent intent = new Intent(this, CurrenciesActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                returnToCurrencies();
             });
         }
     }
@@ -87,45 +125,72 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
     private void saveCurrency() {
         String currencyName = currencyNameEdit.getText().toString().trim();
         
-        // Валидация
-        if (TextUtils.isEmpty(currencyName)) {
-            Log.d(TAG, "Передано пустое название валюты");
+        // Валидация названия валюты
+        try {
+            currencyValidator.validateTitle(currencyName);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "❌ Ошибка валидации названия валюты: " + e.getMessage(), e);
+
+            // выделяем красной рамкой поле с названием валюты
+            currencyNameEdit.setError("Некорректное название валюты.");
+            currencyNameEdit.requestFocus();
+
             return;
-        }   
+        }
 
         try {
-            Log.d(TAG, "🔄 Попытка сохранения валюты '" + currencyName + "'");
+            if (isEditMode && currentCurrency != null) {
+                // Режим редактирования
+                Log.d(TAG, "🔄 Попытка обновления валюты '" + currencyName + "' (ID: " + currentCurrency.getId() + ")");
+                
+                // Обновляем данные валюты через сервис
+                currentCurrency.setTitle(currencyName);
+                currencyService.update(currentCurrency);
+                
+                Log.d(TAG, "✅ Запрос на обновление валюты отправлен");
+                
+            } else {
+                // Режим создания новой валюты
+                Log.d(TAG, "🔄 Попытка создания валюты '" + currencyName + "'");
 
-            // Проверяем существование валюты
-            Currency existingCurrency = currencyService.getByTitle(currencyName).getValue();
-            if (existingCurrency != null) {
-                Log.d(TAG, "⚠️ Валюта с названием '" + currencyName + "' уже существует");
-                return;
+                // Проверяем существование валюты
+                Currency existingCurrency = currencyService.getByTitle(currencyName).getValue();
+                if (existingCurrency != null) {
+                    Log.d(TAG, "⚠️ Валюта с названием '" + currencyName + "' уже существует");
+                    return;
+                }
+
+                // Если валюта не существует, то создаем её
+                currencyService.create(currencyName);
+                
+                Log.d(TAG, "✅ Запрос на создание валюты отправлен");
             }
-
-            // Создаем валюту
-            currencyService.create(currencyName);
-            
-            Log.d(TAG, "✅ Запрос на создание валюты отправлен");
             
             // Возвращаемся к списку валют
-            Intent intent = new Intent(this, CurrenciesActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
+            returnToCurrencies();
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
         }
     }
-    
 
+    /**
+     * Возвращается к списку валют
+     */
+    private void returnToCurrencies() {
+        // Переходим к списку валют
+        Log.d(TAG, "🔄 Переходим к списку валют");
+        Intent intent = new Intent(this, CurrenciesActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
     
+    /**
+     * Метод вызывается при уничтожении Activity
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // if (currencyService != null) {
-        //     // CurrencyService сам управляет своим ExecutorService
-        // }
     }
 } 
