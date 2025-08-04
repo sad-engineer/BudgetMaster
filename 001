@@ -10,7 +10,7 @@ $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 ./gradlew clean assembleRelease
 ./gradlew clean assembleDebug
 
-./gradlew installDebug
+./gradlew clean assembleDebug installDebug
 
 
 cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
