@@ -78,7 +78,8 @@ public class CurrencyValidator {
      */
     public static void validateTitle(String title) {
         BaseEntityValidator.validateNotEmpty(title, "Название валюты");
-        //BaseEntityValidator.validateMaxLength(title, 70, "Название валюты");
+        BaseEntityValidator.validateMinLength(title, 3, "Название валюты");
+        BaseEntityValidator.validateMaxLength(title, 70, "Название валюты");
         BaseEntityValidator.validatePattern(title, "^[a-zA-Zа-яА-Я\\s\\-]+$", "Название валюты");
     }
 

@@ -7,13 +7,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import java.util.concurrent.CompletableFuture;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
+
+import java.util.concurrent.CompletableFuture;
+
 
 /**
  * Activity для создания/изменения валюты
@@ -127,14 +129,11 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         
         // Валидация названия валюты
         try {
-            currencyValidator.validateTitle(currencyName);
+            CurrencyValidator.validateTitle(currencyName);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "❌ Ошибка валидации названия валюты: " + e.getMessage(), e);
-
-            // выделяем красной рамкой поле с названием валюты
-            currencyNameEdit.setError("Некорректное название валюты.");
+            // при ошибке выделять поле ввода красной рамкой
+            currencyNameEdit.setError("Не верное название валюты: \n" + e.getMessage());
             currencyNameEdit.requestFocus();
-
             return;
         }
 
@@ -174,12 +173,14 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         }
     }
 
+    
+
     /**
      * Возвращается к списку валют
      */
     private void returnToCurrencies() {
         // Переходим к списку валют
-        Log.d(TAG, "🔄 Переходим к списку валют");
+        Log.d(TAG, "🔄 Переходим к окну списка валют");
         Intent intent = new Intent(this, CurrenciesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

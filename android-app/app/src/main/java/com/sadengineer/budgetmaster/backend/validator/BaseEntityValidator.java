@@ -94,6 +94,19 @@ public class BaseEntityValidator {
             throw new IllegalArgumentException(fieldName + " слишком длинное (максимум " + maxLength + " символов)");
         }
     }
+
+    /**
+     * Проверяет, что строка превышает минимальную длину
+     * @param value строка для проверки
+     * @param minLength минимальная длина
+     * @param fieldName название поля для сообщения об ошибке
+     * @throws IllegalArgumentException если строка некорректная
+     */
+    public static void validateMinLength(String value, int minLength, String fieldName) {
+        if (value != null && value.length() < minLength) {
+            throw new IllegalArgumentException(fieldName + " слишком короткое (минимум " + minLength + " символов)");
+        }
+    }
     
     /**
      * Проверяет, что строка соответствует регулярному выражению

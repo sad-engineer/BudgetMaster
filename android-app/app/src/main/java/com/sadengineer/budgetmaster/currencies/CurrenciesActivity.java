@@ -5,16 +5,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+
 import java.util.List;
 
+
+/**
+ * Activity для отображения списка валют
+ */
 public class CurrenciesActivity extends BaseNavigationActivity implements CurrencyAdapter.OnCurrencyClickListener, CurrencyAdapter.OnSelectionChangedListener {
     
     private static final String TAG = "CurrenciesActivity";
@@ -26,6 +32,10 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private CurrencyService currencyService;
     private boolean isSelectionMode = false;
 
+    /**
+     * Метод вызывается при создании Activity
+     * @param savedInstanceState - сохраненное состояние Activity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +53,6 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         setupRecyclerView();
         
         // Загружаем валюты из базы данных
-        Log.d(TAG, "🔄 Начинаем загрузку валют...");
         loadCurrenciesFromDatabase();
 
         // Обработчики кнопок валют
@@ -57,6 +66,9 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         addCurrencyButton = findViewById(R.id.add_currency_button);
         deleteCurrencyButton = findViewById(R.id.delete_currency_button);
 
+        /**
+         * Обработчик нажатия на кнопку добавления валюты
+         */
         addCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,6 +83,9 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
             }
         });
 
+        /**
+         * Обработчик нажатия на кнопку удаления валют
+         */
         deleteCurrencyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,11 +139,6 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private void deleteSelectedCurrencies() {
         List<Currency> selectedCurrencies = adapter.getSelectedCurrencies();
         
-        if (selectedCurrencies.isEmpty()) {
-            Toast.makeText(this, "Выберите валюты для удаления", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
         Log.d(TAG, "🗑️ Удаляем выбранные валюты: " + selectedCurrencies.size());
         
         // Удаляем валюты из базы данных
@@ -143,8 +153,7 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         
         // Отменяем режим выбора
         cancelSelectionMode();
-        
-        Toast.makeText(this, "Удалено валют: " + selectedCurrencies.size(), Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "✅ Удалено валют: " + selectedCurrencies.size());
     }
     
     /**
@@ -177,34 +186,44 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
                     Log.d(TAG, "✅ Валюты отображены в списке");
                 } else {
                     Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
-                    Toast.makeText(this, "Валюты не найдены", Toast.LENGTH_SHORT).show();
                 }
             });
             
         } catch (Exception e) {
             Log.e(TAG, "❌ Ошибка загрузки валют: " + e.getMessage(), e);
-            Toast.makeText(this, "Ошибка загрузки валют: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
+    /**
+     * Обрабатывает нажатие на валюту
+     * @param currency - выбранная валюта
+     */
     @Override
     public void onCurrencyClick(Currency currency) {
         if (!isSelectionMode) {
             Log.d(TAG, "👆 Выбрана валюта: " + currency.getTitle() + " (ID: " + currency.getId() + ")");
-            
-            // Открываем экран редактирования с передачей выбранной валюты
-            Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
-            intent.putExtra("currency", currency);
-            startActivity(intent);
+            // Переходим на экран редактирования валюты
+            goToCurrencyEdit(currency);
         }
     }
-    
+
+    /**
+     * Переходит на экран редактирования валюты
+     * @param currency - выбранная валюта
+     */
+    private void goToCurrencyEdit(Currency currency) {
+        Log.d(TAG, "🔄 Переходим к окну редактирования валюты");
+        Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
+        intent.putExtra("currency", currency);
+        startActivity(intent);
+    }
+
+    /**
+     * Обрабатывает изменения в количестве выбранных валют
+     * @param selectedCount - количество выбранных валют
+     */
     @Override
     public void onSelectionChanged(int selectedCount) {
         Log.d(TAG, "📊 Выбрано валют: " + selectedCount);
-        
-        if (selectedCount > 0) {
-            Toast.makeText(this, "Выбрано валют: " + selectedCount, Toast.LENGTH_SHORT).show();
-        }
     }
 } 
