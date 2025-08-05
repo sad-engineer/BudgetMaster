@@ -1,4 +1,4 @@
-// -*- coding: utf-8 -*-
+
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;

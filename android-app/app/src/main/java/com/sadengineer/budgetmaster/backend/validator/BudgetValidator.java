@@ -1,4 +1,4 @@
-// -*- coding: utf-8 -*-
+
 package com.sadengineer.budgetmaster.backend.validator;
 
 import com.sadengineer.budgetmaster.backend.entity.Budget;

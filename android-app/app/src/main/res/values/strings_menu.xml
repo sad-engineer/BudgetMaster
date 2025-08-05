@@ -1,11 +1,8 @@
 <resources>
     <!-- Пункты меню -->
     <string name="menu_main">Главная</string>
-    <string name="menu_currencies">Валюты</string>
-    <string name="menu_create_database">Создать базу</string>
-    <string name="menu_delete_database">Удалить базу</string>
-
     <string name="menu_instructions">Инструкции</string>
+    <string name="menu_currencies">Валюты</string>
     <string name="menu_accounts">Счета и переводы</string>
     <string name="menu_income">Доходы</string>
     <string name="menu_expense">Расходы</string>
@@ -16,6 +13,7 @@
     <string name="menu_import_data">Загрузить данные</string>
     <string name="menu_export_data">Выгрузить данные</string>
     <string name="menu_settings">Настройки</string>
-    <string name="menu_version">Версия приложения</string>
+    <string name="menu_backend_test">Тест Backend</string>
+    <string name="menu_about">О приложении</string>
     <string name="menu_authors">Авторы</string>
 </resources>

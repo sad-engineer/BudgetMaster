@@ -1,21 +1,33 @@
 <resources>
     <!-- Заголовок тулбара -->
     <string name="toolbar_title_main">Главная</string>
+    <string name="toolbar_title_instructions">Инструкции</string>
     <string name="toolbar_title_currencies">Валюты</string>
-    <string name="toolbar_title_currency_edit">Валюта</string>
+    <string name="toolbar_title_accounts">Счета и переводы</string>
+    <string name="toolbar_title_income">Доходы</string>
+    <string name="toolbar_title_expense">Расходы</string>
+    <string name="toolbar_title_budget">Бюджет</string>
+    <string name="toolbar_title_income_categories">Категории доходов</string>
+    <string name="toolbar_title_expense_categories">Категории расходов</string>
+    <string name="toolbar_title_import_data">Загрузить данные</string>
+    <string name="toolbar_title_export_data">Выгрузить данные</string>
+    <string name="toolbar_title_statistics">Статистика</string>
+    <string name="toolbar_title_backend_test">Тест Backend</string>
+    <string name="toolbar_title_settings">Настройки</string>
     <string name="toolbar_title_version">О приложении</string>
     <string name="toolbar_title_authors">Авторы</string>
 
-    <string name="toolbar_title_accounts">Счета</string>
-    <string name="toolbar_title_budget">Бюджет</string>
-    <string name="toolbar_title_income">Доходы</string>
-    <string name="toolbar_title_expense">Расходы</string>
-    <string name="toolbar_title_settings">Настройки</string>
-    <string name="toolbar_title_backend_test">Тест Backend</string>
+    <!-- Заголовки для экранов добавления -->
+    <string name="toolbar_title_currency_edit">Добавить валюту</string>
+    <string name="toolbar_title_add_income">Добавить доход</string>
+    <string name="toolbar_title_add_expense">Добавить расход</string>
+    <string name="toolbar_title_add_account">Добавить счет</string>
+    <string name="toolbar_title_add_category">Добавить категорию</string>
 
     <!-- Описания иконок -->
     <string name="icon_back">Кнопка назад</string>
     <string name="icon_menu">Кнопка меню</string>
+    <string name="icon_save">Кнопка сохранить</string>
     <string name="icon_income_toolbar">Кнопка дохода</string>
     <string name="icon_expense_toolbar">Кнопка расхода</string>
     

@@ -1,4 +1,4 @@
-// -*- coding: utf-8 -*-
+
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;

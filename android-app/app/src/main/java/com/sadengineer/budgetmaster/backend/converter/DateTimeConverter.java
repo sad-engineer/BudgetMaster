@@ -1,4 +1,4 @@
-// -*- coding: utf-8 -*-
+
 package com.sadengineer.budgetmaster.backend.converter;
 
 import androidx.room.TypeConverter;
