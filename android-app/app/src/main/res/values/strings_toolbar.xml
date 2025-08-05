@@ -18,7 +18,8 @@
     <string name="toolbar_title_authors">Авторы</string>
 
     <!-- Заголовки для экранов добавления -->
-    <string name="toolbar_title_currency_edit">Добавить валюту</string>
+    <string name="toolbar_title_currency_edit">Редактировать валюту</string>
+    <string name="toolbar_title_currency_add">Добавить валюту</string>
     <string name="toolbar_title_add_income">Добавить доход</string>
     <string name="toolbar_title_add_expense">Добавить расход</string>
     <string name="toolbar_title_add_account">Добавить счет</string>

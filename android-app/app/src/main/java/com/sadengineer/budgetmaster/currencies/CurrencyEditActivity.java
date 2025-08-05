@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
@@ -81,15 +83,24 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
                 // Заполняем поля данными валюты
                 currencyNameEdit.setText(currentCurrency.getTitle());
                 
+                // Устанавливаем заголовок для режима редактирования
+                setToolbarTitle(R.string.toolbar_title_currency_edit, R.dimen.toolbar_text_currency_edit);
+                
             } else {
                 // Режим создания новой валюты
                 isEditMode = false;
                 Log.d(TAG, "Режим создания новой валюты");
+                
+                // Устанавливаем заголовок для режима создания
+                setToolbarTitle(R.string.toolbar_title_currency_add, R.dimen.toolbar_text_currency_add);
             }
             
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки данных валюты: " + e.getMessage(), e);
             isEditMode = false;
+            
+            // Устанавливаем заголовок для режима создания по умолчанию
+            setToolbarTitle(R.string.toolbar_title_currency_add, R.dimen.toolbar_text_currency_add);
         }
     }
     
@@ -172,8 +183,24 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
             Log.e(TAG, "❌ Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
         }
     }
-
     
+    /**
+     * Устанавливает заголовок тулбара
+     * @param titleResId - ресурс строки для заголовка
+     * @param textSizeResId - ресурс размера шрифта
+     */
+    private void setToolbarTitle(int titleResId, int textSizeResId) {
+        TextView toolbarTitle = findViewById(R.id.toolbar_title);
+        if (toolbarTitle != null) {
+            toolbarTitle.setText(titleResId);
+            Log.d(TAG, "Заголовок тулбара установлен: " + getString(titleResId));
+            
+            // Устанавливаем размер шрифта
+            float textSize = getResources().getDimension(textSizeResId);
+            toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+            Log.d(TAG, "Размер шрифта установлен: " + textSize + "px");
+        }
+    }
 
     /**
      * Возвращается к списку валют
@@ -185,13 +212,5 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
-    }
-    
-    /**
-     * Метод вызывается при уничтожении Activity
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
+    }   
 } 

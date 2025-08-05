@@ -4,11 +4,14 @@ import android.content.Intent;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.navigation.NavigationView;
+
 import com.sadengineer.budgetmaster.MainActivity;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.accounts.Accounts;
@@ -49,7 +52,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             menuButton.setOnClickListener(v -> {
                 if (drawerLayout != null) {
                     drawerLayout.openDrawer(GravityCompat.START);
-                    Log.d(TAG, "👆 Открыто боковое меню");
+                    Log.d(TAG, "👆 Нажата кнопка меню");
                 }
             });
         }
@@ -63,11 +66,11 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         ImageButton backButton = findViewById(backButtonId);
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
-                Log.d(TAG, "👆 Нажата кнопка назад");
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
+                Log.d(TAG, "👆 Нажата кнопка назад");
             });
         }
     }
@@ -259,39 +262,103 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         Log.d(TAG, "Переход на экран авторов");
     }
 
-    // Методы для показа временных сообщений - могут быть переопределены
+    // не реализованные экраны
+    // TODO: реализовать экраны
+
+    /**
+     * Показывает экран инструкций
+     */
     protected void showInstructions() {
-        // Показываем Toast или переходим на экран инструкций
-        Log.d(TAG, "Показать инструкции");
+        Log.d(TAG, "Экран инструкций не реализован");
     }
 
+    /**
+     * Показывает экран статистики
+     */
     protected void showStatistics() {
-        // Показываем Toast или переходим на экран статистики
-        Log.d(TAG, "Показать статистику");
+        Log.d(TAG, "Экран статистики не реализован");
     }
 
+    /**
+     * Показывает экран категорий доходов
+     */
     protected void showIncomeCategories() {
         // Показываем Toast или переходим на экран категорий доходов
-        Log.d(TAG, "Показать категории доходов");
+        Log.d(TAG, "Экран категорий доходов не реализован");
     }
 
+    /**
+     * Показывает экран категорий расходов
+     */
     protected void showExpenseCategories() {
-        // Показываем Toast или переходим на экран категорий расходов
-        Log.d(TAG, "Показать категории расходов");
+        Log.d(TAG, "Экран категорий расходов не реализован");
     }
 
+    /**
+     * Показывает экран импорта данных
+     */
     protected void showImportData() {
-        // Показываем Toast или переходим на экран импорта данных
-        Log.d(TAG, "Показать импорт данных");
+        Log.d(TAG, "Экран импорта данных не реализован");
     }
 
+    /**
+     * Показывает экран экспорта данных
+     */
     protected void showExportData() {
-        // Показываем Toast или переходим на экран экспорта данных
-        Log.d(TAG, "Показать экспорт данных");
+        Log.d(TAG, "Экран экспорта данных не реализован");
     }
 
+    /**
+     * Показывает экран теста Backend
+     */
     protected void showBackendTest() {
-        // Показываем Toast или переходим на экран теста Backend
-        Log.d(TAG, "Показать тест Backend");
+        Log.d(TAG, "Экран теста Backend не реализован");
+    }
+
+    // Жизненный цикл Activity
+
+    /**
+     * Запуск Activity
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "🚀 " + getClass().getSimpleName() + " запущена");
+    }
+
+    /**
+     * Возобновление Activity
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "▶️ " + getClass().getSimpleName() + " возобновлена");
+    }
+
+    /**
+     * Приостановка Activity
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "⏸️ " + getClass().getSimpleName() + " приостановлена");
+    }
+
+    /**
+     * Остановка Activity
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "🛑 " + getClass().getSimpleName() + " остановлена");
+    }
+
+    /**
+     * Уничтожение Activity
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "💀 " + getClass().getSimpleName() + " уничтожена");
     }
 } 

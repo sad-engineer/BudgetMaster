@@ -208,3 +208,4 @@ BudgetMasterBackend/budget_master.db
 Thumbs.db
 
 temp/
+budgetmaster_logs.txt
