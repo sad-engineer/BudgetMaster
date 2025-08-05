@@ -121,5 +121,11 @@ public interface CurrencyDao {
     @Update
     void update(Currency currency);     
 
-    
+    /**
+     * выравнивает позиции валют после удаления, игнорирует записи с position = 0
+     * Устраняет разрывы в позициях
+     */
+    @Query("UPDATE currencies SET position = position - 1 WHERE position > 1 AND position != 0")
+    void updatePositionsAfterDelete();
+
 } 

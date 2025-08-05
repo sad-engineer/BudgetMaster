@@ -19,5 +19,10 @@
     <!-- Размеры для валют-->
     <dimen name="toolbar_text_currency_edit">21sp</dimen>
     <dimen name="toolbar_text_currency_add">@dimen/toolbar_text</dimen>
+        
+    
+    <!-- Размеры для счетов-->
+    <dimen name="toolbar_text_accounts">21sp</dimen>
+    
 
 </resources> 

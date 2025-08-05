@@ -24,12 +24,20 @@
 
 #### Экраны с вкладками (Accounts, Budget, Income, Expense):
 ```xml
-<androidx.constraintlayout.widget.ConstraintLayout 
-    android:id="@+id/main"
+<androidx.drawerlayout.widget.DrawerLayout 
+    android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-    <!-- Содержимое -->
-</androidx.constraintlayout.widget.ConstraintLayout>
+    
+    <androidx.constraintlayout.widget.ConstraintLayout 
+        android:id="@+id/main"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <!-- Содержимое -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    <!-- NavigationView для drawer -->
+</androidx.drawerlayout.widget.DrawerLayout>
 ```
 
 #### Простые экраны с drawer (Version, Authors):
@@ -52,13 +60,20 @@
 
 #### Простые экраны без drawer (Currencies, Settings, BackendTest):
 ```xml
-<LinearLayout
-    android:id="@+id/main"
-    android:layout_width="match_parent"
+<androidx.drawerlayout.widget.DrawerLayout 
+    android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-    <!-- Содержимое -->
-</LinearLayout>
+    android:layout_width="match_parent">
+    
+    <androidx.constraintlayout.widget.ConstraintLayout 
+        android:id="@+id/main"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <!-- Содержимое -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    <!-- NavigationView для drawer -->
+</androidx.drawerlayout.widget.DrawerLayout>
 ```
 
 ### 2. Блок тулбара
@@ -67,11 +82,14 @@
 ```xml
 <androidx.appcompat.widget.Toolbar
     android:id="@+id/toolbar" или "@+id/toolbar2"
-    android:layout_width="match_parent" или "0dp"
+    android:layout_width="0dp"
     android:layout_height="@dimen/toolbar_height"
     android:layout_marginTop="@dimen/toolbar_margin_top"
     android:background="@color/[screen_name]_toolbar_background"
     android:elevation="4dp"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     app:contentInsetStart="0dp"
     app:contentInsetEnd="0dp"
@@ -81,7 +99,6 @@
 #### Внутренний LinearLayout:
 ```xml
 <LinearLayout
-    android:id="@+id/toolbar_container"
     android:gravity="center_vertical"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -105,20 +122,18 @@
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toBottomOf="@id/toolbar2">
-
-    <com.google.android.material.tabs.TabLayout
+    
+    <!-- TabLayout -->
+    <com.google.android.material.tabs.TabLayout 
         android:id="@+id/[screen_name]_tab_layout"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
-        android:background="@color/[screen_name]_tab_background"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tabIndicatorColor="@color/[screen_name]_tab_indicator"
-        app:tabSelectedTextColor="@color/[screen_name]_tab_text_selected"
-        app:tabTextColor="@color/[screen_name]_tab_text_normal" />
-
-    <androidx.viewpager2.widget.ViewPager2
+        app:layout_constraintTop_toTopOf="parent" />
+    
+    <!-- ViewPager2 -->
+    <androidx.viewpager2.widget.ViewPager2 
         android:id="@+id/[screen_name]_view_pager"
         android:layout_height="0dp"
         android:layout_width="0dp"
@@ -126,37 +141,98 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/[screen_name]_tab_layout" />
-
+    
+    <!-- Кнопки внизу справа -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:gravity="end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <!-- Кнопка удаления (меньше) -->
+        <ImageButton
+            android:id="@+id/delete_[type]_button_bottom"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/version_item_background"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/[screen_name]_toolbar_icons" />
+        
+        <!-- Кнопка создания (больше) -->
+        <ImageButton
+            android:id="@+id/add_[type]_button_bottom"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:background="@drawable/version_item_background"
+            android:src="@drawable/ic_add"
+            app:tint="@color/[screen_name]_toolbar_icons" />
+            
+    </LinearLayout>
+    
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
-#### Простые экраны с RecyclerView:
+#### Простые экраны:
 ```xml
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/[screen_name]_recycler_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="8dp" />
-```
-
-#### Простые экраны с ScrollView:
-```xml
-<ScrollView
-    android:id="@+id/[screen_name]_scroll_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout 
+    android:id="@+id/[screen_name]_content_bg"
     android:background="@color/[screen_name]_content_background"
-    android:padding="16dp">
-
+    android:layout_height="0dp"
+    android:layout_width="0dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/toolbar2">
+    
+    <!-- RecyclerView или другой контент -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/[screen_name]_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    
+    <!-- Кнопки внизу справа -->
     <LinearLayout
-        android:id="@+id/[screen_name]_content_container"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <!-- Содержимое -->
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:gravity="end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <!-- Кнопка удаления (меньше) -->
+        <ImageButton
+            android:id="@+id/delete_[type]_button_bottom"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/version_item_background"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/[screen_name]_toolbar_icons" />
+        
+        <!-- Кнопка создания (больше) -->
+        <ImageButton
+            android:id="@+id/add_[type]_button_bottom"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:background="@drawable/version_item_background"
+            android:src="@drawable/ic_add"
+            app:tint="@color/[screen_name]_toolbar_icons" />
+            
     </LinearLayout>
-
-</ScrollView>
+    
+</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 ## Структура фрагментов

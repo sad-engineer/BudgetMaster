@@ -62,32 +62,36 @@ android:paddingEnd="0dp"
 - Кнопки доход/расход остаются неизменными
 
 ### 2. Экраны с вкладками (Accounts, Budget, Income, Expense)
-**Структура:** Назад → Меню → Заголовок → Добавить → Удалить
+**Структура:** Назад → Меню → Заголовок → Пустое место → Изменить позицию
 
 ```xml
 <ImageButton id="@+id/back_button" />
 <ImageButton id="@+id/menu_button" />
 <TextView id="@+id/toolbar_title" />
-<ImageButton id="@+id/add_[type]_button" />
-<ImageButton id="@+id/delete_[type]_button" />
+<View /> <!-- Пустое место (резерв на будущее) -->
+<ImageButton id="@+id/position_change_button" />
 ```
 
-**Типы кнопок:**
-- Accounts: `add_account_button`, `delete_account_button`
-- Budget: `add_budget_button`, `delete_budget_button`
-- Income: `add_income_button`, `delete_income_button`
-- Expense: `add_expense_button`, `delete_expense_button`
+**Особенности:**
+- Кнопки добавления и удаления перемещены вниз экрана справа
+- Пустое место зарезервировано для будущих функций
+- Кнопка изменения позиции использует иконку `ic_position_change`
 
 ### 3. Простые экраны с действиями (Currencies)
-**Структура:** Назад → Меню → Заголовок → Добавить → Удалить
+**Структура:** Назад → Меню → Заголовок → Пустое место → Изменить позицию
 
 ```xml
 <ImageButton id="@+id/back_button" />
 <ImageButton id="@+id/menu_button" />
 <TextView id="@+id/toolbar_title" />
-<ImageButton id="@+id/add_currency_button" />
-<ImageButton id="@+id/delete_currency_button" />
+<View /> <!-- Пустое место (резерв на будущее) -->
+<ImageButton id="@+id/position_change_button" />
 ```
+
+**Особенности:**
+- Кнопки добавления и удаления перемещены вниз экрана справа
+- Пустое место зарезервировано для будущих функций
+- Кнопка изменения позиции использует иконку `ic_position_change`
 
 ### 4. Простые экраны без действий (Version, Authors, Settings, BackendTest)
 **Структура:** Назад → Меню → Заголовок → Пустая кнопка → Пустая кнопка

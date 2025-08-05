@@ -26,9 +26,9 @@ public class ExpenseActivity extends BaseNavigationActivity {
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
 
-        // Обработчики кнопок расходов
-        ImageButton addExpenseButton = findViewById(R.id.add_expense_button);
-        ImageButton deleteExpenseButton = findViewById(R.id.delete_expense_button);
+        // Обработчики кнопок расходов (заглушки)
+        ImageButton addExpenseButton = findViewById(R.id.add_expense_button_bottom);
+        ImageButton deleteExpenseButton = findViewById(R.id.delete_expense_button_bottom);
 
         addExpenseButton.setOnClickListener(new View.OnClickListener() {
             @Override

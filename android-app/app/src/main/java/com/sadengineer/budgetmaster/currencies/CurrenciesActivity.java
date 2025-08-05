@@ -63,8 +63,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
      * Настраивает кнопки
      */
     private void setupButtons() {
-        addCurrencyButton = findViewById(R.id.add_currency_button);
-        deleteCurrencyButton = findViewById(R.id.delete_currency_button);
+        addCurrencyButton = findViewById(R.id.add_currency_button_bottom);
+        deleteCurrencyButton = findViewById(R.id.delete_currency_button_bottom);
 
         /**
          * Обработчик нажатия на кнопку добавления валюты
@@ -73,8 +73,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
             @Override
             public void onClick(View v) {
                 if (isSelectionMode) {
-                    // В режиме выбора - отменяем выбор
-                    cancelSelectionMode();
+                    // В режиме выбора - удаляем выбранные валюты
+                    deleteSelectedCurrencies();
                 } else {
                     // Запускаем окно создания валюты
                     Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
@@ -90,8 +90,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
             @Override
             public void onClick(View v) {
                 if (isSelectionMode) {
-                    // В режиме выбора - удаляем выбранные валюты
-                    deleteSelectedCurrencies();
+                    // В режиме выбора - отменяем выбор
+                    cancelSelectionMode();
                 } else {
                     // Включаем режим выбора
                     enableSelectionMode();
@@ -107,8 +107,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         isSelectionMode = true;
         
         // Меняем иконки кнопок
-        addCurrencyButton.setImageResource(R.drawable.ic_back);
-        deleteCurrencyButton.setImageResource(R.drawable.ic_save);
+        addCurrencyButton.setImageResource(R.drawable.ic_save);
+        deleteCurrencyButton.setImageResource(R.drawable.ic_back);
         
         // Небольшая задержка для плавного перехода
         recyclerView.postDelayed(() -> {

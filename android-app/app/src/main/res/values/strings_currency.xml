@@ -8,6 +8,7 @@
     <string name="icon_add_currency">Добавить валюту</string>
     <string name="icon_delete_currency">Удалить валюту</string>
     <string name="icon_save_currency">Сохранить валюту</string>
+    <string name="icon_position_change">Изменить позицию валюты</string>
     
     <!-- Поля ввода -->
     <string name="currency_name_label">Название</string>

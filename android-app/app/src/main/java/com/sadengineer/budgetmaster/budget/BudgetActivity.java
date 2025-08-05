@@ -26,9 +26,9 @@ public class BudgetActivity extends BaseNavigationActivity {
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
 
-        // Обработчики кнопок бюджета
-        ImageButton addBudgetButton = findViewById(R.id.add_budget_button);
-        ImageButton deleteBudgetButton = findViewById(R.id.delete_budget_button);
+        // Обработчики кнопок бюджета (заглушки)
+        ImageButton addBudgetButton = findViewById(R.id.add_budget_button_bottom);
+        ImageButton deleteBudgetButton = findViewById(R.id.delete_budget_button_bottom);
 
         addBudgetButton.setOnClickListener(new View.OnClickListener() {
             @Override

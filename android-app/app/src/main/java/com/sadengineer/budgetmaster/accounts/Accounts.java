@@ -34,9 +34,9 @@ public class Accounts extends BaseNavigationActivity {
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
 
-        // Обработчики кнопок счетов
-        ImageButton addAccountButton = findViewById(R.id.add_account_button);
-        ImageButton deleteAccountButton = findViewById(R.id.delete_account_button);
+        // Обработчики кнопок счетов (заглушки)
+        ImageButton addAccountButton = findViewById(R.id.add_account_button_bottom);
+        ImageButton deleteAccountButton = findViewById(R.id.delete_account_button_bottom);
 
         addAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override

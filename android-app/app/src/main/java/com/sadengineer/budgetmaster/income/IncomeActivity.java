@@ -26,9 +26,9 @@ public class IncomeActivity extends BaseNavigationActivity {
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
 
-        // Обработчики кнопок доходов
-        ImageButton addIncomeButton = findViewById(R.id.add_income_button);
-        ImageButton deleteIncomeButton = findViewById(R.id.delete_income_button);
+        // Обработчики кнопок доходов (заглушки)
+        ImageButton addIncomeButton = findViewById(R.id.add_income_button_bottom);
+        ImageButton deleteIncomeButton = findViewById(R.id.delete_income_button_bottom);
 
         addIncomeButton.setOnClickListener(new View.OnClickListener() {
             @Override
