@@ -149,7 +149,7 @@ public class CurrencyRepository {
     
     /**
      * Получить максимальную позицию среди всех валют
-     * @return LiveData с максимальной позицией
+     * @return максимальная позиция
      */
     public int getMaxPosition() {
         Integer maxPos = dao.getMaxPosition();
@@ -158,7 +158,7 @@ public class CurrencyRepository {
     
     /**
      * Получить количество активных валют
-     * @return LiveData с количеством активных валют
+     * @return количество активных валют
      */
     public int getActiveCount() {
         return dao.countActive();
@@ -175,7 +175,7 @@ public class CurrencyRepository {
     
     /**
      * Получить общее количество валют
-     * @return LiveData с общим количеством валют
+     * @return общее количество валют
      */
     public int getCount() {
         return dao.count();

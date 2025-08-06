@@ -57,12 +57,90 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      */
     public StandartViewHolder(@NonNull View itemView) {
         super(itemView);
-        checkbox = itemView.findViewById(R.id.currency_checkbox);
-        positionText = itemView.findViewById(R.id.currency_position);
-        titleText = itemView.findViewById(R.id.currency_title);
-        idText = itemView.findViewById(R.id.currency_id);
+        
+        // Ищем чекбокс по разным возможным ID
+        checkbox = findCheckbox(itemView);
+        positionText = findPositionText(itemView);
+        titleText = findTitleText(itemView);
+        idText = findIdText(itemView);
         
         setupClickListeners();
+    }
+    
+    /**
+     * Ищет чекбокс по разным возможным ID
+     */
+    private CheckBox findCheckbox(View itemView) {
+        // Пробуем найти чекбокс по разным ID
+        CheckBox foundCheckbox = itemView.findViewById(R.id.currency_checkbox);
+        if (foundCheckbox != null) {
+            return foundCheckbox;
+        }
+        
+        foundCheckbox = itemView.findViewById(R.id.account_checkbox);
+        if (foundCheckbox != null) {
+            return foundCheckbox;
+        }
+        
+        // Можно добавить другие типы чекбоксов здесь
+        // foundCheckbox = itemView.findViewById(R.id.income_checkbox);
+        // if (foundCheckbox != null) {
+        //     return foundCheckbox;
+        // }
+        
+        // Если чекбокс не найден, возвращаем null
+        return null;
+    }
+    
+    /**
+     * Ищет TextView для позиции по разным возможным ID
+     */
+    private TextView findPositionText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.currency_position);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.account_position);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Ищет TextView для заголовка по разным возможным ID
+     */
+    private TextView findTitleText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.currency_title);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.account_title);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Ищет TextView для ID по разным возможным ID
+     */
+    private TextView findIdText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.currency_id);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.account_id);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
     }
     
     /**
@@ -86,22 +164,28 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             }
         });
         
-        // Обработчик клика на чекбокс
-        checkbox.setOnClickListener(v -> {
-            int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION) {
-                int itemId = getCurrentItemId();
-                if (itemId != -1) {
-                    toggleSelection(itemId);
+        // Обработчик клика на чекбокс (если он существует)
+        if (checkbox != null) {
+            checkbox.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    int itemId = getCurrentItemId();
+                    if (itemId != -1) {
+                        toggleSelection(itemId);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     
     /**
      * Получает ID текущего элемента
      */
     private int getCurrentItemId() {
+        if (idText == null) {
+            return -1;
+        }
+        
         String idTextValue = idText.getText().toString();
         if (idTextValue.startsWith("ID: ")) {
             try {
@@ -135,9 +219,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         this.isSelectionMode = isSelectionMode;
         this.selectedIds = selectedIds;
         
-        positionText.setText(String.valueOf(position));
-        titleText.setText(title);
-        idText.setText("ID: " + id);
+        // Устанавливаем значения только если элементы найдены
+        if (positionText != null) {
+            positionText.setText(String.valueOf(position));
+        }
+        if (titleText != null) {
+            titleText.setText(title);
+        }
+        if (idText != null) {
+            idText.setText("ID: " + id);
+        }
         
         // Настройка видимости чекбокса и смещения текста с анимацией
         if (isSelectionMode) {
@@ -145,22 +236,27 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             animateTextPadding(true, 0);
             
             // Задержка для появления чекбокса
-            checkbox.postDelayed(() -> {
-                animateCheckboxVisibility(true);
-            }, CHECKBOX_ANIMATION_DELAY);
-            
-            checkbox.setChecked(selectedIds.contains(id));
+            if (checkbox != null) {
+                checkbox.postDelayed(() -> {
+                    animateCheckboxVisibility(true);
+                }, CHECKBOX_ANIMATION_DELAY);
+                
+                checkbox.setChecked(selectedIds.contains(id));
+            }
             
         } else {
             // При выключении режима: скрытие чекбокса сразу, смещение через задержку
-            animateCheckboxVisibility(false);
+            if (checkbox != null) {
+                animateCheckboxVisibility(false);
+                checkbox.setChecked(false);
+            }
             
             // Задержка для смещения текста
-            positionText.postDelayed(() -> {
-                animateTextPadding(false, 0);
-            }, TEXT_PADDING_ANIMATION_DELAY);
-            
-            checkbox.setChecked(false);
+            if (positionText != null) {
+                positionText.postDelayed(() -> {
+                    animateTextPadding(false, 0);
+                }, TEXT_PADDING_ANIMATION_DELAY);
+            }
         }
     }
     
@@ -168,6 +264,10 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Анимирует появление/исчезновение чекбокса
      */
     private void animateCheckboxVisibility(boolean show) {
+        if (checkbox == null) {
+            return;
+        }
+        
         if (show) {
             checkbox.setVisibility(View.VISIBLE);
             checkbox.setAlpha(0f);
@@ -190,6 +290,10 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Анимирует смещение текста
      */
     private void animateTextPadding(boolean addPadding, int delay) {
+        if (positionText == null) {
+            return;
+        }
+        
         int targetPadding = addPadding ? 
             (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density) : 0;
         

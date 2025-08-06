@@ -21,6 +21,7 @@ cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
 
 # Все логи
 ./adb logcat
+./adb logcat | coloredlogcat
 
 # Фильтрация по приложению
 ./adb logcat | Select-String "BudgetMaster"
@@ -34,4 +35,4 @@ cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
 
 # Фильтрация и сохранение
 ./adb logcat | Select-String "BudgetMaster" > C:\budgetmaster_logs.txt
-./adb logcat | Select-String "BudgetMaster" > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.txt"
+./adb logcat | Select-String "BudgetMaster" > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log"

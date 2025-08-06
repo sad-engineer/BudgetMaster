@@ -12,7 +12,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 
-import com.sadengineer.budgetmaster.accounts.Accounts;
+import com.sadengineer.budgetmaster.accounts.AccountsActivity;
 import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
@@ -85,7 +85,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnAccounts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Accounts.class);
+                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
                 intent.putExtra("tab_index", 0); // 0 - Текущие
                 startActivity(intent);
             }
@@ -96,7 +96,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnEarned.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Accounts.class);
+                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
                 intent.putExtra("tab_index", 0); // 0 - Текущие
                 startActivity(intent);
             }
@@ -107,7 +107,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnSavings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Accounts.class);
+                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
                 intent.putExtra("tab_index", 1); // 1 - Сбережения
                 startActivity(intent);
             }

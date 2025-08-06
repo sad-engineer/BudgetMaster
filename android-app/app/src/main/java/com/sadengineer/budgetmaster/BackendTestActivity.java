@@ -454,7 +454,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Получаем счета
             CompletableFuture<List<Account>> accountsFuture = databaseManager.executeDatabaseOperation(() -> {
                 BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-                List<Account> accounts = database.accountDao().getAllActiveAccounts();
+                List<Account> accounts = database.accountDao().getAllActive().getValue();
                 database.close();
                 return accounts;
             });

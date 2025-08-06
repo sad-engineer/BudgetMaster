@@ -1,31 +1,104 @@
 package com.sadengineer.budgetmaster.accounts;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.sadengineer.budgetmaster.R;
-import java.util.ArrayList;
+import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
+import com.sadengineer.budgetmaster.backend.entity.Account;
+
 import java.util.List;
+import java.util.ArrayList;
 
 public class TransfersAccountsFragment extends Fragment {
+    private static final String TAG = "TransfersAccountsFragment";
+    private RecyclerView recyclerView;
+    private AccountsAdapter adapter;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_transfers_accounts, container, false);
-        RecyclerView recycler = view.findViewById(R.id.accounts_transfers_recycler);
-
-        List<AccountsAdapter.AccountItem> items = new ArrayList<>();
-        items.add(new AccountsAdapter.AccountItem("июль 2025", ""));
-
-        AccountsAdapter adapter = new AccountsAdapter(items);
-        recycler.setAdapter(adapter);
-
+        
+        // Настраиваем RecyclerView
+        recyclerView = view.findViewById(R.id.accounts_transfers_recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Создаем адаптер
+        adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
+            @Override
+            public void onAccountClick(Account account) {
+                Log.d(TAG, "👆 Выбран счет переводов: " + account.getTitle());
+                // TODO: Обработка клика по счету
+            }
+        });
+        
+        // Настраиваем обработчик изменения выбора
+        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
+            @Override
+            public void onSelectionChanged(int selectedCount) {
+                Log.d(TAG, "🔄 Изменение выбора счетов переводов: " + selectedCount + " выбрано");
+            }
+        });
+        
+        recyclerView.setAdapter(adapter);
+        
+        // Загружаем счета типа 3 (переводы)
+        loadTransfersAccounts();
+        
         return view;
+    }
+    
+    /**
+     * Загружает счета переводов (тип 3)
+     */
+    private void loadTransfersAccounts() {
+        Log.d(TAG, "🔄 Загружаем счета переводов...");
+        
+        try {
+            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
+            
+            // Загружаем счета типа 3 (переводы)
+            database.accountDao().getAllByType("3").observe(getViewLifecycleOwner(), accounts -> {
+                Log.d(TAG, "✅ Загружено счетов переводов: " + (accounts != null ? accounts.size() : 0));
+                
+                if (accounts != null && !accounts.isEmpty()) {
+                    adapter.setAccounts(accounts);
+                    Log.d(TAG, "✅ Счета переводов отображены в списке");
+                } else {
+                    Log.w(TAG, "⚠️ Счета переводов не найдены в базе данных");
+                }
+            });
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Ошибка загрузки счетов переводов: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Устанавливает режим выбора
+     */
+    public void setSelectionMode(boolean enabled) {
+        if (adapter != null) {
+            adapter.setSelectionMode(enabled);
+        }
+    }
+    
+    /**
+     * Получает выбранные счета
+     */
+    public List<Account> getSelectedAccounts() {
+        if (adapter != null) {
+            return adapter.getSelectedAccounts();
+        }
+        return new ArrayList<>();
     }
 } 

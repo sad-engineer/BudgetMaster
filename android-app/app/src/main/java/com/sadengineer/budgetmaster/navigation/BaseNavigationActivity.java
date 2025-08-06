@@ -14,7 +14,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import com.sadengineer.budgetmaster.MainActivity;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.accounts.Accounts;
+import com.sadengineer.budgetmaster.accounts.AccountsActivity;
 import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
@@ -174,10 +174,10 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      */
     protected void navigateToAccounts() {
         // Если уже на экране счетов, просто закрываем меню
-        if (this instanceof Accounts) {
+        if (this instanceof AccountsActivity) {
             return;
         }
-        Intent intent = new Intent(this, Accounts.class);
+        Intent intent = new Intent(this, AccountsActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран счетов");
     }

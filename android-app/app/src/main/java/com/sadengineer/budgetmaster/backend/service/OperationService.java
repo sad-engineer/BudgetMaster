@@ -137,73 +137,73 @@ public class OperationService {
         });
     }
     
-    // Получить операции с автоматическим получением счетов и валют по названиям
-    public LiveData<Operation> createOperationWithTitles(String type, LocalDateTime date, int amount, 
-                                                       String description, int categoryId, 
-                                                       String accountTitle, String currencyTitle) {
-        MutableLiveData<Operation> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Получаем счет и валюту по названиям
-            Account account = accountService.getAccountByTitle(accountTitle).getValue();
-            Currency currency = currencyService.getByTitle(currencyTitle).getValue();
+    // // Получить операции с автоматическим получением счетов и валют по названиям
+    // public LiveData<Operation> createOperationWithTitles(String type, LocalDateTime date, int amount, 
+    //                                                    String description, int categoryId, 
+    //                                                    String accountTitle, String currencyTitle) {
+    //     MutableLiveData<Operation> liveData = new MutableLiveData<>();
+    //     executorService.execute(() -> {
+    //         // Получаем счет и валюту по названиям
+    //         Account account = accountService.getAccountByTitle(accountTitle).getValue();
+    //         Currency currency = currencyService.getByTitle(currencyTitle).getValue();
             
-            if (account != null && currency != null) {
-                Operation operation = new Operation();
-                operation.setType(type);
-                operation.setOperationDate(date);
-                operation.setAmount(amount);
-                operation.setDescription(description);
-                operation.setCategoryId(categoryId);
-                operation.setAccountId(account.getId());
-                operation.setCurrencyId(currency.getId());
+    //         if (account != null && currency != null) {
+    //             Operation operation = new Operation();
+    //             operation.setType(type);
+    //             operation.setOperationDate(date);
+    //             operation.setAmount(amount);
+    //             operation.setDescription(description);
+    //             operation.setCategoryId(categoryId);
+    //             operation.setAccountId(account.getId());
+    //             operation.setCurrencyId(currency.getId());
                 
-                operationRepository.insertOperation(operation, user);
-                liveData.postValue(operation);
-            }
-        });
-        return liveData;
-    }
+    //             operationRepository.insertOperation(operation, user);
+    //             liveData.postValue(operation);
+    //         }
+    //     });
+    //     return liveData;
+    // }
     
-    // Создать перевод с автоматическим получением счетов и валют по названиям
-    public LiveData<Operation> createTransferWithTitles(LocalDateTime date, int amount, String description,
-                                                      String accountTitle, String currencyTitle,
-                                                      String toAccountTitle, String toCurrencyTitle, int toAmount) {
-        MutableLiveData<Operation> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Получаем счета и валюты по названиям
-            Account account = accountService.getAccountByTitle(accountTitle).getValue();
-            Currency currency = currencyService.getByTitle(currencyTitle).getValue();
-            Account toAccount = accountService.getAccountByTitle(toAccountTitle).getValue();
-            Currency toCurrency = currencyService.getByTitle(toCurrencyTitle).getValue();
+    // // Создать перевод с автоматическим получением счетов и валют по названиям
+    // public LiveData<Operation> createTransferWithTitles(LocalDateTime date, int amount, String description,
+    //                                                   String accountTitle, String currencyTitle,
+    //                                                   String toAccountTitle, String toCurrencyTitle, int toAmount) {
+    //     MutableLiveData<Operation> liveData = new MutableLiveData<>();
+    //     executorService.execute(() -> {
+    //         // Получаем счета и валюты по названиям
+    //         Account account = accountService.getAccountByTitle(accountTitle).getValue();
+    //         Currency currency = currencyService.getByTitle(currencyTitle).getValue();
+    //         Account toAccount = accountService.getAccountByTitle(toAccountTitle).getValue();
+    //         Currency toCurrency = currencyService.getByTitle(toCurrencyTitle).getValue();
             
-            if (account != null && currency != null && toAccount != null && toCurrency != null) {
-                Operation operation = new Operation();
-                operation.setType("transfer");
-                operation.setOperationDate(date);
-                operation.setAmount(amount);
-                operation.setDescription(description);
-                operation.setAccountId(account.getId());
-                operation.setCurrencyId(currency.getId());
-                operation.setToAccountId(toAccount.getId());
-                operation.setToCurrencyId(toCurrency.getId());
-                operation.setToAmount((int)toAmount);
+    //         if (account != null && currency != null && toAccount != null && toCurrency != null) {
+    //             Operation operation = new Operation();
+    //             operation.setType("transfer");
+    //             operation.setOperationDate(date);
+    //             operation.setAmount(amount);
+    //             operation.setDescription(description);
+    //             operation.setAccountId(account.getId());
+    //             operation.setCurrencyId(currency.getId());
+    //             operation.setToAccountId(toAccount.getId());
+    //             operation.setToCurrencyId(toCurrency.getId());
+    //             operation.setToAmount((int)toAmount);
                 
-                operationRepository.insertOperation(operation, user);
-                liveData.postValue(operation);
-            }
-        });
-        return liveData;
-    }
+    //             operationRepository.insertOperation(operation, user);
+    //             liveData.postValue(operation);
+    //         }
+    //     });
+    //     return liveData;
+    // }
     
-    // Получить счет по названию через AccountService
-    public LiveData<Account> getAccount(String accountTitle) {
-        return accountService.getAccountByTitle(accountTitle);
-    }
+    // // Получить счет по названию через AccountService
+    // public LiveData<Account> getAccount(String accountTitle) {
+    //     return accountService.getAccountByTitle(accountTitle);
+    // }
     
-    // Получить счет по названию (для внутреннего использования)
-    public LiveData<Account> getAccountByTitle(String accountTitle) {
-        return accountService.getAccountByTitle(accountTitle);
-    }
+    // // Получить счет по названию (для внутреннего использования)
+    // public LiveData<Account> getAccountByTitle(String accountTitle) {
+    //     return accountService.getAccountByTitle(accountTitle);
+    // }
     
     // Получить валюту по названию через CurrencyService
     public LiveData<Currency> getCurrency(String currencyTitle) {

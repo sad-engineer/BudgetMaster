@@ -11,6 +11,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;   
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -159,14 +160,14 @@ public class DatabaseInitializer {
         Log.d(TAG, "🔄 initializeDefaultAccounts: Начинаем инициализацию счетов");
         
         // Проверяем, есть ли уже счета
-        List<Account> existingAccounts = database.accountDao().getAllActiveAccounts();
-        if (existingAccounts != null && !existingAccounts.isEmpty()) {
+        int accountCount = database.accountDao().count();
+        if (accountCount > 0) {
             Log.d(TAG, "🔄 initializeDefaultAccounts: Счета уже существуют, пропускаем");
             return;
         }
         
         // Используем константу DEFAULT_CURRENCY_ID из ModelConstants
-        int defaultCurrencyId = com.sadengineer.budgetmaster.backend.constants.ModelConstants.DEFAULT_CURRENCY_ID;
+        int defaultCurrencyId = ModelConstants.DEFAULT_CURRENCY_ID;
         
         // Создаем дефолтные счета
         Account[] accounts = {

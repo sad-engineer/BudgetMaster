@@ -4,162 +4,142 @@ package com.sadengineer.budgetmaster.backend.repository;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Repository класс для работы с Account Entity
  */
 public class AccountRepository {
+
+    private static final String TAG = "AccountRepository";
     
-    private final AccountDao accountDao;
-    private final ExecutorService executorService;
+    private final AccountDao dao;
     
     public AccountRepository(Context context) {
         BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(context);
-        this.accountDao = database.accountDao();
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.dao = database.accountDao();
+    }
+
+    /**
+     * Получить все счета (включая удаленные)
+     * @return LiveData со списком всех счетов
+     */
+    public LiveData<List<Account>> getAll() {
+        return dao.getAll();
     }
     
-    // Получить все активные счета
-    public LiveData<List<Account>> getAllActiveAccounts() {
-        MutableLiveData<List<Account>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Account> accounts = accountDao.getAllActiveAccounts();
-            liveData.postValue(accounts);
-        });
-        return liveData;
+    /**
+     * Получить все активные счета
+     * @return LiveData со списком активных счетов
+     */
+    public LiveData<List<Account>> getAllActive() {
+        return dao.getAllActive();
     }
     
-    // Получить счета по типу
-    public LiveData<List<Account>> getAccountsByType(String type) {
-        MutableLiveData<List<Account>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Account> accounts = accountDao.getAccountsByType(type);
-            liveData.postValue(accounts);
-        });
-        return liveData;
+    /**
+     * Получить все удаленные счета
+     * @return LiveData со списком удаленных счетов
+     */
+    public LiveData<List<Account>> getAllDeleted() {
+        return dao.getAllDeleted();
     }
     
-    // Получить счет по ID
-    public LiveData<Account> getAccountById(int id) {
-        MutableLiveData<Account> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Account account = accountDao.getAccountById(id);
-            liveData.postValue(account);
-        });
-        return liveData;
+    /**
+     * Получить счет по ID (включая удаленные)
+     * @param id ID счета
+     * @return LiveData с счетом
+     */
+    public LiveData<Account> getById(int id) {
+        return dao.getById(id);
     }
     
-    // Получить счета по валюте
-    public LiveData<List<Account>> getAccountsByCurrency(int currencyId) {
-        MutableLiveData<List<Account>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Account> accounts = accountDao.getAccountsByCurrency(currencyId);
-            liveData.postValue(accounts);
-        });
-        return liveData;
+    /**
+     * Получить счет по названию (включая удаленные)
+     * @param title название счета
+     * @return LiveData с счетом
+     */
+    public LiveData<Account> getByTitle(String title) {
+        return dao.getByTitle(title);
     }
     
-    // Получить общий баланс по валюте
-    public LiveData<Integer> getTotalBalanceByCurrency(int currencyId) {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Integer total = accountDao.getTotalBalanceByCurrency(currencyId);
-            liveData.postValue(total != null ? total : 0);
-        });
-        return liveData;
+    /**
+     * Получить счет по позиции (включая удаленные)
+     * @param position позиция счета
+     * @return LiveData с счетом
+     */
+    public LiveData<Account> getByPosition(int position) {
+        return dao.getByPosition(position);
+    }
+
+    /**
+     * Вставить новый счет
+     * @param account счет для вставки
+     * @return LiveData с вставленным счетом
+     */
+    public LiveData<Account> insert(Account account) {
+        long id = dao.insert(account);
+        return dao.getById((int)id);
     }
     
-    // Вставить новый счет
-    public void insertAccount(Account account, String createdBy) {
-        executorService.execute(() -> {
-            account.setCreateTime(LocalDateTime.now());
-            account.setCreatedBy(createdBy);
-            account.setUpdateTime(LocalDateTime.now());
-            account.setUpdatedBy(createdBy);
-            accountDao.insertAccount(account);
-        });
+    /**
+     * Обновить счет
+     * @param account счет для обновления
+     */
+    public void update(Account account) {
+        dao.update(account);
     }
     
-    // Обновить счет
-    public void updateAccount(Account account, String updatedBy) {
-        executorService.execute(() -> {
-            account.setUpdateTime(LocalDateTime.now());
-            account.setUpdatedBy(updatedBy);
-            accountDao.updateAccount(account);
-        });
+    /**
+     * Удалить счет (полное удаление из БД)
+     * @param account счет для удаления
+     */
+    public void delete(Account account) {
+        dao.delete(account);
     }
     
-    // Удалить счет (soft delete)
-    public void deleteAccount(int accountId, String deletedBy) {
-        executorService.execute(() -> {
-            accountDao.softDeleteAccount(accountId, LocalDateTime.now().toString(), deletedBy);
-        });
+    /**
+     * Удалить все счета
+     */
+    public void deleteAll() {
+        dao.deleteAll();
     }
     
-    // Получить количество активных счетов
-    public LiveData<Integer> getActiveAccountsCount() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            int count = accountDao.getActiveAccountsCount();
-            liveData.postValue(count);
-        });
-        return liveData;
+    /**
+     * Получить максимальную позицию среди всех счетов
+     * @return максимальная позиция
+     */
+    public int getMaxPosition() {
+        Integer maxPos = dao.getMaxPosition();
+        return maxPos != null ? maxPos : 0;
     }
     
-    // Получить все удаленные счета
-    public LiveData<List<Account>> getAllDeletedAccounts() {
-        MutableLiveData<List<Account>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Account> accounts = accountDao.getAllDeletedAccounts();
-            liveData.postValue(accounts);
-        });
-        return liveData;
+    /**
+     * Получить количество активных счетов
+     * @return количество активных счетов
+     */
+    public int getActiveCount() {
+        return dao.countActive();
+    }
+
+    /**
+     * Получить счета по подстроке в названии
+     * @param searchQuery подстрока для поиска
+     * @return LiveData с списком счетов
+     */
+    public LiveData<List<Account>> searchByTitle(String searchQuery) {
+        return dao.searchByTitle(searchQuery);
     }
     
-    // Получить счет по названию
-    public LiveData<Account> getAccountByTitle(String title) {
-        MutableLiveData<Account> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Account account = accountDao.getAccountByTitle(title);
-            liveData.postValue(account);
-        });
-        return liveData;
-    }
-    
-    // Получить максимальную позицию
-    public LiveData<Integer> getMaxPosition() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Integer maxPos = accountDao.getMaxPosition();
-            liveData.postValue(maxPos != null ? maxPos : 0);
-        });
-        return liveData;
-    }
-    
-    // Восстановить счет
-    public void restoreAccount(int accountId, String updatedBy) {
-        executorService.execute(() -> {
-            accountDao.restoreAccount(accountId, LocalDateTime.now().toString(), updatedBy);
-        });
-    }
-    
-    // Получить счет по позиции
-    public LiveData<Account> getAccountByPosition(int position) {
-        MutableLiveData<Account> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Account account = accountDao.getAccountByPosition(position);
-            liveData.postValue(account);
-        });
-        return liveData;
+    /**
+     * Получить общее количество счетов
+     * @return общее количество счетов
+     */
+    public int getCount() {
+        return dao.count();
     }
 } 
