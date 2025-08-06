@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.accounts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -71,8 +72,9 @@ public class AccountsActivity extends BaseNavigationActivity {
         viewPager.setAdapter(adapter);
 
         // Получаем индекс вкладки из Intent (по умолчанию 0)
-        int tabIndex = getIntent().getIntExtra("tab_index", 0);
+        int tabIndex = getIntent().getIntExtra("selected_tab", 0);
         viewPager.setCurrentItem(tabIndex, false);
+        Log.d(TAG, "Устанавливаем вкладку: " + tabIndex);
 
         new TabLayoutMediator(tabLayout, viewPager,
             (tab, position) -> {
@@ -102,8 +104,11 @@ public class AccountsActivity extends BaseNavigationActivity {
                     // В режиме выбора - удаляем выбранные счета
                     deleteSelectedAccounts();
                 } else {
-                    // TODO: Запустить окно создания счета
-                    android.widget.Toast.makeText(AccountsActivity.this, "Создать счет", android.widget.Toast.LENGTH_SHORT).show();
+                    // Запускаем окно создания счета
+                    Intent intent = new Intent(AccountsActivity.this, AccountsEditActivity.class);
+                    // Передаем текущую вкладку
+                    intent.putExtra("source_tab", viewPager.getCurrentItem());
+                    startActivity(intent);
                 }
             }
         });

@@ -70,6 +70,7 @@ public class CurrencyEditActivity extends BaseNavigationActivity {
     /**
      * Загружает данные валюты из Intent и заполняет поля
      */
+    @SuppressWarnings("deprecation") 
     private void loadCurrencyData() {
         try {
             // Получаем валюту из Intent

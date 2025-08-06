@@ -38,6 +38,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private TextView positionText;
     private TextView titleText;
     private TextView idText;
+    private TextView sumText;
     
     private boolean isSelectionMode = false;
     private Set<Integer> selectedIds;
@@ -63,6 +64,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         positionText = findPositionText(itemView);
         titleText = findTitleText(itemView);
         idText = findIdText(itemView);
+        sumText = findSumText(itemView);
         
         setupClickListeners();
     }
@@ -144,6 +146,18 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     }
     
     /**
+     * Ищет TextView для суммы по разным возможным ID
+     */
+    private TextView findSumText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.account_sum);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
      * Настраивает обработчики кликов
      */
     private void setupClickListeners() {
@@ -216,6 +230,10 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Привязывает данные к элементу
      */
     public void bind(int position, String title, int id, boolean isSelectionMode, Set<Integer> selectedIds) {
+        bind(position, title, id, 0, isSelectionMode, selectedIds);
+    }
+    
+    public void bind(int position, String title, int id, int sum, boolean isSelectionMode, Set<Integer> selectedIds) {
         this.isSelectionMode = isSelectionMode;
         this.selectedIds = selectedIds;
         
@@ -228,6 +246,11 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         if (idText != null) {
             idText.setText("ID: " + id);
+        }
+        if (sumText != null) {
+            // Форматируем сумму как валюту (копейки -> рубли)
+            double rubles = sum / 100.0;
+            sumText.setText(String.format("%.2f RUB", rubles));
         }
         
         // Настройка видимости чекбокса и смещения текста с анимацией

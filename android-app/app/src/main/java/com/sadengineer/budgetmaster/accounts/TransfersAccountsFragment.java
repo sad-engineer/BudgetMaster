@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.accounts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +38,8 @@ public class TransfersAccountsFragment extends Fragment {
             @Override
             public void onAccountClick(Account account) {
                 Log.d(TAG, "👆 Выбран счет переводов: " + account.getTitle());
-                // TODO: Обработка клика по счету
+                // Переходим на экран редактирования счета
+                goToAccountEdit(account);
             }
         });
         
@@ -100,5 +102,17 @@ public class TransfersAccountsFragment extends Fragment {
             return adapter.getSelectedAccounts();
         }
         return new ArrayList<>();
+    }
+    
+    /**
+     * Переходит на экран редактирования счета
+     * @param account - выбранный счет
+     */
+    private void goToAccountEdit(Account account) {
+        Log.d(TAG, "🔄 Переходим к окну редактирования счета");
+        Intent intent = new Intent(getActivity(), AccountsEditActivity.class);
+        intent.putExtra("account", account);
+        intent.putExtra("source_tab", 2); // 2 = Переводы
+        startActivity(intent);
     }
 } 

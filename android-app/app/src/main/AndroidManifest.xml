@@ -18,6 +18,9 @@
             android:name=".accounts.AccountsActivity"
             android:exported="false" />
         <activity
+            android:name=".accounts.AccountsEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".income.IncomeActivity"
             android:exported="false" />
         <activity

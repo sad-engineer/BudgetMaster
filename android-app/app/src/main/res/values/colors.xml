@@ -98,6 +98,17 @@
     <color name="currency_edit_input_text">@color/black</color>
     <color name="currency_edit_input_hint">@color/gray</color>
     
+    <!-- Цвета для экрана редактирования счета -->
+    <color name="account_edit_toolbar_background">@color/black</color>
+    <color name="account_edit_toolbar_icons">@color/green</color>
+    <color name="account_edit_toolbar_texts">@color/white</color>
+    <color name="account_edit_content_background">@color/dark_gray</color>
+    <color name="account_edit_titles">@color/white</color>
+    <color name="account_edit_item_content_background">@color/white</color>
+    <color name="account_edit_item_content_texts">@color/black</color>
+    <color name="account_edit_item_content_hint">@color/gray</color>
+    <color name="account_edit_item_divider">@color/gray</color>
+    
     <!-- Цвета для экрана настроек -->
     <color name="settings_toolbar_background">@color/black</color>
     <color name="settings_toolbar_icons">@color/white</color>

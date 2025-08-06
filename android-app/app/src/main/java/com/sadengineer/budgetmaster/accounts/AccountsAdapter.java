@@ -75,7 +75,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Account account = accounts.get(position);
         holder.bind(account.getPosition(), account.getTitle(), account.getId(), 
-                   isSelectionMode, selectedAccounts);
+                   account.getAmount(), isSelectionMode, selectedAccounts);
     }
 
     /**

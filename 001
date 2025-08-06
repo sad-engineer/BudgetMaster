@@ -36,3 +36,14 @@ cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
 # Фильтрация и сохранение
 ./adb logcat | Select-String "BudgetMaster" > C:\budgetmaster_logs.txt
 ./adb logcat | Select-String "BudgetMaster" > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log"
+
+# поиск базы для анализа
+# Найти имя пакета
+./adb shell pm list packages | Select-String "budget"
+какие файлы базы данных есть
+./adb shell run-as com.sadengineer.budgetmaster ls databases/
+копируем основной файл базы данных
+./adb shell "run-as com.sadengineer.budgetmaster cp databases/budget_master_database /sdcard/"
+./adb pull /sdcard/budget_master_database C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budget_master_database.db
+./adb shell "run-as com.sadengineer.budgetmaster cp databases/budget_master_database /sdcard/budget_master_database_room.db"
+./adb pull /sdcard/budget_master_database_room.db C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budget_master_database_room.db
