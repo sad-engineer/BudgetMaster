@@ -1,5 +1,7 @@
 package com.sadengineer.budgetmaster.currencies;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -164,7 +166,52 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         adapter = new CurrencyAdapter(this);
+        
+        // Настраиваем обработчик длительного нажатия
+        adapter.setLongClickListener(new CurrencyAdapter.OnCurrencyLongClickListener() {
+            @Override
+            public void onCurrencyLongClick(Currency currency) {
+                Log.d(TAG, " Длительное нажатие на валюту: " + currency.getTitle());
+                showDeleteConfirmationDialog(currency);
+            }
+        });
+        
         recyclerView.setAdapter(adapter);
+    }
+    
+    /**
+     * Показывает диалог подтверждения удаления валюты
+     */
+    private void showDeleteConfirmationDialog(Currency currency) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Удаление валюты")
+               .setMessage("Вы уверены, что хотите полностью удалить валюту '" + currency.getTitle() + "'?\n\n" +
+                          "⚠️ Это действие нельзя отменить!")
+               .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialog, int which) {
+                       deleteCurrency(currency);
+                   }
+               })
+               .setNegativeButton("Отмена", null)
+               .setIcon(android.R.drawable.ic_dialog_alert)
+               .show();
+    }
+    
+    /**
+     * Удаляет валюту из базы данных
+     */
+    private void deleteCurrency(Currency currency) {
+        try {
+            Log.d(TAG, "🗑️ Удаляем валюту из базы данных: " + currency.getTitle());
+            
+            currencyService.delete(currency);
+            
+            Log.d(TAG, "✅ Запрос на удаление валюты отправлен: " + currency.getTitle());
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Ошибка удаления валюты " + currency.getTitle() + ": " + e.getMessage(), e);
+        }
     }
     
     /**
@@ -178,7 +225,7 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
             BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
             
             // Загружаем валюты через Observer
-            database.currencyDao().getAllActive().observe(this, currencies -> {
+            database.currencyDao().getAll().observe(this, currencies -> {
                 Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
                 
                 if (currencies != null && !currencies.isEmpty()) {

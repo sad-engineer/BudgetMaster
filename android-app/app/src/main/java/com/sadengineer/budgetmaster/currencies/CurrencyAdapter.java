@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.currencies;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +25,16 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
 
     private List<Currency> currencies = new ArrayList<>();
     private OnCurrencyClickListener listener;
+    private OnCurrencyLongClickListener longClickListener;
     private boolean isSelectionMode = false;
     private Set<Integer> selectedCurrencies = new HashSet<>();
     
     public interface OnCurrencyClickListener {
         void onCurrencyClick(Currency currency);
+    }
+    
+    public interface OnCurrencyLongClickListener {
+        void onCurrencyLongClick(Currency currency);
     }
     
     public interface OnSelectionChangedListener {
@@ -39,6 +45,10 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     public CurrencyAdapter(OnCurrencyClickListener listener) {
         this.listener = listener;
+    }
+    
+    public void setLongClickListener(OnCurrencyLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
     }
     
     public void setSelectionListener(OnSelectionChangedListener listener) {
@@ -58,6 +68,15 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 Currency currency = findCurrencyById(itemId);
                 if (currency != null) {
                     listener.onCurrencyClick(currency);
+                }
+            }
+        });
+        
+        holder.setItemLongClickListener(itemId -> {
+            if (longClickListener != null) {
+                Currency currency = findCurrencyById(itemId);
+                if (currency != null) {
+                    longClickListener.onCurrencyLongClick(currency);
                 }
             }
         });
@@ -91,7 +110,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setCurrencies(List<Currency> currencies) {
         this.currencies = currencies != null ? currencies : new ArrayList<>();
-        android.util.Log.d(TAG, "🔄 Обновляем список валют: " + this.currencies.size() + " элементов");
+        Log.d(TAG, "🔄 Обновляем список валют: " + this.currencies.size() + " элементов");
         notifyDataSetChanged();
     }
     

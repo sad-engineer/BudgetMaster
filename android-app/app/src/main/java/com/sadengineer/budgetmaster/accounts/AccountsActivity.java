@@ -192,8 +192,7 @@ public class AccountsActivity extends BaseNavigationActivity {
     private void notifyFragmentsSelectionMode(boolean enabled) {
         // Получаем текущий фрагмент
         int currentPosition = viewPager.getCurrentItem();
-        Fragment currentFragment = getSupportFragmentManager()
-            .findFragmentByTag("f" + currentPosition);
+        Fragment currentFragment = getSupportFragmentManager().findFragmentByTag("f" + currentPosition);
         
         if (currentFragment instanceof CurrentAccountsFragment) {
             ((CurrentAccountsFragment) currentFragment).setSelectionMode(enabled);

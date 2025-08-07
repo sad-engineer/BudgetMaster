@@ -45,6 +45,24 @@
             android:name=".AuthorsActivity"
             android:exported="false" />
         <activity
+            android:name=".instructions.InstructionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".statistics.StatisticsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".categories.IncomeCategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".categories.ExpenseCategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".import_export.ImportDataActivity"
+            android:exported="false" />
+        <activity
+            android:name=".import_export.ExportDataActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>

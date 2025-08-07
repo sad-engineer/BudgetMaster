@@ -24,11 +24,16 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
 
     private List<Account> accounts = new ArrayList<>();
     private OnAccountClickListener listener;
+    private OnAccountLongClickListener longClickListener;
     private boolean isSelectionMode = false;
     private Set<Integer> selectedAccounts = new HashSet<>();
     
     public interface OnAccountClickListener {
         void onAccountClick(Account account);
+    }
+    
+    public interface OnAccountLongClickListener {
+        void onAccountLongClick(Account account);
     }
     
     public interface OnSelectionChangedListener {
@@ -39,6 +44,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     public AccountsAdapter(OnAccountClickListener listener) {
         this.listener = listener;
+    }
+    
+    public void setLongClickListener(OnAccountLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
     }
     
     public void setSelectionListener(OnSelectionChangedListener listener) {
@@ -58,6 +67,15 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 Account account = findAccountById(itemId);
                 if (account != null) {
                     listener.onAccountClick(account);
+                }
+            }
+        });
+        
+        holder.setItemLongClickListener(itemId -> {
+            if (longClickListener != null) {
+                Account account = findAccountById(itemId);
+                if (account != null) {
+                    longClickListener.onAccountLongClick(account);
                 }
             }
         });

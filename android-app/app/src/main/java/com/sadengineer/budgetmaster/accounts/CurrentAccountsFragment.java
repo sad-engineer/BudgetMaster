@@ -15,9 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import com.sadengineer.budgetmaster.backend.service.AccountService;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CurrentAccountsFragment extends Fragment {
     private static final String TAG = "CurrentAccountsFragment";
@@ -34,24 +39,7 @@ public class CurrentAccountsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
         // Создаем адаптер
-        adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
-            @Override
-            public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран текущий счет: " + account.getTitle());
-                // Переходим на экран редактирования счета
-                goToAccountEdit(account);
-            }
-        });
-        
-        // Настраиваем обработчик изменения выбора
-        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
-            @Override
-            public void onSelectionChanged(int selectedCount) {
-                Log.d(TAG, "🔄 Изменение выбора текущих счетов: " + selectedCount + " выбрано");
-            }
-        });
-        
-        recyclerView.setAdapter(adapter);
+        setupAdapter();
         
         // Загружаем счета типа 1 (текущие)
         loadCurrentAccounts();
@@ -114,5 +102,75 @@ public class CurrentAccountsFragment extends Fragment {
         intent.putExtra("account", account);
         intent.putExtra("source_tab", 0); // 0 = Текущие
         startActivity(intent);
+    }
+
+    /**
+     * Настраивает адаптер с обработчиками
+     */
+    private void setupAdapter() {
+        // Создаем адаптер
+        adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
+            @Override
+            public void onAccountClick(Account account) {
+                Log.d(TAG, "👆 Выбран текущий счет: " + account.getTitle());
+                // Переходим на экран редактирования счета
+                goToAccountEdit(account);
+            }
+        });
+        
+        // Настраиваем обработчик длительного нажатия
+        adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
+            @Override
+            public void onAccountLongClick(Account account) {
+                Log.d(TAG, " Длительное нажатие на текущий счет: " + account.getTitle());
+                showDeleteConfirmationDialog(account);
+            }
+        });
+        
+        // Настраиваем обработчик изменения выбора
+        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
+            @Override
+            public void onSelectionChanged(int selectedCount) {
+                Log.d(TAG, "🔄 Изменение выбора текущих счетов: " + selectedCount + " выбрано");
+            }
+        });
+        
+        recyclerView.setAdapter(adapter);
+    }
+
+    /**
+     * Показывает диалог подтверждения удаления счета
+     */
+    private void showDeleteConfirmationDialog(Account account) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Удаление счета")
+               .setMessage("Вы уверены, что хотите полностью удалить счет '" + account.getTitle() + "'?\n\n" +
+                          "⚠️ Это действие нельзя отменить!")
+               .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialog, int which) {
+                       deleteAccount(account);
+                   }
+               })
+               .setNegativeButton("Отмена", null)
+               .setIcon(android.R.drawable.ic_dialog_alert)
+               .show();
+    }
+
+    /**
+     * Удаляет счет из базы данных
+     */
+    private void deleteAccount(Account account) {
+        try {
+            Log.d(TAG, "🗑️ Удаляем счет из базы данных: " + account.getTitle());
+            
+            AccountService accountService = new AccountService(requireContext(), "default_user");
+            accountService.delete(account);
+            
+            Log.d(TAG, "✅ Запрос на удаление счета отправлен: " + account.getTitle());
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
+        }
     }
 } 

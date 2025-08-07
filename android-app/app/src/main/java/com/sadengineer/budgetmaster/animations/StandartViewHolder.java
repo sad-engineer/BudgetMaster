@@ -2,6 +2,7 @@ package com.sadengineer.budgetmaster.animations;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -43,12 +44,17 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private boolean isSelectionMode = false;
     private Set<Integer> selectedIds;
     private OnItemClickListener itemClickListener;
+    private OnItemLongClickListener itemLongClickListener;
     private OnSelectionChangedListener selectionListener;
     
     public interface OnItemClickListener {
         void onItemClick(int itemId);
     }
     
+    public interface OnItemLongClickListener {
+        void onItemLongClick(int itemId);
+    }
+
     public interface OnSelectionChangedListener {
         void onSelectionChanged(int selectedCount);
     }
@@ -178,6 +184,19 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             }
         });
         
+        // Обработчик длительного нажатия на весь элемент
+        itemView.setOnLongClickListener(v -> {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION && itemLongClickListener != null) {
+                int itemId = getCurrentItemId();
+                if (itemId != -1) {
+                    itemLongClickListener.onItemLongClick(itemId);
+                    return true; // Показываем, что обработали длительное нажатие
+                }
+            }
+            return false;
+        });
+        
         // Обработчик клика на чекбокс (если он существует)
         if (checkbox != null) {
             checkbox.setOnClickListener(v -> {
@@ -253,6 +272,14 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             sumText.setText(String.format("%.2f RUB", rubles));
         }
         
+        // Устанавливаем полупрозрачность для счетов с позицией 0 (удаленные счета)
+        if (position == 0) {
+            itemView.setAlpha(0.5f); // Полупрозрачность 50%
+            android.util.Log.d(TAG, "🔄 Устанавливаем полупрозрачность для счета с позицией 0: " + title);
+        } else {
+            itemView.setAlpha(1.0f); // Полная непрозрачность
+        }
+        
         // Настройка видимости чекбокса и смещения текста с анимацией
         if (isSelectionMode) {
             // При включении режима: смещение сразу, чекбокс через задержку
@@ -316,28 +343,34 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         if (positionText == null) {
             return;
         }
-        
+        // рассчитываем размер отступа текста
         int targetPadding = addPadding ? 
             (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density) : 0;
-        
+        // получаем текущий отступ текста
         int currentPadding = positionText.getPaddingLeft();
         
-        android.util.Log.d(TAG, "🔄 Анимация смещения текста: " + 
+        Log.d(TAG, "🔄 Анимация смещения текста: " + 
             currentPadding + " -> " + targetPadding + " (addPadding: " + addPadding + ", delay: " + delay + "ms)");
         
+        // создаем анимацию смещения текста
         ValueAnimator paddingAnimator = ValueAnimator.ofInt(currentPadding, targetPadding);
+        // устанавливаем длительность анимации
         paddingAnimator.setDuration(TEXT_PADDING_ANIMATION_DURATION);
+        // добавляем обработчик обновления анимации
         paddingAnimator.addUpdateListener(animation -> {
+            // получаем текущее значение анимации
             int animatedValue = (Integer) animation.getAnimatedValue();
+            // устанавливаем новый отступ текста
             positionText.setPadding(animatedValue, positionText.getPaddingTop(), 
                                  positionText.getPaddingRight(), positionText.getPaddingBottom());
             
-            android.util.Log.d(TAG, "📏 Текущий отступ: " + animatedValue);
+            Log.d(TAG, "📏 Текущий отступ: " + animatedValue);
         });
-        
+        // устанавливаем задержку анимации
         if (delay > 0) {
             paddingAnimator.setStartDelay(delay);
         }
+        // запускаем анимацию
         paddingAnimator.start();
     }
     
@@ -348,6 +381,13 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         this.itemClickListener = listener;
     }
     
+    /**
+     * Устанавливает обработчик длительного клика на элемент
+     */
+    public void setItemLongClickListener(OnItemLongClickListener listener) {
+        this.itemLongClickListener = listener;
+    }
+
     /**
      * Устанавливает обработчик изменения выбора
      */

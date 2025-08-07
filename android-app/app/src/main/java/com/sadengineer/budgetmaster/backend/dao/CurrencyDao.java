@@ -48,9 +48,9 @@ public interface CurrencyDao {
     
     /**
      * Получает все валюты, включая удаленные
-     * @return список валют, отсортированных по позиции
+     * @return список валют, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM currencies ORDER BY position ASC")
+    @Query("SELECT * FROM currencies ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Currency>> getAll();
 
     /**

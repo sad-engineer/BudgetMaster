@@ -2,6 +2,7 @@ package com.sadengineer.budgetmaster.navigation;
 
 import android.content.Intent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.ImageButton;
 import android.util.Log;
 
@@ -30,6 +31,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
+    private SwipeNavigationHelper swipeNavigationHelper;
 
     /**
      * Инициализация навигационного меню
@@ -39,7 +41,69 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        
+        // Инициализируем помощник для свайпов
+        swipeNavigationHelper = new SwipeNavigationHelper(this);
+        
+        // Добавляем слушатель состояния меню
+        if (drawerLayout != null) {
+            drawerLayout.addDrawerListener(new androidx.drawerlayout.widget.DrawerLayout.DrawerListener() {
+                @Override
+                public void onDrawerSlide(@NonNull android.view.View drawerView, float slideOffset) {
+                    // Не нужно ничего делать при скольжении
+                }
+
+                @Override
+                public void onDrawerOpened(@NonNull android.view.View drawerView) {
+                    // Отключаем свайпы при открытии меню
+                    if (swipeNavigationHelper != null) {
+                        swipeNavigationHelper.setEnabled(false);
+                    }
+                    Log.d(TAG, "📱 Меню открыто - свайпы отключены");
+                }
+
+                @Override
+                public void onDrawerClosed(@NonNull android.view.View drawerView) {
+                    // Включаем свайпы при закрытии меню
+                    if (swipeNavigationHelper != null) {
+                        swipeNavigationHelper.setEnabled(true);
+                    }
+                    Log.d(TAG, "📱 Меню закрыто - свайпы включены");
+                }
+
+                @Override
+                public void onDrawerStateChanged(int newState) {
+                    // Не нужно ничего делать при изменении состояния
+                }
+            });
+        }
+        
         Log.d(TAG, "✅ Навигация инициализирована");
+    }
+
+    /**
+     * Обработка касаний экрана для свайпов
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (swipeNavigationHelper != null) {
+            return swipeNavigationHelper.onTouchEvent(event) || super.onTouchEvent(event);
+        }
+        return super.onTouchEvent(event);
+    }
+
+    /**
+     * Обработка касаний для всех дочерних View
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (swipeNavigationHelper != null) {
+            boolean handled = swipeNavigationHelper.onTouchEvent(event);
+            if (handled) {
+                return true;
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     /**
@@ -221,8 +285,6 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         Log.d(TAG, "Переход на экран бюджета");
     }
 
-
-
     /**
      * Переход на экран настроек
      */
@@ -269,50 +331,63 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран инструкций
      */
     protected void showInstructions() {
-        Log.d(TAG, "Экран инструкций не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.instructions.InstructionsActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран инструкций");
     }
 
     /**
      * Показывает экран статистики
      */
     protected void showStatistics() {
-        Log.d(TAG, "Экран статистики не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.statistics.StatisticsActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран статистики");
     }
 
     /**
      * Показывает экран категорий доходов
      */
     protected void showIncomeCategories() {
-        // Показываем Toast или переходим на экран категорий доходов
-        Log.d(TAG, "Экран категорий доходов не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран категорий доходов");
     }
 
     /**
      * Показывает экран категорий расходов
      */
     protected void showExpenseCategories() {
-        Log.d(TAG, "Экран категорий расходов не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран категорий расходов");
     }
 
     /**
      * Показывает экран импорта данных
      */
     protected void showImportData() {
-        Log.d(TAG, "Экран импорта данных не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.import_export.ImportDataActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран импорта данных");
     }
 
     /**
      * Показывает экран экспорта данных
      */
     protected void showExportData() {
-        Log.d(TAG, "Экран экспорта данных не реализован");
+        Intent intent = new Intent(this, com.sadengineer.budgetmaster.import_export.ExportDataActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран экспорта данных");
     }
 
     /**
      * Показывает экран теста Backend
      */
     protected void showBackendTest() {
-        Log.d(TAG, "Экран теста Backend не реализован");
+        Intent intent = new Intent(this, BackendTestActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "Переход на экран теста Backend");
     }
 
     // Жизненный цикл Activity

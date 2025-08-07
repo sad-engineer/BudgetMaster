@@ -48,9 +48,9 @@ public interface AccountDao {
     
     /**
      * Получает все счета, включая удаленные
-     * @return список счетов, отсортированных по позиции
+     * @return список счетов, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM accounts ORDER BY position ASC")
+    @Query("SELECT * FROM accounts ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAll();
 
     /**
@@ -70,9 +70,9 @@ public interface AccountDao {
     /**
      * Получает все счета по ID валюты (включая удаленные)
      * @param currencyId ID валюты
-     * @return список счетов с указанным ID валюты
+     * @return список счетов с указанным ID валюты, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM accounts WHERE currencyId = :currencyId ORDER BY position ASC")
+    @Query("SELECT * FROM accounts WHERE currencyId = :currencyId ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAllByCurrency(int currencyId);
     
     /**
@@ -86,9 +86,9 @@ public interface AccountDao {
     /**
      * Получает все счета по типу (включая удаленные)
      * @param type тип счета
-     * @return список счетов с указанным типом
+     * @return список счетов с указанным типом, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM accounts WHERE type = :type ORDER BY position ASC")
+    @Query("SELECT * FROM accounts WHERE type = :type ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAllByType(String type);
 
     /**
