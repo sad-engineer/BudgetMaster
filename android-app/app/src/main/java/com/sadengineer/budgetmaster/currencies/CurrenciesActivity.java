@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Activity для отображения списка валют
  */
-public class CurrenciesActivity extends BaseNavigationActivity implements CurrencyAdapter.OnCurrencyClickListener, CurrencyAdapter.OnSelectionChangedListener {
+public class CurrenciesActivity extends BaseNavigationActivity implements CurrencyAdapter.OnCurrencyClickListener {
     
     private static final String TAG = "CurrenciesActivity";
     
@@ -115,7 +115,6 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         // Небольшая задержка для плавного перехода
         recyclerView.postDelayed(() -> {
             adapter.setSelectionMode(true);
-            adapter.setSelectionListener(this);
             Log.d(TAG, "✅ Режим выбора валют включен");
         }, 100);
     }
@@ -265,12 +264,5 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         startActivity(intent);
     }
 
-    /**
-     * Обрабатывает изменения в количестве выбранных валют
-     * @param selectedCount - количество выбранных валют
-     */
-    @Override
-    public void onSelectionChanged(int selectedCount) {
-        Log.d(TAG, "📊 Выбрано валют: " + selectedCount);
-    }
+
 } 

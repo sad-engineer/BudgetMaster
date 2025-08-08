@@ -6,22 +6,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.entity.Account;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
-import com.sadengineer.budgetmaster.backend.service.AccountService;
 
-import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.List;
 import java.util.ArrayList;
-import androidx.fragment.app.Fragment;
+
 
 /**
  * Activity для отображения списка счетов
@@ -32,10 +30,10 @@ public class AccountsActivity extends BaseNavigationActivity {
     
     private ImageButton addAccountButton;
     private ImageButton deleteAccountButton;
-    private AccountService accountService;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private boolean isSelectionMode = false;
+    private AccountsSharedViewModel viewModel;
 
     /**
      * Метод вызывается при создании Activity
@@ -51,14 +49,33 @@ public class AccountsActivity extends BaseNavigationActivity {
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
 
-        // Инициализация AccountService
-        accountService = new AccountService(this, "default_user");
+        // Shared ViewModel для управления режимом выбора и мягким удалением
+        viewModel = new ViewModelProvider(this).get(AccountsSharedViewModel.class);
 
         // Настраиваем TabLayout и ViewPager2
         setupViewPager();
         
         // Обработчики кнопок счетов
         setupButtons();
+
+        // Наблюдаем за режимом выбора, чтобы обновлять иконки
+        viewModel.getSelectionMode().observe(this, enabled -> {
+            isSelectionMode = Boolean.TRUE.equals(enabled);
+            if (isSelectionMode) {
+                addAccountButton.setImageResource(R.drawable.ic_save);
+                deleteAccountButton.setImageResource(R.drawable.ic_back);
+            } else {
+                addAccountButton.setImageResource(R.drawable.ic_add);
+                deleteAccountButton.setImageResource(R.drawable.ic_delete);
+            }
+        });
+
+        // Логируем результат мягкого удаления
+        viewModel.getSoftDeletionDone().observe(this, count -> {
+            if (count != null) {
+                Log.d(TAG, "✅ Мягко удалено счетов: " + count);
+            }
+        });
     }
     
     /**
@@ -101,8 +118,8 @@ public class AccountsActivity extends BaseNavigationActivity {
             @Override
             public void onClick(View v) {
                 if (isSelectionMode) {
-                    // В режиме выбора - удаляем выбранные счета
-                    deleteSelectedAccounts();
+                    // В режиме выбора - мягко удаляем выбранные счета через ViewModel
+                    viewModel.deleteSelectedAccountsSoft();
                 } else {
                     // Запускаем окно создания счета
                     Intent intent = new Intent(AccountsActivity.this, AccountsEditActivity.class);
@@ -120,105 +137,29 @@ public class AccountsActivity extends BaseNavigationActivity {
             @Override
             public void onClick(View v) {
                 if (isSelectionMode) {
-                    // В режиме выбора - отменяем выбор
-                    cancelSelectionMode();
+                    // В режиме выбора - отменяем выбор через ViewModel
+                    viewModel.cancelSelectionMode();
                 } else {
                     // Включаем режим выбора
-                    enableSelectionMode();
+                    viewModel.enableSelectionMode();
                 }
             }
         });
     }
     
-    /**
-     * Включает режим выбора счетов
-     */
-    private void enableSelectionMode() {
-        isSelectionMode = true;
-        
-        // Меняем иконки кнопок
-        addAccountButton.setImageResource(R.drawable.ic_save);
-        deleteAccountButton.setImageResource(R.drawable.ic_back);
-        
-        // Уведомляем все фрагменты о включении режима выбора
-        notifyFragmentsSelectionMode(true);
-        
-        Log.d(TAG, "✅ Режим выбора счетов включен");
-    }
+    // Массовое удаление выполняется напрямую через ViewModel
     
     /**
-     * Отменяет режим выбора
+     * Обработчик нажатия на кнопку "Назад"
      */
-    private void cancelSelectionMode() {
-        isSelectionMode = false;
-        
-        // Возвращаем иконки кнопок
-        addAccountButton.setImageResource(R.drawable.ic_add);
-        deleteAccountButton.setImageResource(R.drawable.ic_delete);
-        
-        // Уведомляем все фрагменты об отмене режима выбора
-        notifyFragmentsSelectionMode(false);
-        
-        Log.d(TAG, "❌ Режим выбора счетов отменен");
-    }
-    
-    /**
-     * Удаляет выбранные счета
-     */
-    private void deleteSelectedAccounts() {
-        // Получаем выбранные счета из текущего фрагмента
-        List<Account> selectedAccounts = getSelectedAccountsFromCurrentFragment();
-        
-        Log.d(TAG, "🗑️ Удаляем выбранные счета: " + selectedAccounts.size());
-        
-        // Удаляем счета из базы данных
-        for (Account account : selectedAccounts) {
-            try {
-                accountService.softDelete(account);
-                Log.d(TAG, "✅ Удален счет: " + account.getTitle());
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
-            }
-        }
-        
-        // Отменяем режим выбора
-        cancelSelectionMode();
-        Log.d(TAG, "✅ Удалено счетов: " + selectedAccounts.size());
-    }
-    
-    /**
-     * Уведомляет фрагменты о изменении режима выбора
-     */
-    private void notifyFragmentsSelectionMode(boolean enabled) {
-        // Получаем текущий фрагмент
-        int currentPosition = viewPager.getCurrentItem();
-        Fragment currentFragment = getSupportFragmentManager().findFragmentByTag("f" + currentPosition);
-        
-        if (currentFragment instanceof CurrentAccountsFragment) {
-            ((CurrentAccountsFragment) currentFragment).setSelectionMode(enabled);
-        } else if (currentFragment instanceof SavingsAccountsFragment) {
-            ((SavingsAccountsFragment) currentFragment).setSelectionMode(enabled);
-        } else if (currentFragment instanceof TransfersAccountsFragment) {
-            ((TransfersAccountsFragment) currentFragment).setSelectionMode(enabled);
+    @Override
+    public void onBackPressed() {
+        if (isSelectionMode) {
+            viewModel.cancelSelectionMode();
+        } else {
+            super.onBackPressed();
         }
     }
     
-    /**
-     * Получает выбранные счета из текущего фрагмента
-     */
-    private List<Account> getSelectedAccountsFromCurrentFragment() {
-        int currentPosition = viewPager.getCurrentItem();
-        Fragment currentFragment = getSupportFragmentManager()
-            .findFragmentByTag("f" + currentPosition);
-        
-        if (currentFragment instanceof CurrentAccountsFragment) {
-            return ((CurrentAccountsFragment) currentFragment).getSelectedAccounts();
-        } else if (currentFragment instanceof SavingsAccountsFragment) {
-            return ((SavingsAccountsFragment) currentFragment).getSelectedAccounts();
-        } else if (currentFragment instanceof TransfersAccountsFragment) {
-            return ((TransfersAccountsFragment) currentFragment).getSelectedAccounts();
-        }
-        
-        return new ArrayList<>();
-    }
+    // Больше не получаем выбранные из фрагментов — источником правды является Shared ViewModel
 }

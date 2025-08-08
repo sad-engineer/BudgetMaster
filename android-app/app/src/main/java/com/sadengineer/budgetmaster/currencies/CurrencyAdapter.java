@@ -37,22 +37,12 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         void onCurrencyLongClick(Currency currency);
     }
     
-    public interface OnSelectionChangedListener {
-        void onSelectionChanged(int selectedCount);
-    }
-    
-    private OnSelectionChangedListener selectionListener;
-    
     public CurrencyAdapter(OnCurrencyClickListener listener) {
         this.listener = listener;
     }
     
     public void setLongClickListener(OnCurrencyLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
-    }
-    
-    public void setSelectionListener(OnSelectionChangedListener listener) {
-        this.selectionListener = listener;
     }
     
     @NonNull
@@ -80,10 +70,13 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 }
             }
         });
-        
-        holder.setSelectionListener(selectedCount -> {
-            if (selectionListener != null) {
-                selectionListener.onSelectionChanged(selectedCount);
+
+        // Настраиваем обработчик изменения выбора конкретного элемента
+        holder.setItemSelectionListener((itemId, isSelected) -> {
+            if (isSelected) {
+                selectedCurrencies.add(itemId);
+            } else {
+                selectedCurrencies.remove(itemId);
             }
         });
         
@@ -93,8 +86,15 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Currency currency = currencies.get(position);
+        holder.resetToInitialState();
+
+        // Определяем, выбран ли текущий элемент
+        boolean isSelected = selectedCurrencies.contains(currency.getId());
+
+        Log.d(TAG, "🔄 Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
+        "ID: " + currency.getId() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(currency.getPosition(), currency.getTitle(), currency.getId(), 
-                   isSelectionMode, selectedCurrencies);
+                   isSelectionMode, isSelected);
     }
 
     /**
@@ -123,9 +123,6 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             selectedCurrencies.clear();
         }
         notifyDataSetChanged();
-        if (selectionListener != null) {
-            selectionListener.onSelectionChanged(selectedCurrencies.size());
-        }
     }
     
     /**
@@ -148,9 +145,6 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void clearSelection() {
         selectedCurrencies.clear();
         notifyDataSetChanged();
-        if (selectionListener != null) {
-            selectionListener.onSelectionChanged(0);
-        }
     }
     
     /**

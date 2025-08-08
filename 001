@@ -35,7 +35,12 @@ cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
 
 # Фильтрация и сохранение
 ./adb logcat | Select-String "BudgetMaster" > C:\budgetmaster_logs.txt
-./adb logcat | Select-String "BudgetMaster" > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log"
+./adb logcat -v time | Out-File -FilePath "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log" -Encoding UTF8
+
+./adb logcat -v time | iconv -f UTF-8 -t UTF-8 > "C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log"
+
+через  cmd
+cmd /c "chcp 65001 && adb logcat -v time > C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\budgetmaster_logs.log"
 
 # поиск базы для анализа
 # Найти имя пакета

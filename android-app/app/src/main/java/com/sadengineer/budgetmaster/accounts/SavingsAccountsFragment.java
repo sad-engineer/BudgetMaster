@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -28,6 +29,7 @@ public class SavingsAccountsFragment extends Fragment {
     private static final String TAG = "SavingsAccountsFragment";
     private RecyclerView recyclerView;
     private AccountsAdapter adapter;
+    private AccountsSharedViewModel viewModel;
 
     @Nullable
     @Override
@@ -38,25 +40,18 @@ public class SavingsAccountsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.accounts_savings_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Создаем адаптер
-        adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
-            @Override
-            public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран сберегательный счет: " + account.getTitle());
-                // Переходим на экран редактирования счета
-                goToAccountEdit(account);
+        // Shared ViewModel из Activity
+        viewModel = new ViewModelProvider(requireActivity()).get(AccountsSharedViewModel.class);
+
+        // Создаем адаптер по общей схеме с long-click
+        setupAdapter();
+
+        // Наблюдаем за режимом выбора
+        viewModel.getSelectionMode().observe(getViewLifecycleOwner(), enabled -> {
+            if (adapter != null) {
+                adapter.setSelectionMode(Boolean.TRUE.equals(enabled));
             }
         });
-        
-        // Настраиваем обработчик изменения выбора
-        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
-            @Override
-            public void onSelectionChanged(int selectedCount) {
-                Log.d(TAG, "🔄 Изменение выбора сберегательных счетов: " + selectedCount + " выбрано");
-            }
-        });
-        
-        recyclerView.setAdapter(adapter);
         
         // Загружаем счета типа 2 (сберегательные)
         loadSavingsAccounts();
@@ -144,12 +139,11 @@ public class SavingsAccountsFragment extends Fragment {
             }
         });
         
-        // Настраиваем обработчик изменения выбора
-        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
-            @Override
-            public void onSelectionChanged(int selectedCount) {
-                Log.d(TAG, " Изменение выбора сберегательных счетов: " + selectedCount + " выбрано");
-            }
+
+
+        // Сообщаем VM полный набор выбранных при каждом изменении
+        adapter.setOnSelectedAccountsChanged(selected -> {
+            viewModel.setSelectedAccounts(selected);
         });
         
         recyclerView.setAdapter(adapter);

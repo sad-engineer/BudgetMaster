@@ -1,7 +1,5 @@
 package com.sadengineer.budgetmaster.animations;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -12,40 +10,31 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
 
-import java.util.Set;
-
 /**
  * Универсальный ViewHolder для элементов с возможностью выбора
  */
 public class StandartViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "StandartViewHolder";
     
-    // Константы для анимаций
-    // задержка для анимации чекбокса
-    private static final int CHECKBOX_ANIMATION_DELAY = 300;
-    // задержка для анимации смещения текста
-    private static final int TEXT_PADDING_ANIMATION_DELAY = 300;
-    // длительность анимации появления чекбокса
-    private static final int CHECKBOX_FADE_IN_DURATION = 300;
-    // длительность анимации исчезновения чекбокса
-    private static final int CHECKBOX_FADE_OUT_DURATION = 200;
-    // длительность анимации смещения текста
-    private static final int TEXT_PADDING_ANIMATION_DURATION = 300;
-    // размер отступа текста
+    // Размер отступа текста
     private static final int TEXT_PADDING_DP = 50;
 
-    // чекбокс
-    private CheckBox checkbox;
+    // UI элементы
+    private CheckBox checkbox;   
     private TextView positionText;
     private TextView titleText;
     private TextView idText;
     private TextView sumText;
     
+    // Состояние
     private boolean isSelectionMode = false;
-    private Set<Integer> selectedIds;
+    private boolean isSelected = false;
+    private int boundItemId = -1;
+    
+    // Обработчики
     private OnItemClickListener itemClickListener;
     private OnItemLongClickListener itemLongClickListener;
-    private OnSelectionChangedListener selectionListener;
+    private OnItemSelectionChangedListener itemSelectionListener;
     
     public interface OnItemClickListener {
         void onItemClick(int itemId);
@@ -55,8 +44,8 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         void onItemLongClick(int itemId);
     }
 
-    public interface OnSelectionChangedListener {
-        void onSelectionChanged(int selectedCount);
+    public interface OnItemSelectionChangedListener {
+        void onItemSelectionChanged(int itemId, boolean isSelected);
     }
     
     /**
@@ -65,7 +54,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     public StandartViewHolder(@NonNull View itemView) {
         super(itemView);
         
-        // Ищем чекбокс по разным возможным ID
+        // Ищем UI элементы
         checkbox = findCheckbox(itemView);
         positionText = findPositionText(itemView);
         titleText = findTitleText(itemView);
@@ -79,7 +68,6 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Ищет чекбокс по разным возможным ID
      */
     private CheckBox findCheckbox(View itemView) {
-        // Пробуем найти чекбокс по разным ID
         CheckBox foundCheckbox = itemView.findViewById(R.id.currency_checkbox);
         if (foundCheckbox != null) {
             return foundCheckbox;
@@ -90,13 +78,6 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundCheckbox;
         }
         
-        // Можно добавить другие типы чекбоксов здесь
-        // foundCheckbox = itemView.findViewById(R.id.income_checkbox);
-        // if (foundCheckbox != null) {
-        //     return foundCheckbox;
-        // }
-        
-        // Если чекбокс не найден, возвращаем null
         return null;
     }
     
@@ -191,13 +172,13 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
                 int itemId = getCurrentItemId();
                 if (itemId != -1) {
                     itemLongClickListener.onItemLongClick(itemId);
-                    return true; // Показываем, что обработали длительное нажатие
+                    return true;
                 }
             }
             return false;
         });
         
-        // Обработчик клика на чекбокс (если он существует)
+        // Обработчик клика на чекбокс
         if (checkbox != null) {
             checkbox.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -215,48 +196,41 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Получает ID текущего элемента
      */
     private int getCurrentItemId() {
-        if (idText == null) {
-            return -1;
-        }
-        
-        String idTextValue = idText.getText().toString();
-        if (idTextValue.startsWith("ID: ")) {
-            try {
-                return Integer.parseInt(idTextValue.substring(4));
-            } catch (NumberFormatException e) {
-                android.util.Log.e(TAG, "Ошибка парсинга ID: " + idTextValue);
-                return -1;
-            }
-        }
-        return -1;
+        return boundItemId;
     }
     
     /**
      * Переключает выбор элемента
      */
     private void toggleSelection(int itemId) {
-        if (selectedIds.contains(itemId)) {
-            selectedIds.remove(itemId);
-        } else {
-            selectedIds.add(itemId);
+        boolean newSelectionState = !isSelected;
+        isSelected = newSelectionState;
+        
+        if (itemSelectionListener != null) {
+            itemSelectionListener.onItemSelectionChanged(itemId, newSelectionState);
         }
-        if (selectionListener != null) {
-            selectionListener.onSelectionChanged(selectedIds.size());
+        
+        if (checkbox != null) {
+            checkbox.setChecked(isSelected);
         }
     }
     
     /**
      * Привязывает данные к элементу
      */
-    public void bind(int position, String title, int id, boolean isSelectionMode, Set<Integer> selectedIds) {
-        bind(position, title, id, 0, isSelectionMode, selectedIds);
+    public void bind(int position, String title, int id, boolean isSelectionMode, boolean isSelected) {
+        bind(position, title, id, 0, isSelectionMode, isSelected);
     }
     
-    public void bind(int position, String title, int id, int sum, boolean isSelectionMode, Set<Integer> selectedIds) {
+    public void bind(int position, String title, int id, int sum, boolean isSelectionMode, boolean isSelected) {
+        this.boundItemId = id;
         this.isSelectionMode = isSelectionMode;
-        this.selectedIds = selectedIds;
+        this.isSelected = isSelected;
         
-        // Устанавливаем значения только если элементы найдены
+        Log.d(TAG, "🔄 bind() для элемента " + id + " (позиция " + position + "): " + 
+            "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected);
+        
+        // Устанавливаем значения
         if (positionText != null) {
             positionText.setText(String.valueOf(position));
         }
@@ -267,111 +241,38 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             idText.setText("ID: " + id);
         }
         if (sumText != null) {
-            // Форматируем сумму как валюту (копейки -> рубли)
             double rubles = sum / 100.0;
             sumText.setText(String.format("%.2f RUB", rubles));
         }
         
-        // Устанавливаем полупрозрачность для счетов с позицией 0 (удаленные счета)
+        // Полупрозрачность для элементов с позицией 0
         if (position == 0) {
-            itemView.setAlpha(0.5f); // Полупрозрачность 50%
-            android.util.Log.d(TAG, "🔄 Устанавливаем полупрозрачность для счета с позицией 0: " + title);
+            itemView.setAlpha(0.5f);
         } else {
-            itemView.setAlpha(1.0f); // Полная непрозрачность
+            itemView.setAlpha(1.0f);
         }
         
-        // Настройка видимости чекбокса и смещения текста с анимацией
+        // Настройка чекбокса и отступа текста
         if (isSelectionMode) {
-            // При включении режима: смещение сразу, чекбокс через задержку
-            animateTextPadding(true, 0);
-            
-            // Задержка для появления чекбокса
-            if (checkbox != null) {
-                checkbox.postDelayed(() -> {
-                    animateCheckboxVisibility(true);
-                }, CHECKBOX_ANIMATION_DELAY);
-                
-                checkbox.setChecked(selectedIds.contains(id));
-            }
-            
-        } else {
-            // При выключении режима: скрытие чекбокса сразу, смещение через задержку
-            if (checkbox != null) {
-                animateCheckboxVisibility(false);
-                checkbox.setChecked(false);
-            }
-            
-            // Задержка для смещения текста
-            if (positionText != null) {
-                positionText.postDelayed(() -> {
-                    animateTextPadding(false, 0);
-                }, TEXT_PADDING_ANIMATION_DELAY);
-            }
-        }
-    }
-    
-    /**
-     * Анимирует появление/исчезновение чекбокса
-     */
-    private void animateCheckboxVisibility(boolean show) {
-        if (checkbox == null) {
-            return;
-        }
-        
-        if (show) {
+            // Показываем чекбокс и смещаем текст
             checkbox.setVisibility(View.VISIBLE);
-            checkbox.setAlpha(0f);
+            checkbox.setChecked(isSelected);
             
-            ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(checkbox, "alpha", 0f, 1f);
-            alphaAnimator.setDuration(CHECKBOX_FADE_IN_DURATION);
-            alphaAnimator.start();
-            
+            if (positionText != null) {
+                int padding = (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density);
+                positionText.setPadding(padding, positionText.getPaddingTop(), 
+                                     positionText.getPaddingRight(), positionText.getPaddingBottom());
+            }
         } else {
-            ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(checkbox, "alpha", 1f, 0f);
-            alphaAnimator.setDuration(CHECKBOX_FADE_OUT_DURATION);
-            alphaAnimator.start();
+            // Скрываем чекбокс и возвращаем текст
+            checkbox.setVisibility(View.GONE);
+            checkbox.setChecked(false);
             
-            // Скрываем чекбокс после анимации
-            checkbox.postDelayed(() -> checkbox.setVisibility(View.GONE), CHECKBOX_FADE_OUT_DURATION);
+            if (positionText != null) {
+                positionText.setPadding(0, positionText.getPaddingTop(), 
+                                     positionText.getPaddingRight(), positionText.getPaddingBottom());
+            }
         }
-    }
-    
-    /**
-     * Анимирует смещение текста
-     */
-    private void animateTextPadding(boolean addPadding, int delay) {
-        if (positionText == null) {
-            return;
-        }
-        // рассчитываем размер отступа текста
-        int targetPadding = addPadding ? 
-            (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density) : 0;
-        // получаем текущий отступ текста
-        int currentPadding = positionText.getPaddingLeft();
-        
-        Log.d(TAG, "🔄 Анимация смещения текста: " + 
-            currentPadding + " -> " + targetPadding + " (addPadding: " + addPadding + ", delay: " + delay + "ms)");
-        
-        // создаем анимацию смещения текста
-        ValueAnimator paddingAnimator = ValueAnimator.ofInt(currentPadding, targetPadding);
-        // устанавливаем длительность анимации
-        paddingAnimator.setDuration(TEXT_PADDING_ANIMATION_DURATION);
-        // добавляем обработчик обновления анимации
-        paddingAnimator.addUpdateListener(animation -> {
-            // получаем текущее значение анимации
-            int animatedValue = (Integer) animation.getAnimatedValue();
-            // устанавливаем новый отступ текста
-            positionText.setPadding(animatedValue, positionText.getPaddingTop(), 
-                                 positionText.getPaddingRight(), positionText.getPaddingBottom());
-            
-            Log.d(TAG, "📏 Текущий отступ: " + animatedValue);
-        });
-        // устанавливаем задержку анимации
-        if (delay > 0) {
-            paddingAnimator.setStartDelay(delay);
-        }
-        // запускаем анимацию
-        paddingAnimator.start();
     }
     
     /**
@@ -389,9 +290,28 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     }
 
     /**
-     * Устанавливает обработчик изменения выбора
+     * Устанавливает обработчик изменения выбора конкретного элемента
      */
-    public void setSelectionListener(OnSelectionChangedListener listener) {
-        this.selectionListener = listener;
+    public void setItemSelectionListener(OnItemSelectionChangedListener listener) {
+        this.itemSelectionListener = listener;
+    }
+
+    /**
+     * Сбрасывает ViewHolder в начальное состояние
+     */
+    public void resetToInitialState() {
+        // Сбрасываем UI элементы
+        checkbox.setVisibility(View.GONE);
+        checkbox.setChecked(false);
+        
+        if (positionText != null) {
+            positionText.setPadding(0, positionText.getPaddingTop(), 
+                                 positionText.getPaddingRight(), positionText.getPaddingBottom());
+        }
+        
+        // Сбрасываем внутренние переменные
+        this.isSelectionMode = false;
+        this.isSelected = false;
+        this.boundItemId = -1;
     }
 } 

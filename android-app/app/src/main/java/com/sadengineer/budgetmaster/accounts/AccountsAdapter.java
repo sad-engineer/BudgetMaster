@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.accounts;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private OnAccountLongClickListener longClickListener;
     private boolean isSelectionMode = false;
     private Set<Integer> selectedAccounts = new HashSet<>();
+    private OnSelectedAccountsChanged externalSelectedAccountsChanged;
     
     public interface OnAccountClickListener {
         void onAccountClick(Account account);
@@ -35,12 +37,11 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public interface OnAccountLongClickListener {
         void onAccountLongClick(Account account);
     }
-    
-    public interface OnSelectionChangedListener {
-        void onSelectionChanged(int selectedCount);
+
+    // Для передачи полного списка выбранных аккаунтов наружу (в VM через фрагмент)
+    public interface OnSelectedAccountsChanged {
+        void onSelectedAccountsChanged(List<Account> selectedAccounts);
     }
-    
-    private OnSelectionChangedListener selectionListener;
     
     public AccountsAdapter(OnAccountClickListener listener) {
         this.listener = listener;
@@ -49,9 +50,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void setLongClickListener(OnAccountLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
     }
-    
-    public void setSelectionListener(OnSelectionChangedListener listener) {
-        this.selectionListener = listener;
+
+    public void setOnSelectedAccountsChanged(OnSelectedAccountsChanged listener) {
+        this.externalSelectedAccountsChanged = listener;
     }
     
     @NonNull
@@ -79,10 +80,18 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 }
             }
         });
-        
-        holder.setSelectionListener(selectedCount -> {
-            if (selectionListener != null) {
-                selectionListener.onSelectionChanged(selectedCount);
+
+        // Настраиваем обработчик изменения выбора конкретного элемента
+        holder.setItemSelectionListener((itemId, isSelected) -> {
+            if (isSelected) {
+                selectedAccounts.add(itemId);
+            } else {
+                selectedAccounts.remove(itemId);
+            }
+            
+            // Сообщаем наружу полный набор выбранных
+            if (externalSelectedAccountsChanged != null) {
+                externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
             }
         });
         
@@ -92,8 +101,15 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Account account = accounts.get(position);
+        holder.resetToInitialState();
+
+        // Определяем, выбран ли текущий элемент
+        boolean isSelected = selectedAccounts.contains(account.getId());
+
+        Log.d(TAG, "🔄 Привязываем данные к ViewHolder: " + account.getTitle() + " (позиция " + account.getPosition() + ")" +
+        "ID: " + account.getId() + ", сумма: " + account.getAmount() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(account.getPosition(), account.getTitle(), account.getId(), 
-                   account.getAmount(), isSelectionMode, selectedAccounts);
+                   account.getAmount(), isSelectionMode, isSelected);
     }
 
     /**
@@ -109,7 +125,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
-        android.util.Log.d(TAG, "🔄 Обновляем список счетов: " + this.accounts.size() + " элементов");
+        Log.d(TAG, "🔄 Обновляем список счетов: " + this.accounts.size() + " элементов");
         notifyDataSetChanged();
     }
     
@@ -122,8 +138,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             selectedAccounts.clear();
         }
         notifyDataSetChanged();
-        if (selectionListener != null) {
-            selectionListener.onSelectionChanged(selectedAccounts.size());
+        // Сообщаем наружу полный набор выбранных
+        if (externalSelectedAccountsChanged != null) {
+            externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
         }
     }
     
@@ -147,8 +164,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void clearSelection() {
         selectedAccounts.clear();
         notifyDataSetChanged();
-        if (selectionListener != null) {
-            selectionListener.onSelectionChanged(0);
+        if (externalSelectedAccountsChanged != null) {
+            externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
         }
     }
     

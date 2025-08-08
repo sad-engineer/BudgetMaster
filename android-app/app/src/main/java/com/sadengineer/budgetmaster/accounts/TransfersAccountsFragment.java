@@ -6,17 +6,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 
 import java.util.List;
@@ -28,6 +30,7 @@ public class TransfersAccountsFragment extends Fragment {
     private static final String TAG = "TransfersAccountsFragment";
     private RecyclerView recyclerView;
     private AccountsAdapter adapter;
+    private AccountsSharedViewModel viewModel;
 
     @Nullable
     @Override
@@ -38,25 +41,18 @@ public class TransfersAccountsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.accounts_transfers_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Создаем адаптер
-        adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
-            @Override
-            public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран счет переводов: " + account.getTitle());
-                // Переходим на экран редактирования счета
-                goToAccountEdit(account);
+        // Shared ViewModel из Activity
+        viewModel = new ViewModelProvider(requireActivity()).get(AccountsSharedViewModel.class);
+
+        // Создаем адаптер по общей схеме с long-click
+        setupAdapter();
+
+        // Наблюдаем за режимом выбора
+        viewModel.getSelectionMode().observe(getViewLifecycleOwner(), enabled -> {
+            if (adapter != null) {
+                adapter.setSelectionMode(Boolean.TRUE.equals(enabled));
             }
         });
-        
-        // Настраиваем обработчик изменения выбора
-        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
-            @Override
-            public void onSelectionChanged(int selectedCount) {
-                Log.d(TAG, "🔄 Изменение выбора счетов переводов: " + selectedCount + " выбрано");
-            }
-        });
-        
-        recyclerView.setAdapter(adapter);
         
         // Загружаем счета типа 3 (переводы)
         loadTransfersAccounts();
@@ -144,15 +140,14 @@ public class TransfersAccountsFragment extends Fragment {
             }
         });
         
-        // Настраиваем обработчик изменения выбора
-        adapter.setSelectionListener(new AccountsAdapter.OnSelectionChangedListener() {
-            @Override
-            public void onSelectionChanged(int selectedCount) {
-                Log.d(TAG, "🔄 Изменение выбора счетов переводов: " + selectedCount + " выбрано");
-            }
-        });
+
         
         recyclerView.setAdapter(adapter);
+
+        // Сообщаем VM полный набор выбранных при каждом изменении
+        adapter.setOnSelectedAccountsChanged(selected -> {
+            viewModel.setSelectedAccounts(selected);
+        });
     }
 
     /**
