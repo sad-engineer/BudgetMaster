@@ -4,174 +4,186 @@ package com.sadengineer.budgetmaster.backend.repository;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.BudgetDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.BudgetFilter;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Repository класс для работы с Budget Entity
  */
 public class BudgetRepository {
     
-    private final BudgetDao budgetDao;
-    private final ExecutorService executorService;
+    private static final String TAG = "BudgetRepository";
+    
+    private final BudgetDao dao;
     
     public BudgetRepository(Context context) {
         BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(context);
-        this.budgetDao = database.budgetDao();
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.dao = database.budgetDao();
     }
-    
-    // Получить все активные бюджеты
-    public LiveData<List<Budget>> getAllActiveBudgets() {
-        MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getAllActiveBudgets();
-            liveData.postValue(budgets);
-        });
-        return liveData;
-    }
-    
-    // Получить бюджеты по периоду
-    public LiveData<List<Budget>> getBudgetsByPeriod() {
-        MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getBudgetsByPeriod();
-            liveData.postValue(budgets);
-        });
-        return liveData;
-    }
-    
-    // Получить бюджеты по категории
-    public LiveData<List<Budget>> getBudgetsByCategory(int categoryId) {
-        MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getBudgetsByCategory(categoryId);
-            liveData.postValue(budgets);
-        });
-        return liveData;
-    }
-    
-    // Получить бюджет по ID
-    public LiveData<Budget> getBudgetById(int id) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Budget budget = budgetDao.getBudgetById(id);
-            liveData.postValue(budget);
-        });
-        return liveData;
-    }
-    
-    // Получить бюджет по ID категории
-    public LiveData<Budget> getBudgetByCategoryId(int categoryId) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Budget budget = budgetDao.getBudgetByCategoryId(categoryId);
-            liveData.postValue(budget);
-        });
-        return liveData;
-    }
-    
-    // Получить бюджеты по валюте
-    public LiveData<List<Budget>> getBudgetsByCurrency(int currencyId) {
-        MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getBudgetsByCurrency(currencyId);
-            liveData.postValue(budgets);
-        });
-        return liveData;
-    }
-    
-    // Получить общую сумму бюджетов по валюте
-    public LiveData<Integer> getTotalAmountByCurrency(int currencyId) {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Integer total = budgetDao.getTotalAmountByCurrency(currencyId);
-            liveData.postValue(total != null ? total : 0);
-        });
-        return liveData;
-    }
-    
-    // Вставить новый бюджет
-    public void insertBudget(Budget budget, String createdBy) {
-        executorService.execute(() -> {
-            budget.setCreateTime(LocalDateTime.now());
-            budget.setCreatedBy(createdBy);
-            budget.setUpdateTime(LocalDateTime.now());
-            budget.setUpdatedBy(createdBy);
-            budgetDao.insertBudget(budget);
-        });
-    }
-    
-    // Обновить бюджет
-    public void updateBudget(Budget budget, String updatedBy) {
-        executorService.execute(() -> {
-            budget.setUpdateTime(LocalDateTime.now());
-            budget.setUpdatedBy(updatedBy);
-            budgetDao.updateBudget(budget);
-        });
-    }
-    
-    // Удалить бюджет (soft delete)
-    public void deleteBudget(int budgetId, String deletedBy) {
-        executorService.execute(() -> {
-            budgetDao.softDeleteBudget(budgetId, LocalDateTime.now().toString(), deletedBy);
-        });
-    }
-    
-    // Получить все удаленные бюджеты
-    public LiveData<List<Budget>> getAllDeletedBudgets() {
-        MutableLiveData<List<Budget>> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            List<Budget> budgets = budgetDao.getAllDeletedBudgets();
-            liveData.postValue(budgets);
-        });
-        return liveData;
-    }
-    
 
-    
-    // Получить максимальную позицию
-    public LiveData<Integer> getMaxPosition() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Integer maxPos = budgetDao.getMaxPosition();
-            liveData.postValue(maxPos != null ? maxPos : 0);
-        });
-        return liveData;
+    /**
+     * Получить все бюджеты
+     * @param filter фильтр для выборки бюджетов
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAll(BudgetFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActive();
+            case DELETED:
+                return dao.getAllDeleted();
+            case ALL:
+            default:
+                return dao.getAll();
+        }
     }
     
-    // Восстановить бюджет
-    public void restoreBudget(int budgetId, String updatedBy) {
-        executorService.execute(() -> {
-            budgetDao.restoreBudget(budgetId, LocalDateTime.now().toString(), updatedBy);
-        });
+    /**
+     * Получить все бюджеты (включая удаленные)
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAll() {
+        return dao.getAll();
+    }   
+
+    /**
+     * Получить все бюджеты по ID валюты
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки бюджетов
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAllByCurrency(int currencyId, BudgetFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActiveByCurrency(currencyId);
+            case DELETED:
+                return dao.getAllDeletedByCurrency(currencyId);
+            case ALL:
+            default:
+                return dao.getAllByCurrency(currencyId);
+        }
     }
     
-    // Получить бюджет по позиции
-    public LiveData<Budget> getBudgetByPosition(int position) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            Budget budget = budgetDao.getBudgetByPosition(position);
-            liveData.postValue(budget);
-        });
-        return liveData;
+    /**
+     * Получить все бюджеты по ID валюты (включая удаленные)
+     * @param currencyId ID валюты
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAllByCurrency(int currencyId) {
+        return dao.getAllByCurrency(currencyId);
     }
     
-    // Получить количество активных бюджетов
-    public LiveData<Integer> getActiveBudgetsCount() {
-        MutableLiveData<Integer> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            int count = budgetDao.getActiveBudgetsCount();
-            liveData.postValue(count);
-        });
-        return liveData;
+    /**
+     * Получить бюджет по ID категории (включая удаленные)
+     * @param categoryId ID категории
+     * @return LiveData с бюджетом
+     */
+    public LiveData<Budget> getByCategory(int categoryId) {
+        return dao.getByCategory(categoryId);
+    }
+    
+    /**
+     * Получить бюджет по ID (включая удаленные)
+     * @param id ID бюджета
+     * @return LiveData с бюджетом
+     */
+    public LiveData<Budget> getById(int id) {
+        return dao.getById(id);
+    }   
+    
+    /**
+     * Получить бюджет по позиции (включая удаленные)
+     * @param position позиция бюджета
+     * @return LiveData с бюджетом
+     */
+    public LiveData<Budget> getByPosition(int position) {
+        return dao.getByPosition(position);
+    }
+
+    /**
+     * Вставить новый бюджет
+     * @param budget бюджет для вставки
+     * @return LiveData с вставленным бюджетом
+     */
+    public LiveData<Budget> insert(Budget budget) {
+        long id = dao.insert(budget);
+        return dao.getById((int)id);
+    }
+    
+    /**
+     * Обновить бюджет
+     * @param budget бюджет для обновления
+     */
+    public void update(Budget budget) {
+        dao.update(budget);
+    }
+    
+    /**
+     * Удалить бюджет (полное удаление из БД)
+     * @param budget бюджет для удаления
+     */
+    public void delete(Budget budget) {
+        dao.delete(budget);
+    }
+    
+    /**
+     * Удалить все бюджеты
+     */
+    public void deleteAll() {
+        dao.deleteAll();
+    }
+    
+    /**
+     * Получить максимальную позицию среди всех бюджетов
+     * @return максимальная позиция
+     */
+    public int getMaxPosition() {
+        return dao.getMaxPosition();
+    }
+    
+    /**
+     * Сдвинуть позиции бюджетов вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    public void shiftPositionsUp(int fromPosition) {
+        dao.shiftPositionsUp(fromPosition);
+    }
+    
+    /**
+     * Сдвинуть позиции бюджетов вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    public void shiftPositionsDown(int fromPosition) {
+        dao.shiftPositionsDown(fromPosition);
+    }
+    
+    /**
+     * Получить количество бюджетов
+     * @param filter фильтр для выборки бюджетов
+     * @return количество бюджетов
+     */
+    public int getCount(BudgetFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.countActive();
+            case DELETED:
+                return dao.countDeleted();
+            case ALL:
+            default:
+                return dao.count();
+        }
+    }
+    
+    /**
+     * Получить общее количество бюджетов (включая удаленные)
+     * @return общее количество бюджетов
+     */
+    public int getCount() {
+        return dao.count();
     }
 } 

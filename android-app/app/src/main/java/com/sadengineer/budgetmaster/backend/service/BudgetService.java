@@ -2,11 +2,13 @@
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.room.Transaction;
 
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.BudgetFilter;
 import com.sadengineer.budgetmaster.backend.repository.BudgetRepository;
 
 import java.time.LocalDateTime;
@@ -18,226 +20,320 @@ import java.util.concurrent.Executors;
  * Service класс для бизнес-логики работы с Budget
  */
 public class BudgetService {
+    private static final String TAG = "BudgetService";
     
-    private final BudgetRepository budgetRepository;
+    private final BudgetRepository repo;
     private final ExecutorService executorService;
     private final String user;
     
     public BudgetService(Context context, String user) {
-        this.budgetRepository = new BudgetRepository(context);
+        this.repo = new BudgetRepository(context);
         this.executorService = Executors.newFixedThreadPool(4);
         this.user = user;
     }
-    
-    // Получить все активные бюджеты
-    public LiveData<List<Budget>> getAllActiveBudgets() {
-        return budgetRepository.getAllActiveBudgets();
-    }
-    
-    // Получить бюджеты по периоду
-    public LiveData<List<Budget>> getBudgetsByPeriod() {
-        return budgetRepository.getBudgetsByPeriod();
-    }
-    
-    // Получить бюджеты по категории
-    public LiveData<List<Budget>> getBudgetsByCategory(int categoryId) {
-        return budgetRepository.getBudgetsByCategory(categoryId);
-    }
-    
-    // Получить бюджет по ID
-    public LiveData<Budget> getBudgetById(int id) {
-        return budgetRepository.getBudgetById(id);
-    }
-    
-    // Получить бюджеты по валюте
-    public LiveData<List<Budget>> getBudgetsByCurrency(int currencyId) {
-        return budgetRepository.getBudgetsByCurrency(currencyId);
-    }
-    
-    // Получить общую сумму бюджетов по валюте
-    public LiveData<Integer> getTotalAmountByCurrency(int currencyId) {
-        return budgetRepository.getTotalAmountByCurrency(currencyId);
-    }
-    
-    // Создать новый бюджет
-    public void createBudget(int amount, int currencyId, Integer categoryId) {
-        Budget budget = new Budget();
-        budget.setAmount(amount);
-        budget.setCurrencyId(currencyId);
-        budget.setCategoryId(categoryId);
-        budget.setPosition(1); // TODO: Получить следующую позицию
-        
-        budgetRepository.insertBudget(budget, user);
-    }
-    
-    // Обновить бюджет
-    public void updateBudget(Budget budget) {
-        budgetRepository.updateBudget(budget, user);
-    }
-    
-    // Удалить бюджет (soft delete)
-    public void deleteBudget(int budgetId) {
-        budgetRepository.deleteBudget(budgetId, user);
-    }
-    
-    // Восстановить удаленный бюджет
-    public void restoreBudget(int budgetId) {
+
+    /**
+     * Изменить позицию бюджета
+     * @param budget бюджет
+     * @param newPosition новая позиция
+     */
+    public void changePosition(Budget budget, int newPosition) {
         executorService.execute(() -> {
-            // Получаем удаленный бюджет
-            Budget deletedBudget = budgetRepository.getBudgetById(budgetId).getValue();
-            if (deletedBudget == null || !deletedBudget.isDeleted()) {
-                return; // Бюджет не найден или уже активен
+            changePositionInTransaction(budget, newPosition);
+        });
+    }
+    
+    /**
+     * Транзакция для изменения позиции бюджета
+     * @param budget бюджет
+     * @param newPosition новая позиция
+     */
+    @Transaction
+    private void changePositionInTransaction(Budget budget, int newPosition) {
+        int oldPosition = budget.getPosition();
+        
+        // Если позиция не изменилась, ничего не делаем
+        if (oldPosition == newPosition) {
+            return;
+        }
+        
+        // Используем методы сдвига позиций из Repository
+        if (oldPosition < newPosition) {
+            repo.shiftPositionsDown(oldPosition);
+            repo.shiftPositionsUp(newPosition + 1);
+        } else {
+            repo.shiftPositionsUp(newPosition);
+            repo.shiftPositionsDown(oldPosition);
+        }
+        
+        // Устанавливаем новую позицию для текущего бюджета
+        budget.setPosition(newPosition);
+        repo.update(budget);
+    }
+    
+    /**
+     * Изменить позицию бюджета по старой позиции
+     * @param oldPosition старая позиция
+     * @param newPosition новая позиция
+     */
+    public void changePosition(int oldPosition, int newPosition) {
+        Budget budget = repo.getByPosition(oldPosition).getValue();
+        if (budget != null) {
+            changePosition(budget, newPosition);
+        }
+    }
+    
+    /**
+     * Изменить позицию бюджета по названию
+     * @param category_id ID категории  
+     * @param newPosition новая позиция
+     */
+    // public void changePosition(int category_id, int newPosition) {
+    //     Budget budget = repo.getByCategory(category_id).getValue();
+    //     if (budget != null) {
+    //         changePosition(budget, newPosition);
+    //     }
+    // }
+
+    /**
+     * Создать новый бюджет
+     * @param category_id ID категории (обязательный параметр, не может быть пустым)
+     * @param amount сумма (необязательный параметр, перелайте null, для установки значения по умолчанию (0))
+     * @param currency_id ID валюты (необязательный параметр, перелайте null, для установки значения по умолчанию (1))
+     */
+    public void create(int category_id, Integer amount, Integer currency_id) {
+        if (category_id <= 0) {
+            throw new IllegalArgumentException("ID категории не может быть пустым");
+        }
+
+        executorService.execute(() -> {
+            try {
+                // Создаем переменные ВНУТРИ lambda
+                int finalAmount = amount;
+                int finalCurrencyId = currency_id;
+                
+                // Проверяем, если сумма не передана, устанавливаем значение по умолчанию
+                if (amount == null || amount <= 0) {
+                    Log.d(TAG, "Для категории " + category_id + " не передано значение суммы, устанавливаем значение по умолчанию");
+                    finalAmount = 0;
+                }
+                
+                // Проверяем, если ID валюты не передан, устанавливаем значение по умолчанию
+                if (currency_id == null || currency_id <= 0) {
+                    Log.d(TAG, "Для категории " + category_id + " не передано значение ID валюты, устанавливаем значение по умолчанию");
+                    finalCurrencyId = 1;
+                }
+                
+                createBudgetInTransaction(category_id, finalAmount, finalCurrencyId);
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при создании бюджета для категории " + category_id + ": " + e.getMessage(), e);
             }
-            
-            // Очищаем поля удаления
+        });
+    }
+    
+    /**
+     * Транзакция для создания нового бюджета
+     * @param category_id ID категории
+     * @param amount сумма
+     * @param currency_id ID валюты
+     */
+    @Transaction
+    private void createBudgetInTransaction(int category_id, Integer amount, Integer currency_id) {
+        Log.d(TAG, "🔄 Запрос на создание бюджета для категории " + category_id);
+        Budget budget = new Budget();
+        budget.setCategoryId(category_id);
+        budget.setAmount(amount);
+        budget.setCurrencyId(currency_id);
+        budget.setPosition(repo.getMaxPosition() + 1);
+        budget.setCreateTime(LocalDateTime.now());
+        budget.setCreatedBy(user);
+        repo.insert(budget);
+        Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно создан");
+    }
+
+    /**
+     * Удалить бюджет (полное удаление - удаление строки из БД)
+     * @param budget бюджет
+     */
+    private void delete(Budget budget) {
+        executorService.execute(() -> {
+            try {
+                deleteBudgetInTransaction(budget);
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при удалении бюджета: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * Транзакция для удаления бюджета
+     * @param budget бюджет
+     */
+    @Transaction
+    private void deleteBudgetInTransaction(Budget budget) {
+        if (budget != null) {
+            Log.d(TAG, "🔄 Запрос на удаление бюджета для категории " + budget.getCategoryId());
+            int deletedPosition = budget.getPosition();
+            repo.delete(budget);
+            // Пересчитываем позиции после удаления
+            repo.shiftPositionsDown(deletedPosition);
+            Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно удален");
+        } else {
+            Log.e(TAG, "❌ Бюджет не найден для удаления");
+        }
+    }
+
+    /**
+     * Удалить бюджет (полное удаление - удаление строки из БД)
+     * @param softDelete true - soft delete, false - полное удаление
+     * @param budget бюджет
+     */
+    public void delete(boolean softDelete, Budget budget) {
+        if (softDelete) {
+            softDelete(budget);
+        } else {
+            delete(budget);
+        }
+    }
+
+    /**
+     * Получить все бюджеты
+     * @param filter фильтр для выборки бюджетов
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAll(BudgetFilter filter) {
+        return repo.getAll(filter);
+    }
+    
+    /**
+     * Получить все бюджеты (включая удаленные)
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAll() {
+        return repo.getAll();
+    }
+
+    /**
+     * Получить бюджет по ID категории
+     * @param category_id ID категории
+     * @return LiveData с бюджетом
+     */
+    public LiveData<Budget> getByCategory(int category_id) {
+        return repo.getByCategory(category_id);
+    }
+
+    /**
+     * Восстановить удаленный бюджет (soft delete)
+     * @param deletedBudget удаленный бюджет
+     */
+    public void restore(Budget deletedBudget) {
+        executorService.execute(() -> {
+            try {
+                restoreBudgetInTransaction(deletedBudget);
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при восстановлении бюджета: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * Транзакция для восстановления бюджета
+     * @param deletedBudget удаленный бюджет
+     */
+    @Transaction
+    private void restoreBudgetInTransaction(Budget deletedBudget) {
+        if (deletedBudget != null) {
+            Log.d(TAG, "🔄 Запрос на восстановление бюджета для категории " + deletedBudget.getCategoryId());
+            deletedBudget.setPosition(repo.getMaxPosition() + 1);
             deletedBudget.setDeleteTime(null);
             deletedBudget.setDeletedBy(null);
             deletedBudget.setUpdateTime(LocalDateTime.now());
             deletedBudget.setUpdatedBy(user);
-            
-            // Обновляем бюджет в базе
-            budgetRepository.updateBudget(deletedBudget, user);
+            repo.update(deletedBudget);
+            Log.d(TAG, "✅ Бюджет для категории " + deletedBudget.getCategoryId() + " успешно восстановлен");
+        } else {
+            Log.e(TAG, "❌ Бюджет не найден для восстановления");
+        }
+    }
+
+    /**
+     * Удалить бюджет (soft delete)
+     * @param budget бюджет
+     */
+    private void softDelete(Budget budget) {
+        executorService.execute(() -> {
+            try {
+                softDeleteBudgetInTransaction(budget);
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при soft delete бюджета: " + e.getMessage(), e);
+            }
         });
     }
     
-    // Изменить позицию бюджета (сложная логика)
-    public void changePosition(Budget budget, int newPosition) {
+    /**
+     * Транзакция для удаления бюджета (soft delete)
+     * @param budget бюджет
+     */
+    @Transaction
+    private void softDeleteBudgetInTransaction(Budget budget) {
+        if (budget != null) {
+            Log.d(TAG, "🔄 Запрос на softDelete бюджета для категории " + budget.getCategoryId());
+            int deletedPosition = budget.getPosition();
+            budget.setPosition(0);
+            budget.setDeleteTime(LocalDateTime.now());
+            budget.setDeletedBy(user);
+            repo.update(budget);
+            // Пересчитываем позиции после soft delete
+            repo.shiftPositionsDown(deletedPosition);
+            Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно soft deleted");
+        } else {
+            Log.e(TAG, "❌ Бюджет не найден для soft delete");
+        }
+    }
+
+    /**
+     * Обновить бюджет
+     * @param budget бюджет
+     */
+    public void update(Budget budget) {
         executorService.execute(() -> {
-            int oldPosition = budget.getPosition();
-            
-            // Если позиция не изменилась, ничего не делаем
-            if (oldPosition == newPosition) {
-                return;
-            }
-            
-            // Получаем все активные бюджеты для переупорядочивания
-            List<Budget> allBudgets = budgetRepository.getAllActiveBudgets().getValue();
-            if (allBudgets == null) return;
-            
-            // Проверяем, что новая позиция валидна
-            int maxPosition = allBudgets.size();
-            if (newPosition < 1 || newPosition > maxPosition) {
-                throw new IllegalArgumentException("Позиция вне диапазона: " + maxPosition);
-            }
-            
-            // Переупорядочиваем позиции
-            if (oldPosition < newPosition) {
-                // Двигаем бюджет вниз: сдвигаем бюджеты между старой и новой позицией вверх
-                for (Budget b : allBudgets) {
-                    if (b.getId() != budget.getId() && 
-                        b.getPosition() > oldPosition && 
-                        b.getPosition() <= newPosition) {
-                        b.setPosition(b.getPosition() - 1);
-                        budgetRepository.updateBudget(b, user);
-                    }
+            if (budget != null) {
+                try {
+                    Log.d(TAG, "🔄 Запрос на обновление бюджета для категории " + budget.getCategoryId());
+                    budget.setUpdateTime(LocalDateTime.now());
+                    budget.setUpdatedBy(user);
+                    repo.update(budget);
+                    Log.d(TAG, "✅ Запрос на обновление бюджета для категории " + budget.getCategoryId() + " успешно отправлен");
+                } catch (Exception e) {
+                    Log.e(TAG, "❌ Ошибка при обновлении бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
                 }
             } else {
-                // Двигаем бюджет вверх: сдвигаем бюджеты между новой и старой позицией вниз
-                for (Budget b : allBudgets) {
-                    if (b.getId() != budget.getId() && 
-                        b.getPosition() >= newPosition && 
-                        b.getPosition() < oldPosition) {
-                        b.setPosition(b.getPosition() + 1);
-                        budgetRepository.updateBudget(b, user);
-                    }
-                }
+                Log.e(TAG, "❌ Ошибка при обновлении бюджета для категории " + budget.getCategoryId() + ": бюджет не найден");
             }
-            
-            // Устанавливаем новую позицию для текущего бюджета
-            budget.setPosition(newPosition);
-            budgetRepository.updateBudget(budget, user);
         });
     }
-    
-    // Получить бюджет по ID категории
-    public LiveData<Budget> getBudgetByCategoryId(int categoryId) {
-        return budgetRepository.getBudgetByCategoryId(categoryId);
+
+    /**
+     * Получить количество бюджетов
+     * @param filter фильтр для выборки бюджетов
+     * @return количество бюджетов
+     */
+    public int getCount(BudgetFilter filter) {
+        return repo.getCount(filter);
     }
     
-    // Получить или создать бюджет по категории
-    public LiveData<Budget> getOrCreateBudgetByCategory(int categoryId, int amount, int currencyId) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Поиск по ID категории
-            Budget existingBudget = budgetRepository.getBudgetByCategoryId(categoryId).getValue();
-            if (existingBudget != null) {
-                liveData.postValue(existingBudget);
-                return;
-            }
-            
-            // Если не найден - создаем новый
-            Budget newBudget = new Budget();
-            newBudget.setAmount(amount);
-            newBudget.setCurrencyId(currencyId);
-            newBudget.setCategoryId(categoryId);
-            newBudget.setPosition(1); // TODO: Получить следующую позицию
-            
-            budgetRepository.insertBudget(newBudget, user);
-            liveData.postValue(newBudget);
-        });
-        return liveData;
+    /**
+     * Получить общее количество бюджетов (включая удаленные)
+     * @return общее количество бюджетов
+     */
+    public int getCount() {
+        return repo.getCount();
     }
     
-    // Получить или создать бюджет
-    public LiveData<Budget> getOrCreateBudget(int amount, int currencyId, Integer categoryId) {
-        MutableLiveData<Budget> liveData = new MutableLiveData<>();
-        executorService.execute(() -> {
-            // Поиск по параметрам
-            List<Budget> budgets = budgetRepository.getAllActiveBudgets().getValue();
-            if (budgets != null) {
-                for (Budget budget : budgets) {
-                    if (budget.getAmount() == amount && 
-                        budget.getCurrencyId() == currencyId && 
-                        budget.getCategoryId() == categoryId) {
-                        liveData.postValue(budget);
-                        return;
-                    }
-                }
-            }
-            
-            // Если не найден - создаем новый
-            Budget newBudget = new Budget();
-            newBudget.setAmount(amount);
-            newBudget.setCurrencyId(currencyId);
-            newBudget.setCategoryId(categoryId);
-            newBudget.setPosition(1); // TODO: Получить следующую позицию
-            
-            budgetRepository.insertBudget(newBudget, user);
-            liveData.postValue(newBudget);
-        });
-        return liveData;
-    }
-    
-    // Получить количество активных бюджетов
-    public LiveData<Integer> getActiveBudgetsCount() {
-        return budgetRepository.getActiveBudgetsCount();
-    }
-    
-    // Валидация бюджета
-    public boolean validateBudget(Budget budget) {
-        if (budget.getCurrencyId() <= 0) {
-            return false;
-        }
-        if (budget.getAmount() <= 0) {
-            return false;
-        }
-        return true;
-    }
-    
-    // Проверить, активен ли бюджет
-    public boolean isBudgetActive(Budget budget) {
-        if (budget == null || budget.isDeleted()) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    // Получить прогресс бюджета
-    public double getBudgetProgress(Budget budget, int spentAmount) {
-        if (budget == null || budget.getAmount() <= 0) {
-            return 0.0;
-        }
-        return Math.min((double)spentAmount / budget.getAmount(), 1.0);
+    /**
+     * Закрыть ExecutorService
+     */
+    public void shutdown() {
+        executorService.shutdown();
     }
 } 
