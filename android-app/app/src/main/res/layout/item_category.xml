@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/categories_item_background"
+    android:layout_margin="4dp">
+
+    <!-- Основной контент -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/category_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/categories_item_text"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/category_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Название"
+            android:textSize="18sp"
+            android:textColor="@color/categories_item_text" />
+
+        <TextView
+            android:id="@+id/category_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID: 1"
+            android:textSize="12sp"
+            android:textColor="@color/categories_item_id_text" />
+
+    </LinearLayout>
+
+    <!-- Чекбокс поверх контента -->
+    <CheckBox
+        android:id="@+id/category_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="16dp"
+        android:visibility="gone" />
+
+</FrameLayout>

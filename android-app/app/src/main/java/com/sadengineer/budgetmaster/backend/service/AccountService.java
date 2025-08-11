@@ -5,12 +5,15 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.room.Transaction;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
+import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,66 +27,52 @@ public class AccountService {
     private final AccountRepository repo;
     private final ExecutorService executorService;
     private final String user;
+    private final ServiceConstants constants;
     
     public AccountService(Context context, String user) {
         this.repo = new AccountRepository(context);
         this.executorService = Executors.newFixedThreadPool(4);
         this.user = user;
+        this.constants = new ServiceConstants();
     }
 
     /**
-     * Изменить позицию счета (сложная логика)
+     * Изменить позицию счета
      * @param account счет
      * @param newPosition новая позиция
      */
     public void changePosition(Account account, int newPosition) {
         executorService.execute(() -> {
-            int oldPosition = account.getPosition();
-            
-            // Если позиция не изменилась, ничего не делаем
-            if (oldPosition == newPosition) {
-                return;
-            }
-            
-            // Получаем все счета для переупорядочивания
-            List<Account> allAccounts = repo.getAll().getValue();
-            if (allAccounts == null) {
-                throw new RuntimeException("Не удалось получить список счетов");
-            }
-            
-            // Проверяем, что новая позиция валидна
-            int maxPosition = allAccounts.size();
-            if (newPosition < 1 || newPosition > maxPosition) {
-                throw new IllegalArgumentException("Позиция вне диапазона: " + maxPosition);
-            }
-            
-            // Переупорядочиваем позиции
-            if (oldPosition < newPosition) {
-                // Двигаем счет вниз: сдвигаем счета между старой и новой позицией вверх
-                for (Account a : allAccounts) {
-                    if (a.getId() != account.getId() && 
-                        a.getPosition() > oldPosition && 
-                        a.getPosition() <= newPosition) {
-                        a.setPosition(a.getPosition() - 1);
-                        repo.update(a);
-                    }
-                }
-            } else {
-                // Двигаем счет вверх: сдвигаем счета между новой и старой позицией вниз
-                for (Account a : allAccounts) {
-                    if (a.getId() != account.getId() && 
-                        a.getPosition() >= newPosition && 
-                        a.getPosition() < oldPosition) {
-                        a.setPosition(a.getPosition() + 1);
-                        repo.update(a);
-                    }
-                }
-            }
-            
-            // Устанавливаем новую позицию для текущего счета
-            account.setPosition(newPosition);
-            repo.update(account);
+            changePositionInTransaction(account, newPosition);
         });
+    }
+    
+    /**
+     * Транзакция для изменения позиции счета
+     * @param account счет
+     * @param newPosition новая позиция
+     */
+    @Transaction
+    private void changePositionInTransaction(Account account, int newPosition) {
+        int oldPosition = account.getPosition();
+        
+        // Если позиция не изменилась, ничего не делаем
+        if (oldPosition == newPosition) {
+            return;
+        }
+        
+        // Используем методы сдвига позиций из Repository
+        if (oldPosition < newPosition) {
+            repo.shiftPositionsDown(oldPosition);
+            repo.shiftPositionsUp(newPosition + 1);
+        } else {
+            repo.shiftPositionsUp(newPosition);
+            repo.shiftPositionsDown(oldPosition);
+        }
+        
+        // Устанавливаем новую позицию для текущего счета
+        account.setPosition(newPosition);
+        repo.update(account);
     }
     
     /**
@@ -113,28 +102,90 @@ public class AccountService {
     /**
      * Создать новый счет
      * @param title название счета
+     * @param amount сумма
+     * @param type тип счета
+     * @param currencyId ID валюты
+     * @param closed признак закрытости счета (0 - открыт, 1 - закрыт)
+     */
+    public void create(String title, Integer currencyId, Integer amount, Integer type, Integer closed) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Название счета не может быть пустым");
+        }
+        executorService.execute(() -> {
+            try {
+                // Создаем переменные ВНУТРИ lambda
+                int finalCurrencyId = currencyId;
+                int finalAmount = amount;
+                int finalType = type;
+                int finalClosed = closed;
+
+                // Проверяем, если ID валюты не передан, устанавливаем значение по умолчанию
+                if (currencyId == null || currencyId <= 0) {
+                    Log.d(TAG, "Для счета " + title + " не передано значение ID валюты, устанавливаем значение по умолчанию");
+                    finalCurrencyId = constants.DEFAULT_CURRENCY_ID;
+                }
+
+                // Проверяем, если сумма не передана, устанавливаем значение по умолчанию
+                if (amount == null || amount <= 0) {
+                    Log.d(TAG, "Для счета " + title + " не передано значение суммы, устанавливаем значение по умолчанию");
+                    finalAmount = constants.DEFAULT_ACCOUNT_BALANCE;
+                }
+
+                // Проверяем, если тип счета не передан, устанавливаем значение по умолчанию
+                if (type == null || type <= 0) {
+                    Log.d(TAG, "Для счета " + title + " не передано значение типа счета, устанавливаем значение по умолчанию");
+                    finalType = constants.DEFAULT_ACCOUNT_TYPE;
+                }
+
+                // Проверяем, если признак закрытости счета не передан, устанавливаем значение по умолчанию
+                if (closed == null) {
+                    Log.d(TAG, "Для счета " + title + " не передано значение признака закрытости счета, устанавливаем значение по умолчанию");
+                    finalClosed = constants.DEFAULT_ACCOUNT_STATUS_OPEN;
+                }               
+                
+                createAccountInTransaction(title, finalAmount, finalCurrencyId, finalType, finalClosed);
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Ошибка при создании счета: " + e.getMessage(), e);
+            }
+        });
+    }   
+
+    /**
+     * Транзакция для создания нового счета
+     * @param title название счета
+     * @param amount сумма
+     * @param currencyId ID валюты
+     * @param type тип счета
+     * @param closed признак закрытости счета (0 - открыт, 1 - закрыт)
+     */
+    @Transaction
+    private void createAccountInTransaction(String title, int amount, int currencyId, int type, int closed) {
+        Log.d(TAG, "🔄 Запрос на создание счета: " + title);
+        Account account = new Account();
+        account.setTitle(title);
+        account.setAmount(amount);
+        account.setCurrencyId(currencyId);
+        account.setType(type);
+        account.setClosed(closed);
+        account.setPosition(repo.getMaxPosition() + 1);
+        account.setCreateTime(LocalDateTime.now());
+        account.setCreatedBy(user);
+        repo.insert(account);
+        Log.d(TAG, "✅ Счет " + title + " успешно создан");
+    }
+
+    /**
+     * Создать новый счет со значениями по умолчанию
+     * @param title название счета
      */
     public void create(String title) {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Название счета не может быть пустым");
         }
-        
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на создание счета: " + title);
-                
                 String trimmedTitle = title.trim();
-                Account account = new Account();
-                account.setTitle(trimmedTitle);
-                account.setPosition(repo.getMaxPosition() + 1);
-                account.setCreateTime(LocalDateTime.now());
-                account.setCreatedBy(user);
-                
-                // Вставляем счет в базу данных
-                repo.insert(account);
-                
-                Log.d(TAG, "✅ Запрос на создание счета успешно отправлен: " + account.getTitle());
-                
+                create(trimmedTitle, null, null, null, null);                
             } catch (Exception e) {
                 Log.e(TAG, "❌ Ошибка при создании счета '" + title + "': " + e.getMessage(), e);
             }
@@ -142,64 +193,59 @@ public class AccountService {
     }
 
     /**
-     * Создать новый счет
-     * @param title название счета
-     * @param currencyId ID валюты
-     * @param amount сумма
-     * @param type тип счета
-     */
-    public void create(String title, int currencyId, int amount, int type) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Название счета не может быть пустым");
-        }
-        
-        executorService.execute(() -> {
-            try {
-                Log.d(TAG, "🔄 Запрос на создание счета: " + title);
-                
-                String trimmedTitle = title.trim();
-                Account account = new Account();
-                account.setTitle(trimmedTitle);
-                account.setCurrencyId(currencyId);
-                account.setAmount(amount);
-                account.setType(type);
-                account.setPosition(repo.getMaxPosition() + 1);
-                account.setCreateTime(LocalDateTime.now());
-                account.setCreatedBy(user); 
-                
-                // Вставляем счет в базу данных
-                repo.insert(account);
-                
-                Log.d(TAG, "✅ Запрос на создание счета успешно отправлен: " + account.getTitle());
-                
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при создании счета '" + title + "': " + e.getMessage(), e);
-            }
-        });
-    }
-
-     /**
      * Удалить счет (полное удаление - удаление строки из БД)
      * @param account счет
      */
-    public void delete(Account account) {
+    private void delete(Account account) {
+        if (account == null) {
+            Log.e(TAG, "❌ Счет не найден для удаления. Удаление было отменено");
+            return;
+        }
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на удаление счета: " + account.getTitle());
-
-                if (account != null) {
-                    repo.delete(account);
-                }
-
-                Log.d(TAG, "✅ Запрос на удаление счета успешно отправлен: " + account.getTitle());
+                deleteAccountInTransaction(account);
             } catch (Exception e) {
                 Log.e(TAG, "❌ Ошибка при удалении счета '" + account.getTitle() + "': " + e.getMessage(), e);
             }
         });
+    }     
+    
+    /**
+     * Транзакция для удаления валюты
+     * @param currency валюта
+     */
+    @Transaction
+    private void deleteAccountInTransaction(Account account) {
+        Log.d(TAG, "🔄 Запрос на удаление счета: " + account.getTitle());
+        int deletedPosition = account.getPosition();
+        repo.delete(account);
+        Log.d(TAG, "✅ Счет " + account.getTitle() + " успешно удален");
+    }
+
+    /**
+     * Удалить счет (полное удаление - удаление строки из БД)
+     * @param softDelete true - soft delete, false - полное удаление
+     * @param account счет
+     */
+    public void delete(boolean softDelete, Account account) {
+        if (softDelete) {
+            softDelete(account);
+        } else {
+            delete(account);
+        }
     }
     
     /**
      * Получить все счета
+     * @param filter фильтр для выборки счетов
+     * @return LiveData со списком всех счетов
+     */
+    public LiveData<List<Account>> getAll(EntityFilter filter) {
+        return repo.getAll(filter);
+    }
+    
+    /**
+     * Получить все счета (включая удаленные)
      * @return LiveData со списком всех счетов
      */
     public LiveData<List<Account>> getAll() {
@@ -222,46 +268,66 @@ public class AccountService {
     public void restore(Account deletedAccount) {
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на восстановление счета: " + deletedAccount.getTitle());
-
-                if (deletedAccount != null) {
-                    int position = deletedAccount.getPosition();
-                    deletedAccount.setPosition(position);
-                    deletedAccount.setDeleteTime(null);
-                    deletedAccount.setDeletedBy(null);
-                    deletedAccount.setUpdateTime(LocalDateTime.now());
-                    deletedAccount.setUpdatedBy(user);
-                    repo.update(deletedAccount);
-                }
-
-                Log.d(TAG, "✅ Запрос на восстановление счета успешно отправлен: " + deletedAccount.getTitle());
+                restoreAccountInTransaction(deletedAccount);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при восстановлении счета '" + deletedAccount.getTitle() + "': " + e.getMessage(), e);
+                Log.e(TAG, "❌ Ошибка при восстановлении счета: " + e.getMessage(), e);
             }
         });
+    }
+    
+    /**
+     * Транзакция для восстановления счета
+     * @param deletedAccount удаленный счет
+     */
+    @Transaction
+    private void restoreAccountInTransaction(Account deletedAccount) {
+        if (deletedAccount != null) {
+            Log.d(TAG, "🔄 Запрос на восстановление счета для категории " + deletedAccount.getTitle());
+            deletedAccount.setPosition(repo.getMaxPosition() + 1);
+            deletedAccount.setDeleteTime(null);
+            deletedAccount.setDeletedBy(null);
+            deletedAccount.setUpdateTime(LocalDateTime.now());
+            deletedAccount.setUpdatedBy(user);
+            repo.update(deletedAccount);
+            Log.d(TAG, "✅ Счет " + deletedAccount.getTitle() + " успешно восстановлен");
+        } else {
+            Log.e(TAG, "❌ Счет не найден для восстановления");
+        }
     }
 
     /**
      * Удалить счет (soft delete)
      * @param account счет
      */
-    public void softDelete(Account account) {
+    private void softDelete(Account account) {
+        if (account == null) {
+            Log.e(TAG, "❌ Счет не найден для soft delete. Удаление было отменено");
+            return;
+        }   
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на softDelete счета: " + account.getTitle());
-                    
-                if (account != null) {
-                    account.setPosition(0);
-                    account.setDeleteTime(LocalDateTime.now());
-                    account.setDeletedBy(user);
-                    repo.update(account);
-                }
-
-                Log.d(TAG, "✅ Запрос на softDelete счета успешно отправлен: " + account.getTitle());
+                softDeleteAccountInTransaction(account);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при softDelete счета '" + account.getTitle() + "': " + e.getMessage(), e);
+                Log.e(TAG, "❌ Ошибка при soft delete счета: " + e.getMessage(), e);
             }
         });
+    }
+
+    /**
+     * Транзакция для удаления счета (soft delete)
+     * @param account счет
+     */
+    @Transaction
+    private void softDeleteAccountInTransaction(Account account) {
+        Log.d(TAG, "🔄 Запрос на softDelete счета для категории " + account.getTitle());
+        int deletedPosition = account.getPosition();
+        account.setPosition(0);
+        account.setDeleteTime(LocalDateTime.now());
+        account.setDeletedBy(user);
+        repo.update(account);
+        // Пересчитываем позиции после soft delete
+        repo.shiftPositionsDown(deletedPosition);
+        Log.d(TAG, "✅ Счет " + account.getTitle() + " успешно soft deleted");
     }
 
     /**
@@ -269,20 +335,45 @@ public class AccountService {
      * @param account счет
      */
     public void update(Account account) {
+        if (account == null) {
+            Log.e(TAG, "❌ Счет не найден для обновления. Обновление было отменено");
+            return;
+        }
+
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на обновление счета: " + account.getTitle());
-
-                if (account != null) {
-                    account.setUpdateTime(LocalDateTime.now());
-                    account.setUpdatedBy(user);
-                    repo.update(account);
-                }
-
-                Log.d(TAG, "✅ Запрос на обновление счета успешно отправлен: " + account.getTitle());
+                Log.d(TAG, "🔄 Запрос на обновление счета для категории " + account.getTitle());
+                account.setUpdateTime(LocalDateTime.now());
+                account.setUpdatedBy(user);
+                repo.update(account);
+                Log.d(TAG, "✅ Запрос на обновление счета для категории " + account.getTitle() + " успешно отправлен");
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при обновлении счета '" + account.getTitle() + "': " + e.getMessage(), e);
+                Log.e(TAG, "❌ Ошибка при обновлении счета для категории " + account.getTitle() + ": " + e.getMessage(), e);
             }
         });
+    }
+    
+    /**
+     * Получить количество счетов
+     * @param filter фильтр для выборки счетов
+     * @return количество счетов
+     */
+    public int getCount(EntityFilter filter) {
+        return repo.getCount(filter);
+    }
+    
+    /**
+     * Получить общее количество счетов (включая удаленные)
+     * @return общее количество счетов
+     */
+    public int getCount() {
+        return repo.getCount();
+    }
+    
+    /**
+     * Закрыть ExecutorService
+     */
+    public void shutdown() {
+        executorService.shutdown();
     }
 } 

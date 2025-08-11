@@ -7,7 +7,6 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-
 import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Currency;
@@ -25,6 +24,13 @@ public interface CurrencyDao {
      */
     @Query("SELECT COUNT(*) FROM currencies WHERE deleteTime IS NULL")
     int countActive();
+
+    /**
+     * Количество удаленных валют
+     * @return количество удаленных валют
+     */
+    @Query("SELECT COUNT(*) FROM currencies WHERE deleteTime IS NOT NULL")
+    int countDeleted();
 
     /**
      * Общее количество валют (включая удаленные)
@@ -93,10 +99,10 @@ public interface CurrencyDao {
 
     /**
      * Получает максимальную позицию среди валют
-     * @return максимальная позиция или null, если валют нет
+     * @return максимальная позиция или 0, если валют нет
      */
-    @Query("SELECT MAX(position) FROM currencies")
-    Integer getMaxPosition();
+    @Query("SELECT COALESCE(MAX(position), 0) FROM currencies")
+    int getMaxPosition();
 
     /**
      * Вставляет новую валюту в базу данных
@@ -114,6 +120,20 @@ public interface CurrencyDao {
     @Query("SELECT * FROM currencies WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
     LiveData<List<Currency>> searchByTitle(String searchQuery);
     
+    /**
+     * Сдвигает позиции валют вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE currencies SET position = position - 1 WHERE position > :fromPosition")
+    void shiftPositionsDown(int fromPosition);
+
+    /**
+     * Сдвигает позиции валют вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE currencies SET position = position + 1 WHERE position >= :fromPosition")
+    void shiftPositionsUp(int fromPosition);
+
     /**
      * Обновляет существующую валюту в базе данных
      * @param currency валюта для обновления

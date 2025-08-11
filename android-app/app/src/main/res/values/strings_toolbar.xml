@@ -26,11 +26,14 @@
     <string name="toolbar_title_add_expense">Добавить расход</string>
     <string name="toolbar_title_add_account">Добавить счет</string>
     <string name="toolbar_title_add_category">Добавить категорию</string>
+    <string name="toolbar_title_category_edit">Редактировать категорию</string>
+    <string name="toolbar_title_category_add">Добавить категорию</string>
 
     <!-- Описания иконок -->
     <string name="icon_back">Кнопка назад</string>
     <string name="icon_menu">Кнопка меню</string>
     <string name="icon_save">Кнопка сохранить</string>
+    <string name="icon_position_change">Изменить позицию</string>
     <string name="icon_income_toolbar">Кнопка дохода</string>
     <string name="icon_expense_toolbar">Кнопка расхода</string>
     

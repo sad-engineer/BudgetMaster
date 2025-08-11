@@ -81,8 +81,8 @@ public class DatabaseInitializer {
         Log.d(TAG, "🔄 initializeDefaultCategories: Начинаем инициализацию категорий");
         
         // Проверяем, есть ли уже категории
-        List<Category> existingCategories = database.categoryDao().getAllActiveCategories();
-        if (existingCategories != null && !existingCategories.isEmpty()) {
+        int categoryCount = database.categoryDao().count();
+        if (categoryCount > 0) {
             Log.d(TAG, "🔄 initializeDefaultCategories: Категории уже существуют, пропускаем");
             return;
         }
@@ -95,10 +95,12 @@ public class DatabaseInitializer {
         database.categoryDao().insert(expenseParent);
         
         // Получаем ID родительских категорий
-        Category incomeParentCategory = database.categoryDao().getCategoryByTitle("Доходы");
-        Category expenseParentCategory = database.categoryDao().getCategoryByTitle("Расходы");
-        int incomeParentId = incomeParentCategory.getId();
-        int expenseParentId = expenseParentCategory.getId();
+        // Category incomeParentCategory = database.categoryDao().getByTitle("Доходы").getValue();
+        // Category expenseParentCategory = database.categoryDao().getByTitle("Расходы").getValue();
+        // int incomeParentId = incomeParentCategory.getId();
+        // int expenseParentId = expenseParentCategory.getId();
+        int incomeParentId = 1;
+        int expenseParentId = 2;
         
         // Создаем дочерние категории доходов
         Category[] incomeCategories = {
@@ -119,10 +121,12 @@ public class DatabaseInitializer {
         database.categoryDao().insert(additional);
         
         // Получаем ID промежуточных категорий
-        Category necessaryCategory = database.categoryDao().getCategoryByTitle("Необходимые");
-        Category additionalCategory = database.categoryDao().getCategoryByTitle("Дополнительные");
-        int necessaryId = necessaryCategory.getId();
-        int additionalId = additionalCategory.getId();
+        // Category necessaryCategory = database.categoryDao().getByTitle("Необходимые").getValue();
+        // Category additionalCategory = database.categoryDao().getByTitle("Дополнительные").getValue();
+        // int necessaryId = necessaryCategory.getId();
+        // int additionalId = additionalCategory.getId();
+        int necessaryId = 6;
+        int additionalId = 7;
         
         // Создаем дочерние категории необходимых расходов
         Category[] necessaryCategories = {

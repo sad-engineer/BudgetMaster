@@ -44,24 +44,12 @@ public class ModelConstants {
     // Значения по умолчанию для счетов
     public static final int DEFAULT_ACCOUNT_TYPE = ACCOUNT_TYPE_CURRENT; // Расчетный счет по умолчанию
     public static final int DEFAULT_ACCOUNT_BALANCE = DEFAULT_AMOUNT; // Баланс счета по умолчанию
-    public static final int DEFAULT_ACCOUNT_CLOSED = ACCOUNT_STATUS_OPEN; // Счет открыт по умолчанию
+    public static final int DEFAULT_ACCOUNT_STATUS_OPEN = ACCOUNT_STATUS_OPEN; // Счет открыт по умолчанию
     
     // Значения по умолчанию для кредитных карт
     public static final Integer DEFAULT_CREDIT_CARD_LIMIT = null; // Лимит кредитной карты по умолчанию
     public static final Integer DEFAULT_CREDIT_CARD_CATEGORY_ID = null; // Категория кредитной карты по умолчанию
     public static final Integer DEFAULT_CREDIT_CARD_COMMISSION_CATEGORY_ID = null; // Категория комиссии кредитной карты по умолчанию
-    
-    // ========================================
-    // КОНСТАНТЫ ДЛЯ КАТЕГОРИЙ (CATEGORY)
-    // ========================================
-    
-    // Типы категорий
-    public static final int CATEGORY_TYPE_PARENT = 0;   // Родительская категория
-    public static final int CATEGORY_TYPE_CHILD = 1;    // Дочерняя категория
-    
-    // Значения по умолчанию для категорий
-    public static final int DEFAULT_CATEGORY_TYPE = 1; // Дочерняя категория по умолчанию
-    public static final Integer DEFAULT_PARENT_CATEGORY_ID = null; // Родительская категория по умолчанию
     
     // ========================================
     // КОНСТАНТЫ ДЛЯ ОПЕРАЦИЙ (OPERATION)
@@ -82,6 +70,19 @@ public class ModelConstants {
     // Флаги для операций
     public static final boolean IS_TRANSFER = true; // Перевод
     public static final boolean IS_NOT_TRANSFER = false; // Не перевод
+
+    // ========================================
+    // КОНСТАНТЫ ДЛЯ КАТЕГОРИЙ (CATEGORY)
+    // ========================================
+    
+    // Типы категорий
+    public static final int CATEGORY_TYPE_PARENT = 0;   // Родительская категория
+    public static final int CATEGORY_TYPE_CHILD = 1;    // Дочерняя категория
+    
+    // Значения по умолчанию для категорий
+    public static final int DEFAULT_CATEGORY_OPERATION_TYPE = OPERATION_TYPE_EXPENSE; // Расход по умолчанию
+    public static final int DEFAULT_CATEGORY_TYPE = CATEGORY_TYPE_CHILD; // Дочерняя категория по умолчанию
+    public static final int DEFAULT_PARENT_CATEGORY_ID = ROOT_CATEGORY_ID; // ID родителя по умолчанию (корневая категория)
     
     // ========================================
     // КОНСТАНТЫ ДЛЯ БЮДЖЕТОВ (BUDGET)

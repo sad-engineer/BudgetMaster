@@ -176,7 +176,7 @@ public class SavingsAccountsFragment extends Fragment {
             Log.d(TAG, "🗑️ Удаляем счет из базы данных: " + account.getTitle());
             
             AccountService accountService = new AccountService(requireContext(), "default_user");
-            accountService.delete(account);
+            accountService.delete(false, account);
             
             Log.d(TAG, "✅ Запрос на удаление счета отправлен: " + account.getTitle());
             

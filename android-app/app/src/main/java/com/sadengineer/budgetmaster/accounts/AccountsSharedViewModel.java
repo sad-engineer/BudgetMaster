@@ -73,7 +73,7 @@ public class AccountsSharedViewModel extends AndroidViewModel {
             int deletedCount = 0;
             for (Account account : accounts) {
                 try {
-                    accountService.softDelete(account);
+                    accountService.delete(true, account);
                     deletedCount++;
                 } catch (Exception ignored) {
                 }

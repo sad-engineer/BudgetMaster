@@ -1,0 +1,13 @@
+<resources>
+    <!-- Кнопки действий -->
+    <string name="icon_add_category">Добавить категорию</string>
+    <string name="icon_delete_category">Удалить категорию</string>
+    
+    <!-- Поля редактирования категории -->
+    <string name="category_name_label">Название категории</string>
+    <string name="category_name_hint">Введите название категории</string>
+    <string name="category_operation_type_label">Тип операции</string>
+    <string name="category_type_label">Тип категории</string>
+    <string name="category_parent_label">Родительская категория</string>
+    
+</resources>

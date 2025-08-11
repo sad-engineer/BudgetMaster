@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import com.sadengineer.budgetmaster.backend.dao.CurrencyDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,28 +28,29 @@ public class CurrencyRepository {
     }
     
     /**
+     * Получить все валюты
+     * @param filter фильтр для выборки валют
+     * @return LiveData со списком всех валют
+     */
+    public LiveData<List<Currency>> getAll(EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActive();
+            case DELETED:
+                return dao.getAllDeleted();
+            case ALL:
+            default:
+                return dao.getAll();
+        }
+    }
+    
+    /**
      * Получить все валюты (включая удаленные)
      * @return LiveData со списком всех валют
      */
     public LiveData<List<Currency>> getAll() {
         return dao.getAll();
-    }
-    
-    /**
-     * Получить все активные валюты
-     * @return LiveData со списком активных валют
-     */
-    public LiveData<List<Currency>> getAllActive() {
-        return dao.getAllActive();
-    }
-    
-    /**
-     * Получить все удаленные валюты
-     * @return LiveData со списком удаленных валют
-     */
-    public LiveData<List<Currency>> getAllDeleted() {
-        return dao.getAllDeleted();
-    }
+    }   
     
     /**
      * Получить валюту по ID (включая удаленные)
@@ -80,48 +82,11 @@ public class CurrencyRepository {
     /**
      * Вставить новую валюту
      * @param currency валюта для вставки
-     * @return LiveData с вставленной валютой. Если валюта не была вставлена, то будет выброшено исключение.
+     * @return LiveData с вставленной валютой
      */
     public LiveData<Currency> insert(Currency currency) {
-        try {
-            if (currency == null) {
-                throw new IllegalArgumentException("Валюта не может быть null");
-            }
-            
-            if (currency.getTitle() == null || currency.getTitle().trim().isEmpty()) {
-                throw new IllegalArgumentException("Название валюты не может быть пустым");
-            }
-            
-            // Проверяем, что база данных доступна
-            if (dao == null) {
-                throw new RuntimeException("DAO не инициализирован");
-            }
-            
-            // Проверяем, что валюта с таким названием уже не существует
-            Currency existingCurrency = getByTitle(currency.getTitle().trim()).getValue();
-            if (existingCurrency != null) {
-                throw new IllegalArgumentException("Валюта с названием '" + currency.getTitle().trim() + "' уже существует");
-            }
-            
-            long id = dao.insert(currency);
-            if (id == -1) {
-                // Если вставка не удалась, попробуем получить существующую валюту
-                Log.w(TAG, "Попытка вставить валюту с названием '" + currency.getTitle().trim() + "'");
-
-                Currency existing = getByTitle(currency.getTitle().trim()).getValue();
-                if (existing != null) {
-                    Log.w(TAG, "Валюта с названием '" + currency.getTitle().trim() + "' уже существует (ID: " + existing.getId() + ")");
-                    return getByTitle(currency.getTitle().trim());
-                } else {
-                    throw new RuntimeException("Не удалось вставить валюту в базу данных");
-                }
-            }
-            
-            return dao.getById((int)id);
-        } catch (Exception e) {
-            Log.e(TAG, "Ошибка при вставке валюты: " + e.getMessage(), e);
-            throw e;
-        }
+        long id = dao.insert(currency);
+        return dao.getById((int)id);
     }
     
     /**
@@ -152,25 +117,40 @@ public class CurrencyRepository {
      * @return максимальная позиция
      */
     public int getMaxPosition() {
-        Integer maxPos = dao.getMaxPosition();
-        return maxPos != null ? maxPos : 0;
-    }
-    
-    /**
-     * Получить количество активных валют
-     * @return количество активных валют
-     */
-    public int getActiveCount() {
-        return dao.countActive();
+        return dao.getMaxPosition();
     }
 
     /**
-     * Получить валюты по подстроке в названии
-     * @param searchQuery подстрока для поиска
-     * @return LiveData с списком валют
+     * Сдвинуть позиции валют вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
      */
-    public LiveData<List<Currency>> searchByTitle(String searchQuery) {
-        return dao.searchByTitle(searchQuery);
+    public void shiftPositionsUp(int fromPosition) {
+        dao.shiftPositionsUp(fromPosition);
+    }
+    
+    /**
+     * Сдвинуть позиции валют вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    public void shiftPositionsDown(int fromPosition) {
+        dao.shiftPositionsDown(fromPosition);
+    }
+    
+    /**
+     * Получить количество валют
+     * @param filter фильтр для выборки валют
+     * @return количество валют
+     */
+    public int getCount(EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.countActive();
+            case DELETED:
+                return dao.countDeleted();
+            case ALL:
+            default:
+                return dao.count();
+        }
     }
     
     /**
@@ -180,4 +160,13 @@ public class CurrencyRepository {
     public int getCount() {
         return dao.count();
     }
+
+    /**
+     * Получить валюты по подстроке в названии
+     * @param searchQuery подстрока для поиска
+     * @return LiveData с списком валют
+     */
+    public LiveData<List<Currency>> searchByTitle(String searchQuery) {
+        return dao.searchByTitle(searchQuery);
+    }  
 } 

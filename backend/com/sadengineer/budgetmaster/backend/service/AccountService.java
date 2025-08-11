@@ -306,7 +306,7 @@ public class AccountService {
      * @return счет
      */
     public Account get(String title, int amount, int type) {
-        return get(title, amount, type, ModelConstants.DEFAULT_CURRENCY_ID, ModelConstants.DEFAULT_ACCOUNT_CLOSED);
+        return get(title, amount, type, ModelConstants.DEFAULT_CURRENCY_ID, ModelConstants.DEFAULT_ACCOUNT_STATUS_OPEN);
     }
 
     /**
@@ -316,7 +316,7 @@ public class AccountService {
      * @return счет
      */
     public Account get(String title, int amount) {
-        return get(title, amount, ModelConstants.DEFAULT_ACCOUNT_TYPE, ModelConstants.DEFAULT_CURRENCY_ID, ModelConstants.DEFAULT_ACCOUNT_CLOSED);
+        return get(title, amount, ModelConstants.DEFAULT_ACCOUNT_TYPE, ModelConstants.DEFAULT_CURRENCY_ID, ModelConstants.DEFAULT_ACCOUNT_STATUS_OPEN);
     }
 
     /**

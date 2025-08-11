@@ -146,4 +146,22 @@
     <color name="authors_content_background">@color/dark_gray</color>
     <color name="authors_item_background">@color/dark_gray</color>
 
+    <!-- Цвета для экранов категорий -->
+    <color name="categories_toolbar_background">@color/black</color>
+    <color name="categories_toolbar_icons">@color/green</color>
+    <color name="categories_toolbar_texts">@color/white</color>
+    <color name="categories_content_background">@color/dark_gray</color>
+    <color name="categories_item_background">@color/white</color>
+    <color name="categories_item_text">@color/black</color>
+    <color name="categories_item_id_text">@color/gray</color>
+    
+    <!-- Цвета для экрана редактирования категории -->
+    <color name="categories_edit_toolbar_background">@color/black</color>
+    <color name="categories_edit_toolbar_icons">@color/green</color>
+    <color name="categories_edit_toolbar_texts">@color/white</color>
+    <color name="categories_edit_content_background">@color/dark_gray</color>
+    <color name="categories_edit_labels">@color/white</color>
+    <color name="categories_edit_input_text">@color/black</color>
+    <color name="categories_edit_input_hint">@color/gray</color>
+
 </resources>

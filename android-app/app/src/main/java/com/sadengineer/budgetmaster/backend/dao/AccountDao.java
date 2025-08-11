@@ -7,7 +7,6 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-
 import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
@@ -25,6 +24,13 @@ public interface AccountDao {
      */
     @Query("SELECT COUNT(*) FROM accounts WHERE deleteTime IS NULL")
     int countActive();
+
+    /**
+     * Количество удаленных счетов
+     * @return количество удаленных счетов
+     */
+    @Query("SELECT COUNT(*) FROM accounts WHERE deleteTime IS NOT NULL")
+    int countDeleted();
 
     /**
      * Общее количество счетов (включая удаленные)
@@ -84,6 +90,14 @@ public interface AccountDao {
     LiveData<List<Account>> getAllActiveByCurrency(int currencyId);
 
     /**
+     * Получает все удаленные счета по ID валюты
+     * @param currencyId ID валюты
+     * @return список счетов с указанным ID валюты
+     */
+    @Query("SELECT * FROM accounts WHERE currencyId = :currencyId AND deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Account>> getAllDeletedByCurrency(int currencyId);
+
+    /**
      * Получает все счета по типу (включая удаленные)
      * @param type тип счета
      * @return список счетов с указанным типом, отсортированных по позиции (счета с позицией 0 в конце)
@@ -98,6 +112,15 @@ public interface AccountDao {
      */
     @Query("SELECT * FROM accounts WHERE type = :type AND deleteTime IS NULL ORDER BY position ASC")
     LiveData<List<Account>> getAllActiveByType(String type);
+
+    /**
+     * Получает все удаленные счета по типу
+     * @param type тип счета
+     * @return список счетов с указанным типом
+     */
+    @Query("SELECT * FROM accounts WHERE type = :type AND deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Account>> getAllDeletedByType(String type);
+    
     /**
      * Получает счет по ID (включая удаленные)
      * @param id ID счета
@@ -124,10 +147,10 @@ public interface AccountDao {
 
     /**
      * Получает максимальную позицию среди счетов
-     * @return максимальная позиция или null, если счетов нет
+     * @return максимальная позиция или 0, если счетов нет
      */
-    @Query("SELECT MAX(position) FROM accounts")
-    Integer getMaxPosition();
+    @Query("SELECT COALESCE(MAX(position), 0) FROM accounts")
+    int getMaxPosition();
 
     /**
      * Получает общую сумму баланса по ID валюты (включая удаленные)
@@ -161,6 +184,20 @@ public interface AccountDao {
     @Query("SELECT * FROM accounts WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
     LiveData<List<Account>> searchByTitle(String searchQuery);
     
+    /**
+     * Сдвигает позиции счетов вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE accounts SET position = position - 1 WHERE position > :fromPosition")
+    void shiftPositionsDown(int fromPosition);
+
+    /**
+     * Сдвигает позиции счетов вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE accounts SET position = position + 1 WHERE position >= :fromPosition")
+    void shiftPositionsUp(int fromPosition);
+
     /**
      * Обновляет существующий счет в базе данных
      * @param account счет для обновления

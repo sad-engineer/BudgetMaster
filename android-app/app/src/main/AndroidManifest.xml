@@ -57,6 +57,9 @@
             android:name=".categories.ExpenseCategoriesActivity"
             android:exported="false" />
         <activity
+            android:name=".categories.CategoryEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".import_export.ImportDataActivity"
             android:exported="false" />
         <activity

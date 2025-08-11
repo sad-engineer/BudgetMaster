@@ -1,7 +1,6 @@
 
 package com.sadengineer.budgetmaster.backend.entity;
 
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
@@ -10,6 +9,7 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
                 @Index("parentId")
         })
 @TypeConverters(DateTimeConverter.class)
-public class Category {
+public class Category implements Serializable{
     
     @PrimaryKey(autoGenerate = true)
     private int id;

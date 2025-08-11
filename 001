@@ -30,6 +30,8 @@ cd C:\Users\Korenyk.A\Documents\Prodjects\android-sdk\platform-tools
 # Только ошибки
 ./adb logcat *:E
 
+
+
 # Сохранение логов в файл
 ./adb logcat > C:\logs.txt
 

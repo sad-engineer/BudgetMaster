@@ -78,6 +78,11 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundCheckbox;
         }
         
+        foundCheckbox = itemView.findViewById(R.id.category_checkbox);
+        if (foundCheckbox != null) {
+            return foundCheckbox;
+        }
+        
         return null;
     }
     
@@ -91,6 +96,11 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         
         foundText = itemView.findViewById(R.id.account_position);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.category_position);
         if (foundText != null) {
             return foundText;
         }
@@ -112,6 +122,11 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundText;
         }
         
+        foundText = itemView.findViewById(R.id.category_title);
+        if (foundText != null) {
+            return foundText;
+        }
+        
         return null;
     }
     
@@ -125,6 +140,11 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         
         foundText = itemView.findViewById(R.id.account_id);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.category_id);
         if (foundText != null) {
             return foundText;
         }

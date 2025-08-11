@@ -9,6 +9,8 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 
+import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 /**
@@ -30,7 +32,7 @@ import java.time.LocalDateTime;
                 @Index("currencyId")
         })
 @TypeConverters(DateTimeConverter.class)
-public class Budget {
+public class Budget implements Serializable{
     
     @PrimaryKey(autoGenerate = true)
     private int id;

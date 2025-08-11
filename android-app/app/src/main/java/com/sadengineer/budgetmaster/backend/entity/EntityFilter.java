@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.backend.entity;
 /**
  * Фильтр для работы с бюджетами
  */
-public enum BudgetFilter {
+public enum EntityFilter {
     /**
      * Только активные бюджеты (deleteTime IS NULL)
      */

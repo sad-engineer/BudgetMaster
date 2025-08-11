@@ -269,14 +269,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
                 }
 
                 // Если счет не существует, то создаем его
-                accountService.create(accountName, selectedCurrencyId, balance, accountType);
-                
-                // Устанавливаем статус закрытия для нового счета
-                Account newAccount = accountService.getByTitle(accountName).getValue();
-                if (newAccount != null) {
-                    newAccount.setClosed(isClosed);
-                    accountService.update(newAccount);
-                }
+                accountService.create(accountName, selectedCurrencyId, balance, accountType, isClosed);
                 
                 Log.d(TAG, "✅ Запрос на создание счета отправлен");
             }

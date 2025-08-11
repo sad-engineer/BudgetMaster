@@ -13,8 +13,13 @@ public class ServiceConstants {
     public static final int DEFAULT_ACCOUNT_BALANCE = ModelConstants.DEFAULT_ACCOUNT_BALANCE;  // Начальный баланс по умолчанию
     public static final int DEFAULT_ACCOUNT_TYPE = ModelConstants.DEFAULT_ACCOUNT_TYPE;        // Расчетный счет по умолчанию
     public static final int DEFAULT_CURRENCY_ID = ModelConstants.DEFAULT_CURRENCY_ID;          // ID валюты по умолчанию (рубли)
-    public static final int DEFAULT_ACCOUNT_CLOSED = ModelConstants.ACCOUNT_STATUS_OPEN;       // Счет не закрыт по умолчанию
+    public static final int DEFAULT_ACCOUNT_STATUS_OPEN = ModelConstants.ACCOUNT_STATUS_OPEN;       // Счет не закрыт по умолчанию
     
+    // Значения по умолчанию для категорий (ссылаемся на ModelConstants)
+    public static final int DEFAULT_CATEGORY_OPERATION_TYPE = ModelConstants.DEFAULT_CATEGORY_OPERATION_TYPE;  // Тип операции по умолчанию
+    public static final int DEFAULT_CATEGORY_TYPE = ModelConstants.DEFAULT_CATEGORY_TYPE;                      // Тип категории по умолчанию
+    public static final int DEFAULT_PARENT_CATEGORY_ID = ModelConstants.ROOT_CATEGORY_ID;          // ID родителя по умолчанию (корневая категория)
+
     // Сообщения об ошибках для сервисов
     public static final String ERROR_POSITION_OUT_OF_RANGE = "Новая позиция должна быть от 1 до ";
     public static final String ERROR_ENTITY_ALREADY_EXISTS = " уже существует";

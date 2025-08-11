@@ -7,6 +7,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Category;
 
@@ -17,75 +18,198 @@ import java.util.List;
  */
 @Dao
 public interface CategoryDao {
-    
-    @Query("SELECT * FROM categories WHERE deleteTime IS NULL ORDER BY title ASC")
-    List<Category> getAllActiveCategories();
-    
-    @Query("SELECT * FROM categories WHERE deleteTime IS NULL ORDER BY title ASC")
-    List<Category> getAllCategories();
-    
-    @Query("SELECT * FROM categories WHERE operationType = :operationType AND deleteTime IS NULL ORDER BY title ASC")
-    List<Category> getCategoriesByType(int operationType);
-    
-    @Query("SELECT * FROM categories WHERE parentId IS NULL AND deleteTime IS NULL ORDER BY title ASC")
-    List<Category> getRootCategories();
-    
-    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NULL ORDER BY title ASC")
-    List<Category> getSubCategories(int parentId);
-    
-    @Query("SELECT * FROM categories WHERE id = :id AND deleteTime IS NULL")
-    Category getCategoryById(int id);
-    
-
-    
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insertCategory(Category category);
-    
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insert(Category category);
-    
-    @Update
-    void updateCategory(Category category);
-    
-    @Delete
-    void deleteCategory(Category category);
-    
-    @Query("UPDATE categories SET deleteTime = :deleteTime, deletedBy = :deletedBy WHERE id = :id")
-    void softDeleteCategory(int id, String deleteTime, String deletedBy);
-    
+    /**
+     * Количество активных категорий
+     * @return количество активных категорий
+     */
     @Query("SELECT COUNT(*) FROM categories WHERE deleteTime IS NULL")
-    int getActiveCategoriesCount();
+    int countActive();
+
+    /**
+     * Количество удаленных категорий
+     * @return количество удаленных категорий
+     */
+    @Query("SELECT COUNT(*) FROM categories WHERE deleteTime IS NOT NULL")
+    int countDeleted();
+
+    /**
+     * Общее количество категорий (включая удаленные)
+     * @return общее количество категорий
+     */
+    @Query("SELECT COUNT(*) FROM categories")
+    int count();
+
+    /**
+     * Удаляет категорию из базы данных
+     * @param category категория для удаления
+     */
+    @Delete
+    void delete(Category category);
     
-    @Query("SELECT COUNT(*) FROM categories WHERE operationType = :operationType AND deleteTime IS NULL")
-    int getCategoriesCountByType(int operationType);
-    
-    @Query("SELECT * FROM categories WHERE deleteTime IS NOT NULL")
-    List<Category> getAllDeletedCategories();
-    
-    @Query("SELECT * FROM categories WHERE title = :name AND deleteTime IS NULL")
-    Category getCategoryByName(String name);
-    
-    @Query("SELECT * FROM categories WHERE title = :title AND deleteTime IS NULL")
-    Category getCategoryByTitle(String title);
-    
-    @Query("SELECT * FROM categories WHERE position = :position AND deleteTime IS NULL")
-    Category getCategoryByPosition(int position);
-    
-    @Query("SELECT MAX(position) FROM categories WHERE deleteTime IS NULL")
-    Integer getMaxPosition();
-    
-    @Query("UPDATE categories SET deleteTime = NULL, deletedBy = NULL, updateTime = :updateTime, updatedBy = :updatedBy WHERE id = :id")
-    void restoreCategory(int id, String updateTime, String updatedBy);
-    
-    @Query("UPDATE categories SET deleteTime = :deleteTime, deletedBy = :deletedBy WHERE title = :name")
-    void softDeleteCategoryByName(String name, String deleteTime, String deletedBy);
-    
-    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NULL ORDER BY position ASC")
-    List<Category> getCategoriesByParent(int parentId);
-    
-    @Query("SELECT * FROM categories WHERE deleteTime IS NULL ORDER BY position ASC")
-    List<Category> getCategoryHierarchy();
-    
+    /**
+     * Удаляет все категории из базы данных
+     */
     @Query("DELETE FROM categories")
     void deleteAll();
+    
+    /**
+     * Получает все категории, включая удаленные
+     * @return список категорий, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    LiveData<List<Category>> getAll();
+
+    /**
+     * Получает все активные категории
+     * @return список активных категорий, отсортированных по позиции
+     */
+    @Query("SELECT * FROM categories WHERE deleteTime IS NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllActive();
+
+    /**
+     * Получает все удаленные категории
+     * @return список удаленных категорий, отсортированных по позиции
+     */
+    @Query("SELECT * FROM categories WHERE deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllDeleted();
+
+    /**
+     * Получает все категории по типу операции (включая удаленные)
+     * @param operationType тип операции
+     * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE operationType = :operationType ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    LiveData<List<Category>> getAllByOperationType(int operationType);
+
+    /**
+     * Получает все активные категории по типу операции
+     * @param operationType тип операции
+     * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE operationType = :operationType AND deleteTime IS NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllActiveByOperationType(int operationType);
+
+    /**
+     * Получает все удаленные категории по типу операции
+     * @param operationType тип операции
+     * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE operationType = :operationType AND deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllDeletedByOperationType(int operationType);
+
+    /**
+     * Получает все категории по ID родителя (включая удаленные)
+     * @param parentId ID родителя
+     * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE parentId = :parentId ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    LiveData<List<Category>> getAllByParentId(int parentId);
+
+    /**
+     * Получает все активные категории по ID родителя
+     * @param parentId ID родителя
+     * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllActiveByParentId(int parentId);
+
+    /**
+     * Получает все удаленные категории по ID родителя
+     * @param parentId ID родителя
+     * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllDeletedByParentId(int parentId);
+
+    /**
+     * Получает все категории по типу (включая удаленные)
+     * @param type тип категории
+     * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE type = :type ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    LiveData<List<Category>> getAllByType(String type);
+
+    /**
+     * Получает все активные категории по типу
+     * @param type тип категории
+     * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE type = :type AND deleteTime IS NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllActiveByType(String type);
+
+    /**
+     * Получает все удаленные категории по типу
+     * @param type тип категории
+     * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories WHERE type = :type AND deleteTime IS NOT NULL ORDER BY position ASC")
+    LiveData<List<Category>> getAllDeletedByType(String type);
+
+    /**
+     * Получает категорию по ID (включая удаленные)
+     * @param id ID категории
+     * @return категория с указанным ID
+     */
+    @Query("SELECT * FROM categories WHERE id = :id")
+    LiveData<Category> getById(int id);
+        
+    /**
+     * Получает категорию по позиции (включая удаленные)
+     * @param position позиция категории
+     * @return категория с указанной позицией
+     */
+    @Query("SELECT * FROM categories WHERE position = :position")
+    LiveData<Category> getByPosition(int position);
+    
+    /**
+     * Получает категорию по названию (включая удаленные)
+     * @param title название категории
+     * @return категория с указанным названием
+     */
+    @Query("SELECT * FROM categories WHERE title = :title")
+    LiveData<Category> getByTitle(String title);
+
+    /**
+     * Получает максимальную позицию среди категорий
+     * @return максимальная позиция или null, если категорий нет
+     */
+    @Query("SELECT MAX(position) FROM categories")
+    Integer getMaxPosition();
+
+    /**
+     * Вставляет новый категорию в базу данных
+     * @param category категория для вставки
+     * @return ID вставленной категории или -1 при конфликте по title
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insert(Category category);
+    
+    /**
+     * Получает категории по подстроке в названии (включая удаленные)
+     * @param searchQuery подстрока для поиска
+     * @return список категорий, содержащих подстроку в названии
+     */
+    @Query("SELECT * FROM categories WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
+    LiveData<List<Category>> searchByTitle(String searchQuery);
+    
+    /**
+     * Сдвигает позиции счетов вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE categories SET position = position - 1 WHERE position > :fromPosition")
+    void shiftPositionsDown(int fromPosition);
+
+    /**
+     * Сдвигает позиции категорий вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    @Query("UPDATE categories SET position = position + 1 WHERE position >= :fromPosition")
+    void shiftPositionsUp(int fromPosition);
+
+    /**
+     * Обновляет существующую категорию в базе данных
+     * @param category категория для обновления
+     */
+    @Update
+    void update(Category category);  
 } 

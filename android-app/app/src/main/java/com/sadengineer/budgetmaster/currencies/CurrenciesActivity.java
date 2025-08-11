@@ -145,7 +145,7 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
         // Удаляем валюты из базы данных
         for (Currency currency : selectedCurrencies) {
             try {
-                currencyService.softDelete(currency);
+                currencyService.delete(true, currency);
                 Log.d(TAG, "✅ Удалена валюта: " + currency.getTitle());
             } catch (Exception e) {
                 Log.e(TAG, "❌ Ошибка удаления валюты " + currency.getTitle() + ": " + e.getMessage(), e);
@@ -203,11 +203,8 @@ public class CurrenciesActivity extends BaseNavigationActivity implements Curren
     private void deleteCurrency(Currency currency) {
         try {
             Log.d(TAG, "🗑️ Удаляем валюту из базы данных: " + currency.getTitle());
-            
-            currencyService.delete(currency);
-            
+            currencyService.delete(false, currency);
             Log.d(TAG, "✅ Запрос на удаление валюты отправлен: " + currency.getTitle());
-            
         } catch (Exception e) {
             Log.e(TAG, "❌ Ошибка удаления валюты " + currency.getTitle() + ": " + e.getMessage(), e);
         }

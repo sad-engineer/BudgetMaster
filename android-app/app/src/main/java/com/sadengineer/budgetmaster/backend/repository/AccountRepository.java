@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.util.List;
 
@@ -26,7 +27,24 @@ public class AccountRepository {
     }
 
     /**
-     * Получить все счета (включая удаленные)
+     * Получить все счета
+     * @param filter фильтр для выборки счетов
+     * @return LiveData со списком всех счетов
+     */
+    public LiveData<List<Account>> getAll(EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActive();
+            case DELETED:
+                return dao.getAllDeleted();
+            case ALL:
+            default:
+                return dao.getAll();
+        }
+    }
+    
+    /**
+     * Получить все счета
      * @return LiveData со списком всех счетов
      */
     public LiveData<List<Account>> getAll() {
@@ -34,21 +52,41 @@ public class AccountRepository {
     }
     
     /**
-     * Получить все активные счета
-     * @return LiveData со списком активных счетов
+     * Получить все счета по ID валюты
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки счетов
+     * @return LiveData со списком всех счетов
      */
-    public LiveData<List<Account>> getAllActive() {
-        return dao.getAllActive();
+    public LiveData<List<Account>> getAllByCurrency (int currencyId, EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActiveByCurrency(currencyId);
+            case DELETED:
+                return dao.getAllDeletedByCurrency(currencyId);
+            case ALL:
+            default:
+                return dao.getAllByCurrency(currencyId);
+        }
     }
-    
+
     /**
-     * Получить все удаленные счета
-     * @return LiveData со списком удаленных счетов
+     * Получить все счета по типу
+     * @param type тип счета
+     * @param filter фильтр для выборки счетов
+     * @return LiveData со списком всех счетов
      */
-    public LiveData<List<Account>> getAllDeleted() {
-        return dao.getAllDeleted();
+    public LiveData<List<Account>> getAllByType(String type, EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActiveByType(type);
+            case DELETED:
+                return dao.getAllDeletedByType(type);
+            case ALL:
+            default:
+                return dao.getAllByType(type);
+        }
     }
-    
+       
     /**
      * Получить счет по ID (включая удаленные)
      * @param id ID счета
@@ -114,29 +152,44 @@ public class AccountRepository {
      * @return максимальная позиция
      */
     public int getMaxPosition() {
-        Integer maxPos = dao.getMaxPosition();
-        return maxPos != null ? maxPos : 0;
+        return dao.getMaxPosition();
     }
     
     /**
-     * Получить количество активных счетов
-     * @return количество активных счетов
+     * Сдвинуть позиции счетов вверх начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
      */
-    public int getActiveCount() {
-        return dao.countActive();
+    public void shiftPositionsUp(int fromPosition) {
+        dao.shiftPositionsUp(fromPosition);
+    }
+    
+    /**
+     * Сдвинуть позиции счетов вниз начиная с указанной позиции
+     * @param fromPosition позиция, с которой начинается сдвиг
+     */
+    public void shiftPositionsDown(int fromPosition) {
+        dao.shiftPositionsDown(fromPosition);
+    }
+    
+    /**
+     * Получить количество счетов
+     * @param filter фильтр для выборки счетов
+     * @return количество счетов
+     */
+    public int getCount(EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.countActive();
+            case DELETED:
+                return dao.countDeleted();
+            case ALL:
+            default:
+                return dao.count();
+        }
     }
 
     /**
-     * Получить счета по подстроке в названии
-     * @param searchQuery подстрока для поиска
-     * @return LiveData с списком счетов
-     */
-    public LiveData<List<Account>> searchByTitle(String searchQuery) {
-        return dao.searchByTitle(searchQuery);
-    }
-    
-    /**
-     * Получить общее количество счетов
+     * Получить общее количество счетов (включая удаленные)
      * @return общее количество счетов
      */
     public int getCount() {

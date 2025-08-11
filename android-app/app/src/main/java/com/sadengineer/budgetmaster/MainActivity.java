@@ -146,37 +146,7 @@ public class MainActivity extends BaseNavigationActivity {
         Log.d(TAG, "✅ MainActivity.onCreate() - инициализация завершена успешно");
     }
 
-    // Переопределяем методы для показа Toast сообщений
-    @Override
-    protected void showInstructions() {
-        Toast.makeText(this, "Инструкции", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void showStatistics() {
-        Toast.makeText(this, "Статистика", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void showIncomeCategories() {
-        Toast.makeText(this, "Категории доходов", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void showExpenseCategories() {
-        Toast.makeText(this, "Категории расходов", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void showImportData() {
-        Toast.makeText(this, "Загрузить данные", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void showExportData() {
-        Toast.makeText(this, "Выгрузить данные", Toast.LENGTH_SHORT).show();
-    }
-
+    // Переопределяем только специфичные для MainActivity методы
     @Override
     protected void navigateToSettings() {
         Intent intent = new Intent(this, BackendTestActivity.class);

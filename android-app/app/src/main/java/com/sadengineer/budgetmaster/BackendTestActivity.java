@@ -446,7 +446,7 @@ public class BackendTestActivity extends BaseNavigationActivity {
             // Получаем категории
             CompletableFuture<List<Category>> categoriesFuture = databaseManager.executeDatabaseOperation(() -> {
                 BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-                List<Category> categories = database.categoryDao().getAllActiveCategories();
+                List<Category> categories = database.categoryDao().getAllActive().getValue();
                 database.close();
                 return categories;
             });

@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData;
 import com.sadengineer.budgetmaster.backend.dao.BudgetDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.entity.BudgetFilter;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class BudgetRepository {
      * @param filter фильтр для выборки бюджетов
      * @return LiveData со списком всех бюджетов
      */
-    public LiveData<List<Budget>> getAll(BudgetFilter filter) {
+    public LiveData<List<Budget>> getAll(EntityFilter filter) {
         switch (filter) {
             case ACTIVE:
                 return dao.getAllActive();
@@ -57,7 +57,7 @@ public class BudgetRepository {
      * @param filter фильтр для выборки бюджетов
      * @return LiveData со списком всех бюджетов
      */
-    public LiveData<List<Budget>> getAllByCurrency(int currencyId, BudgetFilter filter) {
+    public LiveData<List<Budget>> getAllByCurrency(int currencyId, EntityFilter filter) {
         switch (filter) {
             case ACTIVE:
                 return dao.getAllActiveByCurrency(currencyId);
@@ -167,7 +167,7 @@ public class BudgetRepository {
      * @param filter фильтр для выборки бюджетов
      * @return количество бюджетов
      */
-    public int getCount(BudgetFilter filter) {
+    public int getCount(EntityFilter filter) {
         switch (filter) {
             case ACTIVE:
                 return dao.countActive();
