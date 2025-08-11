@@ -225,6 +225,9 @@ public class ExpenseCategoriesActivity extends BaseNavigationActivity {
                     categories.addAll(loadedCategories);
                     adapter.setCategories(loadedCategories);
                     Log.d(TAG, "✅ Категории расходов отображены в списке");
+                    
+                    // Сбрасываем счетчик свайпов при изменении содержимого списка
+                    resetSwipeCount();
                 } else {
                     categories.clear();
                     Log.w(TAG, "⚠️ Категории расходов не найдены в базе данных");

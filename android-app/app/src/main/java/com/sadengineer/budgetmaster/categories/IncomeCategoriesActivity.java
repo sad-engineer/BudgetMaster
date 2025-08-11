@@ -225,6 +225,9 @@ public class IncomeCategoriesActivity extends BaseNavigationActivity {
                     categories.addAll(loadedCategories);
                     adapter.setCategories(loadedCategories);
                     Log.d(TAG, "✅ Категории доходов отображены в списке");
+                    
+                    // Сбрасываем счетчик свайпов при изменении содержимого списка
+                    resetSwipeCount();
                 } else {
                     categories.clear();
                     Log.w(TAG, "⚠️ Категории доходов не найдены в базе данных");

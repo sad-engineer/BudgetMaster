@@ -107,6 +107,15 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     }
 
     /**
+     * Сбрасывает счетчик свайпов (вызывается при изменении содержимого списков)
+     */
+    public void resetSwipeCount() {
+        if (swipeNavigationHelper != null) {
+            swipeNavigationHelper.resetSwipeCount();
+        }
+    }
+    
+    /**
      * Настройка кнопки меню для открытия бокового меню
      * @param menuButtonId ID кнопки меню в toolbar
      */
@@ -408,6 +417,9 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "▶️ " + getClass().getSimpleName() + " возобновлена");
+        
+        // Сбрасываем счетчик свайпов при возврате на экран
+        resetSwipeCount();
     }
 
     /**

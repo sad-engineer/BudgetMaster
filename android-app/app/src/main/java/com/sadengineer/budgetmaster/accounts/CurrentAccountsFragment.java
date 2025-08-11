@@ -19,6 +19,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -75,6 +76,11 @@ public class CurrentAccountsFragment extends Fragment {
                 if (accounts != null && !accounts.isEmpty()) {
                     adapter.setAccounts(accounts);
                     Log.d(TAG, "✅ Текущие счета отображены в списке");
+                    
+                    // Сбрасываем счетчик свайпов при изменении содержимого списка
+                    if (getActivity() instanceof BaseNavigationActivity) {
+                        ((BaseNavigationActivity) getActivity()).resetSwipeCount();
+                    }
                 } else {
                     Log.w(TAG, "⚠️ Текущие счета не найдены в базе данных");
                 }
