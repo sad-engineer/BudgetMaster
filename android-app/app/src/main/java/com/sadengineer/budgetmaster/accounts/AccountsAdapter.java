@@ -38,23 +38,43 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         void onAccountLongClick(Account account);
     }
 
-    // Для передачи полного списка выбранных аккаунтов наружу (в VM через фрагмент)
+    /**
+     * Интерфейс для передачи полного списка выбранных аккаунтов наружу
+     */
     public interface OnSelectedAccountsChanged {
         void onSelectedAccountsChanged(List<Account> selectedAccounts);
     }
     
+    /**
+     * Конструктор адаптера
+     * @param listener обработчик клика на счет
+     */
     public AccountsAdapter(OnAccountClickListener listener) {
         this.listener = listener;
     }
     
+    /**
+     * Устанавливает обработчик длинного клика на счет
+     * @param longClickListener обработчик длинного клика
+     */
     public void setLongClickListener(OnAccountLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
     }
 
+    /**
+     * Устанавливает обработчик изменения выбора
+     * @param listener обработчик изменения выбора
+     */
     public void setOnSelectedAccountsChanged(OnSelectedAccountsChanged listener) {
         this.externalSelectedAccountsChanged = listener;
     }
     
+    /**
+     * Создает ViewHolder для элемента списка
+     * @param parent родительский ViewGroup
+     * @param viewType тип элемента
+     * @return ViewHolder для элемента списка
+     */
     @NonNull
     @Override
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -63,6 +83,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         StandartViewHolder holder = new StandartViewHolder(view);
         
         // Настраиваем обработчики для универсального ViewHolder
+        /**
+         * Обработчик клика на счет
+         */
         holder.setItemClickListener(itemId -> {
             if (listener != null) {
                 Account account = findAccountById(itemId);
@@ -72,6 +95,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             }
         });
         
+        /**
+         * Обработчик длинного клика на счет
+         */
         holder.setItemLongClickListener(itemId -> {
             if (longClickListener != null) {
                 Account account = findAccountById(itemId);
@@ -81,23 +107,28 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             }
         });
 
-        // Настраиваем обработчик изменения выбора конкретного элемента
+        /**
+         * Обработчик изменения выбора конкретного элемента
+         */
         holder.setItemSelectionListener((itemId, isSelected) -> {
             if (isSelected) {
                 selectedAccounts.add(itemId);
             } else {
                 selectedAccounts.remove(itemId);
             }
-            
-            // Сообщаем наружу полный набор выбранных
+            // Сообщаем наружу полный набор выбранных счетов
             if (externalSelectedAccountsChanged != null) {
                 externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
             }
-        });
-        
+        });        
         return holder;
     }
     
+    /**
+     * Привязывает данные к ViewHolder
+     * @param holder ViewHolder для элемента списка
+     * @param position позиция элемента в списке
+     */
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Account account = accounts.get(position);
@@ -106,10 +137,12 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         // Определяем, выбран ли текущий элемент
         boolean isSelected = selectedAccounts.contains(account.getId());
 
-        Log.d(TAG, "🔄 Привязываем данные к ViewHolder: " + account.getTitle() + " (позиция " + account.getPosition() + ")" +
-        "ID: " + account.getId() + ", сумма: " + account.getAmount() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
-        holder.bind(account.getPosition(), account.getTitle(), account.getId(), 
-                   account.getAmount(), isSelectionMode, isSelected);
+        Log.d(
+            TAG, 
+            "🔄 Привязываем данные к ViewHolder: " + account.getTitle() + " (позиция " + account.getPosition() + ")" +
+            "ID: " + account.getId() + ", сумма: " + account.getAmount() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
+        holder.bind(
+            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), isSelectionMode, isSelected);
     }
 
     /**
@@ -122,6 +155,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     /**
      * Обновляет список счетов
+     * @param accounts список счетов
      */
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
@@ -131,6 +165,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     /**
      * Включает/выключает режим выбора
+     * @param enabled true - включить режим выбора, false - выключить
      */
     public void setSelectionMode(boolean enabled) {
         this.isSelectionMode = enabled;
@@ -146,6 +181,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     /**
      * Получает выбранные счета
+     * @return список выбранных счетов
      */
     public List<Account> getSelectedAccounts() {
         List<Account> selected = new ArrayList<>();
@@ -160,6 +196,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     /**
      * Очищает выбор
+     * @return список выбранных счетов
      */
     public void clearSelection() {
         selectedAccounts.clear();
@@ -171,6 +208,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     
     /**
      * Находит счет по ID
+     * @param id ID счета
+     * @return счет или null, если счет не найден
      */
     private Account findAccountById(int id) {
         for (Account account : accounts) {

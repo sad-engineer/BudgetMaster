@@ -60,6 +60,13 @@ public interface CategoryDao {
     LiveData<List<Category>> getAll();
 
     /**
+     * Получает все категории синхронно, включая удаленные
+     * @return список категорий, отсортированных по позиции (категории с позицией 0 в конце)
+     */
+    @Query("SELECT * FROM categories ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    List<Category> getAllSync();
+
+    /**
      * Получает все активные категории
      * @return список активных категорий, отсортированных по позиции
      */

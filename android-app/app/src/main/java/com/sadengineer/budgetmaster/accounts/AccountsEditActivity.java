@@ -25,6 +25,8 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 import java.util.concurrent.CompletableFuture;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Activity для создания/изменения счета
@@ -142,16 +144,17 @@ public class AccountsEditActivity extends BaseNavigationActivity {
                 accountNameEdit.setText(currentAccount.getTitle());
                 // Показываем сумму в рублях (копейки -> рубли)
                 double rubles = currentAccount.getAmount() / 100.0;
-                accountBalanceEdit.setText(String.format("%.2f", rubles));
+                NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("ru", "RU"));
+                formatter.setMinimumFractionDigits(2);
+                formatter.setMaximumFractionDigits(2);
+                accountBalanceEdit.setText(formatter.format(rubles));
                 
                 // Устанавливаем тип счета
                 int accountType = currentAccount.getType();
-                switch (accountType) {
-                    case 1: accountTypeSpinner.setSelection(0); break; // Текущий
-                    case 2: accountTypeSpinner.setSelection(1); break; // Сберегательный
-                    case 3: accountTypeSpinner.setSelection(2); break; // Перевод
-                    default: accountTypeSpinner.setSelection(0); break;
-                }
+                int[] accountTypePositions = {0, 0, 1, 2}; // [0, текущий, сберегательный, перевод]
+                int position = (accountType >= 0 && accountType < accountTypePositions.length) 
+                    ? accountTypePositions[accountType] : 0;
+                accountTypeSpinner.setSelection(position);
                 
                 // Устанавливаем статус закрытия
                 accountClosedCheckbox.setChecked(currentAccount.getClosed() == 1);
@@ -310,12 +313,9 @@ public class AccountsEditActivity extends BaseNavigationActivity {
      */
     private int getAccountTypeFromSpinner() {
         int position = accountTypeSpinner.getSelectedItemPosition();
-        switch (position) {
-            case 0: return 1; // Текущий
-            case 1: return 2; // Сберегательный
-            case 2: return 3; // Перевод
-            default: return 1; // По умолчанию текущий
-        }
+        int[] accountTypes = {1, 2, 3}; // [текущий, сберегательный, перевод]
+        return (position >= 0 && position < accountTypes.length) 
+            ? accountTypes[position] : 1; // По умолчанию текущий
     }
     
     /**

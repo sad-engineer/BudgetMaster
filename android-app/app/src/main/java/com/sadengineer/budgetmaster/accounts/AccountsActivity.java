@@ -92,13 +92,18 @@ public class AccountsActivity extends BaseNavigationActivity {
         int tabIndex = getIntent().getIntExtra("selected_tab", 0);
         viewPager.setCurrentItem(tabIndex, false);
         Log.d(TAG, "Устанавливаем вкладку: " + tabIndex);
+        
+        // Массив названий вкладок
+        String[] tabTitles = {
+            getString(R.string.tab_current),
+            getString(R.string.tab_savings),
+            getString(R.string.tab_transfers)
+        };
 
         new TabLayoutMediator(tabLayout, viewPager,
             (tab, position) -> {
-                switch (position) {
-                    case 0: tab.setText(getString(R.string.tab_current)); break;
-                    case 1: tab.setText(getString(R.string.tab_savings)); break;
-                    case 2: tab.setText(getString(R.string.tab_transfers)); break;
+                if (position >= 0 && position < tabTitles.length) {
+                    tab.setText(tabTitles[position]);
                 }
             }
         ).attach();
@@ -145,9 +150,7 @@ public class AccountsActivity extends BaseNavigationActivity {
                 }
             }
         });
-    }
-    
-    // Массовое удаление выполняется напрямую через ViewModel
+    }    
     
     /**
      * Обработчик нажатия на кнопку "Назад"
@@ -160,6 +163,4 @@ public class AccountsActivity extends BaseNavigationActivity {
             super.onBackPressed();
         }
     }
-    
-    // Больше не получаем выбранные из фрагментов — источником правды является Shared ViewModel
 }

@@ -71,6 +71,10 @@ public class SwipeNavigationHelper {
         AuthorsActivity.class
     };
     
+    /**
+     * Конструктор класса
+     * @param activity текущая активность
+     */
     public SwipeNavigationHelper(BaseNavigationActivity activity) {
         this.activity = activity;
         this.gestureDetector = new GestureDetector(activity, new GestureListener());
@@ -78,6 +82,7 @@ public class SwipeNavigationHelper {
     
     /**
      * Включает/выключает обработку свайпов
+     * @param enabled true - включить обработку свайпов, false - выключить
      */
     public void setEnabled(boolean enabled) {
         this.isEnabled = enabled;
@@ -86,6 +91,7 @@ public class SwipeNavigationHelper {
     
     /**
      * Проверяет, включены ли свайпы
+     * @return true - свайпы включены, false - свайпы отключены
      */
     public boolean isEnabled() {
         return isEnabled;
@@ -93,6 +99,7 @@ public class SwipeNavigationHelper {
     
     /**
      * Сбрасывает счетчик свайпов (вызывается при изменении содержимого списка)
+     * @return true - свайпы включены, false - свайпы отключены
      */
     public void resetSwipeCount() {
         swipeUpCount = 0;
@@ -133,6 +140,8 @@ public class SwipeNavigationHelper {
     
     /**
      * Ищет RecyclerView в иерархии View
+     * @param view текущий View
+     * @return RecyclerView или null, если RecyclerView не найден
      */
     private RecyclerView findRecyclerView(View view) {
         if (view instanceof RecyclerView) {
@@ -154,6 +163,8 @@ public class SwipeNavigationHelper {
     
     /**
      * Проверяет, можно ли прокрутить список вверх
+     * @param recyclerView RecyclerView
+     * @return true - можно прокрутить список вверх, false - нельзя прокрутить список вверх
      */
     private boolean canScrollUp(RecyclerView recyclerView) {
         if (recyclerView == null) return false;
@@ -173,6 +184,8 @@ public class SwipeNavigationHelper {
     
     /**
      * Обрабатывает касание экрана
+     * @param event MotionEvent
+     * @return true - обработка свайпа, false - нет
      */
     public boolean onTouchEvent(MotionEvent event) {
         // Если свайпы отключены, не обрабатываем
@@ -190,12 +203,20 @@ public class SwipeNavigationHelper {
     
     /**
      * Слушатель жестов для обработки свайпов
+     * @param e1 MotionEvent
+     * @param e2 MotionEvent
+     * @param velocityX скорость свайпа по X
+     * @param velocityY скорость свайпа по Y
+     * @return true - обработка свайпа, false - нет
      */
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         
         @Override
-        public boolean onFling(@NonNull MotionEvent e1, @NonNull MotionEvent e2, 
-                              float velocityX, float velocityY) {
+        public boolean onFling(
+            @NonNull MotionEvent e1, 
+            @NonNull MotionEvent e2, 
+            float velocityX, 
+            float velocityY) {
             // Дополнительная проверка на случай, если меню открылось во время жеста
             if (!isEnabled || (activity.drawerLayout != null && activity.drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START))) {
                 return false;
@@ -231,7 +252,7 @@ public class SwipeNavigationHelper {
     
     /**
      * Обработка свайпа вверх с двойной логикой
-     */
+    */
     private void onSwipeUp() {
         Log.d(TAG, "👆 Свайп вверх - обрабатываем с двойной логикой");
         

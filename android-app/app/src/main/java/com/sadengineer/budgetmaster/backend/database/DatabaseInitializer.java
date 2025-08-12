@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
@@ -42,6 +43,9 @@ public class DatabaseInitializer {
         
         // Инициализируем счета
         initializeDefaultAccounts(database);
+        
+        // Инициализируем бюджеты
+        initializeDefaultBudgets(database);
         
         Log.d(TAG, "🔄 initializeDefaultData: Инициализация завершена");
     }
@@ -191,6 +195,40 @@ public class DatabaseInitializer {
     }
     
     /**
+     * Инициализирует дефолтные бюджеты для каждой категории
+     */
+    private static void initializeDefaultBudgets(BudgetMasterDatabase database) {
+        Log.d(TAG, "🔄 initializeDefaultBudgets: Начинаем инициализацию бюджетов");
+        
+        // Проверяем, есть ли уже бюджеты
+        int budgetCount = database.budgetDao().count();
+        if (budgetCount > 0) {
+            Log.d(TAG, "🔄 initializeDefaultBudgets: Бюджеты уже существуют, пропускаем");
+            return;
+        }
+        
+        // Получаем все категории
+        List<Category> categories = database.categoryDao().getAllSync();
+        if (categories == null || categories.isEmpty()) {
+            Log.d(TAG, "❌ initializeDefaultBudgets: Категории не найдены, пропускаем инициализацию бюджетов");
+            return;
+        }
+        
+        Log.d(TAG, "🔄 initializeDefaultBudgets: Найдено категорий: " + categories.size());
+        
+        // Создаем бюджет для каждой категории
+        int position = 1;
+        for (Category category : categories) {
+            Budget budget = createBudget(category.getId(), 0, 1, position);
+            database.budgetDao().insert(budget);
+            Log.d(TAG, "🔄 initializeDefaultBudgets: Добавлен бюджет для категории '" + category.getTitle() + "' (ID: " + category.getId() + ")");
+            position++;
+        }
+        
+        Log.d(TAG, "🔄 initializeDefaultBudgets: Инициализация бюджетов завершена");
+    }
+    
+    /**
      * Создает объект валюты
      */
     private static Currency createCurrency(String title, int position) {
@@ -230,6 +268,20 @@ public class DatabaseInitializer {
         account.setCreateTime(LocalDateTime.now());
         account.setCreatedBy("initializer");
         return account;
+    }
+    
+    /**
+     * Создает объект бюджета
+     */
+    private static Budget createBudget(int categoryId, int amount, int currencyId, int position) {
+        Budget budget = new Budget();
+        budget.setCategoryId(categoryId);
+        budget.setAmount(amount);
+        budget.setCurrencyId(currencyId);
+        budget.setPosition(position);
+        budget.setCreateTime(LocalDateTime.now());
+        budget.setCreatedBy("initializer");
+        return budget;
     }
     
     /**

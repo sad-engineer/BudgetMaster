@@ -222,6 +222,15 @@ public class BudgetService {
     }
 
     /**
+     * Получить бюджет по ID
+     * @param id ID бюджета
+     * @return LiveData с бюджетом
+     */
+    public LiveData<Budget> getById(int id) {
+        return repo.getById(id);
+    }
+
+    /**
      * Восстановить удаленный бюджет (soft delete)
      * @param deletedBudget удаленный бюджет
      */
