@@ -70,6 +70,7 @@
 
                 <!-- Пустое место (резерв на будущее) -->
                 <View
+                    android:id="@+id/empty_space"
                     android:layout_width="@dimen/menu_button_size"
                     android:layout_height="match_parent" />
 

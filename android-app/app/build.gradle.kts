@@ -64,4 +64,7 @@ dependencies {
     
     // Android SQLite (встроен в Android)
     // implementation("org.xerial:sqlite-jdbc:3.44.1.0") // Убираем SQLite JDBC
+    
+    // ICU4J для точного форматирования валют
+    implementation("com.ibm.icu:icu4j:74.2")
 }

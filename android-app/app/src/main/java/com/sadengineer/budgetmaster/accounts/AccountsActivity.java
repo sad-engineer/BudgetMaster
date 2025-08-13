@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,6 +36,8 @@ public class AccountsActivity extends BaseNavigationActivity {
     private ImageButton deleteAccountButton;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+    private View emptySpace;
+    private ProgressBar loadingIndicator;
     private boolean isSelectionMode = false;
     private AccountsSharedViewModel viewModel;
 
@@ -57,6 +63,9 @@ public class AccountsActivity extends BaseNavigationActivity {
         
         // Обработчики кнопок счетов
         setupButtons();
+        
+        // Инициализируем пустое место
+        emptySpace = findViewById(R.id.empty_space);
 
         // Наблюдаем за режимом выбора, чтобы обновлять иконки
         viewModel.getSelectionMode().observe(this, enabled -> {
@@ -73,7 +82,18 @@ public class AccountsActivity extends BaseNavigationActivity {
         // Логируем результат мягкого удаления
         viewModel.getSoftDeletionDone().observe(this, count -> {
             if (count != null) {
-                Log.d(TAG, "✅ Мягко удалено счетов: " + count);
+                Log.d(TAG, "Удалено счетов: " + count);
+            }
+        });
+        
+        // Наблюдаем за состоянием удаления для показа индикатора
+        viewModel.getDeleting().observe(this, isDeleting -> {
+            if (isDeleting != null) {
+                if (isDeleting) {
+                    showLoadingIndicator();
+                } else {
+                    hideLoadingIndicator();
+                }
             }
         });
     }
@@ -91,7 +111,7 @@ public class AccountsActivity extends BaseNavigationActivity {
         // Получаем индекс вкладки из Intent (по умолчанию 0)
         int tabIndex = getIntent().getIntExtra("selected_tab", 0);
         viewPager.setCurrentItem(tabIndex, false);
-        Log.d(TAG, "Устанавливаем вкладку: " + tabIndex);
+        Log.d(TAG, "Открыта вкладка: " + tabIndex);
         
         // Массив названий вкладок
         String[] tabTitles = {
@@ -151,6 +171,37 @@ public class AccountsActivity extends BaseNavigationActivity {
             }
         });
     }    
+    
+    /**
+     * Показывает индикатор загрузки, заменяя пустое место
+     */
+    private void showLoadingIndicator() {
+        if (loadingIndicator == null) {
+            // Создаем индикатор загрузки
+            LayoutInflater inflater = LayoutInflater.from(this);
+            loadingIndicator = (ProgressBar) inflater.inflate(R.layout.loading_indicator, null);
+            
+            // Заменяем пустое место на индикатор
+            ViewGroup parent = (ViewGroup) emptySpace.getParent();
+            int index = parent.indexOfChild(emptySpace);
+            parent.removeView(emptySpace);
+            parent.addView(loadingIndicator, index);
+        }
+    }
+    
+    /**
+     * Скрывает индикатор загрузки, возвращая пустое место
+     */
+    private void hideLoadingIndicator() {
+        if (loadingIndicator != null) {
+            // Возвращаем пустое место
+            ViewGroup parent = (ViewGroup) loadingIndicator.getParent();
+            int index = parent.indexOfChild(loadingIndicator);
+            parent.removeView(loadingIndicator);
+            parent.addView(emptySpace, index);
+            loadingIndicator = null;
+        }
+    }
     
     /**
      * Обработчик нажатия на кнопку "Назад"

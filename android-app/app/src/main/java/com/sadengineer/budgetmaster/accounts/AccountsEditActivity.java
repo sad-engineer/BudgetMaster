@@ -13,7 +13,6 @@ import android.widget.Spinner;
 import android.widget.CheckBox;
 import android.widget.ArrayAdapter;
 
-
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
@@ -21,6 +20,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.List;
@@ -46,6 +46,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
     private AccountService accountService;
     private CurrencyService currencyService;
     private AccountValidator accountValidator;
+    private CurrencyAmountFormatter formatter;
     
     // Поля для хранения данных счета
     private Account currentAccount;
@@ -81,6 +82,9 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         accountService = new AccountService(this, "default_user");
         currencyService = new CurrencyService(this, "default_user");
         
+        // Инициализация форматтера для суммы счета
+        formatter = new CurrencyAmountFormatter();
+        
         // Настраиваем спиннеры
         setupSpinners();
         
@@ -89,6 +93,9 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         
         // Обработчики кнопок
         setupButtonHandlers();
+        
+        // Настройка обработчика поля ввода суммы
+        setupAmountFieldHandler();
     }
     
     /**
@@ -120,6 +127,17 @@ public class AccountsEditActivity extends BaseNavigationActivity {
             android.R.layout.simple_spinner_item, accountTypes);
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         accountTypeSpinner.setAdapter(typeAdapter);
+
+        // Добавляем обработчики для убирания фокуса с поля суммы
+        accountCurrencySpinner.setOnTouchListener((v, event) -> {
+            accountBalanceEdit.clearFocus();
+            return false; // Позволяем спиннеру обрабатывать событие дальше
+        });
+        
+        accountTypeSpinner.setOnTouchListener((v, event) -> {
+            accountBalanceEdit.clearFocus();
+            return false; // Позволяем спиннеру обрабатывать событие дальше
+        });
     }
     
     /**
@@ -133,21 +151,18 @@ public class AccountsEditActivity extends BaseNavigationActivity {
             
             // Получаем информацию о вкладке
             sourceTab = getIntent().getIntExtra("source_tab", 0);
-            Log.d(TAG, "Источник перехода: вкладка " + sourceTab);
+            Log.d(TAG, "Открыто редактирование счёта. Вкладка: " + sourceTab);
             
             if (currentAccount != null) {
                 // Режим редактирования
                 isEditMode = true;
-                Log.d(TAG, "Режим редактирования счета: " + currentAccount.getTitle());
+                Log.d(TAG, "Режим редактирования счёта");
                 
                 // Заполняем поля данными счета
                 accountNameEdit.setText(currentAccount.getTitle());
                 // Показываем сумму в рублях (копейки -> рубли)
-                double rubles = currentAccount.getAmount() / 100.0;
-                NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("ru", "RU"));
-                formatter.setMinimumFractionDigits(2);
-                formatter.setMaximumFractionDigits(2);
-                accountBalanceEdit.setText(formatter.format(rubles));
+                double amount = currentAccount.getAmount() / 100.0;
+                accountBalanceEdit.setText(formatter.format(amount));
                 
                 // Устанавливаем тип счета
                 int accountType = currentAccount.getType();
@@ -181,6 +196,37 @@ public class AccountsEditActivity extends BaseNavigationActivity {
             // Устанавливаем заголовок для режима создания по умолчанию
             setToolbarTitle(R.string.toolbar_title_account_add, R.dimen.toolbar_text_account_add);
         }
+    }
+    
+    /**
+     * Настраивает обработчик поля ввода суммы
+     */
+    private void setupAmountFieldHandler() {
+        accountBalanceEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                // При получении фокуса убираем форматирование
+                String currentText = accountBalanceEdit.getText().toString();
+                if (!TextUtils.isEmpty(currentText)) {
+                    // Используем новый метод для преобразования в простой текст
+                    String plainText = formatter.toPlainText(currentText);
+                    accountBalanceEdit.setText(plainText);
+                    // Устанавливаем курсор в конец текста
+                    accountBalanceEdit.setSelection(plainText.length());
+                }
+            } else {
+                // При потере фокуса форматируем обратно
+                String currentText = accountBalanceEdit.getText().toString();
+                if (!TextUtils.isEmpty(currentText)) {
+                    try {
+                        // Парсим число и форматируем через форматтер
+                        double amount = formatter.parseSafe(currentText);
+                        accountBalanceEdit.setText(formatter.format(amount));
+                    } catch (Exception e) {
+                        // Если не удалось распарсить, оставляем как есть
+                    }
+                }
+            }
+        });
     }
     
     /**
@@ -226,10 +272,8 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         if (!TextUtils.isEmpty(balanceText)) {
             try {
                 // Конвертируем рубли в копейки
-                // Заменяем запятую на точку для корректного парсинга
-                String normalizedBalanceText = balanceText.replace(",", ".");
-                double rubles = Double.parseDouble(normalizedBalanceText);
-                balance = (int) (rubles * 100);
+                double amount = formatter.parseSafe(balanceText);
+                balance = (int) (amount * 100);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Ошибка парсинга баланса: " + balanceText, e);
                 // Показываем ошибку в поле ввода
@@ -248,7 +292,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         try {
             if (isEditMode && currentAccount != null) {
                 // Режим редактирования
-                Log.d(TAG, "🔄 Попытка обновления счета '" + accountName + "' (ID: " + currentAccount.getId() + ")");
+                Log.d(TAG, "Нажата кнопка 'Сохранить'");
                 
                 // Обновляем данные счета через сервис
                 currentAccount.setTitle(accountName);
@@ -256,32 +300,38 @@ public class AccountsEditActivity extends BaseNavigationActivity {
                 currentAccount.setType(accountType);
                 currentAccount.setCurrencyId(selectedCurrencyId);
                 currentAccount.setClosed(isClosed);
-                accountService.update(currentAccount);
+
+                if (currentAccount.isDeleted()) {
+                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + ", действие: restore");
+                    accountService.restore(currentAccount);
+                } else {
+                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + ", действие: update");
+                    accountService.update(currentAccount);
+                }
                 
-                Log.d(TAG, "✅ Запрос на обновление счета отправлен");
+                Log.d(TAG, "Запрос на обновление счета отправлен");
                 
             } else {
                 // Режим создания нового счета
-                Log.d(TAG, "🔄 Попытка создания счета '" + accountName + "'");
+                Log.d(TAG, "Нажата кнопка 'Сохранить'");
 
                 // Проверяем существование счета
                 Account existingAccount = accountService.getByTitle(accountName).getValue();
                 if (existingAccount != null) {
-                    Log.d(TAG, "⚠️ Счет с названием '" + accountName + "' уже существует");
+                    Log.i(TAG, "Создание отменено: счёт уже существует");
                     return;
                 }
-
                 // Если счет не существует, то создаем его
                 accountService.create(accountName, selectedCurrencyId, balance, accountType, isClosed);
                 
-                Log.d(TAG, "✅ Запрос на создание счета отправлен");
+                Log.d(TAG, "Запрос на создание счета отправлен");
             }
             
             // Возвращаемся к списку счетов
             returnToAccounts();
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Критическая ошибка при сохранении счета: " + e.getMessage(), e);
+            Log.e(TAG, "Критическая ошибка при сохранении счета: " + e.getMessage(), e);
         }
     }
     
@@ -327,12 +377,12 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         TextView toolbarTitle = findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
             toolbarTitle.setText(titleResId);
-            Log.d(TAG, "Заголовок тулбара установлен: " + getString(titleResId));
+                Log.d(TAG, "Заголовок тулбара установлен");
             
             // Устанавливаем размер шрифта
             float textSize = getResources().getDimension(textSizeResId);
             toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен: " + textSize + "px");
+                Log.d(TAG, "Размер шрифта установлен");
         }
     }
 
@@ -341,7 +391,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
      */
     private void returnToAccounts() {
         // Переходим к списку счетов
-        Log.d(TAG, "🔄 Переходим к окну списка счетов, вкладка " + sourceTab);
+        Log.d(TAG, "Переход к окну списка счетов, вкладка " + sourceTab);
         Intent intent = new Intent(this, AccountsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("selected_tab", sourceTab);

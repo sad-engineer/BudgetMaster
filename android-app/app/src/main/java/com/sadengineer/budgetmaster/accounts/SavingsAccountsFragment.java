@@ -64,25 +64,25 @@ public class SavingsAccountsFragment extends Fragment {
      * Загружает сберегательные счета (тип 2)
      */
     private void loadSavingsAccounts() {
-        Log.d(TAG, "🔄 Загружаем сберегательные счета...");
+        Log.d(TAG, "Загрузка сберегательных счетов");
         
         try {
             BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
             
             // Загружаем счета типа 2 (сберегательные)
             database.accountDao().getAllByType("2").observe(getViewLifecycleOwner(), accounts -> {
-                Log.d(TAG, "✅ Загружено сберегательных счетов: " + (accounts != null ? accounts.size() : 0));
+                Log.d(TAG, "Загружено: " + (accounts != null ? accounts.size() : 0));
                 
                 if (accounts != null && !accounts.isEmpty()) {
                     adapter.setAccounts(accounts);
-                    Log.d(TAG, "✅ Сберегательные счета отображены в списке");
+                    Log.d(TAG, "Список сберегательных счетов обновлён");
                     
                     // Сбрасываем счетчик свайпов при изменении содержимого списка
                     if (getActivity() instanceof BaseNavigationActivity) {
                         ((BaseNavigationActivity) getActivity()).resetSwipeCount();
                     }
                 } else {
-                    Log.w(TAG, "⚠️ Сберегательные счета не найдены в базе данных");
+                    Log.i(TAG, "Сберегательные счета не найдены");
                 }
             });
             
@@ -115,7 +115,7 @@ public class SavingsAccountsFragment extends Fragment {
      * @param account - выбранный счет
      */
     private void goToAccountEdit(Account account) {
-        Log.d(TAG, "🔄 Переходим к окну редактирования счета");
+        Log.d(TAG, "Переход к окну редактирования счёта");
         Intent intent = new Intent(getActivity(), AccountsEditActivity.class);
         intent.putExtra("account", account);
         intent.putExtra("source_tab", 1); // 1 = Сбережения
@@ -130,8 +130,7 @@ public class SavingsAccountsFragment extends Fragment {
         adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
             @Override
             public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран сберегательный счет: " + account.getTitle());
-                // Переходим на экран редактирования счета
+                Log.d(TAG, "Переход к окну редактирования счёта");
                 goToAccountEdit(account);
             }
         });
@@ -140,7 +139,7 @@ public class SavingsAccountsFragment extends Fragment {
         adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
             @Override
             public void onAccountLongClick(Account account) {
-                Log.d(TAG, " Длительное нажатие на сберегательный счет: " + account.getTitle());
+            Log.d(TAG, "Длительное нажатие на счёт");
                 showDeleteConfirmationDialog(account);
             }
         });
@@ -179,15 +178,15 @@ public class SavingsAccountsFragment extends Fragment {
      */
     private void deleteAccount(Account account) {
         try {
-            Log.d(TAG, "🗑️ Удаляем счет из базы данных: " + account.getTitle());
+            Log.d(TAG, "Удаление счёта: ID=" + account.getId());
             
             AccountService accountService = new AccountService(requireContext(), "default_user");
             accountService.delete(false, account);
             
-            Log.d(TAG, "✅ Запрос на удаление счета отправлен: " + account.getTitle());
+            Log.d(TAG, "Запрос на удаление счёта отправлен: ID=" + account.getId());
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
         }
     }
 } 

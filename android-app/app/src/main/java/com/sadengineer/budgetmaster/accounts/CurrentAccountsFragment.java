@@ -64,25 +64,32 @@ public class CurrentAccountsFragment extends Fragment {
      * Загружает текущие счета (тип 1)
      */
     private void loadCurrentAccounts() {
-        Log.d(TAG, "🔄 Загружаем текущие счета...");
+        Log.d(TAG, "Загрузка текущих счетов");
         
         try {
             BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
             
             // Загружаем счета типа 1 (текущие)
             database.accountDao().getAllByType("1").observe(getViewLifecycleOwner(), accounts -> {
-                Log.d(TAG, "✅ Загружено текущих счетов: " + (accounts != null ? accounts.size() : 0));
+                Log.d(TAG, "Загружено: " + (accounts != null ? accounts.size() : 0));
                 
                 if (accounts != null && !accounts.isEmpty()) {
+                    // Логируем детали каждого загруженного счета
+                    for (Account account : accounts) {
+                        Log.d(TAG, "   - ID: " + account.getId() + ", title: " + account.getTitle() + 
+                              ", position: " + account.getPosition() + ", deleteTime: " + account.getDeleteTime() + 
+                              ", deletedBy: " + account.getDeletedBy() + ", isDeleted: " + account.isDeleted());
+                    }
+                    
                     adapter.setAccounts(accounts);
-                    Log.d(TAG, "✅ Текущие счета отображены в списке");
+                    Log.d(TAG, "Список текущих счетов обновлён");
                     
                     // Сбрасываем счетчик свайпов при изменении содержимого списка
                     if (getActivity() instanceof BaseNavigationActivity) {
                         ((BaseNavigationActivity) getActivity()).resetSwipeCount();
                     }
                 } else {
-                    Log.w(TAG, "⚠️ Текущие счета не найдены в базе данных");
+                    Log.i(TAG, "Текущие счета не найдены");
                 }
             });
             
@@ -115,7 +122,7 @@ public class CurrentAccountsFragment extends Fragment {
      * @param account - выбранный счет
      */
     private void goToAccountEdit(Account account) {
-        Log.d(TAG, "🔄 Переходим к окну редактирования счета");
+                Log.d(TAG, "Переход к окну редактирования счёта");
         Intent intent = new Intent(getActivity(), AccountsEditActivity.class);
         intent.putExtra("account", account);
         intent.putExtra("source_tab", 0); // 0 = Текущие
@@ -130,7 +137,7 @@ public class CurrentAccountsFragment extends Fragment {
         adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
             @Override
             public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран текущий счет: " + account.getTitle());
+                Log.d(TAG, "Переход к окну редактирования счёта");
                 // Переходим на экран редактирования счета
                 goToAccountEdit(account);
             }
@@ -179,15 +186,18 @@ public class CurrentAccountsFragment extends Fragment {
      */
     private void deleteAccount(Account account) {
         try {
-            Log.d(TAG, "🗑️ Удаляем счет из базы данных: " + account.getTitle());
+            Log.d(TAG, "Удаление счёта: ID=" + account.getId());
+            Log.d(TAG, "   - ID: " + account.getId() + ", position: " + account.getPosition() + 
+                  ", deleteTime: " + account.getDeleteTime() + ", deletedBy: " + account.getDeletedBy() + 
+                  ", isDeleted: " + account.isDeleted());
             
             AccountService accountService = new AccountService(requireContext(), "default_user");
             accountService.delete(false, account);
             
-            Log.d(TAG, "✅ Запрос на удаление счета отправлен: " + account.getTitle());
+            Log.d(TAG, "Запрос на удаление счёта отправлен: ID=" + account.getId());
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
         }
     }
 } 

@@ -83,9 +83,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         StandartViewHolder holder = new StandartViewHolder(view);
         
         // Настраиваем обработчики для универсального ViewHolder
-        /**
-         * Обработчик клика на счет
-         */
+        // Обработчик клика на счет
         holder.setItemClickListener(itemId -> {
             if (listener != null) {
                 Account account = findAccountById(itemId);
@@ -95,9 +93,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             }
         });
         
-        /**
-         * Обработчик длинного клика на счет
-         */
+        // Обработчик длинного клика на счет
         holder.setItemLongClickListener(itemId -> {
             if (longClickListener != null) {
                 Account account = findAccountById(itemId);
@@ -107,18 +103,22 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             }
         });
 
-        /**
-         * Обработчик изменения выбора конкретного элемента
-         */
+        // Обработчик изменения выбора конкретного элемента
         holder.setItemSelectionListener((itemId, isSelected) -> {
-            if (isSelected) {
-                selectedAccounts.add(itemId);
+            // Проверяем, что счет не удален перед добавлением в выбор
+            Account account = findAccountById(itemId);
+            if (account != null && !account.isDeleted()) {
+                if (isSelected) {
+                    selectedAccounts.add(itemId);
+                } else {
+                    selectedAccounts.remove(itemId);
+                }
+                // Сообщаем наружу полный набор выбранных счетов
+                if (externalSelectedAccountsChanged != null) {
+                    externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
+                }
             } else {
-                selectedAccounts.remove(itemId);
-            }
-            // Сообщаем наружу полный набор выбранных счетов
-            if (externalSelectedAccountsChanged != null) {
-                externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
+                Log.w(TAG, "Попытка выбора удалённого счёта: ID=" + itemId);
             }
         });        
         return holder;
@@ -133,14 +133,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Account account = accounts.get(position);
         holder.resetToInitialState();
-
-        // Определяем, выбран ли текущий элемент
-        boolean isSelected = selectedAccounts.contains(account.getId());
-
-        Log.d(
-            TAG, 
-            "🔄 Привязываем данные к ViewHolder: " + account.getTitle() + " (позиция " + account.getPosition() + ")" +
-            "ID: " + account.getId() + ", сумма: " + account.getAmount() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
+        // Определяем, выбран ли текущий элемент (только для неудаленных счетов)
+        boolean isSelected = !account.isDeleted() && selectedAccounts.contains(account.getId()); 
         holder.bind(
             account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), isSelectionMode, isSelected);
     }
@@ -159,7 +153,6 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
-        Log.d(TAG, "🔄 Обновляем список счетов: " + this.accounts.size() + " элементов");
         notifyDataSetChanged();
     }
     
@@ -187,7 +180,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         List<Account> selected = new ArrayList<>();
         for (Integer id : selectedAccounts) {
             Account account = findAccountById(id);
-            if (account != null) {
+            if (account != null && !account.isDeleted()) { // Исключаем уже удаленные счета
                 selected.add(account);
             }
         }

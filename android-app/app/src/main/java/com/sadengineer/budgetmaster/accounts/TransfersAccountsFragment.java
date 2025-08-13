@@ -64,20 +64,20 @@ public class TransfersAccountsFragment extends Fragment {
      * Загружает счета переводов (тип 3)
      */
     private void loadTransfersAccounts() {
-        Log.d(TAG, "🔄 Загружаем счета переводов...");
+        Log.d(TAG, "Загрузка счетов переводов");
         
         try {
             BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
             
             // Загружаем счета типа 3 (переводы)
-            database.accountDao().getAllByType("3").observe(getViewLifecycleOwner(), accounts -> {
-                Log.d(TAG, "✅ Загружено счетов переводов: " + (accounts != null ? accounts.size() : 0));
+            database.accountDao().getAllActiveByType("3").observe(getViewLifecycleOwner(), accounts -> {
+                Log.d(TAG, "Загружено: " + (accounts != null ? accounts.size() : 0));
                 
                 if (accounts != null && !accounts.isEmpty()) {
                     adapter.setAccounts(accounts);
-                    Log.d(TAG, "✅ Счета переводов отображены в списке");
+                    Log.d(TAG, "Список счетов переводов обновлён");
                 } else {
-                    Log.w(TAG, "⚠️ Счета переводов не найдены в базе данных");
+                    Log.i(TAG, "Счета переводов не найдены");
                 }
             });
             
@@ -110,7 +110,7 @@ public class TransfersAccountsFragment extends Fragment {
      * @param account - выбранный счет
      */
     private void goToAccountEdit(Account account) {
-        Log.d(TAG, "🔄 Переходим к окну редактирования счета");
+        Log.d(TAG, "Переход к окну редактирования счёта");
         Intent intent = new Intent(getActivity(), AccountsEditActivity.class);
         intent.putExtra("account", account);
         intent.putExtra("source_tab", 2); // 2 = Переводы
@@ -125,8 +125,7 @@ public class TransfersAccountsFragment extends Fragment {
         adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
             @Override
             public void onAccountClick(Account account) {
-                Log.d(TAG, "👆 Выбран счет переводов: " + account.getTitle());
-                // Переходим на экран редактирования счета
+                Log.d(TAG, "Переход к окну редактирования счёта");
                 goToAccountEdit(account);
             }
         });
@@ -135,7 +134,7 @@ public class TransfersAccountsFragment extends Fragment {
         adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
             @Override
             public void onAccountLongClick(Account account) {
-                Log.d(TAG, " Длительное нажатие на счет переводов: " + account.getTitle());
+            Log.d(TAG, "Длительное нажатие на счёт");
                 showDeleteConfirmationDialog(account);
             }
         });
@@ -174,15 +173,15 @@ public class TransfersAccountsFragment extends Fragment {
      */
     private void deleteAccount(Account account) {
         try {
-            Log.d(TAG, "🗑️ Удаляем счет из базы данных: " + account.getTitle());
+            Log.d(TAG, "Удаление счёта: ID=" + account.getId());
             
             AccountService accountService = new AccountService(requireContext(), "default_user");
             accountService.delete(false, account);
             
-            Log.d(TAG, "✅ Запрос на удаление счета отправлен: " + account.getTitle());
+            Log.d(TAG, "Запрос на удаление счёта отправлен: ID=" + account.getId());
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
         }
     }
 } 

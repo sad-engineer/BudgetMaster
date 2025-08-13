@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
 /**
  * Универсальный ViewHolder для элементов с возможностью выбора
@@ -30,6 +31,9 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private boolean isSelectionMode = false;
     private boolean isSelected = false;
     private int boundItemId = -1;
+    
+    // Форматтер для сумм
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     
     // Обработчики
     private OnItemClickListener itemClickListener;
@@ -247,7 +251,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
         
-        Log.d(TAG, "🔄 bind() для элемента " + id + " (позиция " + position + "): " + 
+        Log.d(TAG, "bind() для элемента " + id + " (позиция " + position + "): " + 
             "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected);
         
         // Устанавливаем значения
@@ -262,7 +266,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         if (sumText != null) {
             double rubles = sum / 100.0;
-            sumText.setText(String.format("%.2f RUB", rubles));
+            sumText.setText(formatter.formatCompact(rubles) + " RUB");
         }
         
         // Полупрозрачность для элементов с позицией 0
