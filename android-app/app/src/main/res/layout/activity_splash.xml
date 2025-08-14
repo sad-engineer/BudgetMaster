@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="20dp">
+
+    <!-- Калькулятор -->
+    <ImageView
+        android:id="@+id/calculator_image"
+        android:layout_width="300dp"
+        android:layout_height="350dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/calculator"
+        android:contentDescription="Calculator"
+        android:scaleType="fitCenter"/>
+
+    <!-- Дисплей калькулятора (поверх изображения) -->
+    <TextView
+        android:id="@+id/display_text"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/display_background"
+        android:gravity="center|end"
+        android:padding="10dp"
+        android:text="0"
+        android:textColor="#13664e"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"/>
+
+    <!-- Название приложения -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/calculator_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="Budget Master"
+        android:textSize="28sp"
+        android:textColor="#13664e"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"/>
+
+    <!-- Подзаголовок -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/calculator_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:text="Управляйте своими финансами"
+        android:textSize="16sp"
+        android:textColor="#666666"
+        android:fontFamily="sans-serif-light"/>
+
+</RelativeLayout>

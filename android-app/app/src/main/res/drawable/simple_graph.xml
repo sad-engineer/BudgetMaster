@@ -1,0 +1,51 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="800dp"
+    android:height="800dp"
+    android:viewportWidth="800"
+    android:viewportHeight="800">
+  
+  <!-- Y-ось (вертикальная) -->
+  <path
+      android:pathData="M100,700 L100,100"
+      android:strokeWidth="3"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"/>
+  
+  <!-- X-ось (горизонтальная) -->
+  <path
+      android:pathData="M100,700 L700,700"
+      android:strokeWidth="3"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"/>
+  
+  <!-- Линия графика -->
+  <path
+      android:pathData="M100,650 L150,300 L200,500 L300,200 L400,350 L500,250 L700,150"
+      android:strokeWidth="4"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"
+      android:strokeLineCap="round"/>
+  
+  <!-- Вертикальные пунктирные линии -->
+  <path
+      android:pathData="M200,500 L200,700"
+      android:strokeWidth="2"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"
+      android:strokeDashArray="5,5"/>
+  
+  <path
+      android:pathData="M400,350 L400,700"
+      android:strokeWidth="2"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"
+      android:strokeDashArray="5,5"/>
+  
+  <path
+      android:pathData="M600,250 L600,700"
+      android:strokeWidth="2"
+      android:strokeColor="#2E7D32"
+      android:fillColor="#00000000"
+      android:strokeDashArray="5,5"/>
+  
+</vector>
