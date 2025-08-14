@@ -149,6 +149,21 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     }
 
     /**
+     * Комплексная инициализация стандартного тулбара по фиксированным ID
+     * back_button, menu_button, toolbar_title, position_change_button.
+     * Любой из элементов может отсутствовать в конкретном layout.
+     */
+    protected void setupStandardToolbar() {
+        setupMenuButton(R.id.menu_button);
+        setupBackButton(R.id.back_button);
+        // Кнопка смены позиции — просто логируем клик по умолчанию
+        ImageButton positionButton = findViewById(R.id.position_change_button);
+        if (positionButton != null) {
+            positionButton.setOnClickListener(v -> Log.d(TAG, "👆 Нажата кнопка смены позиции"));
+        }
+    }
+
+    /**
      * Обработка выбора пунктов меню
      * @param item - выбранный пункт меню
      * @return true, если обработка выполнена успешно

@@ -11,6 +11,11 @@
     <color name="red">#FFFF0000</color>
     <color name="yellow">#FFFFF000</color>
     <color name="gray">#FF808080</color>
+
+    <!-- Цвета для универсального тулбара -->
+    <color name="toolbar_content_common_background">@color/dark_gray</color>
+    <color name="toolbar_content_common_icons">@color/green</color>
+    <color name="toolbar_content_common_texts">@color/white</color>
     
     <!-- Глобальные цвета навигации -->
     <color name="navigation_background">@color/dark_gray</color>

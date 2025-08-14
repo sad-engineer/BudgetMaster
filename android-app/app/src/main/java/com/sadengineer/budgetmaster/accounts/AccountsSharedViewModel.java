@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
+import com.sadengineer.budgetmaster.base.SelectionListViewModel;    
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +21,22 @@ import java.util.concurrent.Executors;
  * Shared ViewModel для экрана счетов. Держит общий режим выбора и
  * выполняет мягкое удаление в фоновой очереди.
  */
-public class AccountsSharedViewModel extends AndroidViewModel {
+public class AccountsSharedViewModel extends AndroidViewModel implements SelectionListViewModel {
 
     private static final String TAG = "AccountsSharedViewModel";
-    
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
+    private AccountService accountService;
+    // LiveData для управления режимом выбора и мягким удалением
     private final MutableLiveData<Boolean> selectionMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> deleting = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> softDeletionDone = new MutableLiveData<>();
-     private final MutableLiveData<List<Account>> selectedAccounts = new MutableLiveData<>();
+    private final MutableLiveData<List<Account>> selectedAccounts = new MutableLiveData<>();
 
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
-    private final AccountService accountService;
 
     /**
      * Конструктор
@@ -38,14 +44,16 @@ public class AccountsSharedViewModel extends AndroidViewModel {
      */
     public AccountsSharedViewModel(@NonNull Application application) {
         super(application);
-        accountService = new AccountService(application.getApplicationContext(), "default_user");
+        // Сервисы для работы с данными
+        accountService = new AccountService(application.getApplicationContext(), userName);
     }
 
     /**
      * Возвращает режим выбора
      * @return режим выбора
      */
-        public LiveData<Boolean> getSelectionMode() {
+    @Override
+    public LiveData<Boolean> getSelectionMode() {
         return selectionMode;
     }
 
@@ -53,6 +61,7 @@ public class AccountsSharedViewModel extends AndroidViewModel {
      * Возвращает состояние удаления
      * @return состояние удаления
      */
+    @Override
     public LiveData<Boolean> getDeleting() {
         return deleting;
     }
@@ -61,6 +70,7 @@ public class AccountsSharedViewModel extends AndroidViewModel {
      * Возвращает количество удаленных счетов
      * @return количество удаленных счетов
      */
+    @Override
     public LiveData<Integer> getSoftDeletionDone() {
         return softDeletionDone;
     }
@@ -76,6 +86,7 @@ public class AccountsSharedViewModel extends AndroidViewModel {
     /**
      * Включает режим выбора
      */
+    @Override
     public void enableSelectionMode() {
         selectionMode.setValue(true);
     }
@@ -83,6 +94,7 @@ public class AccountsSharedViewModel extends AndroidViewModel {
     /**
      * Отменяет режим выбора
      */
+    @Override
     public void cancelSelectionMode() {
         selectionMode.setValue(false);
          selectedAccounts.setValue(null);
@@ -149,7 +161,8 @@ public class AccountsSharedViewModel extends AndroidViewModel {
      /**
       * Делает softDelete для текущего набора выбранных счетов из ViewModel.
       */
-     public void deleteSelectedAccountsSoft() {
+    @Override
+    public void deleteSelectedItemsSoft() {
          List<Account> accounts = selectedAccounts.getValue();
          deleteAccountsSoft(accounts);
      }

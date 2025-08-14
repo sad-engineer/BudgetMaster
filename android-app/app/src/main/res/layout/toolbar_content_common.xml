@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="0dp"
+    android:paddingEnd="0dp"
+    android:background="@color/toolbar_content_common_background">
+
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/icon_back"
+        android:src="@drawable/ic_back"
+        android:tint="@color/toolbar_content_common_icons" />
+
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/icon_menu"
+        android:src="@drawable/ic_menu"
+        android:tint="@color/toolbar_content_common_icons" />
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/toolbar_content_common_texts" />
+
+    <View
+        android:id="@+id/toolbar_reserve"
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/position_change_button"
+        android:layout_width="@dimen/menu_button_size"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/icon_position_change"
+        android:src="@drawable/ic_position_change"
+        android:tint="@color/toolbar_content_common_icons" />
+
+</LinearLayout>
+
+

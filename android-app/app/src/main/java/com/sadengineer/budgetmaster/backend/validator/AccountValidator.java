@@ -69,29 +69,32 @@ public class AccountValidator {
      * @param type - тип счета для валидации
      * @throws IllegalArgumentException если тип невалиден
      */
-    public static void validateType(String type) {
+    public static void validateType(Integer type) {
         if (type == null) {
             throw new IllegalArgumentException("Тип счета не может быть пустым");
         }
         
-        if (!type.equals("1") && !type.equals("2") && !type.equals("3")) {
+        if (type != 1 && type != 2 && type != 3) {
             throw new IllegalArgumentException("Тип счета должен быть 1, 2 или 3");
         }
     }
     
     /**
-     * Валидирует валюту счета
-     * @param currency - валюта для валидации
+     * Валидирует ID валюты счета
+     * @param currencyID - валюта для валидации
      * @throws IllegalArgumentException если валюта невалидна
      */
-    public static void validateCurrency(String currency) {
-        if (currency == null || currency.trim().isEmpty()) {
-            throw new IllegalArgumentException("Валюта не может быть пустой");
+    public static void validateCurrencyID(int currencyID) {
+        if (currencyID < 1) {
+            throw new IllegalArgumentException("ID валюты не может быть меньше 1");
         }
         
-        // Проверяем, что валюта состоит из 3 букв
-        if (!currency.matches("^[A-Z]{3}$")) {
-            throw new IllegalArgumentException("Валюта должна состоять из 3 заглавных букв");
+        // Проверяем, что ID валюты состоит из цифр
+        if (!String.valueOf(currencyID).matches("^[0-9]+$")) {
+            throw new IllegalArgumentException("ID валюты должен состоять из цифр");
         }
     }
+    
+
+
 } 

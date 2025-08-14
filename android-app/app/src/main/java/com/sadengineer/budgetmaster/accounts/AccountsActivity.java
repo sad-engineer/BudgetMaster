@@ -3,19 +3,13 @@ package com.sadengineer.budgetmaster.accounts;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.LayoutInflater;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 
 import com.google.android.material.tabs.TabLayout;
@@ -28,17 +22,12 @@ import java.util.ArrayList;
 /**
  * Activity для отображения списка счетов
  */
-public class AccountsActivity extends BaseNavigationActivity {
+public class AccountsActivity extends BaseCardsActivity<Account> {
     
     private static final String TAG = "AccountsActivity";
     
-    private ImageButton addAccountButton;
-    private ImageButton deleteAccountButton;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
-    private View emptySpace;
-    private ProgressBar loadingIndicator;
-    private boolean isSelectionMode = false;
     private AccountsSharedViewModel viewModel;
 
     /**
@@ -49,53 +38,44 @@ public class AccountsActivity extends BaseNavigationActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accounts);
-
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        // Устанавливаем заголовок для режима создания
+        setToolbarTitle(
+            R.string.toolbar_title_accounts, 
+            R.dimen.toolbar_text_accounts);
 
+        // Общая привязка кнопок и placeholder для индикатора
+        // Используем резерв в тулбаре как placeholder индикатора
+        setupCommonCardsUi(0, R.id.add_account_button_bottom, R.id.delete_account_button_bottom, R.id.toolbar_reserve);
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(AccountsSharedViewModel.class);
+        // Привязываем ViewModel к базовой логике кнопок/индикатора (важно: после setupCommonCardsUi)
+        bindSelectionViewModel(viewModel);
 
         // Настраиваем TabLayout и ViewPager2
         setupViewPager();
-        
-        // Обработчики кнопок счетов
-        setupButtons();
-        
-        // Инициализируем пустое место
-        emptySpace = findViewById(R.id.empty_space);
+    }
 
-        // Наблюдаем за режимом выбора, чтобы обновлять иконки
-        viewModel.getSelectionMode().observe(this, enabled -> {
-            isSelectionMode = Boolean.TRUE.equals(enabled);
-            if (isSelectionMode) {
-                addAccountButton.setImageResource(R.drawable.ic_save);
-                deleteAccountButton.setImageResource(R.drawable.ic_back);
-            } else {
-                addAccountButton.setImageResource(R.drawable.ic_add);
-                deleteAccountButton.setImageResource(R.drawable.ic_delete);
-            }
-        });
+    /**
+     * Обработчик клика «Добавить».
+     */
+    @Override
+    protected void onAddClicked() {
+        // Запускаем окно создания счета (режим выбора обрабатывается базовым классом)
+        Intent intent = new Intent(AccountsActivity.this, AccountsEditActivity.class);
+        intent.putExtra("source_tab", viewPager != null ? viewPager.getCurrentItem() : 0);
+        startActivity(intent);
+    }
 
-        // Логируем результат мягкого удаления
-        viewModel.getSoftDeletionDone().observe(this, count -> {
-            if (count != null) {
-                Log.d(TAG, "Удалено счетов: " + count);
-            }
-        });
-        
-        // Наблюдаем за состоянием удаления для показа индикатора
-        viewModel.getDeleting().observe(this, isDeleting -> {
-            if (isDeleting != null) {
-                if (isDeleting) {
-                    showLoadingIndicator();
-                } else {
-                    hideLoadingIndicator();
-                }
-            }
-        });
+    /**
+     * Обработчик клика «Удалить/Режим выбора».
+     */
+    @Override
+    protected void onDeleteClicked() {
+        // Поведение переключения режима выбора обрабатывается базовым классом через ViewModel
     }
     
     /**
@@ -127,91 +107,5 @@ public class AccountsActivity extends BaseNavigationActivity {
                 }
             }
         ).attach();
-    }
-    
-    /**
-     * Настраивает кнопки
-     */
-    private void setupButtons() {
-        addAccountButton = findViewById(R.id.add_account_button_bottom);
-        deleteAccountButton = findViewById(R.id.delete_account_button_bottom);
-
-        /**
-         * Обработчик нажатия на кнопку добавления счета
-         */
-        addAccountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // В режиме выбора - мягко удаляем выбранные счета через ViewModel
-                    viewModel.deleteSelectedAccountsSoft();
-                } else {
-                    // Запускаем окно создания счета
-                    Intent intent = new Intent(AccountsActivity.this, AccountsEditActivity.class);
-                    // Передаем текущую вкладку
-                    intent.putExtra("source_tab", viewPager.getCurrentItem());
-                    startActivity(intent);
-                }
-            }
-        });
-
-        /**
-         * Обработчик нажатия на кнопку удаления счетов
-         */
-        deleteAccountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // В режиме выбора - отменяем выбор через ViewModel
-                    viewModel.cancelSelectionMode();
-                } else {
-                    // Включаем режим выбора
-                    viewModel.enableSelectionMode();
-                }
-            }
-        });
-    }    
-    
-    /**
-     * Показывает индикатор загрузки, заменяя пустое место
-     */
-    private void showLoadingIndicator() {
-        if (loadingIndicator == null) {
-            // Создаем индикатор загрузки
-            LayoutInflater inflater = LayoutInflater.from(this);
-            loadingIndicator = (ProgressBar) inflater.inflate(R.layout.loading_indicator, null);
-            
-            // Заменяем пустое место на индикатор
-            ViewGroup parent = (ViewGroup) emptySpace.getParent();
-            int index = parent.indexOfChild(emptySpace);
-            parent.removeView(emptySpace);
-            parent.addView(loadingIndicator, index);
-        }
-    }
-    
-    /**
-     * Скрывает индикатор загрузки, возвращая пустое место
-     */
-    private void hideLoadingIndicator() {
-        if (loadingIndicator != null) {
-            // Возвращаем пустое место
-            ViewGroup parent = (ViewGroup) loadingIndicator.getParent();
-            int index = parent.indexOfChild(loadingIndicator);
-            parent.removeView(loadingIndicator);
-            parent.addView(emptySpace, index);
-            loadingIndicator = null;
-        }
-    }
-    
-    /**
-     * Обработчик нажатия на кнопку "Назад"
-     */
-    @Override
-    public void onBackPressed() {
-        if (isSelectionMode) {
-            viewModel.cancelSelectionMode();
-        } else {
-            super.onBackPressed();
-        }
     }
 }

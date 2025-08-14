@@ -14,24 +14,22 @@ import android.widget.CheckBox;
 import android.widget.ArrayAdapter;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.List;
 import java.util.ArrayList;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 /**
  * Activity для создания/изменения счета
  */
-public class AccountsEditActivity extends BaseNavigationActivity {
+public class AccountsEditActivity extends BaseEditActivity<Account> {
     
     private static final String TAG = "AccountsEditActivity";
     
@@ -40,20 +38,33 @@ public class AccountsEditActivity extends BaseNavigationActivity {
     private Spinner accountCurrencySpinner;
     private Spinner accountTypeSpinner;
     private CheckBox accountClosedCheckbox;
-    private ImageButton saveButton;
-    private ImageButton backButton;
-    private ImageButton menuButton;
-    private AccountService accountService;
-    private CurrencyService currencyService;
-    private AccountValidator accountValidator;
-    private CurrencyAmountFormatter formatter;
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
+    // Сервисы для работы с данными
+    private AccountService accountService = new AccountService(this, userName);
+    private CurrencyService currencyService = new CurrencyService(this, userName);
+    private AccountValidator accountValidator = new AccountValidator();
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     
     // Поля для хранения данных счета
     private Account currentAccount;
     private boolean isEditMode = false;
     private List<Currency> currencies = new ArrayList<>();
     private int sourceTab = 0; // Вкладка, с которой был вызван переход
-    
+
+    // Константы 
+    /** Тип счета по умолчанию 1 */
+    private final int DEFAULT_ACCOUNT_TYPE = ModelConstants.DEFAULT_ACCOUNT_TYPE;
+    /** Баланс счета по умолчанию 0 */
+    private final int DEFAULT_ACCOUNT_BALANCE = ModelConstants.DEFAULT_ACCOUNT_BALANCE;
+    /** Статус счета по умолчанию 0 */
+    private final int DEFAULT_ACCOUNT_STATUS_OPEN = ModelConstants.DEFAULT_ACCOUNT_STATUS_OPEN;
+    /** ID валюты по умолчанию 1 */
+    private final int DEFAULT_CURRENCY_ID = ModelConstants.DEFAULT_CURRENCY_ID;
+
     /**
      * Метод вызывается при создании Activity
      * @param savedInstanceState - сохраненное состояние Activity
@@ -69,30 +80,18 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         accountCurrencySpinner = findViewById(R.id.account_currency_spinner);
         accountTypeSpinner = findViewById(R.id.account_type_spinner);
         accountClosedCheckbox = findViewById(R.id.account_closed_checkbox);
-        saveButton = findViewById(R.id.save_button);
-        backButton = findViewById(R.id.back_button);
-        menuButton = findViewById(R.id.menu_button);
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
+        setupStandardToolbar();
+        // Инициализация общих действий экрана редактирования: save/cancel могут отсутствовать
+        setupCommonEditActions(R.id.position_change_button);
 
-        // Инициализация сервисов
-        accountService = new AccountService(this, "default_user");
-        currencyService = new CurrencyService(this, "default_user");
-        
-        // Инициализация форматтера для суммы счета
-        formatter = new CurrencyAmountFormatter();
-        
         // Настраиваем спиннеры
         setupSpinners();
         
         // Получаем данные из Intent и заполняем поля
         loadAccountData();
-        
-        // Обработчики кнопок
-        setupButtonHandlers();
         
         // Настройка обработчика поля ввода суммы
         setupAmountFieldHandler();
@@ -103,6 +102,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
      */
     private void setupSpinners() {
         // Настройка спиннера валют
+        //TODO: передлать на синхронный запрос к DAO и не использовать LiveData
         currencyService.getAll().observe(this, currencies -> {
             if (currencies != null && !currencies.isEmpty()) {
                 // Создаем массив названий валют
@@ -122,7 +122,10 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         });
         
         // Настройка спиннера типов счетов
-        String[] accountTypes = {"Текущий", "Сберегательный", "Перевод"};
+        String[] accountTypes = {
+            getString(R.string.tab_current), 
+            getString(R.string.tab_savings), 
+            getString(R.string.tab_transfers)};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, 
             android.R.layout.simple_spinner_item, accountTypes);
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -133,7 +136,7 @@ public class AccountsEditActivity extends BaseNavigationActivity {
             accountBalanceEdit.clearFocus();
             return false; // Позволяем спиннеру обрабатывать событие дальше
         });
-        
+    
         accountTypeSpinner.setOnTouchListener((v, event) -> {
             accountBalanceEdit.clearFocus();
             return false; // Позволяем спиннеру обрабатывать событие дальше
@@ -148,54 +151,69 @@ public class AccountsEditActivity extends BaseNavigationActivity {
         try {
             // Получаем счет из Intent
             currentAccount = (Account) getIntent().getSerializableExtra("account");
-            
             // Получаем информацию о вкладке
             sourceTab = getIntent().getIntExtra("source_tab", 0);
-            Log.d(TAG, "Открыто редактирование счёта. Вкладка: " + sourceTab);
-            
             if (currentAccount != null) {
                 // Режим редактирования
                 isEditMode = true;
-                Log.d(TAG, "Режим редактирования счёта");
-                
-                // Заполняем поля данными счета
-                accountNameEdit.setText(currentAccount.getTitle());
-                // Показываем сумму в рублях (копейки -> рубли)
-                double amount = currentAccount.getAmount() / 100.0;
-                accountBalanceEdit.setText(formatter.format(amount));
-                
-                // Устанавливаем тип счета
-                int accountType = currentAccount.getType();
-                int[] accountTypePositions = {0, 0, 1, 2}; // [0, текущий, сберегательный, перевод]
-                int position = (accountType >= 0 && accountType < accountTypePositions.length) 
-                    ? accountTypePositions[accountType] : 0;
-                accountTypeSpinner.setSelection(position);
-                
-                // Устанавливаем статус закрытия
-                accountClosedCheckbox.setChecked(currentAccount.getClosed() == 1);
-                
-                // Устанавливаем валюту (будет установлена после загрузки валют)
-                setSelectedCurrency(currentAccount.getCurrencyId());
-                
+                Log.d(TAG, "Открыто редактирование счёта. Вкладка: " + sourceTab);
+                // Наполняем поля данными счета
+                fillData();
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_account_edit, R.dimen.toolbar_text_account_edit);
                 
             } else {
                 // Режим создания нового счета
                 isEditMode = false;
-                Log.d(TAG, "Режим создания нового счета");
-                
+                Log.d(TAG, "Открыто создание нового счёта. Вкладка: " + sourceTab);
+                // Устанавливаем дефолтные данные
+                setDefaultData();
                 // Устанавливаем заголовок для режима создания
-                setToolbarTitle(R.string.toolbar_title_account_add, R.dimen.toolbar_text_account_add);
+                setToolbarTitle(
+                    R.string.toolbar_title_account_add, 
+                    R.dimen.toolbar_text_account_add);
             }
-            
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки данных счета: " + e.getMessage(), e);
             isEditMode = false;
-            
             // Устанавливаем заголовок для режима создания по умолчанию
             setToolbarTitle(R.string.toolbar_title_account_add, R.dimen.toolbar_text_account_add);
+            // Устанавливаем дефолтные данные
+            setDefaultData();
         }
+    }
+
+    /** 
+     * Устанавливает дефолтные данные вызове окна на создание нового счета или при ошибке загрузки данных счета 
+     */
+     private void setDefaultData() {
+        accountBalanceEdit.setText(formatter.format(DEFAULT_ACCOUNT_BALANCE));
+        accountTypeSpinner.setSelection(DEFAULT_ACCOUNT_TYPE - 1);
+        setSelectedCurrencyId(DEFAULT_CURRENCY_ID);
+    }
+
+    /** 
+     * Наполняет поля окна данными редактиируемого счета
+     */
+    private void fillData() {
+         // Заполняем поля данными счета
+         accountNameEdit.setText(currentAccount.getTitle());
+         // Показываем сумму в рублях (копейки -> рубли)
+         double amount = currentAccount.getAmount() / 100.0;
+         accountBalanceEdit.setText(formatter.format(amount));
+         
+         // Устанавливаем тип счета
+         int accountType = currentAccount.getType();
+         int[] accountTypePositions = {0, 0, 1, 2}; // [0, текущий, сберегательный, кредитный]
+         int position = (accountType >= 0 && accountType < accountTypePositions.length) 
+             ? accountTypePositions[accountType] : 0;
+         accountTypeSpinner.setSelection(position);
+         
+         // Устанавливаем статус закрытия
+         accountClosedCheckbox.setChecked(currentAccount.getClosed() == 1);
+         
+         // Устанавливаем валюту (будет установлена после загрузки валют)
+         setSelectedCurrencyId(currentAccount.getCurrencyId());
     }
     
     /**
@@ -227,52 +245,46 @@ public class AccountsEditActivity extends BaseNavigationActivity {
                 }
             }
         });
-    }
-    
-    /**
-     * Настраивает обработчики кнопок
-     */
-    private void setupButtonHandlers() {
-        // Кнопка сохранения
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Нажата кнопка 'Сохранить'");
-                saveAccount();
-            }
-        });
-    }
+    }    
     
     /**
      * Переопределяем настройку кнопки "назад" для перехода к списку счетов
      */
     @Override
     protected void setupBackButton(int backButtonId) {
-        if (backButton != null) {
-            backButton.setOnClickListener(v -> {
+        ImageButton back = findViewById(backButtonId);
+        if (back != null) {
+            back.setOnClickListener(v -> {
                 Log.d(TAG, "Нажата кнопка 'Назад'");
-                // Возвращаемся к списку счетов
                 returnToAccounts();
             });
         }
     }
     
     /**
-     * Сохраняет счет в базу данных
+     * Сохраняет данные из полей окна в счет и сохраняет его в базу данных
      */
     private void saveAccount() {
-        String accountName = accountNameEdit.getText().toString().trim();
-        String balanceText = accountBalanceEdit.getText().toString().trim();
-        
+        int balance = DEFAULT_ACCOUNT_BALANCE;
+
         // Валидация названия счета
-        // TODO: Валидация названия счета
-        
+        String accountName = accountNameEdit.getText().toString().trim();
+        try {
+            accountValidator.validateTitle(accountName);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ошибка валидации названия счета: " + e.getMessage(), e);
+            accountNameEdit.setError(e.getMessage());
+            accountNameEdit.requestFocus();
+            return;
+        }
+
         // Валидация баланса
-        int balance = 0;
+        String balanceText = accountBalanceEdit.getText().toString().trim();
         if (!TextUtils.isEmpty(balanceText)) {
             try {
                 // Конвертируем рубли в копейки
                 double amount = formatter.parseSafe(balanceText);
+                accountValidator.validateBalance(amount);
                 balance = (int) (amount * 100);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Ошибка парсинга баланса: " + balanceText, e);
@@ -282,74 +294,95 @@ public class AccountsEditActivity extends BaseNavigationActivity {
                 return; // Прерываем сохранение
             }
         }
-        
-        
-        // Получаем выбранные значения из спиннеров
-        int selectedCurrencyId = getSelectedCurrencyId();
-        int accountType = getAccountTypeFromSpinner();
-        int isClosed = accountClosedCheckbox.isChecked() ? 1 : 0; // 0=open, 1=closed
 
+        // Валидация ти счета
+        int accountType = getAccountTypeFromSpinner();
         try {
-            if (isEditMode && currentAccount != null) {
+            accountValidator.validateType(accountType);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ошибка валидации типа счета: " + e.getMessage(), e);
+            ((TextView) accountTypeSpinner.getSelectedView()).setError(e.getMessage());
+            ((TextView) accountTypeSpinner.getSelectedView()).requestFocus();
+            return;
+        }
+
+        // Получаем статус закрытия
+        int isClosed = accountClosedCheckbox.isChecked() ? 1 : 0; // 0=open, 1=closed
+        
+        // Валидация ID валюты
+        Integer selectedCurrencyID = getSelectedCurrencyId();
+        try {
+            accountValidator.validateCurrencyID(selectedCurrencyID);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ошибка валидации ID валюты: " + e.getMessage(), e);
+            ((TextView) accountCurrencySpinner.getSelectedView()).setError(e.getMessage());
+            ((TextView) accountCurrencySpinner.getSelectedView()).requestFocus();
+            return;
+        }
+
+        // Создаем счет
+        try {
+            if (isEditMode && currentAccount  != null) {
                 // Режим редактирования
-                Log.d(TAG, "Нажата кнопка 'Сохранить'");
-                
                 // Обновляем данные счета через сервис
                 currentAccount.setTitle(accountName);
                 currentAccount.setAmount(balance);
                 currentAccount.setType(accountType);
-                currentAccount.setCurrencyId(selectedCurrencyId);
+                currentAccount.setCurrencyId(selectedCurrencyID);
                 currentAccount.setClosed(isClosed);
-
                 if (currentAccount.isDeleted()) {
-                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + ", действие: restore");
+                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + " в режиме редактирования, действие: restore");
                     accountService.restore(currentAccount);
                 } else {
-                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + ", действие: update");
+                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + " в режиме редактирования, действие: update");
                     accountService.update(currentAccount);
                 }
-                
-                Log.d(TAG, "Запрос на обновление счета отправлен");
-                
+                Log.d(TAG, "Запрос на обновление счета: ID=" + currentAccount.getId() + " в режиме редактирования отправлен");
             } else {
                 // Режим создания нового счета
-                Log.d(TAG, "Нажата кнопка 'Сохранить'");
-
-                // Проверяем существование счета
+                Log.d(TAG, "Запрос на создание нового счета: " + accountName + " отправлен");
+                // Проверяем существование счета 
+                //TODO: передлать на синхронный запрос к DAO и не использовать LiveData
                 Account existingAccount = accountService.getByTitle(accountName).getValue();
                 if (existingAccount != null) {
-                    Log.i(TAG, "Создание отменено: счёт уже существует");
+                    Log.i(TAG, "Создание нового счета: " + accountName + " отменено: счёт уже существует");
                     return;
                 }
                 // Если счет не существует, то создаем его
-                accountService.create(accountName, selectedCurrencyId, balance, accountType, isClosed);
-                
-                Log.d(TAG, "Запрос на создание счета отправлен");
+                accountService.create(accountName, selectedCurrencyID, balance, accountType, isClosed);
+                Log.d(TAG, "Запрос на создание счета: " + accountName + " отправлен");
             }
-            
             // Возвращаемся к списку счетов
             returnToAccounts();
-
         } catch (Exception e) {
             Log.e(TAG, "Критическая ошибка при сохранении счета: " + e.getMessage(), e);
         }
+    }
+
+    // Реализация абстрактного метода базового класса. Здесь можно переиспользовать текущую логику сохранения.
+    @Override
+    protected boolean validateAndSave() {
+        // Выполняем сохранение существующей логикой
+        saveAccount();
+        // Если дошли сюда, считаем, что сохранение прошло (ошибки обработаны внутри saveAccount())
+        return true;
     }
     
     /**
      * Получает ID выбранной валюты
      */
-    private int getSelectedCurrencyId() {
+    private Integer getSelectedCurrencyId() {
         int position = accountCurrencySpinner.getSelectedItemPosition();
         if (position >= 0 && position < currencies.size()) {
             return currencies.get(position).getId();
         }
-        return 1; // По умолчанию RUB
+        return DEFAULT_CURRENCY_ID; // По умолчанию RUB
     }
     
     /**
      * Устанавливает выбранную валюту по ID
      */
-    private void setSelectedCurrency(int currencyId) {
+    private void setSelectedCurrencyId(int currencyId) {
         for (int i = 0; i < currencies.size(); i++) {
             if (currencies.get(i).getId() == currencyId) {
                 accountCurrencySpinner.setSelection(i);
@@ -363,39 +396,16 @@ public class AccountsEditActivity extends BaseNavigationActivity {
      */
     private int getAccountTypeFromSpinner() {
         int position = accountTypeSpinner.getSelectedItemPosition();
-        int[] accountTypes = {1, 2, 3}; // [текущий, сберегательный, перевод]
+        int[] accountTypes = {1, 2, 3}; // [текущий, сберегательный, кредитный]
         return (position >= 0 && position < accountTypes.length) 
-            ? accountTypes[position] : 1; // По умолчанию текущий
-    }
-    
-    /**
-     * Устанавливает заголовок тулбара
-     * @param titleResId - ресурс строки для заголовка
-     * @param textSizeResId - ресурс размера шрифта
-     */
-    private void setToolbarTitle(int titleResId, int textSizeResId) {
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        if (toolbarTitle != null) {
-            toolbarTitle.setText(titleResId);
-                Log.d(TAG, "Заголовок тулбара установлен");
-            
-            // Устанавливаем размер шрифта
-            float textSize = getResources().getDimension(textSizeResId);
-            toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-                Log.d(TAG, "Размер шрифта установлен");
-        }
+            ? accountTypes[position] : DEFAULT_ACCOUNT_TYPE; // По умолчанию текущий
     }
 
     /**
      * Возвращается к списку счетов
      */
     private void returnToAccounts() {
-        // Переходим к списку счетов
         Log.d(TAG, "Переход к окну списка счетов, вкладка " + sourceTab);
-        Intent intent = new Intent(this, AccountsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("selected_tab", sourceTab);
-        startActivity(intent);
-        finish();
-    }   
+        returnTo(AccountsActivity.class, "selected_tab", sourceTab);
+    }
 }
