@@ -6,7 +6,7 @@
     <string name="toolbar_title_accounts">Счета и переводы</string>
     <string name="toolbar_title_income">Доходы</string>
     <string name="toolbar_title_expense">Расходы</string>
-    <string name="toolbar_title_budget">Бюджет</string>
+    <string name="toolbar_title_budgets">Бюджеты</string>
     <string name="toolbar_title_income_categories">Категории доходов</string>
     <string name="toolbar_title_expense_categories">Категории расходов</string>
     <string name="toolbar_title_import_data">Загрузить данные</string>
@@ -28,6 +28,8 @@
     <string name="toolbar_title_add_category">Добавить категорию</string>
     <string name="toolbar_title_category_edit">Редактировать категорию</string>
     <string name="toolbar_title_category_add">Добавить категорию</string>
+    <string name="toolbar_title_budget_edit">Редактировать бюджет</string>
+    <string name="toolbar_title_budget_add">Добавить бюджет</string>
 
     <!-- Описания иконок -->
     <string name="icon_back">Кнопка назад</string>

@@ -7,7 +7,7 @@
     android:gravity="center_vertical"
     android:paddingStart="0dp"
     android:paddingEnd="0dp"
-    android:background="@color/toolbar_content_common_background">
+    android:layout_gravity="fill">
 
     <ImageButton
         android:id="@+id/back_button"

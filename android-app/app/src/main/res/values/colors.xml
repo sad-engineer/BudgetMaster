@@ -13,7 +13,7 @@
     <color name="gray">#FF808080</color>
 
     <!-- Цвета для универсального тулбара -->
-    <color name="toolbar_content_common_background">@color/dark_gray</color>
+    <color name="toolbar_content_common_background">@color/black</color>
     <color name="toolbar_content_common_icons">@color/green</color>
     <color name="toolbar_content_common_texts">@color/white</color>
     

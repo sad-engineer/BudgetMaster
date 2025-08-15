@@ -29,22 +29,37 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private boolean isSelectionMode = false;
     private Set<Integer> selectedCurrencies = new HashSet<>();
     
+    /**
+     * Интерфейс для обработки кликов на валюте
+     */
     public interface OnCurrencyClickListener {
         void onCurrencyClick(Currency currency);
     }
     
+    /**
+     * Интерфейс для обработки длинных кликов на валюте
+     */
     public interface OnCurrencyLongClickListener {
         void onCurrencyLongClick(Currency currency);
     }
     
+    /**
+     * Конструктор адаптера
+     */
     public CurrencyAdapter(OnCurrencyClickListener listener) {
         this.listener = listener;
     }
     
+    /**
+     * Устанавливает обработчик длинных кликов
+     */
     public void setLongClickListener(OnCurrencyLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
     }
     
+    /**
+     * Создает ViewHolder для элемента списка
+     */
     @NonNull
     @Override
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -83,6 +98,9 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         return holder;
     }
     
+    /**
+     * Привязывает данные к ViewHolder
+     */
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         Currency currency = currencies.get(position);
@@ -98,7 +116,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
 
     /**
-     * Возвращает количество элементов в списке
+     * Возвращает количество элементов в списке валют
      */
     @Override
     public int getItemCount() {
@@ -106,7 +124,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
-     * Обновляет список валют
+     * Обновляет список валют и уведомляет адаптер о необходимости обновления
      */
     public void setCurrencies(List<Currency> currencies) {
         this.currencies = currencies != null ? currencies : new ArrayList<>();
@@ -115,7 +133,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
-     * Включает/выключает режим выбора
+     * Включает/выключает режим выбора и очищает выбранные валюты
      */
     public void setSelectionMode(boolean enabled) {
         this.isSelectionMode = enabled;
@@ -126,7 +144,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
-     * Получает выбранные валюты
+     * Получает список выбранных валют
      */
     public List<Currency> getSelectedCurrencies() {
         List<Currency> selected = new ArrayList<>();
@@ -140,7 +158,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
-     * Очищает выбор
+     * Очищает выбор и уведомляет адаптер о необходимости обновления
      */
     public void clearSelection() {
         selectedCurrencies.clear();
@@ -148,7 +166,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
-     * Находит валюту по ID
+     * Находит валюту по её ID
      */
     private Currency findCurrencyById(int id) {
         for (Currency currency : currencies) {

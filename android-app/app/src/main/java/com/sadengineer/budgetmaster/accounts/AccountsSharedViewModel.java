@@ -97,7 +97,7 @@ public class AccountsSharedViewModel extends AndroidViewModel implements Selecti
     @Override
     public void cancelSelectionMode() {
         selectionMode.setValue(false);
-         selectedAccounts.setValue(null);
+        selectedAccounts.setValue(null);
     }
 
     /**

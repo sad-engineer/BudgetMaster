@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
-            android:background="@color/currencies_toolbar_background"
+            android:background="@color/toolbar_content_common_background"
             android:elevation="4dp"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"

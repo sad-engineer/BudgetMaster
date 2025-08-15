@@ -8,14 +8,23 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Адаптер для отображения вкладок бюджета
+ */
 public class BudgetPagerAdapter extends FragmentStateAdapter {
 
     private final Map<Integer, Fragment> fragments = new HashMap<>();
 
+    /**
+     * Конструктор адаптера
+     */
     public BudgetPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
 
+    /**
+     * Создает фрагмент для указанной позиции
+     */
     @NonNull
     @Override
     public Fragment createFragment(int position) {
@@ -35,6 +44,9 @@ public class BudgetPagerAdapter extends FragmentStateAdapter {
         return fragment;
     }
 
+    /**
+     * Возвращает количество вкладок
+     */
     @Override
     public int getItemCount() {
         return 2; // 2 вкладки: Лимиты, Осталось
@@ -44,6 +56,7 @@ public class BudgetPagerAdapter extends FragmentStateAdapter {
      * Получает фрагмент по позиции
      */
     public Fragment getFragment(int position) {
+        // Возвращаем фрагмент для указанной позиции
         return fragments.get(position);
     }
 } 

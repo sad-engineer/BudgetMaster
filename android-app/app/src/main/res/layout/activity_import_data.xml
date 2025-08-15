@@ -16,7 +16,7 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/authors_toolbar_background"
+            android:background="@color/toolbar_content_common_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
@@ -26,58 +26,7 @@
             app:contentInsetEnd="0dp"
             app:title="">
 
-            <LinearLayout 
-                android:gravity="center_vertical"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp">
-
-                <ImageButton
-                    android:id="@+id/back_button"
-                    android:layout_width="@dimen/menu_button_size"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_back"
-                    android:rotationX="2"
-                    android:src="@drawable/ic_back"
-                    app:tint="@color/authors_toolbar_icons" />
-
-                 <ImageButton
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/icon_menu"
-                    android:id="@+id/menu_button"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/menu_button_size"
-                    android:src="@drawable/ic_menu"
-                    app:tint="@color/authors_toolbar_icons" />
-
-                <TextView
-                    android:gravity="center"
-                    android:id="@+id/toolbar_title"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:text="@string/menu_import_data"
-                    android:textColor="@color/authors_toolbar_texts"
-                    android:textSize="@dimen/toolbar_text"
-                    android:textStyle="bold" />
-
-                <ImageButton 
-                    android:background="@android:color/transparent"
-                    android:id="@+id/empty_import_data_button_1"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/menu_button_size"
-                    android:visibility="invisible" />
-
-                <ImageButton 
-                    android:background="@android:color/transparent"
-                    android:id="@+id/empty_import_data_button_2"
-                    android:layout_height="match_parent"
-                    android:layout_width="@dimen/menu_button_size"
-                    android:visibility="invisible" />
-            </LinearLayout>
+            <include layout="@layout/toolbar_content_common" />
 
         </androidx.appcompat.widget.Toolbar>
 

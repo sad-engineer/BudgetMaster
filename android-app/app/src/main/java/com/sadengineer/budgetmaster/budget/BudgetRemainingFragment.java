@@ -11,10 +11,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 
+/**
+ * Фрагмент для отображения остатков бюджета
+ */
 public class BudgetRemainingFragment extends Fragment {
 
     private RecyclerView recyclerView;
 
+    /**
+     * Создает представление фрагмента
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

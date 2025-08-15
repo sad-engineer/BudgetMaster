@@ -54,6 +54,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         void onSelectionChanged(int selectedCount);
     }
     
+    /**
+     * Создает ViewHolder для элемента списка
+     */
     @NonNull
     @Override
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -88,6 +91,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         return holder;
     }
     
+    /**
+     * Привязывает данные к ViewHolder
+     */
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
         if (position < budgets.size()) {
@@ -108,6 +114,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         }
     }
     
+    /**
+     * Возвращает количество элементов в списке бюджетов
+     */
     @Override
     public int getItemCount() {
         return budgets.size();

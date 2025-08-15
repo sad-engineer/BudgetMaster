@@ -17,12 +17,12 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".accounts.AccountsActivity">
 
-        <androidx.appcompat.widget.Toolbar 
-            android:background="@color/accounts_toolbar_background"
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
             android:layout_width="0dp"
+            android:background="@color/toolbar_content_common_background"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

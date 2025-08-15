@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
@@ -25,16 +23,13 @@ import java.util.ArrayList;
 /**
  * Activity для создания/изменения бюджета
  */
-public class BudgetEditActivity extends BaseNavigationActivity {
+public class BudgetEditActivity extends BaseEditActivity<Budget> {
     
     private static final String TAG = "BudgetEditActivity";
     
     private EditText budgetAmountEdit;
     private Spinner budgetCategorySpinner;
     private Spinner budgetCurrencySpinner;
-    private ImageButton saveButton;
-    private ImageButton backButton;
-    private ImageButton menuButton;
     private BudgetService budgetService;
     private CategoryService categoryService;
     private CurrencyService currencyService;
@@ -53,18 +48,21 @@ public class BudgetEditActivity extends BaseNavigationActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_edit);
 
-        // Инициализация всех View элементов
-        budgetAmountEdit = findViewById(R.id.budget_amount_edit_text);
-        budgetCategorySpinner = findViewById(R.id.budget_category_spinner);
-        budgetCurrencySpinner = findViewById(R.id.budget_currency_spinner);
-        saveButton = findViewById(R.id.save_button);
-        backButton = findViewById(R.id.back_button);
-        menuButton = findViewById(R.id.menu_button);
-
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.toolbar_title_budget_edit, R.dimen.toolbar_text_budget_edit);
+
+        // Настройка общих кнопок редактирования
+        setupCommonEditActions(R.id.save_button);
+
+        // Инициализация всех View элементов
+        budgetAmountEdit = findViewById(R.id.budget_amount_edit_text);
+        budgetCategorySpinner = findViewById(R.id.budget_category_spinner);
+        budgetCurrencySpinner = findViewById(R.id.budget_currency_spinner);
 
         // Инициализация сервисов
         budgetService = new BudgetService(this, "default_user");
@@ -76,9 +74,6 @@ public class BudgetEditActivity extends BaseNavigationActivity {
         
         // Получаем данные из Intent и заполняем поля
         loadBudgetData();
-        
-        // Обработчики кнопок
-        setupButtonHandlers();
     }
     
     /**
@@ -129,56 +124,40 @@ public class BudgetEditActivity extends BaseNavigationActivity {
     }
     
     /**
-     * Загружает данные бюджета из Intent
+     * Загружает данные бюджета из Intent и заполняет поля
      */
+    @SuppressWarnings("deprecation")
     private void loadBudgetData() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            int budgetId = intent.getIntExtra("budget_id", -1);
-            if (budgetId != -1) {
+        try {
+            // Получаем бюджет из Intent
+            currentBudget = (Budget) getIntent().getSerializableExtra("budget");
+            
+            if (currentBudget != null) {
                 // Режим редактирования
                 isEditMode = true;
-                Log.d(TAG, "🔄 Режим редактирования бюджета ID: " + budgetId);
+                Log.d(TAG, "Режим редактирования бюджета: ID=" + currentBudget.getId());
                 
-                // Загружаем данные бюджета из базы
-                budgetService.getById(budgetId).observe(this, budget -> {
-                    if (budget != null) {
-                        currentBudget = budget;
-                        fillBudgetData();
-                        Log.d(TAG, "✅ Данные бюджета загружены из базы");
-                    } else {
-                        Log.e(TAG, "❌ Бюджет с ID " + budgetId + " не найден");
-                        finish();
-                    }
-                });
+                // Заполняем поля данными бюджета
+                budgetAmountEdit.setText(String.valueOf(currentBudget.getAmount()));
+                
+                // Устанавливаем заголовок для режима редактирования
+                setToolbarTitle(R.string.toolbar_title_budget_edit, R.dimen.toolbar_text_budget_edit);
+                
             } else {
-                // Режим создания
+                // Режим создания нового бюджета
                 isEditMode = false;
-                Log.d(TAG, "🔄 Режим создания нового бюджета");
-            }
-        }
-    }
-    
-    /**
-     * Заполняет поля данными бюджета
-     */
-    private void fillBudgetData() {
-        if (currentBudget != null) {
-            budgetAmountEdit.setText(String.valueOf(currentBudget.getAmount()));
-            
-            // Устанавливаем выбранную категорию
-            int categoryPosition = findCategoryPosition(currentBudget.getCategoryId());
-            if (categoryPosition != -1) {
-                budgetCategorySpinner.setSelection(categoryPosition);
+                Log.d(TAG, "Режим создания нового бюджета");
+                
+                // Устанавливаем заголовок для режима создания
+                setToolbarTitle(R.string.toolbar_title_budget_add, R.dimen.toolbar_text_budget_add);
             }
             
-            // Устанавливаем выбранную валюту
-            int currencyPosition = findCurrencyPosition(currentBudget.getCurrencyId());
-            if (currencyPosition != -1) {
-                budgetCurrencySpinner.setSelection(currencyPosition);
-            }
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка загрузки данных бюджета: " + e.getMessage(), e);
+            isEditMode = false;
             
-            Log.d(TAG, "✅ Данные бюджета загружены в поля");
+            // Устанавливаем заголовок для режима создания по умолчанию
+            setToolbarTitle(R.string.toolbar_title_budget_add, R.dimen.toolbar_text_budget_add);
         }
     }
     
@@ -207,17 +186,10 @@ public class BudgetEditActivity extends BaseNavigationActivity {
     }
     
     /**
-     * Настраивает обработчики кнопок
+     * Выполняет валидацию и сохранение. Реализация для BaseEditActivity.
      */
-    private void setupButtonHandlers() {
-        saveButton.setOnClickListener(v -> saveBudget());
-        backButton.setOnClickListener(v -> finish());
-    }
-    
-    /**
-     * Сохраняет бюджет
-     */
-    private void saveBudget() {
+    @Override
+    protected boolean validateAndSave() {
         Log.d(TAG, "🔄 Сохранение бюджета...");
         
         // Получаем данные из полей
@@ -227,18 +199,20 @@ public class BudgetEditActivity extends BaseNavigationActivity {
         
         // Валидация
         if (TextUtils.isEmpty(amountText)) {
-            budgetAmountEdit.setError("Введите сумму бюджета");
-            return;
+            showFieldError(budgetAmountEdit, "Введите сумму бюджета");
+            return false;
         }
         
         if (categoryPosition == -1 || categoryPosition >= categories.size()) {
             Log.e(TAG, "❌ Не выбрана категория");
-            return;
+            showSpinnerError(budgetCategorySpinner, "Выберите категорию");
+            return false;
         }
         
         if (currencyPosition == -1 || currencyPosition >= currencies.size()) {
             Log.e(TAG, "❌ Не выбрана валюта");
-            return;
+            showSpinnerError(budgetCurrencySpinner, "Выберите валюту");
+            return false;
         }
         
         try {
@@ -254,9 +228,12 @@ public class BudgetEditActivity extends BaseNavigationActivity {
                 createBudget(selectedCategory.getId(), amount, selectedCurrency.getId());
             }
             
+            return true;
+            
         } catch (NumberFormatException e) {
-            budgetAmountEdit.setError("Введите корректную сумму");
+            showFieldError(budgetAmountEdit, "Введите корректную сумму");
             Log.e(TAG, "❌ Ошибка парсинга суммы: " + e.getMessage());
+            return false;
         }
     }
     
@@ -269,7 +246,7 @@ public class BudgetEditActivity extends BaseNavigationActivity {
         budgetService.create(categoryId, amount, currencyId);
         
         Log.d(TAG, "✅ Бюджет создан");
-        finish();
+        returnToBudgets();
     }
     
     /**
@@ -289,6 +266,27 @@ public class BudgetEditActivity extends BaseNavigationActivity {
         budgetService.update(currentBudget);
         
         Log.d(TAG, "✅ Бюджет обновлен");
+        returnToBudgets();
+    }
+
+    /**
+     * Возвращается к списку бюджетов
+     */
+    private void returnToBudgets() {
+        Log.d(TAG, "🔄 Переходим к окну списка бюджетов");
+        Intent intent = new Intent(this, BudgetActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
     }
+
+    /**
+     * Переопределяем обработчик кнопки "Назад" для возврата к списку бюджетов
+     */
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "Нажата кнопка 'Назад'");
+        returnToBudgets();
+    }
 }
+    

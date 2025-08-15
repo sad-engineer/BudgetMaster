@@ -1,187 +1,149 @@
 package com.sadengineer.budgetmaster.accounts;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
+import com.sadengineer.budgetmaster.base.BaseListFragment;
 
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
-public class TransfersAccountsFragment extends Fragment {
-    private static final String TAG = "TransfersAccountsFragment";
-    private RecyclerView recyclerView;
-    private AccountsAdapter adapter;
-    private AccountsSharedViewModel viewModel;
+/**
+ * Фрагмент для отображения счетов переводов (тип 3)
+ */
+public class TransfersAccountsFragment extends BaseListFragment<Account, AccountsAdapter, AccountsSharedViewModel, AccountService> {
 
-    @Nullable
+    /**
+     * Возвращает layout для фрагмента
+     */
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_transfers_accounts, container, false);
-        
-        // Настраиваем RecyclerView
-        recyclerView = view.findViewById(R.id.accounts_transfers_recycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        
-        // Shared ViewModel из Activity
-        viewModel = new ViewModelProvider(requireActivity()).get(AccountsSharedViewModel.class);
+    protected int getLayoutResourceId() {
+        return R.layout.fragment_transfers_accounts;
+    }
 
-        // Создаем адаптер по общей схеме с long-click
-        setupAdapter();
+    /**
+     * Возвращает id recyclerView для фрагмента
+     */
+    @Override
+    protected int getRecyclerViewId() {
+        return R.id.accounts_transfers_recycler;
+    }
 
-        // Наблюдаем за режимом выбора
+    /**
+     * Возвращает класс ViewModel для фрагмента
+     */
+    @Override
+    protected Class<AccountsSharedViewModel> getViewModelClass() {
+        return AccountsSharedViewModel.class;
+    }
+
+    /**
+     * Возвращает класс сервиса для фрагмента
+     */
+    @Override
+    protected Class<AccountService> getServiceClass() {
+        return AccountService.class;
+    }
+
+    /**
+     * Возвращает параметры для загрузки данных
+     */
+    @Override
+    protected Object getLoadParameters() {
+        return "3"; // Тип счетов переводов
+    }
+
+    /**
+     * Возвращает source_tab для фрагмента
+     */
+    @Override
+    protected int getSourceTab() {
+        return 2; // 2 = Переводы
+    }
+
+    /**
+     * Выполняет загрузку данных
+     */
+    @Override
+    protected void performDataLoading() {
+        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
+        // Для переводов загружаем только активные счета
+        database.accountDao().getAllActiveByType("3").observe(getViewLifecycleOwner(), this::handleDataLoaded);
+    }
+
+    /**
+     * Устанавливает данные в адаптер
+     */
+    @Override
+    protected void setAdapterData(List<Account> items) {
+        adapter.setAccounts(items);
+    }
+
+    /**
+     * Возвращает класс активности для редактирования
+     */
+    @Override
+    protected Class<?> getEditActivityClass() {
+        return AccountsEditActivity.class;
+    }
+
+    /**
+     * Наблюдает за режимом выбора
+     */
+    @Override
+    protected void observeSelectionMode() {
         viewModel.getSelectionMode().observe(getViewLifecycleOwner(), enabled -> {
             if (adapter != null) {
                 adapter.setSelectionMode(Boolean.TRUE.equals(enabled));
             }
         });
-        
-        // Загружаем счета типа 3 (переводы)
-        loadTransfersAccounts();
-        
-        return view;
-    }
-    
-    /**
-     * Загружает счета переводов (тип 3)
-     */
-    private void loadTransfersAccounts() {
-        Log.d(TAG, "Загрузка счетов переводов");
-        
-        try {
-            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-            
-            // Загружаем счета типа 3 (переводы)
-            database.accountDao().getAllActiveByType("3").observe(getViewLifecycleOwner(), accounts -> {
-                Log.d(TAG, "Загружено: " + (accounts != null ? accounts.size() : 0));
-                
-                if (accounts != null && !accounts.isEmpty()) {
-                    adapter.setAccounts(accounts);
-                    Log.d(TAG, "Список счетов переводов обновлён");
-                } else {
-                    Log.i(TAG, "Счета переводов не найдены");
-                }
-            });
-            
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка загрузки счетов переводов: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Устанавливает режим выбора
-     */
-    public void setSelectionMode(boolean enabled) {
-        if (adapter != null) {
-            adapter.setSelectionMode(enabled);
-        }
-    }
-    
-    /**
-     * Получает выбранные счета
-     */
-    public List<Account> getSelectedAccounts() {
-        if (adapter != null) {
-            return adapter.getSelectedAccounts();
-        }
-        return new ArrayList<>();
-    }
-    
-    /**
-     * Переходит на экран редактирования счета
-     * @param account - выбранный счет
-     */
-    private void goToAccountEdit(Account account) {
-        Log.d(TAG, "Переход к окну редактирования счёта");
-        Intent intent = new Intent(getActivity(), AccountsEditActivity.class);
-        intent.putExtra("account", account);
-        intent.putExtra("source_tab", 2); // 2 = Переводы
-        startActivity(intent);
     }
 
     /**
-     * Настраивает адаптер с обработчиками
+     * Настраивает адаптер
      */
-    private void setupAdapter() {
-        // Создаем адаптер
+    @Override
+    protected void setupAdapter() {
         adapter = new AccountsAdapter(new AccountsAdapter.OnAccountClickListener() {
             @Override
             public void onAccountClick(Account account) {
                 Log.d(TAG, "Переход к окну редактирования счёта");
-                goToAccountEdit(account);
+                goToEdit(account);
             }
         });
         
-        // Настраиваем обработчик длительного нажатия
         adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
             @Override
             public void onAccountLongClick(Account account) {
-            Log.d(TAG, "Длительное нажатие на счёт");
+                Log.d(TAG, "Длительное нажатие на счёт");
                 showDeleteConfirmationDialog(account);
             }
         });
         
-
-        
         recyclerView.setAdapter(adapter);
 
-        // Сообщаем VM полный набор выбранных при каждом изменении
         adapter.setOnSelectedAccountsChanged(selected -> {
             viewModel.setSelectedAccounts(selected);
         });
     }
 
     /**
-     * Показывает диалог подтверждения удаления счета
+     * Выполняет удаление
      */
-    private void showDeleteConfirmationDialog(Account account) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Удаление счета")
-               .setMessage("Вы уверены, что хотите полностью удалить счет '" + account.getTitle() + "'?\n\n" +
-                          "⚠️ Это действие нельзя отменить!")
-               .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialog, int which) {
-                       deleteAccount(account);
-                   }
-               })
-               .setNegativeButton("Отмена", null)
-               .setIcon(android.R.drawable.ic_dialog_alert)
-               .show();
+    @Override
+    protected void performDelete(AccountService service, Account item) {
+        service.delete(false, item);
     }
 
     /**
-     * Удаляет счет из базы данных
+     * Возвращает заголовок элемента для логирования
      */
-    private void deleteAccount(Account account) {
-        try {
-            Log.d(TAG, "Удаление счёта: ID=" + account.getId());
-            
-            AccountService accountService = new AccountService(requireContext(), "default_user");
-            accountService.delete(false, account);
-            
-            Log.d(TAG, "Запрос на удаление счёта отправлен: ID=" + account.getId());
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Ошибка удаления счета " + account.getTitle() + ": " + e.getMessage(), e);
-        }
+    @Override
+    protected String getItemTitle(Account item) {
+        return "ID: " + item.getId() + ", title: " + item.getTitle() + 
+               ", position: " + item.getPosition() + ", deleteTime: " + item.getDeleteTime() + 
+               ", deletedBy: " + item.getDeletedBy() + ", isDeleted: " + item.isDeleted();
     }
 } 

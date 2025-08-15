@@ -25,6 +25,10 @@ import com.sadengineer.budgetmaster.VersionActivity;
 import com.sadengineer.budgetmaster.AuthorsActivity;
 import com.sadengineer.budgetmaster.BackendTestActivity;
 
+/**
+ * Базовый класс для всех Activity с навигацией
+ * Содержит методы для инициализации навигации, обработки свайпов и переходов между экранами
+ */
 public abstract class BaseNavigationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "BaseNavigationActivity";
