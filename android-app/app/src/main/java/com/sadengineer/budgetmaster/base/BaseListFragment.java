@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
+import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -251,7 +252,7 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
      */
     protected S getServiceInstance() {
         try {
-            return getServiceClass().getDeclaredConstructor(String.class, String.class)
+            return getServiceClass().getDeclaredConstructor(Context.class, String.class)
                     .newInstance(requireContext(), "default_user");
         } catch (Exception e) {
             Log.e(TAG, "Ошибка создания сервиса: " + e.getMessage(), e);
