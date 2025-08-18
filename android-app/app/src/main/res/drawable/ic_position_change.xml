@@ -1,18 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    
-    <!-- Стрелка вверх -->
-    <path
-        android:fillColor="#1F1F1F"
-        android:pathData="M7,14l5,-5 5,5z"/>
-    
-    <!-- Стрелка вниз -->
-    <path
-        android:fillColor="#1F1F1F"
-        android:pathData="M7,10l5,5 5,-5z"/>
-    
-</vector> 
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:pathData="M320,520v-287L217,336l-57,-56 200,-200 200,200 -57,56 -103,-103v287h-80ZM600,880 L400,680l57,-56 103,103v-287h80v287l103,-103 57,56L600,880Z"
+      android:fillColor="#e3e3e3"/>
+</vector>

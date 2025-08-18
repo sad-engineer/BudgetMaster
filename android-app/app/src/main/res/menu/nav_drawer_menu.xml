@@ -58,13 +58,13 @@
         <!-- Загрузить данные -->
         <item
             android:id="@+id/nav_import_data"
-            android:icon="@drawable/ic_accounts"
+            android:icon="@drawable/ic_download"
             android:title="@string/menu_import_data" />
 
         <!-- Выгрузить данные -->
         <item
             android:id="@+id/nav_export_data"
-            android:icon="@drawable/ic_accounts"
+            android:icon="@drawable/ic_upload"
             android:title="@string/menu_export_data" />
 
         <!-- Статистика -->
@@ -73,12 +73,10 @@
             android:icon="@drawable/ic_target"
             android:title="@string/menu_statistics" />
 
-
-
         <!-- Настройки -->
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_menu"
+            android:icon="@drawable/ic_settings"
             android:title="@string/menu_settings" />
 
         <!-- О приложении -->

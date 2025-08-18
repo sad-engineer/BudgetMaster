@@ -61,6 +61,31 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
+            <TextView
+                android:id="@+id/currency_short_name_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/currency_short_name_label"
+                android:textColor="@color/currency_edit_titles"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/currency_short_name_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/currency_short_name_hint"
+                android:textColor="@color/currency_edit_input_text"
+                android:textColorHint="@color/currency_edit_input_hint"
+                android:background="@color/currency_edit_input_background"
+                android:padding="12dp"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true" />
+
         </LinearLayout>
 
     </LinearLayout>

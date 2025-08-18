@@ -21,12 +21,12 @@ public class BaseEntityValidator {
     /**
      * Проверяет, что ID положительный
      * @param id ID для проверки
-     * @param fieldName название поля для сообщения об ошибке
+     * @param errorMessage сообщение об ошибке
      * @throws IllegalArgumentException если ID некорректный
      */
-    public static void validatePositiveId(int id, String fieldName) {
+    public static void validatePositiveId(int id, String errorMessage) {
         if (id <= 0) {
-            throw new IllegalArgumentException(fieldName + " должен быть положительным");
+            throw new IllegalArgumentException(errorMessage);
         }
     }
     
@@ -69,16 +69,16 @@ public class BaseEntityValidator {
     /**
      * Проверяет, что строка не пустая
      * @param value строка для проверки
-     * @param fieldName название поля для сообщения об ошибке
+     * @param errorMessage сообщение об ошибке
      * @throws IllegalArgumentException если строка некорректная
      */
-    public static void validateNotEmpty(String value, String fieldName) {
+    public static void validateNotEmpty(String value, String errorMessage) {
         if (value == null) {
-            throw new IllegalArgumentException(fieldName + " не может быть null");
+            throw new IllegalArgumentException(errorMessage);
         }
         
         if (value.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + " не может быть пустым");
+            throw new IllegalArgumentException(errorMessage);
         }
     }
     
@@ -86,12 +86,16 @@ public class BaseEntityValidator {
      * Проверяет, что строка не превышает максимальную длину
      * @param value строка для проверки
      * @param maxLength максимальная длина
-     * @param fieldName название поля для сообщения об ошибке
+     * @param errorMessage сообщение об ошибке (может содержать %d для подстановки maxLength)
      * @throws IllegalArgumentException если строка некорректная
      */
-    public static void validateMaxLength(String value, int maxLength, String fieldName) {
+    public static void validateMaxLength(String value, int maxLength, String errorMessage) {
         if (value != null && value.length() > maxLength) {
-            throw new IllegalArgumentException(fieldName + " слишком длинное (максимум " + maxLength + " символов)");
+            if (errorMessage.contains("%d")) {
+                throw new IllegalArgumentException(String.format(errorMessage, maxLength));
+            } else {
+                throw new IllegalArgumentException(errorMessage);
+            }
         }
     }
 
@@ -99,12 +103,16 @@ public class BaseEntityValidator {
      * Проверяет, что строка превышает минимальную длину
      * @param value строка для проверки
      * @param minLength минимальная длина
-     * @param fieldName название поля для сообщения об ошибке
+     * @param errorMessage сообщение об ошибке (может содержать %d для подстановки minLength)
      * @throws IllegalArgumentException если строка некорректная
      */
-    public static void validateMinLength(String value, int minLength, String fieldName) {
+    public static void validateMinLength(String value, int minLength, String errorMessage) {
         if (value != null && value.length() < minLength) {
-            throw new IllegalArgumentException(fieldName + " слишком короткое (минимум " + minLength + " символов)");
+            if (errorMessage.contains("%d")) {
+                throw new IllegalArgumentException(String.format(errorMessage, minLength));
+            } else {
+                throw new IllegalArgumentException(errorMessage);
+            }
         }
     }
     
@@ -112,12 +120,12 @@ public class BaseEntityValidator {
      * Проверяет, что строка соответствует регулярному выражению
      * @param value строка для проверки
      * @param pattern регулярное выражение
-     * @param fieldName название поля для сообщения об ошибке
+     * @param errorMessage сообщение об ошибке
      * @throws IllegalArgumentException если строка некорректная
      */
-    public static void validatePattern(String value, String pattern, String fieldName) {
+    public static void validatePattern(String value, String pattern, String errorMessage) {
         if (value != null && !value.matches(pattern)) {
-            throw new IllegalArgumentException(fieldName + " содержит недопустимые символы");
+            throw new IllegalArgumentException(errorMessage);
         }
     }
     

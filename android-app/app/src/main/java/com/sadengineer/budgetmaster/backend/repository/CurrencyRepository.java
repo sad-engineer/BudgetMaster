@@ -71,6 +71,15 @@ public class CurrencyRepository {
     }
     
     /**
+     * Получить валюту по короткому имени (включая удаленные)
+     * @param shortName короткое имя валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getByShortName(String shortName) {
+        return dao.getByShortName(shortName);
+    }
+    
+    /**
      * Получить валюту по позиции (включая удаленные)
      * @param position позиция валюты
      * @return LiveData с валютой
@@ -168,5 +177,52 @@ public class CurrencyRepository {
      */
     public LiveData<List<Currency>> searchByTitle(String searchQuery) {
         return dao.searchByTitle(searchQuery);
-    }  
+    }
+    
+    /**
+     * Получить валюты по подстроке в названии или коротком имени
+     * @param searchQuery подстрока для поиска
+     * @return LiveData с списком валют
+     */
+    public LiveData<List<Currency>> searchByTitleOrShortName(String searchQuery) {
+        return dao.searchByTitleOrShortName(searchQuery);
+    }
+    
+    /**
+     * Проверить существование валюты с указанным названием
+     * @param title название валюты
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByTitle(String title) {
+        return dao.existsByTitle(title);
+    }
+    
+    /**
+     * Проверить существование валюты с указанным коротким именем
+     * @param shortName короткое имя валюты
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByShortName(String shortName) {
+        return dao.existsByShortName(shortName);
+    }
+
+    /**
+     * Проверить существование валюты с указанным названием, исключая валюту по ID
+     * @param title название валюты
+     * @param excludeId ID валюты, которую нужно исключить из проверки
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByTitleExcludingId(String title, int excludeId) {
+        return dao.existsByTitleExcludingId(title, excludeId);
+    }
+
+    /**
+     * Проверить существование валюты с указанным коротким именем, исключая валюту по ID
+     * @param shortName короткое имя валюты
+     * @param excludeId ID валюты, которую нужно исключить из проверки
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByShortNameExcludingId(String shortName, int excludeId) {
+        return dao.existsByShortNameExcludingId(shortName, excludeId);
+    }
 } 

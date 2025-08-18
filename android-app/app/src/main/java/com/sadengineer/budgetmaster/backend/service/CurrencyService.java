@@ -10,6 +10,7 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 
 import java.time.LocalDateTime;
 
@@ -97,70 +98,83 @@ public class CurrencyService {
             changePosition(currency, newPosition);
         }
     }
-
+    
     /**
-     * Создать новую валюту
-     * @param title название валюты
+     * Изменить позицию валюты по короткому имени
+     * @param shortName короткое имя валюты
+     * @param newPosition новая позиция
      */
-    public void create(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Название валюты не может быть пустым");
+    public void changePositionByShortName(String shortName, int newPosition) {
+        Currency currency = repo.getByShortName(shortName).getValue();
+        if (currency != null) {
+            changePosition(currency, newPosition);
         }
-        
-        executorService.execute(() -> {
-            try {
-                String trimmedTitle = title.trim();
-                createCurrencyInTransaction(trimmedTitle);                
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
-            }
-        });
     }
 
     /**
-     * Транзакция для создания новой валюты
+     * Создать новую валюту без короткого имени
+     * Не проверяет уникальность 
      * @param title название валюты
      */
+    public void create(String title) {
+        String trimmedTitle = title.trim();
+        CurrencyValidator.validateTitle(trimmedTitle);
+        executorService.execute(() -> {
+            try {
+                createCurrencyInTransaction(trimmedTitle, null);                
+            } catch (Exception e) {
+                Log.e(TAG, "Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * Создать новую валюту с коротким именем
+     * Проверяет уникальность названия и короткого имени
+     * @param title название валюты
+     * @param shortName короткое имя валюты
+     */
+    public void create(String title, String shortName) {
+        String trimmedTitle = title.trim();
+        String trimmedShortName = shortName != null ? shortName.trim() : null;
+        CurrencyValidator.validateTitle(trimmedTitle);
+        CurrencyValidator.validateShortName(trimmedShortName);
+        executorService.execute(() -> {
+            try {
+                // Проверяем уникальность в фоновом потоке
+                if (repo.existsByTitle(trimmedTitle)) {
+                    Log.e(TAG, "Валюта с названием '" + trimmedTitle + "' уже существует");
+                    return;
+                }
+                
+                if (trimmedShortName != null && repo.existsByShortName(trimmedShortName)) {
+                    Log.e(TAG, "Валюта с коротким именем '" + trimmedShortName + "' уже существует");
+                    return;
+                }
+                
+                createCurrencyInTransaction(trimmedTitle, trimmedShortName);                
+            } catch (Exception e) {
+                Log.e(TAG, "Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * Транзакция для создания новой валюты
+     * @param title название валюты
+     * @param shortName короткое имя валюты
+     */
     @Transaction
-    private void createCurrencyInTransaction(String title) {
-        Log.d(TAG, "🔄 Запрос на создание валюты: " + title);
+    private void createCurrencyInTransaction(String title, String shortName) {
+        Log.d(TAG, "🔄 Запрос на создание валюты: " + title + (shortName != null ? " (" + shortName + ")" : ""));
         Currency currency = new Currency();
         currency.setTitle(title);
+        currency.setShortName(shortName);
         currency.setPosition(repo.getMaxPosition() + 1);
         currency.setCreateTime(LocalDateTime.now());
         currency.setCreatedBy(user);
         repo.insert(currency);
         Log.d(TAG, "✅ Валюта " + currency.getTitle() + " успешно создана");
-    }
-
-    /**
-     * Удалить валюту (полное удаление - удаление строки из БД)
-     * @param currency валюта
-     */
-    private void delete(Currency currency) {
-        if (currency == null) {
-            Log.e(TAG, "❌ Валюта не найдена для удаления. Удаление было отменено");
-            return;
-        }
-        executorService.execute(() -> {
-            try {
-                deleteCurrencyInTransaction(currency);
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при удалении валюты '" + currency.getTitle() + "': " + e.getMessage(), e);
-            }
-        });
-    }     
-    
-    /**
-     * Транзакция для удаления валюты
-     * @param currency валюта
-     */
-    @Transaction
-    private void deleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, "🔄 Запрос на удаление валюты: " + currency.getTitle());
-        int deletedPosition = currency.getPosition();
-        repo.delete(currency);
-        Log.d(TAG, "✅ Валюта " + currency.getTitle() + " успешно удалена");
     }
 
     /**
@@ -176,6 +190,36 @@ public class CurrencyService {
         }
     }
 
+    /**
+     * Удалить валюту (полное удаление - удаление строки из БД)
+     * @param currency валюта
+     */
+    private void delete(Currency currency) {
+        if (currency == null) {
+            Log.e(TAG, "Валюта не передана для удаления. Удаление было отменено");
+            return;
+        }
+        executorService.execute(() -> {
+            try {
+                deleteCurrencyInTransaction(currency);
+            } catch (Exception e) {
+                Log.e(TAG, "Ошибка при удалении валюты '" + currency.getTitle() + "': " + e.getMessage(), e);
+            }
+        });
+    }     
+    
+    /**
+     * Транзакция для удаления валюты
+     * @param currency валюта
+     */
+    @Transaction
+    private void deleteCurrencyInTransaction(Currency currency) {
+        Log.d(TAG, "🔄 Запрос на удаление валюты: " + currency.getTitle());
+        int deletedPosition = currency.getPosition();
+        repo.delete(currency);
+        Log.d(TAG, "✅ Валюта " + currency.getTitle() + " успешно удалена");
+    }
+   
     /**
      * Получить все валюты
      * @param filter фильтр для выборки валют
@@ -201,6 +245,33 @@ public class CurrencyService {
     public LiveData<Currency> getByTitle(String title) {
         return repo.getByTitle(title);
     }
+    
+    /**
+     * Получить валюту по короткому имени
+     * @param shortName короткое имя валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getByShortName(String shortName) {
+        return repo.getByShortName(shortName);
+    }
+    
+    /**
+     * Проверить существование валюты с указанным названием
+     * @param title название валюты
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByTitle(String title) {
+        return repo.existsByTitle(title);
+    }
+    
+    /**
+     * Проверить существование валюты с указанным коротким именем
+     * @param shortName короткое имя валюты
+     * @return true если валюта существует, false если нет
+     */
+    public boolean existsByShortName(String shortName) {
+        return repo.existsByShortName(shortName);
+    }    
 
     /**
      * Восстановить удаленную валюту (soft delete)
@@ -211,7 +282,7 @@ public class CurrencyService {
             try {
                 restoreCurrencyInTransaction(deletedCurrency);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при восстановлении валюты: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при восстановлении валюты: " + e.getMessage(), e);
             }
         });
     }
@@ -223,16 +294,16 @@ public class CurrencyService {
     @Transaction
     private void restoreCurrencyInTransaction(Currency deletedCurrency) {
         if (deletedCurrency != null) {
-            Log.d(TAG, "🔄 Запрос на восстановление валюты для категории " + deletedCurrency.getTitle());
+            Log.d(TAG, "Запрос на восстановление валюты " + deletedCurrency.getTitle());
             deletedCurrency.setPosition(repo.getMaxPosition() + 1);
             deletedCurrency.setDeleteTime(null);
             deletedCurrency.setDeletedBy(null);
             deletedCurrency.setUpdateTime(LocalDateTime.now());
             deletedCurrency.setUpdatedBy(user);
             repo.update(deletedCurrency);
-            Log.d(TAG, "✅ Валюта " + deletedCurrency.getTitle() + " успешно восстановлена");
+            Log.d(TAG, "Валюта " + deletedCurrency.getTitle() + " успешно восстановлена");
         } else {
-            Log.e(TAG, "❌ Валюта не найдена для восстановления");
+            Log.e(TAG, "Валюта не найдена для восстановления");
         }
     }
 
@@ -242,7 +313,7 @@ public class CurrencyService {
      */
     private void softDelete(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "❌ Валюта не найдена для soft delete. Удаление было отменено");
+            Log.e(TAG, "Валюта не найдена для soft delete. Удаление было отменено");
             return;
         }   
 
@@ -250,7 +321,7 @@ public class CurrencyService {
             try {
                 softDeleteCurrencyInTransaction(currency);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при soft delete валюты: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при soft delete валюты: " + e.getMessage(), e);
             }
         });
     }
@@ -261,7 +332,7 @@ public class CurrencyService {
      */
     @Transaction
     private void softDeleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, "🔄 Запрос на softDelete валюты для категории " + currency.getTitle());
+        Log.d(TAG, "Запрос на softDelete валюты " + currency.getTitle());
         int deletedPosition = currency.getPosition();
         currency.setPosition(0);
         currency.setDeleteTime(LocalDateTime.now());
@@ -279,19 +350,30 @@ public class CurrencyService {
      */
     public void update(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "❌ Валюта не найдена для обновления. Обновление было отменено");
+            Log.e(TAG, "Валюта не найдена для обновления. Обновление было отменено");
             return;
         }
 
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на обновление валюты для категории " + currency.getTitle());
+                // Проверяем уникальность (исключая текущую валюту)
+                if (repo.existsByTitleExcludingId(currency.getTitle(), currency.getId())) {
+                    Log.e(TAG, "Валюта с названием '" + currency.getTitle() + "' уже существует");
+                    return;
+                }
+                
+                if (currency.getShortName() != null && repo.existsByShortNameExcludingId(currency.getShortName(), currency.getId())) {
+                    Log.e(TAG, "Валюта с коротким именем '" + currency.getShortName() + "' уже существует");
+                    return;
+                }
+                
+                Log.d(TAG, "Запрос на обновление валюты " + currency.getTitle());
                 currency.setUpdateTime(LocalDateTime.now());
                 currency.setUpdatedBy(user);
                 repo.update(currency);
-                Log.d(TAG, "✅ Запрос на обновление валюты для категории " + currency.getTitle() + " успешно отправлен");
+                Log.d(TAG, "Запрос на обновление валюты для категории " + currency.getTitle() + " успешно отправлен");
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при обновлении валюты для категории " + currency.getTitle() + ": " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при обновлении валюты для категории " + currency.getTitle() + ": " + e.getMessage(), e);
             }
         });
     }

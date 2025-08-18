@@ -98,6 +98,48 @@ public interface CurrencyDao {
     LiveData<Currency> getByTitle(String title);
 
     /**
+     * Получает валюту по короткому имени (включая удаленные)
+     * @param shortName короткое имя валюты
+     * @return валюта с указанным коротким именем
+     */
+    @Query("SELECT * FROM currencies WHERE shortName = :shortName")
+    LiveData<Currency> getByShortName(String shortName);
+
+    /**
+     * Проверяет существование валюты с указанным названием
+     * @param title название валюты
+     * @return true если валюта существует, false если нет
+     */
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE title = :title)")
+    boolean existsByTitle(String title);
+
+    /**
+     * Проверяет существование валюты с указанным коротким именем
+     * @param shortName короткое имя валюты
+     * @return true если валюта существует, false если нет
+     */
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE shortName = :shortName)")
+    boolean existsByShortName(String shortName);
+
+    /**
+     * Проверяет существование валюты с указанным названием, исключая валюту по ID
+     * @param title название валюты
+     * @param excludeId ID валюты, которую нужно исключить из проверки
+     * @return true если валюта существует, false если нет
+     */
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE title = :title AND id != :excludeId)")
+    boolean existsByTitleExcludingId(String title, int excludeId);
+
+    /**
+     * Проверяет существование валюты с указанным коротким именем, исключая валюту по ID
+     * @param shortName короткое имя валюты
+     * @param excludeId ID валюты, которую нужно исключить из проверки
+     * @return true если валюта существует, false если нет
+     */
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE shortName = :shortName AND id != :excludeId)")
+    boolean existsByShortNameExcludingId(String shortName, int excludeId);
+
+    /**
      * Получает максимальную позицию среди валют
      * @return максимальная позиция или 0, если валют нет
      */
@@ -119,6 +161,14 @@ public interface CurrencyDao {
      */
     @Query("SELECT * FROM currencies WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
     LiveData<List<Currency>> searchByTitle(String searchQuery);
+
+    /**
+     * Получает валюты по подстроке в названии или коротком имени (включая удаленные)
+     * @param searchQuery подстрока для поиска
+     * @return список валют, содержащих подстроку в названии или коротком имени
+     */
+    @Query("SELECT * FROM currencies WHERE title LIKE '%' || :searchQuery || '%' OR shortName LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
+    LiveData<List<Currency>> searchByTitleOrShortName(String searchQuery);
     
     /**
      * Сдвигает позиции валют вниз начиная с указанной позиции

@@ -139,7 +139,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         Log.d(TAG, "🔄 Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
         "ID: " + currency.getId() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(currency.getPosition(), currency.getTitle(), currency.getId(), 
-                   isSelectionMode, isSelected);
+                   0, currency.getShortName(), isSelectionMode, isSelected);
     }
 
     /**

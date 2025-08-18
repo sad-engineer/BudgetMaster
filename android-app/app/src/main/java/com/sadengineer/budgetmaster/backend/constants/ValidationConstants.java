@@ -23,11 +23,15 @@ public class ValidationConstants {
     // Максимальные длины
     public static final int MAX_TITLE_LENGTH = 200;      // Максимальная длина названия
     public static final int MAX_COMMENT_LENGTH = 300;    // Максимальная длина комментария
+    public static final int MIN_CURRENCY_TITLE_LENGTH = 3; // Минимальная длина названия валюты
     public static final int MAX_CURRENCY_TITLE_LENGTH = 80; // Максимальная длина названия валюты
+    public static final int MIN_CURRENCY_SHORT_NAME_LENGTH = 1; // Минимальная длина короткого имени валюты
+    public static final int MAX_CURRENCY_SHORT_NAME_LENGTH = 3; // Максимальная длина короткого имени валюты
     
     // Регулярные выражения
     public static final String TITLE_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-\\(\\)]+$";
     public static final String CURRENCY_TITLE_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-]+$";
+    public static final String CURRENCY_SHORT_NAME_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-₽$€¥£¢₹₩₪₦₨₴₸₺₼₾₿]+$";
     public static final String COMMENT_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-\\.,!?;:()]+$";
     
     // Сообщения об ошибках
@@ -57,4 +61,23 @@ public class ValidationConstants {
     
     public static final String ERROR_CLOSED_STATUS = "Статус закрытия должен быть " + STATUS_OPEN + 
         " (открыт) или " + STATUS_CLOSED + " (закрыт)";
+    
+    // Сообщения об ошибках для валют
+    public static final String ERROR_CURRENCY_NULL = "Валюта не может быть null";
+    public static final String ERROR_CURRENCY_TITLE_ALREADY_EXISTS = "Валюта с названием '%s' уже существует";
+    public static final String ERROR_CURRENCY_SHORT_NAME_ALREADY_EXISTS = "Валюта с коротким именем '%s' уже существует";
+    public static final String ERROR_CURRENCY_TITLE_EMPTY = "Название валюты не может быть пустым";
+    public static final String ERROR_CURRENCY_SHORT_NAME_EMPTY = "Короткое название валюты не может быть пустым";
+    public static final String ERROR_CURRENCY_TITLE_TOO_SHORT = "Название валюты должно содержать минимум %d символов";
+    public static final String ERROR_CURRENCY_TITLE_TOO_LONG = "Название валюты не может быть длиннее %d символов";
+    public static final String ERROR_CURRENCY_SHORT_NAME_TOO_SHORT = "Короткое название валюты должно содержать минимум %d символов";
+    public static final String ERROR_CURRENCY_SHORT_NAME_TOO_LONG = "Короткое название валюты не может быть длиннее %d символов";
+    public static final String ERROR_CURRENCY_TITLE_INVALID_CHARS = "Название валюты содержит недопустимые символы";
+    public static final String ERROR_CURRENCY_SHORT_NAME_INVALID_CHARS = "Короткое название валюты содержит недопустимые символы";
+    public static final String ERROR_CURRENCY_ID_INVALID = "ID валюты должен быть положительным";
+    public static final String ERROR_CURRENCY_POSITION_INVALID = "Позиция валюты должна быть положительной";
+    public static final String ERROR_CURRENCY_CREATE_TIME_INVALID = "Время создания валюты не может быть в будущем";
+    public static final String ERROR_CURRENCY_UPDATE_TIME_INVALID = "Время обновления валюты не может быть в будущем";
+    public static final String ERROR_CURRENCY_CREATED_BY_INVALID = "Имя пользователя, создавшего валюту, не может быть пустым";
+    public static final String ERROR_CURRENCY_UPDATED_BY_INVALID = "Имя пользователя, обновившего валюту, не может быть пустым";
 } 

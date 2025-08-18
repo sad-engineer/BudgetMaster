@@ -21,6 +21,10 @@ import java.time.LocalDateTime;
         @Index(
             value = "title", 
             unique = true
+            ),
+        @Index(
+            value = "shortName", 
+            unique = true
             )
         }
     )
@@ -31,6 +35,7 @@ public class Currency implements Serializable {
     private int id;
     
     private String title; // Название валюты
+    private String shortName; // Короткое имя валюты 1-3 символа (RUB, ₽)
     //private String code; // Код валюты (USD, EUR, RUB)
     //private String symbol; // Символ валюты ($, €, ₽)
     //private boolean isDefault; // Валюта по умолчанию
@@ -64,7 +69,13 @@ public class Currency implements Serializable {
         this.title = title;
     }
     
-
+    public String getShortName() {
+        return shortName;
+    }
+    
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
     
     public int getPosition() {
         return position;

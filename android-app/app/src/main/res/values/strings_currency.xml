@@ -12,4 +12,6 @@
     <!-- Поля ввода -->
     <string name="currency_name_label">Название</string>
     <string name="currency_name_hint">Введите название валюты</string>
+    <string name="currency_short_name_label">Короткое имя</string>
+    <string name="currency_short_name_hint">Введите короткое имя валюты: 1-3 символа (₽, RUB)</string>
 </resources>

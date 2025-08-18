@@ -26,6 +26,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private TextView titleText;
     private TextView idText;
     private TextView sumText;
+    private TextView shortNameText;
     
     // Состояние
     private boolean isSelectionMode = false;
@@ -64,6 +65,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         titleText = findTitleText(itemView);
         idText = findIdText(itemView);
         sumText = findSumText(itemView);
+        shortNameText = findShortNameText(itemView);
         
         setupClickListeners();
     }
@@ -169,6 +171,18 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     }
     
     /**
+     * Ищет TextView для короткого имени валюты
+     */
+    private TextView findShortNameText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.currency_short_name);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
      * Настраивает обработчики кликов
      */
     private void setupClickListeners() {
@@ -247,6 +261,10 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     }
     
     public void bind(int position, String title, int id, int sum, boolean isSelectionMode, boolean isSelected) {
+        bind(position, title, id, sum, null, isSelectionMode, isSelected);
+    }
+    
+    public void bind(int position, String title, int id, int sum, String shortName, boolean isSelectionMode, boolean isSelected) {
         this.boundItemId = id;
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
@@ -267,6 +285,9 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         if (sumText != null) {
             double rubles = sum / 100.0;
             sumText.setText(formatter.formatCompact(rubles) + " RUB");
+        }
+        if (shortNameText != null) {
+            shortNameText.setText(shortName != null ? shortName : "");
         }
         
         // Полупрозрачность для элементов с позицией 0

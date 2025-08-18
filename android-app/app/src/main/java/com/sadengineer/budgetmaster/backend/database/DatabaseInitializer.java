@@ -65,9 +65,9 @@ public class DatabaseInitializer {
         
         // Создаем дефолтные валюты
         Currency[] currencies = {
-            createCurrency("Рубль", 1),
-            createCurrency("Доллар", 2),
-            createCurrency("Евро", 3)
+            createCurrency("Рубль", "₽", 1),
+            createCurrency("Доллар", "$", 2),
+            createCurrency("Евро", "€", 3)
         };
         
         for (Currency currency : currencies) {
@@ -231,9 +231,10 @@ public class DatabaseInitializer {
     /**
      * Создает объект валюты
      */
-    private static Currency createCurrency(String title, int position) {
+    private static Currency createCurrency(String title, String shortName, int position) {
         Currency currency = new Currency();
         currency.setTitle(title);
+        currency.setShortName(shortName);
         currency.setPosition(position);
         currency.setCreateTime(LocalDateTime.now());
         currency.setCreatedBy("initializer");

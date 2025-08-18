@@ -27,6 +27,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private static final String TAG = "CurrencyEditActivity";
     
     private EditText currencyNameEdit;
+    private EditText currencyShortNameEdit;
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
@@ -48,6 +49,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
 
         // Инициализация всех View элементов
         currencyNameEdit = findViewById(R.id.currency_name_edit);
+        currencyShortNameEdit = findViewById(R.id.currency_short_name_edit);
         saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
@@ -83,6 +85,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 
                 // Заполняем поля данными валюты
                 currencyNameEdit.setText(currentCurrency.getTitle());
+                currencyShortNameEdit.setText(currentCurrency.getShortName());
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_currency_edit, R.dimen.toolbar_text_currencies_edit);
@@ -133,6 +136,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
      */
     private boolean saveCurrency() {
         String currencyName = currencyNameEdit.getText().toString().trim();
+        String currencyShortName = currencyShortNameEdit.getText().toString().trim();
         
         // Валидация названия валюты
         try {
@@ -143,33 +147,37 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             currencyNameEdit.requestFocus();
             return false;
         }
+        
+        // Валидация короткого имени валюты
+        try {
+            CurrencyValidator.validateShortName(currencyShortName);
+        } catch (IllegalArgumentException e) {
+            // при ошибке выделять поле ввода красной рамкой
+            currencyShortNameEdit.setError("Не верное короткое имя валюты: \n" + e.getMessage());
+            currencyShortNameEdit.requestFocus();
+            return false;
+        }
 
         try {
             if (isEditMode && currentCurrency != null) {
                 // Режим редактирования
-                Log.d(TAG, "🔄 Попытка обновления валюты '" + currencyName + "' (ID: " + currentCurrency.getId() + ")");
+                Log.d(TAG, "Попытка обновления валюты '" + currencyName + "' (ID: " + currentCurrency.getId() + ")");
                 
                 // Обновляем данные валюты через сервис
                 currentCurrency.setTitle(currencyName);
+                currentCurrency.setShortName(currencyShortName);
                 currencyService.update(currentCurrency);
                 
-                Log.d(TAG, "✅ Запрос на обновление валюты отправлен");
+                Log.d(TAG, "Запрос на обновление валюты отправлен");
                 
             } else {
                 // Режим создания новой валюты
-                Log.d(TAG, "🔄 Попытка создания валюты '" + currencyName + "'");
+                Log.d(TAG, "Попытка создания валюты '" + currencyName + "'");
 
-                // Проверяем существование валюты
-                Currency existingCurrency = currencyService.getByTitle(currencyName).getValue();
-                if (existingCurrency != null) {
-                    Log.d(TAG, "⚠️ Валюта с названием '" + currencyName + "' уже существует");
-                    return false;
-                }
-
-                // Если валюта не существует, то создаем её
-                currencyService.create(currencyName);
+                // Создаем валюту через сервис (проверки уникальности внутри сервиса)
+                currencyService.create(currencyName, currencyShortName);
                 
-                Log.d(TAG, "✅ Запрос на создание валюты отправлен");
+                Log.d(TAG, "Запрос на создание валюты отправлен");
             }
             
             // Возвращаемся к списку валют
@@ -177,19 +185,17 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             return true;
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
+            Log.e(TAG, "Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
             return false;
         }
     }
     
-
-
     /**
      * Возвращается к списку валют
      */
     private void returnToCurrencies() {
         // Переходим к списку валют
-        Log.d(TAG, "🔄 Переходим к окну списка валют");
+        Log.d(TAG, "Переходим к окну списка валют");
         Intent intent = new Intent(this, CurrenciesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
