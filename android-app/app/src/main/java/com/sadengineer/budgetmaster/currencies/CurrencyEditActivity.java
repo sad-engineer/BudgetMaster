@@ -74,7 +74,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private void loadCurrencyData() {
         try {
             // Получаем валюту из Intent
-            currentCurrency = (Currency) getIntent().getSerializableExtra("currency");
+            currentCurrency = (Currency) getIntent().getSerializableExtra("item");
             
             if (currentCurrency != null) {
                 // Режим редактирования

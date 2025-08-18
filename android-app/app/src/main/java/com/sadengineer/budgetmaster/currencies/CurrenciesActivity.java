@@ -1,38 +1,26 @@
 package com.sadengineer.budgetmaster.currencies;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageButton;
 
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 
 import java.util.List;
+import java.util.ArrayList;
 
 
 /**
  * Activity для отображения списка валют
  */
-public class CurrenciesActivity extends BaseContentActivity implements CurrencyAdapter.OnCurrencyClickListener {
+public class CurrenciesActivity extends BaseCardsActivity<Currency> {
     
     private static final String TAG = "CurrenciesActivity";
-    
-    private RecyclerView recyclerView;
-    private CurrencyAdapter adapter;
-    private ImageButton addCurrencyButton;
-    private ImageButton deleteCurrencyButton;
-    private CurrencyService currencyService;
-    private boolean isSelectionMode = false;
+    private CurrenciesSharedViewModel viewModel;
 
     /**
      * Метод вызывается при создании Activity
@@ -42,7 +30,7 @@ public class CurrenciesActivity extends BaseContentActivity implements CurrencyA
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currencies);
-
+        
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
@@ -51,218 +39,53 @@ public class CurrenciesActivity extends BaseContentActivity implements CurrencyA
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_currencies, R.dimen.toolbar_text);
 
-        // Инициализация CurrencyService
-        currencyService = new CurrencyService(this, "default_user");
+        // Общая привязка кнопок и placeholder для индикатора
+        setupCommonCardsUi(0, R.id.add_currency_button_bottom, R.id.delete_currency_button_bottom, R.id.toolbar_reserve);
+        
+        // Shared ViewModel для управления режимом выбора и мягким удалением
+        viewModel = new ViewModelProvider(this).get(CurrenciesSharedViewModel.class);
+        
+        // Привязываем ViewModel к базовой логике кнопок/индикатора
+        bindSelectionViewModel(viewModel);
 
-        // Инициализация RecyclerView
-        setupRecyclerView();
-        
-        // Загружаем валюты из базы данных
-        loadCurrenciesFromDatabase();
-
-        // Обработчики кнопок валют
-        setupButtons();
+        // Настраиваем список валют
+        setupCurrenciesList();
     }
     
     /**
-     * Настраивает кнопки
-     */
-    private void setupButtons() {
-        addCurrencyButton = findViewById(R.id.add_currency_button_bottom);
-        deleteCurrencyButton = findViewById(R.id.delete_currency_button_bottom);
-
-        /**
-         * Обработчик нажатия на кнопку добавления валюты
-         */
-        addCurrencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // В режиме выбора - удаляем выбранные валюты
-                    deleteSelectedCurrencies();
-                } else {
-                    // Запускаем окно создания валюты
-                    Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
-
-        /**
-         * Обработчик нажатия на кнопку удаления валют
-         */
-        deleteCurrencyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // В режиме выбора - отменяем выбор
-                    cancelSelectionMode();
-                } else {
-                    // Включаем режим выбора
-                    enableSelectionMode();
-                }
-            }
-        });
-    }
-    
-    /**
-     * Включает режим выбора валют
-     */
-    private void enableSelectionMode() {
-        isSelectionMode = true;
-        
-        // Меняем иконки кнопок
-        addCurrencyButton.setImageResource(R.drawable.ic_save);
-        deleteCurrencyButton.setImageResource(R.drawable.ic_back);
-        
-        // Небольшая задержка для плавного перехода
-        recyclerView.postDelayed(() -> {
-            adapter.setSelectionMode(true);
-            Log.d(TAG, "✅ Режим выбора валют включен");
-        }, 100);
-    }
-    
-    /**
-     * Отменяет режим выбора
-     */
-    private void cancelSelectionMode() {
-        isSelectionMode = false;
-        adapter.setSelectionMode(false);
-        adapter.clearSelection();
-        
-        // Возвращаем иконки кнопок
-        addCurrencyButton.setImageResource(R.drawable.ic_add);
-        deleteCurrencyButton.setImageResource(R.drawable.ic_delete);
-        
-        Log.d(TAG, "❌ Режим выбора валют отменен");
-    }
-    
-    /**
-     * Удаляет выбранные валюты
-     */
-    private void deleteSelectedCurrencies() {
-        List<Currency> selectedCurrencies = adapter.getSelectedCurrencies();
-        
-        Log.d(TAG, "🗑️ Удаляем выбранные валюты: " + selectedCurrencies.size());
-        
-        // Удаляем валюты из базы данных
-        for (Currency currency : selectedCurrencies) {
-            try {
-                currencyService.delete(true, currency);
-                Log.d(TAG, "✅ Удалена валюта: " + currency.getTitle());
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка удаления валюты " + currency.getTitle() + ": " + e.getMessage(), e);
-            }
-        }
-        
-        // Отменяем режим выбора
-        cancelSelectionMode();
-        Log.d(TAG, "✅ Удалено валют: " + selectedCurrencies.size());
-    }
-    
-    /**
-     * Настраивает RecyclerView
-     */
-    private void setupRecyclerView() {
-        recyclerView = findViewById(R.id.currencies_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
-        adapter = new CurrencyAdapter(this);
-        
-        // Настраиваем обработчик длительного нажатия
-        adapter.setLongClickListener(new CurrencyAdapter.OnCurrencyLongClickListener() {
-            @Override
-            public void onCurrencyLongClick(Currency currency) {
-                Log.d(TAG, " Длительное нажатие на валюту: " + currency.getTitle());
-                showDeleteConfirmationDialog(currency);
-            }
-        });
-        
-        recyclerView.setAdapter(adapter);
-    }
-    
-    /**
-     * Показывает диалог подтверждения удаления валюты
-     */
-    private void showDeleteConfirmationDialog(Currency currency) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Удаление валюты")
-               .setMessage("Вы уверены, что хотите полностью удалить валюту '" + currency.getTitle() + "'?\n\n" +
-                          "⚠️ Это действие нельзя отменить!")
-               .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialog, int which) {
-                       deleteCurrency(currency);
-                   }
-               })
-               .setNegativeButton("Отмена", null)
-               .setIcon(android.R.drawable.ic_dialog_alert)
-               .show();
-    }
-    
-    /**
-     * Удаляет валюту из базы данных
-     */
-    private void deleteCurrency(Currency currency) {
-        try {
-            Log.d(TAG, "🗑️ Удаляем валюту из базы данных: " + currency.getTitle());
-            currencyService.delete(false, currency);
-            Log.d(TAG, "✅ Запрос на удаление валюты отправлен: " + currency.getTitle());
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка удаления валюты " + currency.getTitle() + ": " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Загружает валюты из базы данных
-     */
-    private void loadCurrenciesFromDatabase() {
-        Log.d(TAG, "🔄 Загружаем валюты из базы данных...");
-        
-        try {
-            // Получаем базу данных (уже инициализирована в MainActivity)
-            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-            
-            // Загружаем валюты через Observer
-            database.currencyDao().getAll().observe(this, currencies -> {
-                Log.d(TAG, "✅ Загружено валют: " + (currencies != null ? currencies.size() : 0));
-                
-                if (currencies != null && !currencies.isEmpty()) {
-                    adapter.setCurrencies(currencies);
-                    Log.d(TAG, "✅ Валюты отображены в списке");
-                } else {
-                    Log.w(TAG, "⚠️ Валюты не найдены в базе данных");
-                }
-            });
-            
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка загрузки валют: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Обрабатывает нажатие на валюту
-     * @param currency - выбранная валюта
+     * Обработчик клика «Добавить».
      */
     @Override
-    public void onCurrencyClick(Currency currency) {
-        if (!isSelectionMode) {
-            Log.d(TAG, "👆 Выбрана валюта: " + currency.getTitle() + " (ID: " + currency.getId() + ")");
-            // Переходим на экран редактирования валюты
-            goToCurrencyEdit(currency);
-        }
-    }
-
-    /**
-     * Переходит на экран редактирования валюты
-     * @param currency - выбранная валюта
-     */
-    private void goToCurrencyEdit(Currency currency) {
-        Log.d(TAG, "🔄 Переходим к окну редактирования валюты");
+    protected void onAddClicked() {
+        // Запускаем окно создания валюты (режим выбора обрабатывается базовым классом)
         Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
-        intent.putExtra("currency", currency);
         startActivity(intent);
     }
 
-
+    /**
+     * Обработчик клика «Удалить/Режим выбора».
+     */
+    @Override
+    protected void onDeleteClicked() {
+        // Поведение переключения режима выбора обрабатывается базовым классом через ViewModel
+    }
+    
+    /**
+     * Настраивает список валют
+     */
+    private void setupCurrenciesList() {
+        // Создаем и добавляем фрагмент списка валют
+        CurrenciesListFragment fragment = new CurrenciesListFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.currencies_container, fragment)
+                .commit();
+    }
+    
+    /**
+     * Обновляет количество выбранных элементов
+     */
+    public void updateSelectionCount(int count) {
+        Log.d(TAG, "🔄 Выбрано элементов: " + count);
+        // Можно добавить отображение количества в UI
+    }
 } 

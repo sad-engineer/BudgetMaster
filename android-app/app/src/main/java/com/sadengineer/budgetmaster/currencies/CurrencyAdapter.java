@@ -24,8 +24,9 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private static final String TAG = "CurrencyAdapter";
 
     private List<Currency> currencies = new ArrayList<>();
-    private OnCurrencyClickListener listener;
+    private OnCurrencyClickListener clickListener;
     private OnCurrencyLongClickListener longClickListener;
+    private OnSelectionListener selectionListener;
     private boolean isSelectionMode = false;
     private Set<Integer> selectedCurrencies = new HashSet<>();
     
@@ -44,10 +45,24 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
+     * Интерфейс для обработки изменений выбора
+     */
+    public interface OnSelectionListener {
+        void onSelectionChanged(int selectedCount);
+    }
+    
+    /**
      * Конструктор адаптера
      */
-    public CurrencyAdapter(OnCurrencyClickListener listener) {
-        this.listener = listener;
+    public CurrencyAdapter() {
+        // Пустой конструктор для совместимости с BaseListFragment
+    }
+    
+    /**
+     * Устанавливает обработчик кликов
+     */
+    public void setClickListener(OnCurrencyClickListener clickListener) {
+        this.clickListener = clickListener;
     }
     
     /**
@@ -55,6 +70,13 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setLongClickListener(OnCurrencyLongClickListener longClickListener) {
         this.longClickListener = longClickListener;
+    }
+    
+    /**
+     * Устанавливает обработчик изменений выбора
+     */
+    public void setSelectionListener(OnSelectionListener selectionListener) {
+        this.selectionListener = selectionListener;
     }
     
     /**
@@ -69,10 +91,10 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         
         // Настраиваем обработчики для универсального ViewHolder
         holder.setItemClickListener(itemId -> {
-            if (listener != null) {
+            if (clickListener != null) {
                 Currency currency = findCurrencyById(itemId);
                 if (currency != null) {
-                    listener.onCurrencyClick(currency);
+                    clickListener.onCurrencyClick(currency);
                 }
             }
         });
@@ -92,6 +114,11 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 selectedCurrencies.add(itemId);
             } else {
                 selectedCurrencies.remove(itemId);
+            }
+            
+            // Уведомляем о изменении количества выбранных элементов
+            if (selectionListener != null) {
+                selectionListener.onSelectionChanged(selectedCurrencies.size());
             }
         });
         
