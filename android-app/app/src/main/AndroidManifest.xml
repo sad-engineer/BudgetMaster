@@ -38,9 +38,7 @@
         <activity
             android:name=".currencies.CurrencyEditActivity"
             android:exported="false" />
-        <activity
-            android:name=".BackendTestActivity"
-            android:exported="false" />
+
         <activity
             android:name=".VersionActivity"
             android:exported="false" />
@@ -67,6 +65,9 @@
             android:exported="false" />
         <activity
             android:name=".import_export.ExportDataActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

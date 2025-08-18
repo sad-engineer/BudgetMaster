@@ -4,13 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 
 import androidx.viewpager2.widget.ViewPager2;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.base.BaseCardsActivity;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.budget.BudgetAdapter;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -18,14 +20,18 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.List;
 import java.util.ArrayList;
 
-public class BudgetActivity extends BaseCardsActivity<Budget> {
+public class BudgetActivity extends BaseContentActivity {
 
     private static final String TAG = "BudgetActivity";
     
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private BudgetPagerAdapter pagerAdapter;
+    private ImageButton addBudgetButton;
+    private ImageButton deleteBudgetButton;
+    private boolean isSelectionMode = false;
     private BudgetSharedViewModel viewModel;
+    private BudgetAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,21 +42,79 @@ public class BudgetActivity extends BaseCardsActivity<Budget> {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
-
+        
         // Устанавливаем заголовок
-        setToolbarTitle(R.string.toolbar_title_budgets, R.dimen.toolbar_text_budgets);
-
-        // Общая привязка кнопок и placeholder для индикатора
-        setupCommonCardsUi(0, R.id.add_budget_button_bottom, R.id.delete_budget_button_bottom, null);
+        setToolbarTitle(R.string.toolbar_title_budgets, R.dimen.toolbar_text);
 
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(BudgetSharedViewModel.class);
-        
-        // Привязываем ViewModel к базовой логике кнопок/индикатора
-        bindSelectionViewModel(viewModel);
+
+        // Обработчики кнопок бюджета
+        setupButtons();
+
+        // Наблюдаем за режимом выбора, чтобы обновлять иконки
+        viewModel.getSelectionMode().observe(this, enabled -> {
+            isSelectionMode = Boolean.TRUE.equals(enabled);
+            if (isSelectionMode) {
+                addBudgetButton.setImageResource(R.drawable.ic_save);
+                deleteBudgetButton.setImageResource(R.drawable.ic_back);
+            } else {
+                addBudgetButton.setImageResource(R.drawable.ic_add);
+                deleteBudgetButton.setImageResource(R.drawable.ic_delete);
+            }
+        });
+
+        // Логируем результат мягкого удаления
+        viewModel.getSoftDeletionDone().observe(this, count -> {
+            if (count != null) {
+                Log.d(TAG, "✅ Мягко удалено бюджетов: " + count);
+            }
+        });
 
         // Инициализация ViewPager2 и TabLayout
         setupViewPager();
+    }
+    
+    /**
+     * Настраивает кнопки
+     */
+    private void setupButtons() {
+        addBudgetButton = findViewById(R.id.add_budget_button_bottom);
+        deleteBudgetButton = findViewById(R.id.delete_budget_button_bottom);
+
+        addBudgetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isSelectionMode) {
+                    // Сохраняем выбранные бюджеты (мягкое удаление)
+                    BudgetLimitsFragment fragment = getCurrentFragment();
+                    if (fragment != null) {
+                        List<Budget> selectedBudgets = adapter.getSelectedBudgets();
+                        Log.d(TAG, "🔄 Выбранные бюджеты: " + selectedBudgets.size());
+                        if (selectedBudgets != null && !selectedBudgets.isEmpty()) {
+                            viewModel.softDeleteSelectedBudgets(selectedBudgets);
+                        }
+                    }
+                } else {
+                    // Добавляем новый бюджет
+                    Log.d(TAG, "👆 Добавить бюджет");
+                    // TODO: Реализовать добавление бюджета
+                }
+            }
+        });
+
+        deleteBudgetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isSelectionMode) {
+                    // Отменяем выбор
+                    viewModel.setSelectionMode(false);
+                } else {
+                    // Включаем режим выбора
+                    viewModel.setSelectionMode(true);
+                }
+            }
+        });
     }
     
     /**
@@ -93,37 +157,5 @@ public class BudgetActivity extends BaseCardsActivity<Budget> {
     public void updateSelectionCount(int count) {
         Log.d(TAG, "🔄 Выбрано элементов: " + count);
         // Можно добавить отображение количества в UI
-    }
-
-    /**
-     * Обработчик клика «Добавить». Реализация для BaseCardsActivity.
-     */
-    @Override
-    protected void onAddClicked() {
-        Log.d(TAG, "➕ Нажата кнопка 'Добавить бюджет'");
-        // TODO: Реализовать добавление бюджета
-        Intent intent = new Intent(BudgetActivity.this, BudgetEditActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * Обработчик клика «Удалить/Режим выбора». Реализация для BaseCardsActivity.
-     */
-    @Override
-    protected void onDeleteClicked() {
-        Log.d(TAG, "🗑️ Нажата кнопка 'Удалить/Режим выбора'");
-        toggleSelectionMode();
-    }
-
-    /**
-     * Переопределяем для обработки удаления выбранных бюджетов
-     */
-    @Override
-    protected void onSelectionModeChanged(boolean enabled) {
-        if (enabled) {
-            Log.d(TAG, "✅ Режим выбора бюджетов включен");
-        } else {
-            Log.d(TAG, "❌ Режим выбора бюджетов отменен");
-        }
     }
 } 

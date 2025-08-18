@@ -4,13 +4,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
+
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -21,7 +27,11 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private static final String TAG = "CurrencyEditActivity";
     
     private EditText currencyNameEdit;
+    private ImageButton saveButton;
+    private ImageButton backButton;
+    private ImageButton menuButton;
     private CurrencyService currencyService;
+    private CurrencyValidator currencyValidator;
     
     // Поля для хранения данных валюты
     private Currency currentCurrency;
@@ -36,19 +46,19 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency_edit);
 
+        // Инициализация всех View элементов
+        currencyNameEdit = findViewById(R.id.currency_name_edit);
+        saveButton = findViewById(R.id.position_change_button);
+        backButton = findViewById(R.id.back_button);
+        menuButton = findViewById(R.id.menu_button);
+
         // Инициализация навигации
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
-
-        // Устанавливаем заголовок
-        setToolbarTitle(R.string.toolbar_title_currency_edit, R.dimen.toolbar_text_currencies_edit);
-
-        // Настройка общих кнопок редактирования
+        
+        // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
-
-        // Инициализация всех View элементов
-        currencyNameEdit = findViewById(R.id.currency_name_edit);
 
         // Инициализация CurrencyService
         currencyService = new CurrencyService(this, "default_user");
@@ -96,10 +106,32 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     }
     
     /**
-     * Выполняет валидацию и сохранение. Реализация для BaseEditActivity.
+     * Переопределяем настройку кнопки "назад" для перехода к списку валют
+     */
+    @Override
+    protected void setupBackButton(int backButtonId) {
+        super.setupBackButton(backButtonId);
+        if (backButton != null) {
+            backButton.setOnClickListener(v -> {
+                Log.d(TAG, "Нажата кнопка 'Назад'");
+                // Возвращаемся к списку валют
+                returnToCurrencies();
+            });
+        }
+    }
+    
+    /**
+     * Реализация абстрактного метода для валидации и сохранения
      */
     @Override
     protected boolean validateAndSave() {
+        return saveCurrency();
+    }
+    
+    /**
+     * Сохраняет валюту в базу данных
+     */
+    private boolean saveCurrency() {
         String currencyName = currencyNameEdit.getText().toString().trim();
         
         // Валидация названия валюты
@@ -107,7 +139,8 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             CurrencyValidator.validateTitle(currencyName);
         } catch (IllegalArgumentException e) {
             // при ошибке выделять поле ввода красной рамкой
-            showFieldError(currencyNameEdit, "Не верное название валюты: \n" + e.getMessage());
+            currencyNameEdit.setError("Не верное название валюты: \n" + e.getMessage());
+            currencyNameEdit.requestFocus();
             return false;
         }
 
@@ -130,7 +163,6 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 Currency existingCurrency = currencyService.getByTitle(currencyName).getValue();
                 if (existingCurrency != null) {
                     Log.d(TAG, "⚠️ Валюта с названием '" + currencyName + "' уже существует");
-                    showFieldError(currencyNameEdit, "Валюта с таким названием уже существует");
                     return false;
                 }
 
@@ -149,6 +181,8 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             return false;
         }
     }
+    
+
 
     /**
      * Возвращается к списку валют
@@ -160,14 +194,5 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
-    }
-
-    /**
-     * Переопределяем обработчик кнопки "Назад" для возврата к списку валют
-     */
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "Нажата кнопка 'Назад'");
-        returnToCurrencies();
-    }
+    }   
 } 

@@ -7,12 +7,12 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.appcompat.widget.Toolbar;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 
 /**
  * Экран авторов
  */
-public class AuthorsActivity extends BaseNavigationActivity {
+public class AuthorsActivity extends BaseContentActivity {
 
     private static final String TAG = "AuthorsActivity";
 
@@ -33,5 +33,8 @@ public class AuthorsActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.toolbar_title_authors, R.dimen.toolbar_text);
     }
 } 

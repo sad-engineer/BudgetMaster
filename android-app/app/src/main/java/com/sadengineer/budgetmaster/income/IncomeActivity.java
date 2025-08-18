@@ -6,11 +6,11 @@ import android.view.View;
 import android.widget.ImageButton;
 import androidx.viewpager2.widget.ViewPager2;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-public class IncomeActivity extends BaseNavigationActivity {
+public class IncomeActivity extends BaseContentActivity {
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
@@ -25,6 +25,9 @@ public class IncomeActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.toolbar_title_income, R.dimen.toolbar_text);
 
         // Обработчики кнопок доходов (заглушки)
         ImageButton addIncomeButton = findViewById(R.id.add_income_button_bottom);

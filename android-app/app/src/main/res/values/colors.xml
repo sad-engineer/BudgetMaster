@@ -15,7 +15,7 @@
     <!-- Цвета для универсального тулбара -->
     <color name="toolbar_content_common_background">@color/black</color>
     <color name="toolbar_content_common_icons">@color/green</color>
-    <color name="toolbar_content_common_texts">@color/white</color>
+    <color name="toolbar_content_common_texts">@color/yellow</color>
     
     <!-- Глобальные цвета навигации -->
     <color name="navigation_background">@color/dark_gray</color>
@@ -118,7 +118,7 @@
     <color name="settings_toolbar_background">@color/black</color>
     <color name="settings_toolbar_icons">@color/white</color>
     <color name="settings_toolbar_texts">@color/white</color>
-    <color name="settings_content_background">@color/white</color>
+    <color name="settings_content_background">@color/dark_gray</color>
     <color name="settings_text">@color/black</color>
 
     <!-- Цвета для экрана тестирования backend -->

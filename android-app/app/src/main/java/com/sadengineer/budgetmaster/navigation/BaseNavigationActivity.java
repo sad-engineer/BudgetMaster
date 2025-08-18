@@ -23,7 +23,6 @@ import com.sadengineer.budgetmaster.currencies.CurrenciesActivity;
 import com.sadengineer.budgetmaster.settings.SettingsActivity;
 import com.sadengineer.budgetmaster.VersionActivity;
 import com.sadengineer.budgetmaster.AuthorsActivity;
-import com.sadengineer.budgetmaster.BackendTestActivity;
 
 /**
  * Базовый класс для всех Activity с навигацией
@@ -207,8 +206,6 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             navigateToAuthors();
         } else if (id == R.id.nav_statistics) {
             showStatistics();
-        } else if (id == R.id.nav_backend_test) {
-            showBackendTest();
         }
 
         // Закрываем боковое меню
@@ -409,14 +406,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         Log.d(TAG, "Переход на экран экспорта данных");
     }
 
-    /**
-     * Показывает экран теста Backend
-     */
-    protected void showBackendTest() {
-        Intent intent = new Intent(this, BackendTestActivity.class);
-        startActivity(intent);
-        Log.d(TAG, "Переход на экран теста Backend");
-    }
+
 
     // Жизненный цикл Activity
 

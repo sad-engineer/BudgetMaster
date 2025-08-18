@@ -1,14 +1,15 @@
 package com.sadengineer.budgetmaster.settings;
 
-import android.content.Intent;
+
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageButton;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 
-public class SettingsActivity extends BaseNavigationActivity {
+public class SettingsActivity extends BaseContentActivity {
+
+    private static final String TAG = "SettingsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,8 +20,11 @@ public class SettingsActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.menu_settings, R.dimen.toolbar_text);
 
-        // TODO: Добавить логику для отображения информации о backend.jar
-        // Пока что просто показываем заглушку
+        Log.d(TAG, "✅ SettingsActivity создана");
     }
+
 } 

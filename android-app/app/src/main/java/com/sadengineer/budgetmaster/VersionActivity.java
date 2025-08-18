@@ -7,12 +7,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.util.Log;
 import androidx.appcompat.widget.Toolbar;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 
 /**
  * Экран версии приложения
  */
-public class VersionActivity extends BaseNavigationActivity {
+public class VersionActivity extends BaseContentActivity {
 
     /**
      * Тег для логирования
@@ -38,6 +38,9 @@ public class VersionActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.toolbar_title_version, R.dimen.toolbar_text);
 
         // Получаем ссылки на TextView
         TextView frontendVersionText = findViewById(R.id.frontend_version_text);

@@ -146,13 +146,6 @@ public class MainActivity extends BaseNavigationActivity {
         Log.d(TAG, "✅ MainActivity.onCreate() - инициализация завершена успешно");
     }
 
-    // Переопределяем только специфичные для MainActivity методы
-    @Override
-    protected void navigateToSettings() {
-        Intent intent = new Intent(this, BackendTestActivity.class);
-        startActivity(intent);
-    }
-
     /**
      * Инициализирует базу данных
      */

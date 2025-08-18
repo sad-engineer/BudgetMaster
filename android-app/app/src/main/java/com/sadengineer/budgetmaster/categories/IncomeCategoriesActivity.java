@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Activity для отображения категорий доходов
  */
-public class IncomeCategoriesActivity extends BaseNavigationActivity {
+public class IncomeCategoriesActivity extends BaseContentActivity {
     
     private static final String TAG = "IncomeCategoriesActivity";
     private static final int OPERATION_TYPE_INCOME = 1; // Доходы
@@ -50,6 +50,9 @@ public class IncomeCategoriesActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        
+        // Устанавливаем заголовок
+        setToolbarTitle(R.string.menu_income_categories, R.dimen.toolbar_text);
 
         // Инициализация CategoryService
         categoryService = new CategoryService(this, "default_user");

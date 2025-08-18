@@ -73,11 +73,7 @@
             android:icon="@drawable/ic_target"
             android:title="@string/menu_statistics" />
 
-        <!-- Тест Backend -->
-        <item
-            android:id="@+id/nav_backend_test"
-            android:icon="@drawable/ic_menu"
-            android:title="@string/menu_backend_test" />
+
 
         <!-- Настройки -->
         <item

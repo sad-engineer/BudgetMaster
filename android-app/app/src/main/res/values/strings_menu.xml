@@ -13,7 +13,7 @@
     <string name="menu_import_data">Загрузить данные</string>
     <string name="menu_export_data">Выгрузить данные</string>
     <string name="menu_settings">Настройки</string>
-    <string name="menu_backend_test">Тест Backend</string>
+
     <string name="menu_about">О приложении</string>
     <string name="menu_authors">Авторы</string>
 </resources>

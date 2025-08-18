@@ -22,7 +22,6 @@ import com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity;
 import com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity;
 import com.sadengineer.budgetmaster.import_export.ImportDataActivity;
 import com.sadengineer.budgetmaster.import_export.ExportDataActivity;
-import com.sadengineer.budgetmaster.BackendTestActivity;
 import com.sadengineer.budgetmaster.VersionActivity;
 import com.sadengineer.budgetmaster.AuthorsActivity;
 
@@ -65,7 +64,6 @@ public class SwipeNavigationHelper {
         ImportDataActivity.class,
         ExportDataActivity.class,
         StatisticsActivity.class,
-        BackendTestActivity.class,
         SettingsActivity.class,
         VersionActivity.class,
         AuthorsActivity.class

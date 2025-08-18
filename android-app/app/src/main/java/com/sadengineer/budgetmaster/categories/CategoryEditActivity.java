@@ -13,7 +13,7 @@ import android.widget.ArrayAdapter;
 import android.util.TypedValue;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Activity для создания/изменения категории
  */
-public class CategoryEditActivity extends BaseNavigationActivity {
+public class CategoryEditActivity extends BaseEditActivity<Category> {
     
     private static final String TAG = "CategoryEditActivity";
     
@@ -55,7 +55,7 @@ public class CategoryEditActivity extends BaseNavigationActivity {
         categoryTypeSpinner = findViewById(R.id.category_type_spinner);
         categoryOperationTypeSpinner = findViewById(R.id.category_operation_type_spinner);
         categoryParentSpinner = findViewById(R.id.category_parent_spinner);
-        saveButton = findViewById(R.id.save_button);
+        saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
 
@@ -63,6 +63,9 @@ public class CategoryEditActivity extends BaseNavigationActivity {
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
         setupBackButton(R.id.back_button);
+        
+        // Инициализация общих действий экрана редактирования
+        setupCommonEditActions(R.id.position_change_button);
 
         // Инициализация сервисов
         categoryService = new CategoryService(this, "default_user");
@@ -72,9 +75,6 @@ public class CategoryEditActivity extends BaseNavigationActivity {
         
         // Получаем данные из Intent и заполняем поля
         loadCategoryData();
-        
-        // Обработчики кнопок
-        setupButtonHandlers();
     }
     
     /**
@@ -173,18 +173,6 @@ public class CategoryEditActivity extends BaseNavigationActivity {
         }
     }
     
-    /**
-     * Настраивает обработчики кнопок
-     */
-    private void setupButtonHandlers() {
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveCategory();
-            }
-        });
-    }
-    
     @Override
     protected void setupBackButton(int backButtonId) {
         super.setupBackButton(backButtonId);
@@ -197,39 +185,54 @@ public class CategoryEditActivity extends BaseNavigationActivity {
     }
     
     /**
+     * Реализация абстрактного метода для валидации и сохранения
+     */
+    @Override
+    protected boolean validateAndSave() {
+        return saveCategory();
+    }
+    
+    /**
      * Сохраняет категорию
      */
-    private void saveCategory() {
+    private boolean saveCategory() {
         String title = categoryNameEdit.getText().toString().trim();
         
         if (TextUtils.isEmpty(title)) {
             categoryNameEdit.setError("Название категории не может быть пустым");
-            return;
+            return false;
         }
         
-        if (isEditMode) {
-            // Редактирование существующей категории
-            if (currentCategory != null) {
-                currentCategory.setTitle(title);
-                currentCategory.setOperationType(getSelectedOperationType());
-                currentCategory.setType(getSelectedCategoryType());
-                currentCategory.setParentId(getSelectedParentId());
+        try {
+            if (isEditMode) {
+                // Редактирование существующей категории
+                if (currentCategory != null) {
+                    currentCategory.setTitle(title);
+                    currentCategory.setOperationType(getSelectedOperationType());
+                    currentCategory.setType(getSelectedCategoryType());
+                    currentCategory.setParentId(getSelectedParentId());
+                    
+                    categoryService.update(currentCategory);
+                    Log.d(TAG, "✅ Категория обновлена: " + title);
+                }
+            } else {
+                // Создание новой категории
+                int operationType = getSelectedOperationType();
+                int categoryType = getSelectedCategoryType();
+                Integer parentId = getSelectedParentId();
                 
-                categoryService.update(currentCategory);
-                Log.d(TAG, "✅ Категория обновлена: " + title);
+                categoryService.create(title, operationType, categoryType, parentId);
+                Log.d(TAG, "✅ Категория создана: " + title);
             }
-        } else {
-            // Создание новой категории
-            int operationType = getSelectedOperationType();
-            int categoryType = getSelectedCategoryType();
-            Integer parentId = getSelectedParentId();
             
-            categoryService.create(title, operationType, categoryType, parentId);
-            Log.d(TAG, "✅ Категория создана: " + title);
+            // Возвращаемся к списку категорий
+            returnToCategories();
+            return true;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Ошибка при сохранении категории: " + e.getMessage(), e);
+            return false;
         }
-        
-        // Возвращаемся к списку категорий
-        returnToCategories();
     }
     
     /**
@@ -258,17 +261,7 @@ public class CategoryEditActivity extends BaseNavigationActivity {
         return null;
     }
     
-    /**
-     * Устанавливает заголовок тулбара
-     */
-    private void setToolbarTitle(int titleResId, int textSizeResId) {
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        if (toolbarTitle != null) {
-            toolbarTitle.setText(titleResId);
-            toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, 
-                getResources().getDimensionPixelSize(textSizeResId));
-        }
-    }
+
     
     /**
      * Возвращается к списку категорий
