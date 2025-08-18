@@ -150,7 +150,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     private void loadAccountData() {
         try {
             // Получаем счет из Intent
-            currentAccount = (Account) getIntent().getSerializableExtra("account");
+            currentAccount = (Account) getIntent().getSerializableExtra("item");
             // Получаем информацию о вкладке
             sourceTab = getIntent().getIntExtra("source_tab", 0);
             if (currentAccount != null) {
