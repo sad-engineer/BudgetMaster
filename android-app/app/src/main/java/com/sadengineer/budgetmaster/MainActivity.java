@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.widget.Toolbar;
@@ -28,24 +27,24 @@ public class MainActivity extends BaseNavigationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "🚀 MainActivity.onCreate() - начало инициализации");
+        Log.d(TAG, "MainActivity.onCreate() - начало инициализации");
         
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "📱 Layout загружен");
+        Log.d(TAG, "Layout загружен");
 
         // Инициализация базы данных
-        Log.d(TAG, "🔧 Начинаем инициализацию базы данных");
+        Log.d(TAG, "Начинаем инициализацию базы данных");
         initializeDatabase();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Log.d(TAG, "🔧 Toolbar настроен");
+        Log.d(TAG, "Toolbar настроен");
 
         // Инициализация навигации
-        Log.d(TAG, "🔧 Инициализация навигации");
+        Log.d(TAG, "Инициализация навигации");
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
-        Log.d(TAG, "🔧 Навигация настроена");
+        Log.d(TAG, "Навигация настроена");
 
         // Настройка обработки кнопки "Назад"
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -59,7 +58,7 @@ public class MainActivity extends BaseNavigationActivity {
                 }
             }
         });
-        Log.d(TAG, "🔧 Обработчик кнопки 'Назад' настроен");
+        Log.d(TAG, "Обработчик кнопки 'Назад' настроен");
 
         // Обработчики кнопок toolbar
         ImageButton incomeButton = toolbar.findViewById(R.id.income_button);
@@ -78,7 +77,7 @@ public class MainActivity extends BaseNavigationActivity {
                 startActivity(intent);
             }
         });
-        Log.d(TAG, "🔧 Кнопки toolbar настроены");
+        Log.d(TAG, "Кнопки toolbar настроены");
 
         // Обработчик кнопки "На счетах"
         Button btnAccounts = findViewById(R.id.btn_accounts);
@@ -143,7 +142,7 @@ public class MainActivity extends BaseNavigationActivity {
             }
         });
         
-        Log.d(TAG, "✅ MainActivity.onCreate() - инициализация завершена успешно");
+        Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
     }
 
     /**
@@ -151,30 +150,23 @@ public class MainActivity extends BaseNavigationActivity {
      */
     private void initializeDatabase() {
         try {
-            Log.d(TAG, "🔧 Инициализация базы данных...");
+            Log.d(TAG, "Инициализация базы данных...");
             databaseManager = new DatabaseManager(this);
             
             // Инициализируем базу данных асинхронно
             databaseManager.initializeDatabase().thenAccept(success -> {
                 if (success) {
-                    Log.d(TAG, "✅ База данных инициализирована успешно");
+                    Log.d(TAG, "База данных инициализирована успешно");
                 } else {
-                    Log.e(TAG, "❌ Ошибка инициализации базы данных");
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Ошибка инициализации базы данных", Toast.LENGTH_LONG).show();
-                    });
+                    Log.e(TAG, "Ошибка инициализации базы данных");
                 }
             }).exceptionally(throwable -> {
-                Log.e(TAG, "❌ Исключение при инициализации БД: " + throwable.getMessage(), throwable);
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Ошибка инициализации БД: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                Log.e(TAG, "Исключение при инициализации БД: " + throwable.getMessage(), throwable);
                 return null;
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка создания DatabaseManager: " + e.getMessage(), e);
-            Toast.makeText(this, "Ошибка создания DatabaseManager: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Ошибка создания DatabaseManager: " + e.getMessage(), e);
         }
     }
 }

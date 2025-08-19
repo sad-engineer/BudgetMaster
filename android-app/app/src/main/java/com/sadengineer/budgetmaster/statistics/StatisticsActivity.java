@@ -26,6 +26,6 @@ public class StatisticsActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_statistics, R.dimen.toolbar_text);
 
-        Log.d(TAG, "✅ StatisticsActivity создана");
+        Log.d(TAG, "StatisticsActivity создана");
     }
 } 

@@ -24,7 +24,7 @@ public class SettingsActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_settings, R.dimen.toolbar_text);
 
-        Log.d(TAG, "✅ SettingsActivity создана");
+        Log.d(TAG, "SettingsActivity создана");
     }
 
 } 

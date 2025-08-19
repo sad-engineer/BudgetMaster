@@ -36,5 +36,7 @@ public class AuthorsActivity extends BaseContentActivity {
 
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_authors, R.dimen.toolbar_text);
+
+        Log.d(TAG, "AuthorsActivity создана");
     }
 } 

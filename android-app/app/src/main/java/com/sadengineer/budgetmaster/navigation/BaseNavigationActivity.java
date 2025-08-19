@@ -23,6 +23,12 @@ import com.sadengineer.budgetmaster.currencies.CurrenciesActivity;
 import com.sadengineer.budgetmaster.settings.SettingsActivity;
 import com.sadengineer.budgetmaster.VersionActivity;
 import com.sadengineer.budgetmaster.AuthorsActivity;
+import com.sadengineer.budgetmaster.instructions.InstructionsActivity;
+import com.sadengineer.budgetmaster.statistics.StatisticsActivity;
+import com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity;
+import com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity;
+import com.sadengineer.budgetmaster.import_export.ImportDataActivity;
+import com.sadengineer.budgetmaster.import_export.ExportDataActivity;
 
 /**
  * Базовый класс для всех Activity с навигацией
@@ -62,7 +68,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
                     if (swipeNavigationHelper != null) {
                         swipeNavigationHelper.setEnabled(false);
                     }
-                    Log.d(TAG, "📱 Меню открыто - свайпы отключены");
+                    Log.d(TAG, "Меню открыто - свайпы отключены");
                 }
 
                 @Override
@@ -71,7 +77,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
                     if (swipeNavigationHelper != null) {
                         swipeNavigationHelper.setEnabled(true);
                     }
-                    Log.d(TAG, "📱 Меню закрыто - свайпы включены");
+                    Log.d(TAG, "Меню закрыто - свайпы включены");
                 }
 
                 @Override
@@ -81,7 +87,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             });
         }
         
-        Log.d(TAG, "✅ Навигация инициализирована");
+        Log.d(TAG, "Навигация инициализирована");
     }
 
     /**
@@ -128,7 +134,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
             menuButton.setOnClickListener(v -> {
                 if (drawerLayout != null) {
                     drawerLayout.openDrawer(GravityCompat.START);
-                    Log.d(TAG, "👆 Нажата кнопка меню");
+                    Log.d(TAG, "Нажата кнопка меню");
                 }
             });
         }
@@ -146,7 +152,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "👆 Нажата кнопка назад");
+                Log.d(TAG, "Нажата кнопка назад");
             });
         }
     }
@@ -162,7 +168,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         // Кнопка смены позиции — просто логируем клик по умолчанию
         ImageButton positionButton = findViewById(R.id.position_change_button);
         if (positionButton != null) {
-            positionButton.setOnClickListener(v -> Log.d(TAG, "👆 Нажата кнопка смены позиции"));
+            positionButton.setOnClickListener(v -> Log.d(TAG, "Нажата кнопка смены позиции"));
         }
     }
 
@@ -224,7 +230,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     public void onBackPressed() {
         if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Log.d(TAG, "👆 Закрыто боковое меню");
+            Log.d(TAG, "Закрыто боковое меню");
         } else {
             super.onBackPressed();
         }
@@ -349,14 +355,11 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
         Log.d(TAG, "Переход на экран авторов");
     }
 
-    // не реализованные экраны
-    // TODO: реализовать экраны
-
     /**
      * Показывает экран инструкций
      */
     protected void showInstructions() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.instructions.InstructionsActivity.class);
+        Intent intent = new Intent(this, InstructionsActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран инструкций");
     }
@@ -365,7 +368,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран статистики
      */
     protected void showStatistics() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.statistics.StatisticsActivity.class);
+        Intent intent = new Intent(this, StatisticsActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран статистики");
     }
@@ -374,7 +377,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран категорий доходов
      */
     protected void showIncomeCategories() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity.class);
+        Intent intent = new Intent(this, IncomeCategoriesActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран категорий доходов");
     }
@@ -383,7 +386,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран категорий расходов
      */
     protected void showExpenseCategories() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity.class);
+        Intent intent = new Intent(this, ExpenseCategoriesActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран категорий расходов");
     }
@@ -392,7 +395,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран импорта данных
      */
     protected void showImportData() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.import_export.ImportDataActivity.class);
+        Intent intent = new Intent(this, ImportDataActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран импорта данных");
     }
@@ -401,12 +404,10 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
      * Показывает экран экспорта данных
      */
     protected void showExportData() {
-        Intent intent = new Intent(this, com.sadengineer.budgetmaster.import_export.ExportDataActivity.class);
+        Intent intent = new Intent(this, ExportDataActivity.class);
         startActivity(intent);
         Log.d(TAG, "Переход на экран экспорта данных");
     }
-
-
 
     // Жизненный цикл Activity
 
@@ -416,7 +417,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "🚀 " + getClass().getSimpleName() + " запущена");
+        Log.d(TAG, getClass().getSimpleName() + " запущена");
     }
 
     /**
@@ -425,7 +426,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "▶️ " + getClass().getSimpleName() + " возобновлена");
+        Log.d(TAG, getClass().getSimpleName() + " возобновлена");
         
         // Сбрасываем счетчик свайпов при возврате на экран
         resetSwipeCount();
@@ -437,7 +438,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "⏸️ " + getClass().getSimpleName() + " приостановлена");
+        Log.d(TAG, getClass().getSimpleName() + " приостановлена");
     }
 
     /**
@@ -446,7 +447,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "🛑 " + getClass().getSimpleName() + " остановлена");
+        Log.d(TAG, getClass().getSimpleName() + " остановлена");
     }
 
     /**
@@ -455,6 +456,6 @@ public abstract class BaseNavigationActivity extends AppCompatActivity implement
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "💀 " + getClass().getSimpleName() + " уничтожена");
+        Log.d(TAG, getClass().getSimpleName() + " уничтожена");
     }
 } 

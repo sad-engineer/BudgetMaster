@@ -84,7 +84,7 @@ public class SwipeNavigationHelper {
      */
     public void setEnabled(boolean enabled) {
         this.isEnabled = enabled;
-        Log.d(TAG, "🔄 Свайпы " + (enabled ? "включены" : "отключены"));
+        Log.d(TAG, "Свайпы " + (enabled ? "включены" : "отключены"));
     }
     
     /**
@@ -103,7 +103,7 @@ public class SwipeNavigationHelper {
         swipeUpCount = 0;
         shouldNavigateOnNextSwipe = false;
         lastSwipeUpTime = 0;
-        Log.d(TAG, "🔄 Счетчик свайпов сброшен");
+        Log.d(TAG, "Счетчик свайпов сброшен");
     }
     
     /**
@@ -117,19 +117,19 @@ public class SwipeNavigationHelper {
         // Ищем RecyclerView по ID (попробуем несколько вариантов)
         RecyclerView recyclerView = findRecyclerView(rootView);
         if (recyclerView == null) {
-            Log.d(TAG, "❌ RecyclerView не найден");
+            Log.d(TAG, "RecyclerView не найден");
             return false;
         }
         
         // Проверяем количество элементов
         int itemCount = recyclerView.getAdapter() != null ? recyclerView.getAdapter().getItemCount() : 0;
-        Log.d(TAG, "📊 Найдено элементов в списке: " + itemCount);
+        Log.d(TAG, "Найдено элементов в списке: " + itemCount);
         
         // Проверяем, действительно ли список длинный и требует прокрутки
         if (itemCount >= CARDS_THRESHOLD) {
             // Дополнительная проверка - может ли список прокручиваться
             boolean canScroll = recyclerView.canScrollVertically(-1) || recyclerView.canScrollVertically(1);
-            Log.d(TAG, "📜 Список может прокручиваться: " + canScroll);
+            Log.d(TAG, "Список может прокручиваться: " + canScroll);
             return canScroll;
         }
         
@@ -174,7 +174,7 @@ public class SwipeNavigationHelper {
         // но может прокручиваться вниз, значит мы в начале списка
         boolean canScrollDown = recyclerView.canScrollVertically(1);
         
-        Log.d(TAG, "📜 canScrollUp: " + canScrollUp + ", canScrollDown: " + canScrollDown);
+        Log.d(TAG, "canScrollUp: " + canScrollUp + ", canScrollDown: " + canScrollDown);
         
         // Если можем прокрутить вверх - значит не в начале списка
         return canScrollUp;
@@ -252,17 +252,17 @@ public class SwipeNavigationHelper {
      * Обработка свайпа вверх с двойной логикой
     */
     private void onSwipeUp() {
-        Log.d(TAG, "👆 Свайп вверх - обрабатываем с двойной логикой");
+        Log.d(TAG, "Свайп вверх - обрабатываем с двойной логикой");
         
         // Проверяем, нужно ли использовать двойную логику
         boolean useDoubleLogic = shouldUseDoubleSwipeLogic();
-        Log.d(TAG, "🔍 Использовать двойную логику: " + useDoubleLogic);
+        Log.d(TAG, "Использовать двойную логику: " + useDoubleLogic);
         
         if (useDoubleLogic) {
             handleDoubleSwipeLogic();
         } else {
             // Обычная логика - сразу переходим на следующий экран
-            Log.d(TAG, "📱 Используем обычную навигацию");
+            Log.d(TAG, "Используем обычную навигацию");
             navigateToNextScreen();
         }
     }
@@ -278,18 +278,18 @@ public class SwipeNavigationHelper {
         RecyclerView recyclerView = findRecyclerView(rootView);
         
         if (recyclerView == null) {
-            Log.d(TAG, "❌ RecyclerView не найден, используем обычную навигацию");
+            Log.d(TAG, "RecyclerView не найден, используем обычную навигацию");
             navigateToNextScreen();
             return;
         }
         
         // Проверяем, можно ли прокрутить список вверх
         boolean canScrollUp = canScrollUp(recyclerView);
-        Log.d(TAG, "📜 Можно прокрутить вверх: " + canScrollUp);
+        Log.d(TAG, "Можно прокрутить вверх: " + canScrollUp);
         
         if (canScrollUp) {
             // Можно прокрутить - первый свайп прокручивает список
-            Log.d(TAG, "📜 Первый свайп - прокручиваем список");
+            Log.d(TAG, "Первый свайп - прокручиваем список");
             
             // Прокручиваем на определенное расстояние
             int scrollDistance = -400; // Увеличиваем расстояние прокрутки
@@ -299,12 +299,12 @@ public class SwipeNavigationHelper {
             shouldNavigateOnNextSwipe = true;
             lastSwipeUpTime = currentTime;
             
-            Log.d(TAG, "✅ Список прокручен, следующий свайп перейдет на экран");
+            Log.d(TAG, "Список прокручен, следующий свайп перейдет на экран");
             
         } else if (shouldNavigateOnNextSwipe && 
                    (currentTime - lastSwipeUpTime) < NAVIGATION_SWIPE_DELAY) {
             // Нельзя прокрутить и флаг установлен - переходим на экран
-            Log.d(TAG, "🔄 Второй свайп - переходим на следующий экран");
+            Log.d(TAG, "Второй свайп - переходим на следующий экран");
             navigateToNextScreen();
             
             // Сбрасываем флаги
@@ -313,7 +313,7 @@ public class SwipeNavigationHelper {
             
         } else {
             // Нельзя прокрутить и флаг не установлен - переходим на экран
-            Log.d(TAG, "📱 Нельзя прокрутить список - переходим на экран");
+            Log.d(TAG, "Нельзя прокрутить список - переходим на экран");
             navigateToNextScreen();
         }
     }
@@ -322,7 +322,7 @@ public class SwipeNavigationHelper {
      * Переход на следующий экран
      */
     private void navigateToNextScreen() {
-        Log.d(TAG, "👆 Свайп вверх - переходим на следующий экран");
+        Log.d(TAG, "Свайп вверх - переходим на следующий экран");
         
         // Находим текущий экран в порядке навигации
         Class<?> currentActivity = activity.getClass();
@@ -340,7 +340,7 @@ public class SwipeNavigationHelper {
             Class<?> nextActivity = navigationOrder[currentIndex + 1];
             navigateToActivity(nextActivity);
         } else {
-            Log.d(TAG, "📱 Достигнут конец навигации или экран не найден в списке");
+            Log.d(TAG, "Достигнут конец навигации или экран не найден в списке");
         }
     }
     
@@ -348,7 +348,7 @@ public class SwipeNavigationHelper {
      * Обработка свайпа вниз - переход на предыдущий экран
      */
     private void onSwipeDown() {
-        Log.d(TAG, "👇 Свайп вниз - переходим на предыдущий экран");
+        Log.d(TAG, "Свайп вниз - переходим на предыдущий экран");
         
         // Сбрасываем флаги двойной логики
         shouldNavigateOnNextSwipe = false;
@@ -370,7 +370,7 @@ public class SwipeNavigationHelper {
             Class<?> previousActivity = navigationOrder[currentIndex - 1];
             navigateToActivity(previousActivity);
         } else {
-            Log.d(TAG, "📱 Достигнут начало навигации или экран не найден в списке");
+            Log.d(TAG, "Достигнут начало навигации или экран не найден в списке");
         }
     }
     
@@ -379,11 +379,11 @@ public class SwipeNavigationHelper {
      */
     private void navigateToActivity(Class<?> targetActivity) {
         try {
-            Log.d(TAG, "🔄 Переход на экран: " + targetActivity.getSimpleName());
+            Log.d(TAG, "Переход на экран: " + targetActivity.getSimpleName());
             Intent intent = new Intent(activity, targetActivity);
             activity.startActivity(intent);
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка перехода на экран " + targetActivity.getSimpleName() + ": " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка перехода на экран " + targetActivity.getSimpleName() + ": " + e.getMessage(), e);
         }
     }
 } 
