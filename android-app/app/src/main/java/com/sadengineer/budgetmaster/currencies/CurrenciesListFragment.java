@@ -109,17 +109,17 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
         adapter = new CurrencyAdapter();
         
         adapter.setClickListener(currency -> {
-            Log.d(TAG, "👆 Клик по валюте: " + currency.getId());
+            Log.d(TAG, "Клик по валюте: " + currency.getId());
             goToEdit(currency);
         });
         
         adapter.setLongClickListener(currency -> {
-            Log.d(TAG, "👆 Длительный клик по валюте: " + currency.getId());
+            Log.d(TAG, "Длительный клик по валюте: " + currency.getId());
             showDeleteConfirmationDialog(currency);
         });
         
         adapter.setSelectionListener(selectedCount -> {
-            Log.d(TAG, "🔄 Выбрано валют: " + selectedCount);
+            Log.d(TAG, "Выбрано валют: " + selectedCount);
             // Уведомляем Activity о количестве выбранных элементов
             if (getActivity() instanceof CurrenciesActivity) {
                 ((CurrenciesActivity) getActivity()).updateSelectionCount(selectedCount);

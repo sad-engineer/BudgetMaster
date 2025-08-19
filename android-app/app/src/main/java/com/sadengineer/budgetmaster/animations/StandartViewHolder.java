@@ -257,7 +257,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Привязывает данные к элементу
      */
     public void bind(int position, String title, int id, boolean isSelectionMode, boolean isSelected) {
-        bind(position, title, id, 0, isSelectionMode, isSelected);
+        bind(position, title, id, 0, null, isSelectionMode, isSelected);
     }
     
     public void bind(int position, String title, int id, int sum, boolean isSelectionMode, boolean isSelected) {
@@ -284,7 +284,8 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         if (sumText != null) {
             double rubles = sum / 100.0;
-            sumText.setText(formatter.formatCompact(rubles) + " RUB");
+            String currencySymbol = (shortName != null && !shortName.isEmpty()) ? shortName : "RUB";
+            sumText.setText(formatter.formatCompact(rubles) + " " + currencySymbol);
         }
         if (shortNameText != null) {
             shortNameText.setText(shortName != null ? shortName : "");

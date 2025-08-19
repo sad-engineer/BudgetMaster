@@ -120,7 +120,7 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
         }
         
         if (currenciesToDelete.isEmpty()) {
-            Log.w(TAG, "⚠️ Нет валют для удаления - все уже удалены");
+            Log.w(TAG, "Нет валют для удаления - все уже удалены");
             softDeletionDone.setValue(0);
             selectionMode.setValue(false);
             return;
@@ -136,7 +136,7 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
                     Log.d(TAG, "Удаление валюты: ID=" + currency.getId());
                     currencyService.delete(true, currency);
                     deletedCount++;
-                    Log.d(TAG, "✅ Валюта ID: " + currency.getId() + " успешно удалена");
+                    Log.d(TAG, "Валюта ID: " + currency.getId() + " успешно удалена");
                 } catch (Exception e) {
                     Log.e(TAG, "Ошибка удаления валюты: ID=" + currency.getId() + ", причина: " + e.getMessage());
                 }

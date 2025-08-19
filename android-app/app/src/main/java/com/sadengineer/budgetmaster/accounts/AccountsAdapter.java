@@ -8,13 +8,18 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -29,6 +34,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private boolean isSelectionMode = false;
     private Set<Integer> selectedAccounts = new HashSet<>();
     private OnSelectedAccountsChanged externalSelectedAccountsChanged;
+    private CurrencyService currencyService;
+    private Map<Integer, String> currencyCache = new HashMap<>();
     
     public interface OnAccountClickListener {
         void onAccountClick(Account account);
@@ -48,9 +55,11 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     /**
      * Конструктор адаптера
      * @param listener обработчик клика на счет
+     * @param context контекст приложения
      */
-    public AccountsAdapter(OnAccountClickListener listener) {
+    public AccountsAdapter(OnAccountClickListener listener, Context context) {
         this.listener = listener;
+        this.currencyService = new CurrencyService(context, "default_user");
     }
     
     /**
@@ -135,8 +144,13 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         holder.resetToInitialState();
         // Определяем, выбран ли текущий элемент (только для неудаленных счетов)
         boolean isSelected = !account.isDeleted() && selectedAccounts.contains(account.getId()); 
+        
+        // Получаем короткое имя валюты из кэша
+        String currencyShortName = currencyCache.getOrDefault(account.getCurrencyId(), "RUB");
+        Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
+        
         holder.bind(
-            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), isSelectionMode, isSelected);
+            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected);
     }
 
     /**
@@ -153,7 +167,39 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
+        loadCurrencyCache();
         notifyDataSetChanged();
+    }
+    
+    /**
+     * Загружает валюты в кэш
+     */
+    private void loadCurrencyCache() {
+        currencyCache.clear();
+        try {
+            // Получаем все валюты асинхронно
+            currencyService.getAll().observeForever(currencies -> {
+                if (currencies != null) {
+                    for (Currency currency : currencies) {
+                        if (currency.getShortName() != null && !currency.getShortName().isEmpty()) {
+                            currencyCache.put(currency.getId(), currency.getShortName());
+                        }
+                    }
+                    Log.d(TAG, "Кэш валют загружен: " + currencyCache.size() + " валют");
+                    // Обновляем UI после загрузки кэша
+                    notifyDataSetChanged();
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка загрузки кэша валют: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Обновляет кэш валют
+     */
+    public void refreshCurrencyCache() {
+        loadCurrencyCache();
     }
     
     /**

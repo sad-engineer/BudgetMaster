@@ -113,7 +113,7 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
             performDataLoading();
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка загрузки данных: " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка загрузки данных: " + e.getMessage(), e);
         }
     }
     

@@ -111,7 +111,7 @@ public class SavingsAccountsFragment extends BaseListFragment<Account, AccountsA
                 Log.d(TAG, "Переход к окну редактирования счёта");
                 goToEdit(account);
             }
-        });
+        }, requireContext());
         
         adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
             @Override

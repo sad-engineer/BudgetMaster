@@ -236,6 +236,24 @@ public class CurrencyService {
     public LiveData<List<Currency>> getAll() {
         return repo.getAll();
     }
+    
+    /**
+     * Получить валюту по ID
+     * @param id ID валюты
+     * @return LiveData с валютой
+     */
+    public LiveData<Currency> getById(int id) {
+        return repo.getById(id);
+    }
+    
+    /**
+     * Получить валюту по ID синхронно
+     * @param id ID валюты
+     * @return валюта
+     */
+    public Currency getByIdSync(int id) {
+        return repo.getByIdSync(id);
+    }
 
     /**
      * Получить валюту по названию

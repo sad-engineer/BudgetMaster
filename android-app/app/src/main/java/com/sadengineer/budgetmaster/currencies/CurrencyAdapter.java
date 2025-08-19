@@ -136,7 +136,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         // Определяем, выбран ли текущий элемент
         boolean isSelected = selectedCurrencies.contains(currency.getId());
 
-        Log.d(TAG, "🔄 Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
+        Log.d(TAG, "Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
         "ID: " + currency.getId() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(currency.getPosition(), currency.getTitle(), currency.getId(), 
                    0, currency.getShortName(), isSelectionMode, isSelected);
@@ -155,7 +155,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setCurrencies(List<Currency> currencies) {
         this.currencies = currencies != null ? currencies : new ArrayList<>();
-        Log.d(TAG, "🔄 Обновляем список валют: " + this.currencies.size() + " элементов");
+        Log.d(TAG, "Обновляем список валют: " + this.currencies.size() + " элементов");
         notifyDataSetChanged();
     }
     

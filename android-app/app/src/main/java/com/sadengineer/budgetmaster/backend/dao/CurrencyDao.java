@@ -80,6 +80,14 @@ public interface CurrencyDao {
      */
     @Query("SELECT * FROM currencies WHERE id = :id")
     LiveData<Currency> getById(int id);
+    
+    /**
+     * Получает валюту по ID синхронно (включая удаленные)
+     * @param id ID валюты
+     * @return валюта с указанным ID
+     */
+    @Query("SELECT * FROM currencies WHERE id = :id")
+    Currency getByIdSync(int id);
         
     /**
      * Получает валюту по позиции (включая удаленные)

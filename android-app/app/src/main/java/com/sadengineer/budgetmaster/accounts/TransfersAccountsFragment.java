@@ -112,7 +112,7 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
                 Log.d(TAG, "Переход к окну редактирования счёта");
                 goToEdit(account);
             }
-        });
+        }, requireContext());
         
         adapter.setLongClickListener(new AccountsAdapter.OnAccountLongClickListener() {
             @Override

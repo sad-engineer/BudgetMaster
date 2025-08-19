@@ -85,7 +85,7 @@ public class CurrenciesActivity extends BaseCardsActivity<Currency> {
      * Обновляет количество выбранных элементов
      */
     public void updateSelectionCount(int count) {
-        Log.d(TAG, "🔄 Выбрано элементов: " + count);
+        Log.d(TAG, "Выбрано элементов: " + count);
         // Можно добавить отображение количества в UI
     }
 } 

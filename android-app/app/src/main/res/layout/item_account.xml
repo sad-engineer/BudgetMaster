@@ -30,6 +30,7 @@
             android:layout_weight="1"
             android:text="Название"
             android:textSize="18sp"
+            android:textStyle="normal"
             android:textColor="@color/accounts_item_text" />
 
         <TextView
@@ -38,6 +39,7 @@
             android:layout_height="wrap_content"
             android:text="ID: 1"
             android:textSize="12sp"
+            android:textStyle="normal"
             android:textColor="@color/accounts_item_id_text" />
 
         <TextView
@@ -46,6 +48,7 @@
             android:layout_height="wrap_content"
             android:text="0.00 RUB"
             android:textSize="18sp"
+            android:textStyle="normal"
             android:textColor="@color/accounts_item_text"
             android:layout_marginStart="16dp" />
 

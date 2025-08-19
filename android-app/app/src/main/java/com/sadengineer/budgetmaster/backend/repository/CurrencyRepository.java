@@ -62,6 +62,15 @@ public class CurrencyRepository {
     }
     
     /**
+     * Получить валюту по ID синхронно (включая удаленные)
+     * @param id ID валюты
+     * @return валюта
+     */
+    public Currency getByIdSync(int id) {
+        return dao.getByIdSync(id);
+    }
+    
+    /**
      * Получить валюту по названию (включая удаленные)
      * @param title название валюты
      * @return LiveData с валютой

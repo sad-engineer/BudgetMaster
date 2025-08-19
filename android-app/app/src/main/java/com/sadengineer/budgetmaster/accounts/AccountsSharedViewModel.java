@@ -121,7 +121,7 @@ public class AccountsSharedViewModel extends AndroidViewModel implements Selecti
         }
 
         if (accountsToDelete.isEmpty()) {
-            Log.w(TAG, "⚠️ Нет счетов для удаления - все уже удалены");
+            Log.w(TAG, "Нет счетов для удаления - все уже удалены");
             softDeletionDone.setValue(0);
             selectionMode.setValue(false);
             return;
@@ -137,7 +137,7 @@ public class AccountsSharedViewModel extends AndroidViewModel implements Selecti
                     Log.d(TAG, "Удаление счёта: ID=" + account.getId());
                     accountService.delete(true, account);
                     deletedCount++;
-                    Log.d(TAG, "✅ Счет ID: " + account.getId() + " успешно удален");
+                    Log.d(TAG, "Счет ID: " + account.getId() + " успешно удален");
                 } catch (Exception e) {
                     Log.e(TAG, "Ошибка удаления счёта: ID=" + account.getId() + ", причина: " + e.getMessage());
                 }
