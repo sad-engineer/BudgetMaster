@@ -26,6 +26,6 @@ public class ExportDataActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_export_data, R.dimen.toolbar_text);
 
-        Log.d(TAG, "✅ ExportDataActivity создана");
+        Log.d(TAG, "ExportDataActivity создана");
     }
 } 

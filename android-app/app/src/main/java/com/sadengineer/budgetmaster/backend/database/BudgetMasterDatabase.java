@@ -37,16 +37,25 @@ import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 @TypeConverters(DateTimeConverter.class)
 public abstract class BudgetMasterDatabase extends RoomDatabase {
     
-    // DAO интерфейсы
+    /**
+     * DAO интерфейсы
+     */
     public abstract AccountDao accountDao();
     public abstract OperationDao operationDao();
     public abstract CategoryDao categoryDao();
     public abstract BudgetDao budgetDao();
     public abstract CurrencyDao currencyDao();
     
-    // Singleton для базы данных
+    /**
+     * Singleton для базы данных
+     */
     private static volatile BudgetMasterDatabase INSTANCE;
     
+    /**
+     * Получение экземпляра базы данных
+     * @param context контекст приложения
+     * @return экземпляр базы данных
+     */
     public static BudgetMasterDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (BudgetMasterDatabase.class) {

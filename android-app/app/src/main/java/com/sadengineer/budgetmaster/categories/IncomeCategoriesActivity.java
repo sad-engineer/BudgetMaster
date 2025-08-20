@@ -122,7 +122,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         // Небольшая задержка для плавного перехода
         recyclerView.postDelayed(() -> {
             adapter.setSelectionMode(true);
-            Log.d(TAG, "✅ Режим выбора категорий включен");
+            Log.d(TAG, "Режим выбора категорий включен");
         }, 100);
     }
     
@@ -138,7 +138,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         addCategoryButton.setImageResource(R.drawable.ic_add);
         deleteCategoryButton.setImageResource(R.drawable.ic_delete);
         
-        Log.d(TAG, "❌ Режим выбора категорий отменен");
+        Log.d(TAG, "Режим выбора категорий отменен");
     }
     
     /**
@@ -147,21 +147,21 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
     private void deleteSelectedCategories() {
         List<Category> selectedCategories = adapter.getSelectedCategories();
         
-        Log.d(TAG, "🗑️ Удаляем выбранные категории: " + selectedCategories.size());
+        Log.d(TAG, "Удаляем выбранные категории: " + selectedCategories.size());
         
         // Удаляем категории из базы данных
         for (Category category : selectedCategories) {
             try {
                 categoryService.delete(true, category);
-                Log.d(TAG, "✅ Удалена категория: " + category.getTitle());
+                Log.d(TAG, "Удалена категория: " + category.getTitle());
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
             }
         }
         
         // Отменяем режим выбора
         cancelSelectionMode();
-        Log.d(TAG, "✅ Удалено категорий: " + selectedCategories.size());
+        Log.d(TAG, "Удалено категорий: " + selectedCategories.size());
     }
     
     /**
@@ -201,11 +201,11 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      */
     private void deleteCategory(Category category) {
         try {
-            Log.d(TAG, "🗑️ Удаляем категорию из базы данных: " + category.getTitle());
+            Log.d(TAG, "Удаляем категорию из базы данных: " + category.getTitle());
             categoryService.delete(false, category);
-            Log.d(TAG, "✅ Запрос на удаление категории отправлен: " + category.getTitle());
+            Log.d(TAG, "Запрос на удаление категории отправлен: " + category.getTitle());
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
         }
     }
     
@@ -213,7 +213,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      * Загружает категории доходов из базы данных
      */
     private void loadCategoriesFromDatabase() {
-        Log.d(TAG, "🔄 Загружаем категории доходов из базы данных...");
+        Log.d(TAG, "Загружаем категории доходов из базы данных...");
         
         try {
             // Получаем базу данных (уже инициализирована в MainActivity)
@@ -221,24 +221,24 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
             
             // Загружаем категории доходов через Observer
             database.categoryDao().getAllActiveByOperationType(OPERATION_TYPE_INCOME).observe(this, loadedCategories -> {
-                Log.d(TAG, "✅ Загружено категорий доходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
+                Log.d(TAG, "Загружено категорий доходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
                 
                 if (loadedCategories != null && !loadedCategories.isEmpty()) {
                     categories.clear();
                     categories.addAll(loadedCategories);
                     adapter.setCategories(loadedCategories);
-                    Log.d(TAG, "✅ Категории доходов отображены в списке");
+                    Log.d(TAG, "Категории доходов отображены в списке");
                     
                     // Сбрасываем счетчик свайпов при изменении содержимого списка
                     resetSwipeCount();
                 } else {
                     categories.clear();
-                    Log.w(TAG, "⚠️ Категории доходов не найдены в базе данных");
+                    Log.w(TAG, "Категории доходов не найдены в базе данных");
                 }
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка загрузки категорий доходов: " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка загрузки категорий доходов: " + e.getMessage(), e);
         }
     }
     
@@ -297,7 +297,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      * @param category - выбранная категория
      */
     private void goToCategoryEdit(Category category) {
-        Log.d(TAG, "🔄 Переходим к окну редактирования категории");
+        Log.d(TAG, "Переходим к окну редактирования категории");
         Intent intent = new Intent(IncomeCategoriesActivity.this, CategoryEditActivity.class);
         intent.putExtra("category", category);
         intent.putExtra("operation_type", OPERATION_TYPE_INCOME);

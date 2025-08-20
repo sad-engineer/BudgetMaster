@@ -52,24 +52,8 @@ public class BudgetActivity extends BaseContentActivity {
         // Обработчики кнопок бюджета
         setupButtons();
 
-        // Наблюдаем за режимом выбора, чтобы обновлять иконки
-        viewModel.getSelectionMode().observe(this, enabled -> {
-            isSelectionMode = Boolean.TRUE.equals(enabled);
-            if (isSelectionMode) {
-                addBudgetButton.setImageResource(R.drawable.ic_save);
-                deleteBudgetButton.setImageResource(R.drawable.ic_back);
-            } else {
-                addBudgetButton.setImageResource(R.drawable.ic_add);
-                deleteBudgetButton.setImageResource(R.drawable.ic_delete);
-            }
-        });
-
-        // Логируем результат мягкого удаления
-        viewModel.getSoftDeletionDone().observe(this, count -> {
-            if (count != null) {
-                Log.d(TAG, "✅ Мягко удалено бюджетов: " + count);
-            }
-        });
+        // Кнопки скрыты, поэтому режим выбора не нужен
+        Log.d(TAG, "Режим выбора отключен - кнопки скрыты");
 
         // Инициализация ViewPager2 и TabLayout
         setupViewPager();
@@ -82,39 +66,11 @@ public class BudgetActivity extends BaseContentActivity {
         addBudgetButton = findViewById(R.id.add_budget_button_bottom);
         deleteBudgetButton = findViewById(R.id.delete_budget_button_bottom);
 
-        addBudgetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // Сохраняем выбранные бюджеты (мягкое удаление)
-                    BudgetLimitsFragment fragment = getCurrentFragment();
-                    if (fragment != null) {
-                        List<Budget> selectedBudgets = adapter.getSelectedBudgets();
-                        Log.d(TAG, "🔄 Выбранные бюджеты: " + selectedBudgets.size());
-                        if (selectedBudgets != null && !selectedBudgets.isEmpty()) {
-                            viewModel.softDeleteSelectedBudgets(selectedBudgets);
-                        }
-                    }
-                } else {
-                    // Добавляем новый бюджет
-                    Log.d(TAG, "👆 Добавить бюджет");
-                    // TODO: Реализовать добавление бюджета
-                }
-            }
-        });
-
-        deleteBudgetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isSelectionMode) {
-                    // Отменяем выбор
-                    viewModel.setSelectionMode(false);
-                } else {
-                    // Включаем режим выбора
-                    viewModel.setSelectionMode(true);
-                }
-            }
-        });
+        // Скрываем кнопки, так как бюджеты создаются только через категории
+        addBudgetButton.setVisibility(View.GONE);
+        deleteBudgetButton.setVisibility(View.GONE);
+        
+        Log.d(TAG, "Кнопки создания/удаления бюджетов скрыты - бюджеты управляются через категории");
     }
     
     /**
@@ -151,11 +107,5 @@ public class BudgetActivity extends BaseContentActivity {
         return null;
     }
     
-    /**
-     * Обновляет количество выбранных элементов
-     */
-    public void updateSelectionCount(int count) {
-        Log.d(TAG, "🔄 Выбрано элементов: " + count);
-        // Можно добавить отображение количества в UI
-    }
+    // Метод updateSelectionCount удален, так как режим выбора отключен
 } 

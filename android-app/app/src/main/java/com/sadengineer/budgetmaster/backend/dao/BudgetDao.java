@@ -69,6 +69,16 @@ public interface BudgetDao {
     LiveData<List<Budget>> getAllActive();
 
     /**
+     * Получает все активные бюджеты для категорий расходов (operation_type = 1)
+     * @return список активных бюджетов для расходов, отсортированных по позиции
+     */
+    @Query("SELECT b.* FROM budgets b " +
+           "INNER JOIN categories c ON b.categoryId = c.id " +
+           "WHERE b.deleteTime IS NULL AND c.deleteTime IS NULL AND c.operationType = 1 " +
+           "ORDER BY b.position ASC")
+    LiveData<List<Budget>> getAllActiveForExpenses();
+
+    /**
      * Получает все удаленные бюджеты
      * @return список удаленных бюджетов, отсортированных по позиции
      */

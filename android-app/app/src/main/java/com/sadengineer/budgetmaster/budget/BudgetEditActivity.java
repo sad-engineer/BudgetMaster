@@ -13,10 +13,8 @@ import android.widget.ArrayAdapter;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
-import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 
 import java.util.List;
@@ -32,17 +30,16 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private EditText budgetAmountEdit;
     private Spinner budgetCategorySpinner;
     private Spinner budgetCurrencySpinner;
+    private View categoryLabel; 
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
     private BudgetService budgetService;
-    private CategoryService categoryService;
     private CurrencyService currencyService;
     
     // Поля для хранения данных бюджета
     private Budget currentBudget;
     private boolean isEditMode = false;
-    private List<Category> categories = new ArrayList<>();
     private List<Currency> currencies = new ArrayList<>();
     
     /**
@@ -57,7 +54,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         budgetAmountEdit = findViewById(R.id.budget_amount_edit_text);
         budgetCategorySpinner = findViewById(R.id.budget_category_spinner);
         budgetCurrencySpinner = findViewById(R.id.budget_currency_spinner);
-        saveButton = findViewById(R.id.position_change_button);
+        categoryLabel = findViewById(R.id.category_label); // TextView с текстом "Категория"        saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
 
@@ -71,7 +68,6 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
 
         // Инициализация сервисов
         budgetService = new BudgetService(this, "default_user");
-        categoryService = new CategoryService(this, "default_user");
         currencyService = new CurrencyService(this, "default_user");
         
         // Настраиваем спиннеры
@@ -82,30 +78,9 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     }
     
     /**
-     * Настраивает спиннеры для категорий и валют
+     * Настраивает спиннеры для валют (категории не загружаются, так как скрыты)
      */
     private void setupSpinners() {
-        // Настройка спиннера категорий
-        categoryService.getAll().observe(this, categories -> {
-            if (categories != null && !categories.isEmpty()) {
-                this.categories = categories;
-                
-                // Создаем массив названий категорий
-                String[] categoryTitles = new String[categories.size()];
-                for (int i = 0; i < categories.size(); i++) {
-                    categoryTitles[i] = categories.get(i).getTitle();
-                }
-                
-                ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                    this, android.R.layout.simple_spinner_item, categoryTitles
-                );
-                categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                budgetCategorySpinner.setAdapter(categoryAdapter);
-                
-                Log.d(TAG, "✅ Спиннер категорий настроен: " + categories.size() + " категорий");
-            }
-        });
-        
         // Настройка спиннера валют
         currencyService.getAll().observe(this, currencies -> {
             if (currencies != null && !currencies.isEmpty()) {
@@ -123,7 +98,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 budgetCurrencySpinner.setAdapter(currencyAdapter);
                 
-                Log.d(TAG, "✅ Спиннер валют настроен: " + currencies.size() + " валют");
+                Log.d(TAG, "Спиннер валют настроен: " + currencies.size() + " валют");
             }
         });
     }
@@ -134,49 +109,71 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private void loadBudgetData() {
         Intent intent = getIntent();
         if (intent != null) {
-            int budgetId = intent.getIntExtra("budget_id", -1);
-            if (budgetId != -1) {
+            Budget budget = (Budget) intent.getSerializableExtra("item");
+            if (budget != null) {
                 // Режим редактирования
                 isEditMode = true;
-                Log.d(TAG, "🔄 Режим редактирования бюджета ID: " + budgetId);
+                currentBudget = budget;
+                Log.d(TAG, "Режим редактирования бюджета ID: " + budget.getId());
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_budget_edit, R.dimen.toolbar_text);
                 
-                // Загружаем данные бюджета из базы
-                budgetService.getById(budgetId).observe(this, budget -> {
-                    if (budget != null) {
-                        currentBudget = budget;
+                // Скрываем элементы выбора категории в режиме редактирования
+                hideCategorySelection();
+                
+                // Загружаем актуальные данные из базы
+                budgetService.getById(budget.getId()).observe(this, loadedBudget -> {
+                    if (loadedBudget != null) {
+                        currentBudget = loadedBudget;
                         fillBudgetData();
-                        Log.d(TAG, "✅ Данные бюджета загружены из базы");
+                        Log.d(TAG, "Данные бюджета загружены из базы");
                     } else {
-                        Log.e(TAG, "❌ Бюджет с ID " + budgetId + " не найден");
+                        Log.e(TAG, "Бюджет с ID " + budget.getId() + " не найден");
                         finish();
                     }
                 });
             } else {
-                // Режим создания
-                isEditMode = false;
-                Log.d(TAG, "🔄 Режим создания нового бюджета");
-                
-                // Устанавливаем заголовок для режима создания
-                setToolbarTitle(R.string.toolbar_title_budget_add, R.dimen.toolbar_text);
+                // Бюджеты создаются только через категории, поэтому всегда режим редактирования
+                Log.e(TAG, "BudgetEditActivity открыт без данных бюджета. Бюджеты создаются только через категории.");
+                finish();
             }
+        } else {
+            Log.e(TAG, "Intent равен null");
+            finish();
         }
     }
     
+    /**
+     * Скрывает элементы выбора категории в режиме редактирования
+     */
+    private void hideCategorySelection() {
+        if (categoryLabel != null) {
+            categoryLabel.setVisibility(View.GONE);
+            Log.d(TAG, "Скрыт лейбл категории");
+        }
+        if (budgetCategorySpinner != null) {
+            budgetCategorySpinner.setVisibility(View.GONE);
+            Log.d(TAG, "Скрыт спиннер категории");
+        }
+    }
+
     /**
      * Заполняет поля данными бюджета
      */
     private void fillBudgetData() {
         if (currentBudget != null) {
-            budgetAmountEdit.setText(String.valueOf(currentBudget.getAmount()));
+            Log.d(TAG, "fillBudgetData: загружаем бюджет ID=" + currentBudget.getId() + 
+                      ", сумма в копейках=" + currentBudget.getAmount());
             
-            // Устанавливаем выбранную категорию
-            int categoryPosition = findCategoryPosition(currentBudget.getCategoryId());
-            if (categoryPosition != -1) {
-                budgetCategorySpinner.setSelection(categoryPosition);
-            }
+            // Конвертируем копейки в рубли для отображения
+            double amountInRubles = currentBudget.getAmount() / 100.0;
+            budgetAmountEdit.setText(String.valueOf(amountInRubles));
+            
+            Log.d(TAG, "fillBudgetData: установлена сумма в рублях=" + amountInRubles);
+            
+            // В режиме редактирования категория не изменяется, только отображаем её ID
+            Log.d(TAG, "fillBudgetData: категория бюджета ID=" + currentBudget.getCategoryId() + " (не изменяется)");
             
             // Устанавливаем выбранную валюту
             int currencyPosition = findCurrencyPosition(currentBudget.getCurrencyId());
@@ -184,20 +181,10 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 budgetCurrencySpinner.setSelection(currencyPosition);
             }
             
-            Log.d(TAG, "✅ Данные бюджета загружены в поля");
+            Log.d(TAG, "Данные бюджета загружены в поля");
+        } else {
+            Log.w(TAG, "fillBudgetData: currentBudget равен null");
         }
-    }
-    
-    /**
-     * Находит позицию категории в спиннере по ID
-     */
-    private int findCategoryPosition(int categoryId) {
-        for (int i = 0; i < categories.size(); i++) {
-            if (categories.get(i).getId() == categoryId) {
-                return i;
-            }
-        }
-        return -1;
     }
     
     /**
@@ -224,11 +211,10 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      * Сохраняет бюджет
      */
     private boolean saveBudget() {
-        Log.d(TAG, "🔄 Сохранение бюджета...");
+        Log.d(TAG, "Сохранение бюджета...");
         
         // Получаем данные из полей
         String amountText = budgetAmountEdit.getText().toString().trim();
-        int categoryPosition = budgetCategorySpinner.getSelectedItemPosition();
         int currencyPosition = budgetCurrencySpinner.getSelectedItemPosition();
         
         // Валидация
@@ -237,52 +223,41 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
             return false;
         }
         
-        if (categoryPosition == -1 || categoryPosition >= categories.size()) {
-            Log.e(TAG, "❌ Не выбрана категория");
-            return false;
-        }
-        
         if (currencyPosition == -1 || currencyPosition >= currencies.size()) {
-            Log.e(TAG, "❌ Не выбрана валюта");
+            Log.e(TAG, "Не выбрана валюта");
             return false;
         }
         
         try {
-            int amount = Integer.parseInt(amountText);
-            Category selectedCategory = categories.get(categoryPosition);
+            // Конвертируем рубли в копейки
+            double amountInRubles = Double.parseDouble(amountText);
+            int amountInKopecks = (int) (amountInRubles * 100);
+            
             Currency selectedCurrency = currencies.get(currencyPosition);
             
             if (isEditMode) {
-                // Обновляем существующий бюджет
-                return updateBudget(amount, selectedCategory.getId(), selectedCurrency.getId());
+                // Обновляем существующий бюджет (категория не изменяется)
+                return updateBudget(amountInKopecks, currentBudget.getCategoryId(), selectedCurrency.getId());
             } else {
-                // Создаем новый бюджет
-                return createBudget(selectedCategory.getId(), amount, selectedCurrency.getId());
+                // Создаем новый бюджет (этот код не должен выполняться)
+                Log.e(TAG, "Попытка создания бюджета в режиме редактирования");
+                return false;
             }
             
         } catch (NumberFormatException e) {
             budgetAmountEdit.setError("Введите корректную сумму");
-            Log.e(TAG, "❌ Ошибка парсинга суммы: " + e.getMessage());
+            Log.e(TAG, "Ошибка парсинга суммы: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Создает новый бюджет
+     * Создает новый бюджет (не используется - бюджеты создаются только через категории)
      */
     private boolean createBudget(int categoryId, int amount, int currencyId) {
-        try {
-            Log.d(TAG, "🔄 Создание бюджета: категория=" + categoryId + ", сумма=" + amount + ", валюта=" + currencyId);
-            
-            budgetService.create(categoryId, amount, currencyId);
-            
-            Log.d(TAG, "✅ Бюджет создан");
-            returnToBudget();
-            return true;
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка при создании бюджета: " + e.getMessage(), e);
-            return false;
-        }
+        Log.e(TAG, "Попытка создания бюджета через BudgetEditActivity - недопустимо!");
+        Log.e(TAG, "Бюджеты создаются только автоматически при создании категорий");
+        throw new UnsupportedOperationException("Создание бюджетов через BudgetEditActivity не предусмотрено. Бюджеты создаются автоматически при создании категорий.");
     }
     
     /**
@@ -290,23 +265,26 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private boolean updateBudget(int amount, int categoryId, int currencyId) {
         if (currentBudget == null) {
-            Log.e(TAG, "❌ currentBudget равен null, невозможно обновить бюджет");
+            Log.e(TAG, "currentBudget равен null, невозможно обновить бюджет");
             return false;
         }
         
         try {
-            Log.d(TAG, "🔄 Обновление бюджета ID: " + currentBudget.getId());
+            Log.d(TAG, "Обновление бюджета ID: " + currentBudget.getId() + 
+                      ", новая сумма: " + amount + " копеек (" + (amount / 100.0) + " рублей)" +
+                      ", категория остается: " + categoryId +
+                      ", новая валюта: " + currencyId);
             
             currentBudget.setAmount(amount);
-            currentBudget.setCategoryId(categoryId);
+            // Категория не изменяется - оставляем как есть
             currentBudget.setCurrencyId(currencyId);
             budgetService.update(currentBudget);
             
-            Log.d(TAG, "✅ Бюджет обновлен");
+            Log.d(TAG, "Бюджет обновлен успешно");
             returnToBudget();
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка при обновлении бюджета: " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка при обновлении бюджета: " + e.getMessage(), e);
             return false;
         }
     }
@@ -331,7 +309,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private void returnToBudget() {
         // Переходим к списку бюджетов
-        Log.d(TAG, "🔄 Переходим к окну списка бюджетов");
+        Log.d(TAG, "Переходим к окну списка бюджетов");
         Intent intent = new Intent(this, BudgetActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

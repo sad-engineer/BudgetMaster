@@ -7,14 +7,19 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.Category;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Фрагмент для отображения лимитов бюджетов
  */
 public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter, BudgetSharedViewModel, BudgetService> {
+    
+    private static final String TAG = "BudgetLimitsFragment";   
 
     @Override
     protected int getLayoutResourceId() {
@@ -49,11 +54,72 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     @Override
     protected void performDataLoading() {
         BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-        database.budgetDao().getAll().observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        
+        // Загружаем только бюджеты для категорий расходов (operation_type = 1)
+        database.budgetDao().getAllActiveForExpenses().observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = 1)");
+    }
+    
+    @Override
+    protected void setupAdapter() {
+        adapter = new BudgetAdapter();
+        
+        adapter.setClickListener(budget -> {
+            Log.d(TAG, "Клик по бюджету: " + budget.getId());
+            goToEdit(budget);
+        });
+        
+        // Длительный клик отключен, так как удаление бюджетов не предусмотрено
+        
+        // Режим выбора отключен, так как кнопки скрыты
+        
+        recyclerView.setAdapter(adapter);
+        
+        // Загружаем категории и валюты один раз при создании адаптера
+        loadCategoriesAndCurrencies();
+    }
+    
+    /**
+     * Загружает категории и валюты один раз при создании фрагмента
+     */
+    private void loadCategoriesAndCurrencies() {
+        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
+        
+        // Загружаем только категории расходов (operation_type = 1)
+        database.categoryDao().getAllActive().observe(getViewLifecycleOwner(), allCategories -> {
+            if (allCategories != null) {
+                // Фильтруем только категории расходов
+                List<Category> expenseCategories = allCategories.stream()
+                    .filter(category -> category.getOperationType() ==  ModelConstants.OPERATION_TYPE_EXPENSE) // 1 = расход
+                    .collect(Collectors.toList());
+                
+                if (adapter != null) {
+                    adapter.setCategories(expenseCategories);
+                    Log.d(TAG, "Установлено категорий расходов в адаптер: " + expenseCategories.size());
+                }
+            }
+        });
+        
+        // Загружаем валюты один раз
+        database.currencyDao().getAll().observe(getViewLifecycleOwner(), currencies -> {
+            if (adapter != null) {
+                adapter.setCurrencies(currencies);
+                Log.d(TAG, "Установлено валют в адаптер: " + (currencies != null ? currencies.size() : 0));
+            }
+        });
     }
 
     @Override
     protected void setAdapterData(List<Budget> items) {
+        Log.d(TAG, "setAdapterData: получено бюджетов: " + (items != null ? items.size() : 0));
+        if (items != null) {
+            for (Budget budget : items) {
+                Log.d(TAG, "  - Бюджет ID=" + budget.getId() + 
+                          ", сумма=" + budget.getAmount() + 
+                          ", категория=" + budget.getCategoryId() + 
+                          ", валюта=" + budget.getCurrencyId());
+            }
+        }
         adapter.setBudgets(items);
     }
 
@@ -64,36 +130,8 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
 
     @Override
     protected void observeSelectionMode() {
-        viewModel.getSelectionMode().observe(getViewLifecycleOwner(), enabled -> {
-            if (adapter != null) {
-                adapter.setSelectionMode(Boolean.TRUE.equals(enabled));
-            }
-        });
-    }
-
-    @Override
-    protected void setupAdapter() {
-        adapter = new BudgetAdapter();
-        
-        adapter.setClickListener(budget -> {
-            Log.d(TAG, "👆 Клик по бюджету: " + budget.getId());
-            goToEdit(budget);
-        });
-        
-        adapter.setLongClickListener(budget -> {
-            Log.d(TAG, "👆 Длительный клик по бюджету: " + budget.getId());
-            showDeleteConfirmationDialog(budget);
-        });
-        
-        adapter.setSelectionListener(selectedCount -> {
-            Log.d(TAG, "🔄 Выбрано бюджетов: " + selectedCount);
-            // Уведомляем Activity о количестве выбранных элементов
-            if (getActivity() instanceof BudgetActivity) {
-                ((BudgetActivity) getActivity()).updateSelectionCount(selectedCount);
-            }
-        });
-        
-        recyclerView.setAdapter(adapter);
+        // Режим выбора отключен, так как кнопки скрыты
+        Log.d(TAG, "Режим выбора отключен - кнопки скрыты");
     }
 
     @Override

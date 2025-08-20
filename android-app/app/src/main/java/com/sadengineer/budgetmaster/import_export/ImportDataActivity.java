@@ -26,6 +26,6 @@ public class ImportDataActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_import_data, R.dimen.toolbar_text);
 
-        Log.d(TAG, "✅ ImportDataActivity создана");
+        Log.d(TAG, "ImportDataActivity создана");
     }
 } 

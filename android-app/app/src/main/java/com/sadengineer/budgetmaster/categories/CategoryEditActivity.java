@@ -213,7 +213,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                     currentCategory.setParentId(getSelectedParentId());
                     
                     categoryService.update(currentCategory);
-                    Log.d(TAG, "✅ Категория обновлена: " + title);
+                    Log.d(TAG, "Категория обновлена: " + title);
                 }
             } else {
                 // Создание новой категории
@@ -222,7 +222,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 Integer parentId = getSelectedParentId();
                 
                 categoryService.create(title, operationType, categoryType, parentId);
-                Log.d(TAG, "✅ Категория создана: " + title);
+                Log.d(TAG, "Категория создана: " + title);
             }
             
             // Возвращаемся к списку категорий

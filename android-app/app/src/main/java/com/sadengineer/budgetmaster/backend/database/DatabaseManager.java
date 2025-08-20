@@ -50,7 +50,7 @@ public class DatabaseManager {
                 boolean isNewDatabase = !databaseFile.exists();
                 
                 if (isNewDatabase) {
-                    Log.d(TAG, "📁 База данных не существует, создаем новую...");
+                    Log.d(TAG, "База данных не существует, создаем новую...");
                     
                     // Проверяем, есть ли дефолтные данные
                     int currencyCount = database.currencyDao().count();
@@ -58,31 +58,31 @@ public class DatabaseManager {
                     int accountCount = database.accountDao().count();
                     
                     if (currencyCount == 0 && categoryCount == 0 && accountCount == 0) {
-                        Log.d(TAG, "📝 Создаем дефолтные данные...");
+                        Log.d(TAG, "Создаем дефолтные данные...");
                         DatabaseInitializer.initializeDefaultData(database);
-                        Log.d(TAG, "✅ Дефолтные данные созданы успешно");
+                        Log.d(TAG, "Дефолтные данные созданы успешно");
                     } else {
-                        Log.d(TAG, "ℹ️ Дефолтные данные уже существуют");
+                        Log.d(TAG, "Дефолтные данные уже существуют");
                     }
                 } else {
-                    Log.d(TAG, "📁 База данных уже существует");
+                    Log.d(TAG, "База данных уже существует");
                     
                     // Проверяем, есть ли данные
                     int currencyCount = database.currencyDao().count();
                     int categoryCount = database.categoryDao().count();
                     int accountCount = database.accountDao().count();
                     
-                    Log.d(TAG, "📊 Статистика данных: " + 
+                    Log.d(TAG, "Статистика данных: " + 
                           currencyCount + " валют, " + 
                           categoryCount + " категорий, " + 
                           accountCount + " счетов");
                 }
                 
-                Log.d(TAG, "✅ Инициализация базы данных завершена");
+                Log.d(TAG, "Инициализация базы данных завершена");
                 return true;
                 
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка инициализации базы данных: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка инициализации базы данных: " + e.getMessage(), e);
                 return false;
             }
         }, executor);
@@ -96,7 +96,7 @@ public class DatabaseManager {
             try {
                 return operation.call();
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка выполнения операции с БД: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка выполнения операции с БД: " + e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         }, executor);

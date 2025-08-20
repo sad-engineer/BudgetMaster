@@ -36,7 +36,7 @@ public class BudgetSharedViewModel extends ViewModel {
      */
     public void setSelectionMode(boolean enabled) {
         selectionMode.setValue(enabled);
-        Log.d(TAG, "🔄 Режим выбора: " + (enabled ? "включен" : "выключен"));
+        Log.d(TAG, "Режим выбора: " + (enabled ? "включен" : "выключен"));
     }
     
     /**
@@ -51,11 +51,11 @@ public class BudgetSharedViewModel extends ViewModel {
      */
     public void softDeleteSelectedBudgets(List<Budget> selectedBudgets) {
         if (selectedBudgets == null || selectedBudgets.isEmpty()) {
-            Log.w(TAG, "⚠️ Нет выбранных бюджетов для удаления");
+            Log.w(TAG, "Нет выбранных бюджетов для удаления");
             return;
         }
         
-        Log.d(TAG, "🔄 Начинаем мягкое удаление " + selectedBudgets.size() + " бюджетов");
+        Log.d(TAG, "Начинаем мягкое удаление " + selectedBudgets.size() + " бюджетов");
         
         executor.execute(() -> {
             try {
@@ -67,9 +67,9 @@ public class BudgetSharedViewModel extends ViewModel {
                     try {
                         budgetService.delete(true, budget); // true = softDelete
                         deletedCount++;
-                        Log.d(TAG, "✅ Бюджет мягко удален: " + budget.getId());
+                        Log.d(TAG, "Бюджет мягко удален: " + budget.getId());
                     } catch (Exception e) {
-                        Log.e(TAG, "❌ Ошибка мягкого удаления бюджета: " + budget.getId() + ": " + e.getMessage());
+                        Log.e(TAG, "Ошибка мягкого удаления бюджета: " + budget.getId() + ": " + e.getMessage());
                     }
                 }
                 
@@ -79,10 +79,10 @@ public class BudgetSharedViewModel extends ViewModel {
                 // Выключаем режим выбора
                 selectionMode.postValue(false);
                 
-                Log.d(TAG, "✅ Мягкое удаление завершено. Удалено бюджетов: " + deletedCount);
+                Log.d(TAG, "Мягкое удаление завершено. Удалено бюджетов: " + deletedCount);
                 
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при мягком удалении бюджетов: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при мягком удалении бюджетов: " + e.getMessage(), e);
                 softDeletionDone.postValue(0);
                 selectionMode.postValue(false);
             }
@@ -92,6 +92,6 @@ public class BudgetSharedViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        Log.d(TAG, "🔄 BudgetSharedViewModel очищен");
+        Log.d(TAG, "BudgetSharedViewModel очищен");
     }
 }

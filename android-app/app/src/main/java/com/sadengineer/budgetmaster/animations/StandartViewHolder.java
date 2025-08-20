@@ -285,7 +285,9 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         if (sumText != null) {
             double rubles = sum / 100.0;
             String currencySymbol = (shortName != null && !shortName.isEmpty()) ? shortName : "RUB";
-            sumText.setText(formatter.formatCompact(rubles) + " " + currencySymbol);
+            String formattedSum = formatter.formatCompact(rubles) + " " + currencySymbol;
+            sumText.setText(formattedSum);
+            Log.d(TAG, "Установлена сумма: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
         }
         if (shortNameText != null) {
             shortNameText.setText(shortName != null ? shortName : "");

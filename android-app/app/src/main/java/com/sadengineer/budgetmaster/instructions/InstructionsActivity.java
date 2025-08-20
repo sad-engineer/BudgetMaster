@@ -26,6 +26,6 @@ public class InstructionsActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_instructions, R.dimen.toolbar_text);
 
-        Log.d(TAG, "✅ InstructionsActivity создана");
+        Log.d(TAG, "InstructionsActivity создана");
     }
 } 

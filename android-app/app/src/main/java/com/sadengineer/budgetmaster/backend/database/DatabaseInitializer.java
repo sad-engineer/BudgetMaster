@@ -33,7 +33,7 @@ public class DatabaseInitializer {
      * Инициализирует дефолтные данные в базе
      */
     public static void initializeDefaultData(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 initializeDefaultData: Начинаем инициализацию");
+        Log.d(TAG, "initializeDefaultData: Начинаем инициализацию");
         
         // Инициализируем валюты
         initializeDefaultCurrencies(database);
@@ -47,19 +47,19 @@ public class DatabaseInitializer {
         // Инициализируем бюджеты
         initializeDefaultBudgets(database);
         
-        Log.d(TAG, "🔄 initializeDefaultData: Инициализация завершена");
+        Log.d(TAG, "initializeDefaultData: Инициализация завершена");
     }
     
     /**
      * Инициализирует дефолтные валюты
      */
     private static void initializeDefaultCurrencies(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 initializeDefaultCurrencies: Начинаем инициализацию валют");
+        Log.d(TAG, "initializeDefaultCurrencies: Начинаем инициализацию валют");
         
         // Проверяем, есть ли уже валюты
         int currencyCount = database.currencyDao().count();
         if (currencyCount > 0) {
-            Log.d(TAG, "🔄 initializeDefaultCurrencies: Валюты уже существуют, пропускаем");
+            Log.d(TAG, "initializeDefaultCurrencies: Валюты уже существуют, пропускаем");
             return;
         }
         
@@ -72,28 +72,28 @@ public class DatabaseInitializer {
         
         for (Currency currency : currencies) {
             database.currencyDao().insert(currency);
-            Log.d(TAG, "🔄 initializeDefaultCurrencies: Добавлена валюта: " + currency.getTitle());
+            Log.d(TAG, "initializeDefaultCurrencies: Добавлена валюта: " + currency.getTitle());
         }
         
-        Log.d(TAG, "🔄 initializeDefaultCurrencies: Инициализация валют завершена");
+        Log.d(TAG, "initializeDefaultCurrencies: Инициализация валют завершена");
     }
     
     /**
      * Инициализирует дефолтные категории
      */
     private static void initializeDefaultCategories(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 initializeDefaultCategories: Начинаем инициализацию категорий");
+        Log.d(TAG, "initializeDefaultCategories: Начинаем инициализацию категорий");
         
         // Проверяем, есть ли уже категории
         int categoryCount = database.categoryDao().count();
         if (categoryCount > 0) {
-            Log.d(TAG, "🔄 initializeDefaultCategories: Категории уже существуют, пропускаем");
+            Log.d(TAG, "initializeDefaultCategories: Категории уже существуют, пропускаем");
             return;
         }
         
         // Создаем родительские категории
-        Category incomeParent = createCategory("Доходы", 1, null, 1);
-        Category expenseParent = createCategory("Расходы", 2, null, 2);
+        Category incomeParent = createCategory("Доходы", ModelConstants.OPERATION_TYPE_INCOME, null, 1);
+        Category expenseParent = createCategory("Расходы", ModelConstants.OPERATION_TYPE_EXPENSE, null, 2);
         
         database.categoryDao().insert(incomeParent);
         database.categoryDao().insert(expenseParent);
@@ -108,9 +108,9 @@ public class DatabaseInitializer {
         
         // Создаем дочерние категории доходов
         Category[] incomeCategories = {
-            createCategory("Работа", 1, incomeParentId, 3),
-            createCategory("Подработка", 1, incomeParentId, 4),
-            createCategory("Подарки", 1, incomeParentId, 5)
+            createCategory("Работа", ModelConstants.OPERATION_TYPE_INCOME, incomeParentId, 3),
+            createCategory("Подработка", ModelConstants.OPERATION_TYPE_INCOME, incomeParentId, 4),
+            createCategory("Подарки", ModelConstants.OPERATION_TYPE_INCOME, incomeParentId, 5)
         };
         
         for (Category category : incomeCategories) {
@@ -118,8 +118,8 @@ public class DatabaseInitializer {
         }
         
         // Создаем промежуточные категории расходов
-        Category necessary = createCategory("Необходимые", 2, expenseParentId, 6);
-        Category additional = createCategory("Дополнительные", 2, expenseParentId, 7);
+        Category necessary = createCategory("Необходимые", ModelConstants.OPERATION_TYPE_EXPENSE, expenseParentId, 6);
+        Category additional = createCategory("Дополнительные", ModelConstants.OPERATION_TYPE_EXPENSE, expenseParentId, 7);
         
         database.categoryDao().insert(necessary);
         database.categoryDao().insert(additional);
@@ -134,12 +134,12 @@ public class DatabaseInitializer {
         
         // Создаем дочерние категории необходимых расходов
         Category[] necessaryCategories = {
-            createCategory("Коммунальные", 2, necessaryId, 8),
-            createCategory("Продукты", 2, necessaryId, 9),
-            createCategory("Транспорт", 2, necessaryId, 10),
-            createCategory("Медицина", 2, necessaryId, 11),
-            createCategory("Одежда", 2, necessaryId, 12),
-            createCategory("Налоги", 2, necessaryId, 13)
+            createCategory("Коммунальные", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 8),
+            createCategory("Продукты", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 9),
+            createCategory("Транспорт", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 10),
+            createCategory("Медицина", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 11),
+            createCategory("Одежда", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 12),
+            createCategory("Налоги", ModelConstants.OPERATION_TYPE_EXPENSE, necessaryId, 13)
         };
         
         for (Category category : necessaryCategories) {
@@ -148,29 +148,29 @@ public class DatabaseInitializer {
         
         // Создаем дочерние категории дополнительных расходов
         Category[] additionalCategories = {
-            createCategory("Домашние нужды", 2, additionalId, 14),
-            createCategory("Кино", 2, additionalId, 15),
-            createCategory("Кафе и рестораны", 2, additionalId, 16),
-            createCategory("Подарки", 2, additionalId, 17)
+            createCategory("Домашние нужды", ModelConstants.OPERATION_TYPE_EXPENSE, additionalId, 14),
+            createCategory("Кино", ModelConstants.OPERATION_TYPE_EXPENSE, additionalId, 15),
+            createCategory("Кафе и рестораны", ModelConstants.OPERATION_TYPE_EXPENSE, additionalId, 16),
+            createCategory("Подарки", ModelConstants.OPERATION_TYPE_EXPENSE, additionalId, 17)
         };
         
         for (Category category : additionalCategories) {
             database.categoryDao().insert(category);
         }
         
-        Log.d(TAG, "🔄 initializeDefaultCategories: Инициализация категорий завершена");
+        Log.d(TAG, "initializeDefaultCategories: Инициализация категорий завершена");
     }
     
     /**
      * Инициализирует дефолтные счета
      */
     private static void initializeDefaultAccounts(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 initializeDefaultAccounts: Начинаем инициализацию счетов");
+        Log.d(TAG, "initializeDefaultAccounts: Начинаем инициализацию счетов");
         
         // Проверяем, есть ли уже счета
         int accountCount = database.accountDao().count();
         if (accountCount > 0) {
-            Log.d(TAG, "🔄 initializeDefaultAccounts: Счета уже существуют, пропускаем");
+            Log.d(TAG, "initializeDefaultAccounts: Счета уже существуют, пропускаем");
             return;
         }
         
@@ -179,53 +179,53 @@ public class DatabaseInitializer {
         
         // Создаем дефолтные счета
         Account[] accounts = {
-            createAccount("Наличные", 1, 0, 1, defaultCurrencyId, 0),
-            createAccount("Зарплатная карта", 2, 0, 1, defaultCurrencyId, 0),
-            createAccount("Сберегательный счет", 3, 0, 2, defaultCurrencyId, 0),
-            createAccount("Кредитная карта", 4, 0, 3, defaultCurrencyId, 0),
-            createAccount("Карта рассрочки", 5, 0, 3, defaultCurrencyId, 0)
+            createAccount("Наличные", 1, ModelConstants.DEFAULT_ACCOUNT_BALANCE, ModelConstants.ACCOUNT_TYPE_CURRENT, defaultCurrencyId, 0),
+            createAccount("Зарплатная карта", 2, ModelConstants.DEFAULT_ACCOUNT_BALANCE, ModelConstants.ACCOUNT_TYPE_CURRENT, defaultCurrencyId, 0),
+            createAccount("Сберегательный счет", 3, ModelConstants.DEFAULT_ACCOUNT_BALANCE, ModelConstants.ACCOUNT_TYPE_SAVINGS, defaultCurrencyId, 0),
+            createAccount("Кредитная карта", 4, ModelConstants.DEFAULT_ACCOUNT_BALANCE, ModelConstants.ACCOUNT_TYPE_CREDIT, defaultCurrencyId, 0),
+            createAccount("Карта рассрочки", 5, ModelConstants.DEFAULT_ACCOUNT_BALANCE, ModelConstants.ACCOUNT_TYPE_CREDIT, defaultCurrencyId, 0)
         };
         
         for (Account account : accounts) {
             database.accountDao().insert(account);
-            Log.d(TAG, "🔄 initializeDefaultAccounts: Добавлен счет: " + account.getTitle());
+            Log.d(TAG, "initializeDefaultAccounts: Добавлен счет: " + account.getTitle());
         }
         
-        Log.d(TAG, "🔄 initializeDefaultAccounts: Инициализация счетов завершена");
+        Log.d(TAG, "initializeDefaultAccounts: Инициализация счетов завершена");
     }
     
     /**
      * Инициализирует дефолтные бюджеты для каждой категории
      */
     private static void initializeDefaultBudgets(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 initializeDefaultBudgets: Начинаем инициализацию бюджетов");
+        Log.d(TAG, "initializeDefaultBudgets: Начинаем инициализацию бюджетов");
         
         // Проверяем, есть ли уже бюджеты
         int budgetCount = database.budgetDao().count();
         if (budgetCount > 0) {
-            Log.d(TAG, "🔄 initializeDefaultBudgets: Бюджеты уже существуют, пропускаем");
+            Log.d(TAG, "initializeDefaultBudgets: Бюджеты уже существуют, пропускаем");
             return;
         }
         
         // Получаем все категории
         List<Category> categories = database.categoryDao().getAllSync();
         if (categories == null || categories.isEmpty()) {
-            Log.d(TAG, "❌ initializeDefaultBudgets: Категории не найдены, пропускаем инициализацию бюджетов");
+            Log.d(TAG, "initializeDefaultBudgets: Категории не найдены, пропускаем инициализацию бюджетов");
             return;
         }
         
-        Log.d(TAG, "🔄 initializeDefaultBudgets: Найдено категорий: " + categories.size());
+        Log.d(TAG, "initializeDefaultBudgets: Найдено категорий: " + categories.size());
         
         // Создаем бюджет для каждой категории
         int position = 1;
         for (Category category : categories) {
-            Budget budget = createBudget(category.getId(), 0, 1, position);
+            Budget budget = createBudget(category.getId(), ModelConstants.DEFAULT_BUDGET_AMOUNT, ModelConstants.DEFAULT_CURRENCY_ID, position);
             database.budgetDao().insert(budget);
-            Log.d(TAG, "🔄 initializeDefaultBudgets: Добавлен бюджет для категории '" + category.getTitle() + "' (ID: " + category.getId() + ")");
+            Log.d(TAG, "initializeDefaultBudgets: Добавлен бюджет для категории '" + category.getTitle() + "' (ID: " + category.getId() + ")");
             position++;
         }
         
-        Log.d(TAG, "🔄 initializeDefaultBudgets: Инициализация бюджетов завершена");
+        Log.d(TAG, "initializeDefaultBudgets: Инициализация бюджетов завершена");
     }
     
     /**
@@ -289,7 +289,7 @@ public class DatabaseInitializer {
      * Очищает все данные из базы
      */
     public static void clearAllData(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 clearAllData: Начинаем очистку данных");
+        Log.d(TAG, "clearAllData: Начинаем очистку данных");
         
         database.operationDao().deleteAll();
         database.accountDao().deleteAll();
@@ -297,14 +297,14 @@ public class DatabaseInitializer {
         database.currencyDao().deleteAll();
         database.budgetDao().deleteAll();
         
-        Log.d(TAG, "🔄 clearAllData: Очистка данных завершена");
+        Log.d(TAG, "clearAllData: Очистка данных завершена");
     }
     
     /**
      * Восстанавливает дефолтные данные
      */
     public static void restoreDefaults(BudgetMasterDatabase database) {
-        Log.d(TAG, "🔄 restoreDefaults: Начинаем восстановление дефолтных данных");
+        Log.d(TAG, "restoreDefaults: Начинаем восстановление дефолтных данных");
         
         // Очищаем все данные
         clearAllData(database);
@@ -312,6 +312,6 @@ public class DatabaseInitializer {
         // Инициализируем дефолтные данные
         initializeDefaultData(database);
         
-        Log.d(TAG, "🔄 restoreDefaults: Восстановление завершено");
+        Log.d(TAG, "restoreDefaults: Восстановление завершено");
     }
 } 
