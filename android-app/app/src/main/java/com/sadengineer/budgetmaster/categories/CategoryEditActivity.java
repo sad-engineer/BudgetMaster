@@ -2,6 +2,8 @@ package com.sadengineer.budgetmaster.categories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -115,28 +117,56 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 parentOptions.add("Нет родителя");
                 parentCategories.add(null); // null для "Нет родителя"
                 
-                // Добавляем все категории (и основные, и подкатегории)
-                for (Category category : categories) {
-                    parentOptions.add(category.getTitle());
-                    parentCategories.add(category);
-                }
-                
-                // Сохраняем список категорий для получения ID
-                this.parentCategories = parentCategories;
-                
-                ArrayAdapter<String> parentAdapter = new ArrayAdapter<>(this, 
-                    android.R.layout.simple_spinner_item, parentOptions);
-                parentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                categoryParentSpinner.setAdapter(parentAdapter);
-                
-                // Если это режим редактирования, устанавливаем родительскую категорию
+                // Если это режим редактирования, исключаем дочерние категории
                 if (isEditMode && currentCategory != null) {
-                    Log.d(TAG, "Устанавливаем родительскую категорию для редактирования. ParentId: " + currentCategory.getParentId());
-                    if (currentCategory.getParentId() != null && currentCategory.getParentId() != PARENT) {
-                        setSelectedParentCategory(currentCategory.getParentId());
-                    } else {
-                        setSelectedParentCategory(PARENT);
+                    // Получаем все дочерние категории редактируемой категории
+                    categoryService.getAllDescendants(currentCategory.getId(), EntityFilter.ACTIVE).observe(this, descendants -> {
+                        if (descendants != null) {
+                            // Создаем множество ID дочерних категорий для быстрого поиска
+                            Set<Integer> descendantIds = new HashSet<>();
+                            for (Category descendant : descendants) {
+                                descendantIds.add(descendant.getId());
+                            }
+                            
+                                                         // Добавляем только те категории, которые не являются дочерними
+                             for (Category category : categories) {
+                                 if (!descendantIds.contains(category.getId()) && category.getId() != currentCategory.getId()) {
+                                     parentOptions.add(category.getTitle());
+                                     parentCategories.add(category);
+                                 }
+                             }
+                            
+                            // Сохраняем список категорий для получения ID
+                            this.parentCategories = parentCategories;
+                            
+                            ArrayAdapter<String> parentAdapter = new ArrayAdapter<>(this, 
+                                android.R.layout.simple_spinner_item, parentOptions);
+                            parentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            categoryParentSpinner.setAdapter(parentAdapter);
+                            
+                            // Устанавливаем родительскую категорию для редактирования
+                            Log.d(TAG, "Устанавливаем родительскую категорию для редактирования. ParentId: " + currentCategory.getParentId());
+                            if (currentCategory.getParentId() != null && currentCategory.getParentId() != PARENT) {
+                                setSelectedParentCategory(currentCategory.getParentId());
+                            } else {
+                                setSelectedParentCategory(PARENT);
+                            }
+                        }
+                    });
+                } else {
+                    // Для создания новой категории добавляем все категории
+                    for (Category category : categories) {
+                        parentOptions.add(category.getTitle());
+                        parentCategories.add(category);
                     }
+                    
+                    // Сохраняем список категорий для получения ID
+                    this.parentCategories = parentCategories;
+                    
+                    ArrayAdapter<String> parentAdapter = new ArrayAdapter<>(this, 
+                        android.R.layout.simple_spinner_item, parentOptions);
+                    parentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    categoryParentSpinner.setAdapter(parentAdapter);
                 }
             }
         });

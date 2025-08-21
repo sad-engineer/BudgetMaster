@@ -213,4 +213,22 @@ public class CategoryRepository {
     public int getCount() {
         return dao.count();
     }
+    
+    /**
+     * Получить все дочерние категории для заданной категории (включая вложенные)
+     * @param categoryId ID категории
+     * @param filter фильтр для выборки категорий
+     * @return LiveData со списком всех дочерних категорий
+     */
+    public LiveData<List<Category>> getAllDescendants(int categoryId, EntityFilter filter) {
+        switch (filter) {
+            case ACTIVE:
+                return dao.getAllActiveDescendants(categoryId);
+            case DELETED:
+                return dao.getAllDeletedDescendants(categoryId);
+            case ALL:
+            default:
+                return dao.getAllDescendants(categoryId);
+        }
+    }
 } 

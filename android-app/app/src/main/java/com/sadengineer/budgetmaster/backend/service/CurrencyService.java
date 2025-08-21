@@ -11,12 +11,12 @@ import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
+import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 import java.time.LocalDateTime;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * Service класс для бизнес-логики работы с Currency
@@ -31,7 +31,7 @@ public class CurrencyService {
     
     public CurrencyService(Context context, String user) {
         this.repo = new CurrencyRepository(context);
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.executorService = ThreadManager.getExecutor();
         this.user = user;
         this.defaultCurrencyID = ModelConstants.DEFAULT_CURRENCY_ID;
     }

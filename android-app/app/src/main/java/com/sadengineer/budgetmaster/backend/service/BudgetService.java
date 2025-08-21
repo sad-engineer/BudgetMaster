@@ -10,11 +10,12 @@ import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.repository.BudgetRepository;
+import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * Service класс для бизнес-логики работы с Budget
@@ -28,7 +29,7 @@ public class BudgetService {
     
     public BudgetService(Context context, String user) {
         this.repo = new BudgetRepository(context);
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.executorService = ThreadManager.getExecutor();
         this.user = user;
     }
 

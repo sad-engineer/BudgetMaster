@@ -218,5 +218,59 @@ public interface CategoryDao {
      * @param category категория для обновления
      */
     @Update
-    void update(Category category);  
+    void update(Category category);
+    
+    /**
+     * Получает все дочерние категории для заданной категории (включая вложенные)
+     * Использует рекурсивный CTE запрос для получения всех потомков
+     * @param categoryId ID категории
+     * @return список всех дочерних категорий, отсортированных по позиции
+     */
+    @Query("WITH RECURSIVE descendants AS (" +
+           "  SELECT * " +
+           "  FROM categories " +
+           "  WHERE parentId = :categoryId " +
+           "  UNION ALL " +
+           "  SELECT c.* " +
+           "  FROM categories c " +
+           "  INNER JOIN descendants d ON c.parentId = d.id" +
+           ") " +
+           "SELECT * FROM descendants ORDER BY position ASC")
+    LiveData<List<Category>> getAllDescendants(int categoryId);
+    
+    /**
+     * Получает все активные дочерние категории для заданной категории (включая вложенные)
+     * @param categoryId ID категории
+     * @return список всех активных дочерних категорий, отсортированных по позиции
+     */
+    @Query("WITH RECURSIVE descendants AS (" +
+           "  SELECT * " +
+           "  FROM categories " +
+           "  WHERE parentId = :categoryId AND deleteTime IS NULL " +
+           "  UNION ALL " +
+           "  SELECT c.* " +
+           "  FROM categories c " +
+           "  INNER JOIN descendants d ON c.parentId = d.id " +
+           "  WHERE c.deleteTime IS NULL" +
+           ") " +
+           "SELECT * FROM descendants ORDER BY position ASC")
+    LiveData<List<Category>> getAllActiveDescendants(int categoryId);
+    
+    /**
+     * Получает все удаленные дочерние категории для заданной категории (включая вложенные)
+     * @param categoryId ID категории
+     * @return список всех удаленных дочерних категорий, отсортированных по позиции
+     */
+    @Query("WITH RECURSIVE descendants AS (" +
+           "  SELECT * " +
+           "  FROM categories " +
+           "  WHERE parentId = :categoryId AND deleteTime IS NOT NULL " +
+           "  UNION ALL " +
+           "  SELECT c.* " +
+           "  FROM categories c " +
+           "  INNER JOIN descendants d ON c.parentId = d.id " +
+           "  WHERE c.deleteTime IS NOT NULL" +
+           ") " +
+           "SELECT * FROM descendants ORDER BY position ASC")
+    LiveData<List<Category>> getAllDeletedDescendants(int categoryId);
 } 

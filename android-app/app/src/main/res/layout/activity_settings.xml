@@ -59,30 +59,62 @@
                     android:padding="8dp" />
 
                 <!-- Чекбокс для отображения позиции -->
-                <CheckBox
-                    android:id="@+id/checkbox_show_position"
+                <LinearLayout
+                    android:id="@+id/checkbox_show_position_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_show_position"
-                    android:textSize="16sp"
-                    android:textColor="@color/settings_text"
+                    android:orientation="horizontal"
                     android:padding="12dp"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/checkbox_show_position_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_checkbox_unchecked"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_show_position"
+                        android:textSize="16sp"
+                        android:textColor="@color/settings_text" />
+
+                </LinearLayout>
 
                 <!-- Чекбокс для отображения ID -->
-                <CheckBox
-                    android:id="@+id/checkbox_show_id"
+                <LinearLayout
+                    android:id="@+id/checkbox_show_id_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_show_id"
-                    android:textSize="16sp"
-                    android:textColor="@color/settings_text"
+                    android:orientation="horizontal"
                     android:padding="12dp"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/checkbox_show_id_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_checkbox_unchecked"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_show_id"
+                        android:textSize="16sp"
+                        android:textColor="@color/settings_text" />
+
+                </LinearLayout>
 
                 <!-- Разделитель -->
                 <View

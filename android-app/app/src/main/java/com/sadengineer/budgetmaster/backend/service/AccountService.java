@@ -11,12 +11,12 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
+import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 import java.time.LocalDateTime;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * Service класс для бизнес-логики работы с Account
@@ -31,7 +31,7 @@ public class AccountService {
     
     public AccountService(Context context, String user) {
         this.repo = new AccountRepository(context);
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.executorService = ThreadManager.getExecutor();
         this.user = user;
         this.constants = new ServiceConstants();
     }
@@ -390,8 +390,11 @@ public class AccountService {
     
     /**
      * Закрыть ExecutorService
+     * @deprecated Используйте ThreadManager.shutdown() для централизованного управления
      */
+    @Deprecated
     public void shutdown() {
-        executorService.shutdown();
+        // Не закрываем ExecutorService здесь, так как он общий
+        // Используйте ThreadManager.shutdown() при завершении приложения
     }
 } 

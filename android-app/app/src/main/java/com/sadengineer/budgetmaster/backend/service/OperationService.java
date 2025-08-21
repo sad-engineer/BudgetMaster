@@ -10,11 +10,12 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.repository.OperationRepository;
+import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 /**
  * Service класс для бизнес-логики работы с Operation
@@ -31,7 +32,7 @@ public class OperationService {
         this.operationRepository = new OperationRepository(context);
         this.accountService = new AccountService(context, user);
         this.currencyService = new CurrencyService(context, user);
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.executorService = ThreadManager.getExecutor();
         this.user = user;
     }
     

@@ -18,6 +18,7 @@ import com.sadengineer.budgetmaster.budget.BudgetActivity;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 
 public class MainActivity extends BaseNavigationActivity {
@@ -148,6 +149,14 @@ public class MainActivity extends BaseNavigationActivity {
         });
         
         Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Завершаем работу общего ExecutorService
+        ThreadManager.shutdown();
+        Log.d(TAG, "ThreadManager завершен");
     }
 
     /**
