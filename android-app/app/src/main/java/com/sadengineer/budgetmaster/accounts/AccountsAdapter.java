@@ -14,6 +14,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +94,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_account, parent, false);
+        
+        // Инициализируем менеджер настроек
+        SettingsManager.init(parent.getContext());
+        
         StandartViewHolder holder = new StandartViewHolder(view);
         
         // Настраиваем обработчики для универсального ViewHolder
@@ -154,7 +159,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
         
         holder.bind(
-            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected);
+            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected,
+            SettingsManager.isShowPosition(), SettingsManager.isShowId());
     }
 
     /**

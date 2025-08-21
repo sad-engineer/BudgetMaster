@@ -17,6 +17,7 @@ import com.sadengineer.budgetmaster.expense.ExpenseActivity;
 import com.sadengineer.budgetmaster.budget.BudgetActivity;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 
 public class MainActivity extends BaseNavigationActivity {
@@ -35,6 +36,10 @@ public class MainActivity extends BaseNavigationActivity {
         // Инициализация базы данных
         Log.d(TAG, "Начинаем инициализацию базы данных");
         initializeDatabase();
+
+        // Инициализация настроек
+        Log.d(TAG, "Инициализация настроек приложения");
+        SettingsManager.init(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

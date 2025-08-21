@@ -41,18 +41,83 @@
             android:background="@color/settings_content_background"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/info_text_view"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
-                android:textColor="@color/settings_text"
-                android:background="@color/settings_content_background"
-                android:padding="8dp"
-                android:scrollbars="vertical"
-                android:fadeScrollbars="false"
-                tools:text="Информация о backend.jar будет здесь..." />
+                android:orientation="vertical"
+                android:background="@color/settings_content_background">
+
+                <!-- Заголовок раздела настроек -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_display_options"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/settings_titles"
+                    android:layout_marginBottom="16dp"
+                    android:padding="8dp" />
+
+                <!-- Чекбокс для отображения позиции -->
+                <CheckBox
+                    android:id="@+id/checkbox_show_position"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_show_position"
+                    android:textSize="16sp"
+                    android:textColor="@color/settings_text"
+                    android:padding="12dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Чекбокс для отображения ID -->
+                <CheckBox
+                    android:id="@+id/checkbox_show_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_show_id"
+                    android:textSize="16sp"
+                    android:textColor="@color/settings_text"
+                    android:padding="12dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Разделитель -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/settings_text"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:alpha="0.3" />
+
+                <!-- Информация о backend -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_backend_info"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/settings_titles"
+                    android:layout_marginBottom="8dp"
+                    android:padding="8dp" />
+
+                <TextView
+                    android:id="@+id/info_text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:textColor="@color/settings_text"
+                    android:background="@color/settings_content_background"
+                    android:padding="8dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false"
+                    tools:text="Информация о backend.jar будет здесь..." />
+
+            </LinearLayout>
 
         </ScrollView>
 

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Category;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,6 +69,10 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
     public CategoryTreeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_category_tree, parent, false);
+        
+        // Инициализируем менеджер настроек
+        SettingsManager.init(parent.getContext());
+        
         return new CategoryTreeViewHolder(view);
     }
     
@@ -274,17 +279,27 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             itemView.setPadding(paddingLeft, itemView.getPaddingTop(), 
                               itemView.getPaddingRight(), itemView.getPaddingBottom());
             
-            // Устанавливаем позицию
+            // Устанавливаем позицию с учетом настроек
             if (positionText != null) {
-                positionText.setText(String.valueOf(category.getPosition()));
+                if (SettingsManager.isShowPosition()) {
+                    positionText.setText(String.valueOf(category.getPosition()));
+                    positionText.setVisibility(View.VISIBLE);
+                } else {
+                    positionText.setVisibility(View.GONE);
+                }
             }
             
             // Устанавливаем название
             titleText.setText(category.getTitle());
             
-            // Устанавливаем ID
+            // Устанавливаем ID с учетом настроек
             if (idText != null) {
-                idText.setText("ID: " + category.getId());
+                if (SettingsManager.isShowId()) {
+                    idText.setText("ID: " + category.getId());
+                    idText.setVisibility(View.VISIBLE);
+                } else {
+                    idText.setVisibility(View.GONE);
+                }
             }
             
             // Настраиваем иконку разворачивания

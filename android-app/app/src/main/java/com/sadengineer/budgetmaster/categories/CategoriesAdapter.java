@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,6 +65,10 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_category, parent, false);
+        
+        // Инициализируем менеджер настроек
+        SettingsManager.init(parent.getContext());
+        
         StandartViewHolder holder = new StandartViewHolder(view);
         
         // Настраиваем обработчики для универсального ViewHolder
@@ -111,8 +116,12 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
                 category.getPosition(), 
                 category.getTitle(), 
                 category.getId(), 
+                0, // sum - не используется для категорий
+                null, // shortName - не используется для категорий
                 isSelectionMode, 
-                selectedCategories.contains(category.getId())
+                selectedCategories.contains(category.getId()),
+                SettingsManager.isShowPosition(),
+                SettingsManager.isShowId()
             );
             
             // Настраиваем обработчики для универсального ViewHolder

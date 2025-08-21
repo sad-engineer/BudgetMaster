@@ -13,6 +13,7 @@ import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
+        
+        // Инициализируем менеджер настроек
+        SettingsManager.init(parent.getContext());
         
         StandartViewHolder holder = new StandartViewHolder(
             inflater.inflate(R.layout.item_account, parent, false)
@@ -116,7 +120,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 budget.getAmount(),
                 shortName,
                 isSelectionMode,
-                selectedBudgets.contains(budget.getId())
+                selectedBudgets.contains(budget.getId()),
+                SettingsManager.isShowPosition(),
+                SettingsManager.isShowId()
             );
         }
     }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Настройки отображения -->
+    <string name="settings_display_options">Настройки отображения</string>
+    <string name="settings_show_position">Показывать позицию в карточках</string>
+    <string name="settings_show_id">Показывать ID в карточках</string>
+    
+    <!-- Информация о backend -->
+    <string name="settings_backend_info">Информация о backend</string>
+</resources>

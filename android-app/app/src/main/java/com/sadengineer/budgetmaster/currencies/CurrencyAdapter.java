@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
+import com.sadengineer.budgetmaster.settings.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -87,6 +88,10 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public StandartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_currency, parent, false);
+        
+        // Инициализируем менеджер настроек
+        SettingsManager.init(parent.getContext());
+        
         StandartViewHolder holder = new StandartViewHolder(view);
         
         // Настраиваем обработчики для универсального ViewHolder
@@ -139,7 +144,8 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         Log.d(TAG, "Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
         "ID: " + currency.getId() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(currency.getPosition(), currency.getTitle(), currency.getId(), 
-                   0, currency.getShortName(), isSelectionMode, isSelected);
+                   0, currency.getShortName(), isSelectionMode, isSelected,
+                   SettingsManager.isShowPosition(), SettingsManager.isShowId());
     }
 
     /**

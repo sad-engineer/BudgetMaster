@@ -298,30 +298,45 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Привязывает данные к элементу
      */
     public void bind(int position, String title, int id, boolean isSelectionMode, boolean isSelected) {
-        bind(position, title, id, 0, null, isSelectionMode, isSelected);
+        bind(position, title, id, 0, null, isSelectionMode, isSelected, true, true);
     }
     
     public void bind(int position, String title, int id, int sum, boolean isSelectionMode, boolean isSelected) {
-        bind(position, title, id, sum, null, isSelectionMode, isSelected);
+        bind(position, title, id, sum, null, isSelectionMode, isSelected, true, true);
     }
     
     public void bind(int position, String title, int id, int sum, String shortName, boolean isSelectionMode, boolean isSelected) {
+        bind(position, title, id, sum, shortName, isSelectionMode, isSelected, true, true);
+    }
+    
+    public void bind(int position, String title, int id, int sum, String shortName, boolean isSelectionMode, boolean isSelected, boolean showPosition, boolean showId) {
         this.boundItemId = id;
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
         
         Log.d(TAG, "bind() для элемента " + id + " (позиция " + position + "): " + 
-            "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected);
+            "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected + 
+            ", showPosition=" + showPosition + ", showId=" + showId);
         
-        // Устанавливаем значения
+        // Устанавливаем значения с учетом настроек отображения
         if (positionText != null) {
-            positionText.setText(String.valueOf(position));
+            if (showPosition) {
+                positionText.setText(String.valueOf(position));
+                positionText.setVisibility(View.VISIBLE);
+            } else {
+                positionText.setVisibility(View.GONE);
+            }
         }
         if (titleText != null) {
             titleText.setText(title);
         }
         if (idText != null) {
-            idText.setText("ID: " + id);
+            if (showId) {
+                idText.setText("ID: " + id);
+                idText.setVisibility(View.VISIBLE);
+            } else {
+                idText.setVisibility(View.GONE);
+            }
         }
         if (sumText != null) {
             double rubles = sum / 100.0;
@@ -354,10 +369,17 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
                 checkbox.setChecked(isSelected);
             }
             
-            if (positionText != null) {
-                int padding = (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density);
+            // Применяем отступ к позиции, если она видима, иначе к названию
+            int padding = (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density);
+            
+            if (positionText != null && showPosition) {
+                // Если позиция видима, применяем отступ к ней
                 positionText.setPadding(padding, positionText.getPaddingTop(), 
                                      positionText.getPaddingRight(), positionText.getPaddingBottom());
+            } else if (titleText != null && !showPosition) {
+                // Если позиция скрыта, применяем отступ к названию
+                titleText.setPadding(padding, titleText.getPaddingTop(), 
+                                   titleText.getPaddingRight(), titleText.getPaddingBottom());
             }
         } else {
             // Скрываем чекбокс и возвращаем текст
@@ -368,9 +390,14 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
                 checkbox.setChecked(false);
             }
             
+            // Сбрасываем отступы
             if (positionText != null) {
                 positionText.setPadding(0, positionText.getPaddingTop(), 
                                      positionText.getPaddingRight(), positionText.getPaddingBottom());
+            }
+            if (titleText != null) {
+                titleText.setPadding(0, titleText.getPaddingTop(), 
+                                   titleText.getPaddingRight(), titleText.getPaddingBottom());
             }
         }
     }
@@ -408,9 +435,14 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             checkbox.setChecked(false);
         }
         
+        // Сбрасываем отступы для всех текстовых полей
         if (positionText != null) {
             positionText.setPadding(0, positionText.getPaddingTop(), 
                                  positionText.getPaddingRight(), positionText.getPaddingBottom());
+        }
+        if (titleText != null) {
+            titleText.setPadding(0, titleText.getPaddingTop(), 
+                               titleText.getPaddingRight(), titleText.getPaddingBottom());
         }
         
         // Сбрасываем внутренние переменные
