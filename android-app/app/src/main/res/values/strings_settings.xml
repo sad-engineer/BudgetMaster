@@ -7,4 +7,8 @@
     
     <!-- Информация о backend -->
     <string name="settings_backend_info">Информация о backend</string>
+    
+    <!-- Настройки валют -->
+    <string name="settings_currency_options">Настройки валют</string>
+    <string name="settings_default_currency">Валюта по умолчанию</string>
 </resources>
