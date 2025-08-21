@@ -221,7 +221,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
          // Устанавливаем статус закрытия
          accountClosedCheckbox.setChecked(currentAccount.getClosed() == 1);
          
-         // Валюта будет установлена после загрузки валют в setupSpinners()
+        // Валюта будет установлена после загрузки валют в setupSpinners()
     }
     
     /**

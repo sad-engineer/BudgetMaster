@@ -62,5 +62,18 @@
         android:layout_gravity="start|center_vertical"
         android:layout_marginStart="16dp"
         android:visibility="gone" />
+        
+    <!-- Иконка чекбокса поверх контента -->
+    <ImageView
+        android:id="@+id/account_checkbox_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_checkbox_unchecked"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground" />
 
 </FrameLayout> 

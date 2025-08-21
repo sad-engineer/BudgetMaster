@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -27,10 +27,15 @@ import java.util.ArrayList;
 public class IncomeCategoriesActivity extends BaseContentActivity {
     
     private static final String TAG = "IncomeCategoriesActivity";
-    private static final int OPERATION_TYPE_INCOME = 1; // Доходы
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
+    private static final int OPERATION_TYPE = ModelConstants.OPERATION_TYPE_INCOME; // Доходы
     
     private RecyclerView recyclerView;
-    private CategoriesAdapter adapter;
+    private CategoryTreeAdapter adapter;
     private ImageButton addCategoryButton;
     private ImageButton deleteCategoryButton;
     private CategoryService categoryService;
@@ -55,7 +60,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         setToolbarTitle(R.string.menu_income_categories, R.dimen.toolbar_text);
 
         // Инициализация CategoryService
-        categoryService = new CategoryService(this, "default_user");
+        categoryService = new CategoryService(this, userName);
 
         // Инициализация RecyclerView
         setupRecyclerView();
@@ -86,7 +91,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
                 } else {
                     // Запускаем окно создания категории
                     Intent intent = new Intent(IncomeCategoriesActivity.this, CategoryEditActivity.class);
-                    intent.putExtra("operation_type", OPERATION_TYPE_INCOME);
+                    intent.putExtra("operation_type", OPERATION_TYPE);
                     startActivity(intent);
                 }
             }
@@ -169,7 +174,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      */
     private void setupRecyclerView() {
         recyclerView = findViewById(R.id.income_categories_recycler_view);
-        adapter = new CategoriesAdapter(this::onCategoryClick);
+        adapter = new CategoryTreeAdapter(this::onCategoryClick);
         adapter.setOnCategoryLongClickListener(this::onCategoryLongClick);
         adapter.setOnSelectedCategoriesChanged(this::onSelectedCategoriesChanged);
         
@@ -216,13 +221,8 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         Log.d(TAG, "Загружаем категории доходов из базы данных...");
         
         try {
-            // Получаем базу данных (уже инициализирована в MainActivity)
-            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-            
-            // Загружаем категории доходов через Observer
-            database.categoryDao().getAllActiveByOperationType(OPERATION_TYPE_INCOME).observe(this, loadedCategories -> {
+            categoryService.getAllByOperationType(OPERATION_TYPE, EntityFilter.ALL).observe(this, loadedCategories -> {
                 Log.d(TAG, "Загружено категорий доходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
-                
                 if (loadedCategories != null && !loadedCategories.isEmpty()) {
                     categories.clear();
                     categories.addAll(loadedCategories);
@@ -235,8 +235,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
                     categories.clear();
                     Log.w(TAG, "Категории доходов не найдены в базе данных");
                 }
-            });
-            
+            }); 
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки категорий доходов: " + e.getMessage(), e);
         }
@@ -300,7 +299,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         Log.d(TAG, "Переходим к окну редактирования категории");
         Intent intent = new Intent(IncomeCategoriesActivity.this, CategoryEditActivity.class);
         intent.putExtra("category", category);
-        intent.putExtra("operation_type", OPERATION_TYPE_INCOME);
+        intent.putExtra("operation_type", OPERATION_TYPE);
         startActivity(intent);
     }
 } 

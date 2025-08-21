@@ -73,45 +73,7 @@
                     android:textColor="@color/categories_edit_input_text"
                     android:textColorHint="@color/categories_edit_input_hint"
                     android:textSize="16sp" />
-
-                <!-- Тип операции -->
-                <TextView
-                    android:id="@+id/category_operation_type_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/category_operation_type_label"
-                    android:textColor="@color/categories_edit_labels"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <Spinner
-                    android:id="@+id/category_operation_type_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/version_item_background"
-                    android:padding="12dp" />
-
-                <!-- Тип категории -->
-                <TextView
-                    android:id="@+id/category_type_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/category_type_label"
-                    android:textColor="@color/categories_edit_labels"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <Spinner
-                    android:id="@+id/category_type_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/version_item_background"
-                    android:padding="12dp" />
-
+                    
                 <!-- Родительская категория -->
                 <TextView
                     android:id="@+id/category_parent_label"

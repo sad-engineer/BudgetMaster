@@ -1,5 +1,8 @@
 package com.sadengineer.budgetmaster.categories;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,9 +19,10 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.entity.Category;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * Activity для создания/изменения категории
@@ -26,10 +30,12 @@ import java.util.List;
 public class CategoryEditActivity extends BaseEditActivity<Category> {
     
     private static final String TAG = "CategoryEditActivity";
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
     
     private EditText categoryNameEdit;
-    private Spinner categoryTypeSpinner;
-    private Spinner categoryOperationTypeSpinner;
     private Spinner categoryParentSpinner;
     private ImageButton saveButton;
     private ImageButton backButton;
@@ -40,6 +46,11 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     private Category currentCategory;
     private boolean isEditMode = false;
     private int sourceOperationType = 1; // Тип операции по умолчанию (1 - доходы, 2 - расходы)
+    private List<Category> parentCategories = new ArrayList<>(); // Список родительских категорий
+    
+    private static final int PARENT = ModelConstants.CATEGORY_TYPE_PARENT;
+    private static final int CHILD = ModelConstants.CATEGORY_TYPE_CHILD;
+    public static final int DEFAULT_CATEGORY_ID = ModelConstants.DEFAULT_PARENT_CATEGORY_ID;
     
     /**
      * Метод вызывается при создании Activity
@@ -52,8 +63,6 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
 
         // Инициализация всех View элементов
         categoryNameEdit = findViewById(R.id.category_name_edit_text);
-        categoryTypeSpinner = findViewById(R.id.category_type_spinner);
-        categoryOperationTypeSpinner = findViewById(R.id.category_operation_type_spinner);
         categoryParentSpinner = findViewById(R.id.category_parent_spinner);
         saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
@@ -68,33 +77,19 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         setupCommonEditActions(R.id.position_change_button);
 
         // Инициализация сервисов
-        categoryService = new CategoryService(this, "default_user");
+        categoryService = new CategoryService(this, userName);
+        
+        // Получаем данные из Intent ПЕРЕД настройкой спиннеров
+        loadCategoryData();
         
         // Настраиваем спиннеры
         setupSpinners();
-        
-        // Получаем данные из Intent и заполняем поля
-        loadCategoryData();
     }
     
     /**
      * Настраивает спиннеры для типов категорий
      */
     private void setupSpinners() {
-        // Настройка спиннера типов операций
-        String[] operationTypes = {"Доходы", "Расходы"};
-        ArrayAdapter<String> operationTypeAdapter = new ArrayAdapter<>(this, 
-            android.R.layout.simple_spinner_item, operationTypes);
-        operationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categoryOperationTypeSpinner.setAdapter(operationTypeAdapter);
-        
-        // Настройка спиннера типов категорий
-        String[] categoryTypes = {"Основная", "Подкатегория"};
-        ArrayAdapter<String> categoryTypeAdapter = new ArrayAdapter<>(this, 
-            android.R.layout.simple_spinner_item, categoryTypes);
-        categoryTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categoryTypeSpinner.setAdapter(categoryTypeAdapter);
-        
         // Настройка спиннера родительских категорий
         String[] parentCategories = {"Нет родителя"};
         ArrayAdapter<String> parentAdapter = new ArrayAdapter<>(this, 
@@ -110,22 +105,39 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      * Загружает родительские категории для спиннера
      */
     private void loadParentCategories() {
-        categoryService.getAllByOperationType(sourceOperationType, 
-            com.sadengineer.budgetmaster.backend.entity.EntityFilter.ACTIVE).observe(this, categories -> {
-            if (categories != null && !categories.isEmpty()) {
+        // Используем тип операции, переданный из Intent
+        categoryService.getAllByOperationType(sourceOperationType, EntityFilter.ACTIVE).observe(this, categories -> {
+            if (categories != null) {
                 List<String> parentOptions = new ArrayList<>();
-                parentOptions.add("Нет родителя");
+                List<Category> parentCategories = new ArrayList<>();
                 
+                // Добавляем опцию "Нет родителя"
+                parentOptions.add("Нет родителя");
+                parentCategories.add(null); // null для "Нет родителя"
+                
+                // Добавляем все категории (и основные, и подкатегории)
                 for (Category category : categories) {
-                    if (category.getParentId() == null) {
-                        parentOptions.add(category.getTitle());
-                    }
+                    parentOptions.add(category.getTitle());
+                    parentCategories.add(category);
                 }
+                
+                // Сохраняем список категорий для получения ID
+                this.parentCategories = parentCategories;
                 
                 ArrayAdapter<String> parentAdapter = new ArrayAdapter<>(this, 
                     android.R.layout.simple_spinner_item, parentOptions);
                 parentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 categoryParentSpinner.setAdapter(parentAdapter);
+                
+                // Если это режим редактирования, устанавливаем родительскую категорию
+                if (isEditMode && currentCategory != null) {
+                    Log.d(TAG, "Устанавливаем родительскую категорию для редактирования. ParentId: " + currentCategory.getParentId());
+                    if (currentCategory.getParentId() != null && currentCategory.getParentId() != PARENT) {
+                        setSelectedParentCategory(currentCategory.getParentId());
+                    } else {
+                        setSelectedParentCategory(PARENT);
+                    }
+                }
             }
         });
     }
@@ -139,21 +151,23 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         if (intent != null) {
             // Получаем тип операции из Intent
             sourceOperationType = intent.getIntExtra("operation_type", 1);
+            Log.d(TAG, "Загружен тип операции из Intent: " + sourceOperationType);
             
             // Получаем категорию для редактирования
-            currentCategory = intent.getParcelableExtra("category");
+            currentCategory = (Category) intent.getSerializableExtra("category");
             
             if (currentCategory != null) {
                 isEditMode = true;
+                Log.d(TAG, "Режим редактирования. Категория: " + currentCategory.getTitle() + 
+                          ", ID: " + currentCategory.getId() + 
+                          ", ParentId: " + currentCategory.getParentId());
                 fillCategoryData();
                 setToolbarTitle(R.string.toolbar_title_category_edit, R.dimen.toolbar_text);
             } else {
                 isEditMode = false;
+                Log.d(TAG, "Режим создания новой категории");
                 setToolbarTitle(R.string.toolbar_title_category_add, R.dimen.toolbar_text);
             }
-            
-            // Устанавливаем тип операции в спиннер
-            categoryOperationTypeSpinner.setSelection(sourceOperationType - 1);
         }
     }
     
@@ -163,13 +177,9 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     private void fillCategoryData() {
         if (currentCategory != null) {
             categoryNameEdit.setText(currentCategory.getTitle());
-            categoryTypeSpinner.setSelection(currentCategory.getType() - 1);
-            categoryOperationTypeSpinner.setSelection(currentCategory.getOperationType() - 1);
+            Log.d(TAG, "Заполнено название категории: " + currentCategory.getTitle());
             
-            // Устанавливаем родительскую категорию
-            if (currentCategory.getParentId() != null) {
-                // TODO: Найти и установить родительскую категорию в спиннер
-            }
+            // Родительская категория будет установлена после загрузки списка в loadParentCategories()
         }
     }
     
@@ -208,7 +218,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 // Редактирование существующей категории
                 if (currentCategory != null) {
                     currentCategory.setTitle(title);
-                    currentCategory.setOperationType(getSelectedOperationType());
+                    currentCategory.setOperationType(sourceOperationType);
                     currentCategory.setType(getSelectedCategoryType());
                     currentCategory.setParentId(getSelectedParentId());
                     
@@ -217,11 +227,10 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 }
             } else {
                 // Создание новой категории
-                int operationType = getSelectedOperationType();
                 int categoryType = getSelectedCategoryType();
                 Integer parentId = getSelectedParentId();
                 
-                categoryService.create(title, operationType, categoryType, parentId);
+                categoryService.create(title, sourceOperationType, categoryType, parentId);
                 Log.d(TAG, "Категория создана: " + title);
             }
             
@@ -230,23 +239,21 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
             return true;
             
         } catch (Exception e) {
-            Log.e(TAG, "❌ Ошибка при сохранении категории: " + e.getMessage(), e);
+            Log.e(TAG, "Ошибка при сохранении категории: " + e.getMessage(), e);
             return false;
         }
     }
     
-    /**
-     * Получает выбранный тип операции
-     */
-    private int getSelectedOperationType() {
-        return categoryOperationTypeSpinner.getSelectedItemPosition() + 1;
-    }
+
     
     /**
-     * Получает выбранный тип категории
+     * Автоматически определяет тип категории на основе выбранного родителя
+     * @return 0 - основная категория, 1 - подкатегория
      */
     private int getSelectedCategoryType() {
-        return categoryTypeSpinner.getSelectedItemPosition() + 1;
+        Integer parentId = getSelectedParentId();
+        // Если есть родитель - это подкатегория (CHILD), иначе основная (PARENT)
+        return (parentId != null && parentId != PARENT) ? CHILD : PARENT;
     }
     
     /**
@@ -254,11 +261,33 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      */
     private Integer getSelectedParentId() {
         int position = categoryParentSpinner.getSelectedItemPosition();
-        if (position == 0) {
-            return null; // Нет родителя
+        if (position == 0 || position >= parentCategories.size()) {
+            return PARENT; // Нет родителя - используем PARENT (0)
         }
-        // TODO: Реализовать получение ID родительской категории
-        return null;
+        
+        Category selectedCategory = parentCategories.get(position);
+        return selectedCategory != null ? selectedCategory.getId() : PARENT;
+    }
+    
+    /**
+     * Устанавливает выбранную родительскую категорию по ID
+     */
+    private void setSelectedParentCategory(Integer parentId) {
+        Log.d(TAG, "setSelectedParentCategory вызван с parentId: " + parentId);
+        if (parentId == null || parentId == DEFAULT_CATEGORY_ID) {
+            categoryParentSpinner.setSelection(0); // "Нет родителя"
+            Log.d(TAG, "Установлена позиция 0 (Нет родителя)");
+            return;
+        }
+        
+        for (int i = 0; i < parentCategories.size(); i++) {
+            Category category = parentCategories.get(i);
+            if (category != null && category.getId() == parentId) {
+                categoryParentSpinner.setSelection(i);
+                Log.d(TAG, "Установлена позиция " + i + " для категории с ID " + parentId);
+                break;
+            }
+        }
     }
     
 

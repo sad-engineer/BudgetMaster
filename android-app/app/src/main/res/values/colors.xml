@@ -16,6 +16,9 @@
     <color name="toolbar_content_common_background">@color/black</color>
     <color name="toolbar_content_common_icons">@color/green</color>
     <color name="toolbar_content_common_texts">@color/yellow</color>
+
+    <color name="common_icons">@color/green</color>
+
     
     <!-- Глобальные цвета навигации -->
     <color name="navigation_background">@color/dark_gray</color>
@@ -98,6 +101,9 @@
     <color name="currency_edit_toolbar_icons">@color/green</color>
     <color name="currency_edit_toolbar_texts">@color/white</color>
     <color name="currency_edit_content_background">@color/dark_gray</color>
+    
+    <!-- Цвета для экрана категорий -->
+    <color name="categories_list_text">@color/white</color>
     <color name="currency_edit_titles">@color/white</color>
     <color name="currency_edit_input_background">@color/white</color>
     <color name="currency_edit_input_text">@color/black</color>

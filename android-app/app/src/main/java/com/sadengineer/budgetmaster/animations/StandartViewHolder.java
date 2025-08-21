@@ -3,6 +3,7 @@ package com.sadengineer.budgetmaster.animations;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,7 +22,8 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private static final int TEXT_PADDING_DP = 50;
 
     // UI элементы
-    private CheckBox checkbox;   
+    private CheckBox checkbox;
+    private ImageView checkboxIcon;   
     private TextView positionText;
     private TextView titleText;
     private TextView idText;
@@ -61,6 +63,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         
         // Ищем UI элементы
         checkbox = findCheckbox(itemView);
+        checkboxIcon = findCheckboxIcon(itemView);
         positionText = findPositionText(itemView);
         titleText = findTitleText(itemView);
         idText = findIdText(itemView);
@@ -87,6 +90,28 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         foundCheckbox = itemView.findViewById(R.id.category_checkbox);
         if (foundCheckbox != null) {
             return foundCheckbox;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Ищет иконку чекбокса по разным возможным ID
+     */
+    private ImageView findCheckboxIcon(View itemView) {
+        ImageView foundIcon = itemView.findViewById(R.id.currency_checkbox_icon);
+        if (foundIcon != null) {
+            return foundIcon;
+        }
+        
+        foundIcon = itemView.findViewById(R.id.account_checkbox_icon);
+        if (foundIcon != null) {
+            return foundIcon;
+        }
+        
+        foundIcon = itemView.findViewById(R.id.category_checkbox_icon);
+        if (foundIcon != null) {
+            return foundIcon;
         }
         
         return null;
@@ -228,6 +253,19 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
                 }
             });
         }
+        
+        // Обработчик клика на иконку чекбокса
+        if (checkboxIcon != null) {
+            checkboxIcon.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    int itemId = getCurrentItemId();
+                    if (itemId != -1) {
+                        toggleSelection(itemId);
+                    }
+                }
+            });
+        }
     }
     
     /**
@@ -248,7 +286,10 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             itemSelectionListener.onItemSelectionChanged(itemId, newSelectionState);
         }
         
-        if (checkbox != null) {
+        if (checkboxIcon != null) {
+            checkboxIcon.setImageResource(isSelected ? 
+                R.drawable.ic_checkbox_checked : R.drawable.ic_checkbox_unchecked);
+        } else if (checkbox != null) {
             checkbox.setChecked(isSelected);
         }
     }
@@ -302,9 +343,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         
         // Настройка чекбокса и отступа текста
         if (isSelectionMode) {
-            // Показываем чекбокс и смещаем текст
-            checkbox.setVisibility(View.VISIBLE);
-            checkbox.setChecked(isSelected);
+            // Показываем иконку чекбокса и смещаем текст
+            if (checkboxIcon != null) {
+                checkboxIcon.setVisibility(View.VISIBLE);
+                checkboxIcon.setImageResource(isSelected ? 
+                    R.drawable.ic_checkbox_checked : R.drawable.ic_checkbox_unchecked);
+            } else {
+                // Fallback к стандартному чекбоксу
+                checkbox.setVisibility(View.VISIBLE);
+                checkbox.setChecked(isSelected);
+            }
             
             if (positionText != null) {
                 int padding = (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density);
@@ -313,8 +361,12 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             }
         } else {
             // Скрываем чекбокс и возвращаем текст
-            checkbox.setVisibility(View.GONE);
-            checkbox.setChecked(false);
+            if (checkboxIcon != null) {
+                checkboxIcon.setVisibility(View.GONE);
+            } else {
+                checkbox.setVisibility(View.GONE);
+                checkbox.setChecked(false);
+            }
             
             if (positionText != null) {
                 positionText.setPadding(0, positionText.getPaddingTop(), 
@@ -349,8 +401,12 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      */
     public void resetToInitialState() {
         // Сбрасываем UI элементы
-        checkbox.setVisibility(View.GONE);
-        checkbox.setChecked(false);
+        if (checkboxIcon != null) {
+            checkboxIcon.setVisibility(View.GONE);
+        } else {
+            checkbox.setVisibility(View.GONE);
+            checkbox.setChecked(false);
+        }
         
         if (positionText != null) {
             positionText.setPadding(0, positionText.getPaddingTop(), 

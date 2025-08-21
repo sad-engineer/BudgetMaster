@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -27,10 +27,15 @@ import java.util.ArrayList;
 public class ExpenseCategoriesActivity extends BaseContentActivity {
     
     private static final String TAG = "ExpenseCategoriesActivity";
-    private static final int OPERATION_TYPE_EXPENSE = 2; // Расходы
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
+    private static final int OPERATION_TYPE = ModelConstants.OPERATION_TYPE_EXPENSE; // Расходы
     
     private RecyclerView recyclerView;
-    private CategoriesAdapter adapter;
+    private CategoryTreeAdapter adapter;
     private ImageButton addCategoryButton;
     private ImageButton deleteCategoryButton;
     private CategoryService categoryService;
@@ -55,7 +60,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
         setToolbarTitle(R.string.menu_expense_categories, R.dimen.toolbar_text);
 
         // Инициализация CategoryService
-        categoryService = new CategoryService(this, "default_user");
+        categoryService = new CategoryService(this, userName);
 
         // Инициализация RecyclerView
         setupRecyclerView();
@@ -86,7 +91,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
                 } else {
                     // Запускаем окно создания категории
                     Intent intent = new Intent(ExpenseCategoriesActivity.this, CategoryEditActivity.class);
-                    intent.putExtra("operation_type", OPERATION_TYPE_EXPENSE);
+                    intent.putExtra("operation_type", OPERATION_TYPE);
                     startActivity(intent);
                 }
             }
@@ -169,7 +174,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      */
     private void setupRecyclerView() {
         recyclerView = findViewById(R.id.expense_categories_recycler_view);
-        adapter = new CategoriesAdapter(this::onCategoryClick);
+        adapter = new CategoryTreeAdapter(this::onCategoryClick);
         adapter.setOnCategoryLongClickListener(this::onCategoryLongClick);
         adapter.setOnSelectedCategoriesChanged(this::onSelectedCategoriesChanged);
         
@@ -215,14 +220,10 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
     private void loadCategoriesFromDatabase() {
         Log.d(TAG, "Загружаем категории расходов из базы данных...");
         
-        try {
-            // Получаем базу данных (уже инициализирована в MainActivity)
-            BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(this);
-            
-            // Загружаем категории расходов через Observer
-            database.categoryDao().getAllActiveByOperationType(OPERATION_TYPE_EXPENSE).observe(this, loadedCategories -> {
+        try {   
+
+            categoryService.getAllByOperationType(OPERATION_TYPE, EntityFilter.ALL).observe(this, loadedCategories -> {
                 Log.d(TAG, "Загружено категорий расходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
-                
                 if (loadedCategories != null && !loadedCategories.isEmpty()) {
                     categories.clear();
                     categories.addAll(loadedCategories);
@@ -235,8 +236,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
                     categories.clear();
                     Log.w(TAG, "Категории расходов не найдены в базе данных");
                 }
-            });
-            
+            }); 
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки категорий расходов: " + e.getMessage(), e);
         }
@@ -300,7 +300,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
         Log.d(TAG, "Переходим к окну редактирования категории");
         Intent intent = new Intent(ExpenseCategoriesActivity.this, CategoryEditActivity.class);
         intent.putExtra("category", category);
-        intent.putExtra("operation_type", OPERATION_TYPE_EXPENSE);
+        intent.putExtra("operation_type", OPERATION_TYPE);
         startActivity(intent);
     }
 } 

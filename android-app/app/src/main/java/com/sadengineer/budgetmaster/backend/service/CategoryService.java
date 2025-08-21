@@ -111,10 +111,10 @@ public class CategoryService {
         }
         executorService.execute(() -> {
             try {
-                // Создаем переменные ВНУТРИ lambda
-                int finalOperationType = operationType;
-                int finalType = type;
-                int finalParentId = parentId;
+                // Создаем переменные ВНУТРИ lambda с проверкой на null
+                int finalOperationType = (operationType != null) ? operationType : constants.DEFAULT_CATEGORY_OPERATION_TYPE;
+                int finalType = (type != null) ? type : constants.DEFAULT_CATEGORY_TYPE;
+                int finalParentId = (parentId != null) ? parentId : constants.DEFAULT_PARENT_CATEGORY_ID;
 
                 // Проверяем, если тип операции не передан, устанавливаем значение по умолчанию
                 if (operationType == null || operationType <= 0) {
