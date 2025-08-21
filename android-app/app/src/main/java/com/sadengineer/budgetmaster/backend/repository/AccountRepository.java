@@ -76,7 +76,7 @@ public class AccountRepository {
      * @param filter фильтр для выборки счетов
      * @return LiveData со списком всех счетов
      */
-    public LiveData<List<Account>> getAllByType(String type, EntityFilter filter) {
+    public LiveData<List<Account>> getAllByType(EntityFilter filter, int type) {
         switch (filter) {
             case ACTIVE:
                 return dao.getAllActiveByType(type);

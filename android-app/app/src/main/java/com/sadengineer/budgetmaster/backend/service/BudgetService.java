@@ -8,6 +8,7 @@ import androidx.room.Transaction;
 
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.repository.BudgetRepository;
 
 import java.time.LocalDateTime;
@@ -125,7 +126,7 @@ public class BudgetService {
                 
                 createBudgetInTransaction(category_id, finalAmount, finalCurrencyId);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при создании бюджета для категории " + category_id + ": " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при создании бюджета для категории " + category_id + ": " + e.getMessage(), e);
             }
         });
     }
@@ -138,7 +139,7 @@ public class BudgetService {
      */
     @Transaction
     private void createBudgetInTransaction(int category_id, Integer amount, Integer currency_id) {
-        Log.d(TAG, "🔄 Запрос на создание бюджета для категории " + category_id);
+        Log.d(TAG, "Запрос на создание бюджета для категории " + category_id);
         Budget budget = new Budget();
         budget.setCategoryId(category_id);
         budget.setAmount(amount);
@@ -147,7 +148,7 @@ public class BudgetService {
         budget.setCreateTime(LocalDateTime.now());
         budget.setCreatedBy(user);
         repo.insert(budget);
-        Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно создан");
+        Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно создан");
     }
 
     /**
@@ -156,7 +157,7 @@ public class BudgetService {
      */
     private void delete(Budget budget) {
         if (budget == null) {
-            Log.e(TAG, "❌ Бюджет не найден для удаления. Удаление было отменено");
+            Log.e(TAG, "Бюджет не найден для удаления. Удаление было отменено");
             return;
         }
 
@@ -164,7 +165,7 @@ public class BudgetService {
             try {
                 deleteBudgetInTransaction(budget);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при удалении бюджета: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при удалении бюджета: " + e.getMessage(), e);
             }
         });
     }
@@ -175,10 +176,10 @@ public class BudgetService {
      */
     @Transaction
     private void deleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, "🔄 Запрос на удаление бюджета для категории " + budget.getCategoryId());
+        Log.d(TAG, "Запрос на удаление бюджета для категории " + budget.getCategoryId());
         int deletedPosition = budget.getPosition();
         repo.delete(budget);
-        Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно удален");
+        Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно удален");
     }
 
     /**
@@ -199,8 +200,8 @@ public class BudgetService {
      * @param filter фильтр для выборки бюджетов
      * @return LiveData со списком всех бюджетов
      */
-    public LiveData<List<Budget>> getAll(EntityFilter filter) {
-        return repo.getAll(filter);
+    public LiveData<List<Budget>> getAll(EntityFilter filter, OperationTypeFilter operationType) {
+        return repo.getAll(filter, operationType);
     }
     
     /**
@@ -238,7 +239,7 @@ public class BudgetService {
             try {
                 restoreBudgetInTransaction(deletedBudget);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при восстановлении бюджета: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при восстановлении бюджета: " + e.getMessage(), e);
             }
         });
     }
@@ -250,16 +251,16 @@ public class BudgetService {
     @Transaction
     private void restoreBudgetInTransaction(Budget deletedBudget) {
         if (deletedBudget != null) {
-            Log.d(TAG, "🔄 Запрос на восстановление бюджета для категории " + deletedBudget.getCategoryId());
+            Log.d(TAG, "Запрос на восстановление бюджета для категории " + deletedBudget.getCategoryId());
             deletedBudget.setPosition(repo.getMaxPosition() + 1);
             deletedBudget.setDeleteTime(null);
             deletedBudget.setDeletedBy(null);
             deletedBudget.setUpdateTime(LocalDateTime.now());
             deletedBudget.setUpdatedBy(user);
             repo.update(deletedBudget);
-            Log.d(TAG, "✅ Бюджет для категории " + deletedBudget.getCategoryId() + " успешно восстановлен");
+            Log.d(TAG, "Бюджет для категории " + deletedBudget.getCategoryId() + " успешно восстановлен");
         } else {
-            Log.e(TAG, "❌ Бюджет не найден для восстановления");
+            Log.e(TAG, "Бюджет не найден для восстановления");
         }
     }
 
@@ -269,7 +270,7 @@ public class BudgetService {
      */
     private void softDelete(Budget budget) {
         if (budget == null) {
-            Log.e(TAG, "❌ Бюджет не найден для soft delete. Удаление было отменено");
+            Log.e(TAG, "Бюджет не найден для soft delete. Удаление было отменено");
             return;
         }   
 
@@ -277,7 +278,7 @@ public class BudgetService {
             try {
                 softDeleteBudgetInTransaction(budget);
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при soft delete бюджета: " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при soft delete бюджета: " + e.getMessage(), e);
             }
         });
     }
@@ -288,7 +289,7 @@ public class BudgetService {
      */
     @Transaction
     private void softDeleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, "🔄 Запрос на softDelete бюджета для категории " + budget.getCategoryId());
+        Log.d(TAG, "Запрос на softDelete бюджета для категории " + budget.getCategoryId());
         int deletedPosition = budget.getPosition();
         budget.setPosition(0);
         budget.setDeleteTime(LocalDateTime.now());
@@ -296,7 +297,7 @@ public class BudgetService {
         repo.update(budget);
         // Пересчитываем позиции после soft delete
         repo.shiftPositionsDown(deletedPosition);
-        Log.d(TAG, "✅ Бюджет для категории " + budget.getCategoryId() + " успешно soft deleted");
+        Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно soft deleted");
     }
 
     /**
@@ -305,19 +306,19 @@ public class BudgetService {
      */
     public void update(Budget budget) {
         if (budget == null) {
-            Log.e(TAG, "❌ Бюджет не найден для обновления. Обновление было отменено");
+            Log.e(TAG, "Бюджет не найден для обновления. Обновление было отменено");
             return;
         }
 
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "🔄 Запрос на обновление бюджета для категории " + budget.getCategoryId());
+                Log.d(TAG, "Запрос на обновление бюджета для категории " + budget.getCategoryId());
                 budget.setUpdateTime(LocalDateTime.now());
                 budget.setUpdatedBy(user);
                 repo.update(budget);
-                Log.d(TAG, "✅ Запрос на обновление бюджета для категории " + budget.getCategoryId() + " успешно отправлен");
+                Log.d(TAG, "Запрос на обновление бюджета для категории " + budget.getCategoryId() + " успешно отправлен");
             } catch (Exception e) {
-                Log.e(TAG, "❌ Ошибка при обновлении бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
+                Log.e(TAG, "Ошибка при обновлении бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
             }
         });
     }

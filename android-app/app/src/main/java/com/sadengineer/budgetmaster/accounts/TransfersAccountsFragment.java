@@ -7,6 +7,8 @@ import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ import java.util.List;
  * Фрагмент для отображения счетов переводов (тип 3)
  */
 public class TransfersAccountsFragment extends BaseListFragment<Account, AccountsAdapter, AccountsSharedViewModel, AccountService> {
+
+    private final int ACCOUNT_TYPE = ModelConstants.ACCOUNT_TYPE_CREDIT; // Используем CREDIT для переводов
 
     /**
      * Возвращает layout для фрагмента
@@ -52,7 +56,7 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
      */
     @Override
     protected Object getLoadParameters() {
-        return "3"; // Тип счетов переводов
+        return ACCOUNT_TYPE; // Тип счетов переводов
     }
 
     /**
@@ -68,9 +72,12 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
      */
     @Override
     protected void performDataLoading() {
-        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
         // Для переводов загружаем только активные счета
-        database.accountDao().getAllActiveByType("3").observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        // Используем сервис из базового класса
+        AccountService service = getServiceInstance();
+        if (service != null) {
+            service.getAllByType(EntityFilter.ALL, ACCOUNT_TYPE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        }
     }
 
     /**

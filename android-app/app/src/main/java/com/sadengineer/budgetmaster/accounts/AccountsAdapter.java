@@ -28,6 +28,10 @@ import java.util.Set;
 public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private static final String TAG = "AccountsAdapter";
 
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
     private List<Account> accounts = new ArrayList<>();
     private OnAccountClickListener listener;
     private OnAccountLongClickListener longClickListener;
@@ -59,7 +63,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public AccountsAdapter(OnAccountClickListener listener, Context context) {
         this.listener = listener;
-        this.currencyService = new CurrencyService(context, "default_user");
+        this.currencyService = new CurrencyService(context, userName);
     }
     
     /**

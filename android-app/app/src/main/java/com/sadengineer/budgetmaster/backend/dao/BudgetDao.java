@@ -10,6 +10,8 @@ import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,14 +71,14 @@ public interface BudgetDao {
     LiveData<List<Budget>> getAllActive();
 
     /**
-     * Получает все активные бюджеты для категорий расходов (operation_type = 1)
+     * Получает все активные бюджеты по типу операций категорий
      * @return список активных бюджетов для расходов, отсортированных по позиции
      */
     @Query("SELECT b.* FROM budgets b " +
            "INNER JOIN categories c ON b.categoryId = c.id " +
-           "WHERE b.deleteTime IS NULL AND c.deleteTime IS NULL AND c.operationType = 1 " +
+           "WHERE b.deleteTime IS NULL AND c.deleteTime IS NULL AND c.operationType = :operationType " +
            "ORDER BY b.position ASC")
-    LiveData<List<Budget>> getAllActiveForExpenses();
+    LiveData<List<Budget>> getAllActiveByOperationType(int operationType);
 
     /**
      * Получает все удаленные бюджеты
@@ -84,6 +86,16 @@ public interface BudgetDao {
      */
     @Query("SELECT * FROM budgets WHERE deleteTime IS NOT NULL ORDER BY position ASC")
     LiveData<List<Budget>> getAllDeleted();
+
+    /**
+     * Получает все удаленные бюджеты по типу операций категорий
+     * @return список удаленных бюджетов для расходов, отсортированных по позиции
+     */
+    @Query("SELECT b.* FROM budgets b " +
+           "INNER JOIN categories c ON b.categoryId = c.id " +
+           "WHERE b.deleteTime IS NOT NULL AND c.deleteTime IS NULL AND c.operationType = :operationType " +
+           "ORDER BY b.position ASC")
+    LiveData<List<Budget>> getAllDeletedByOperationType(int operationType);
 
     /**
      * Получает все бюджеты по ID валюты (включая удаленные)

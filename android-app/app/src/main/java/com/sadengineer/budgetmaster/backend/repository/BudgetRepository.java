@@ -9,6 +9,7 @@ import com.sadengineer.budgetmaster.backend.dao.BudgetDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
 
 import java.util.List;
 
@@ -29,14 +30,31 @@ public class BudgetRepository {
     /**
      * Получить все бюджеты
      * @param filter фильтр для выборки бюджетов
+     * @param operationType фильтр типа операции
      * @return LiveData со списком всех бюджетов
      */
-    public LiveData<List<Budget>> getAll(EntityFilter filter) {
+    public LiveData<List<Budget>> getAll(EntityFilter filter, OperationTypeFilter operationType) {
         switch (filter) {
             case ACTIVE:
-                return dao.getAllActive();
+                switch (operationType) {
+                    case EXPENSE:
+                        return dao.getAllActiveByOperationType(OperationTypeFilter.EXPENSE.getIndex());
+                    case INCOME:
+                        return dao.getAllActiveByOperationType(OperationTypeFilter.INCOME.getIndex());
+                    case ALL:
+                    default:
+                        return dao.getAllActive();
+                }
             case DELETED:
-                return dao.getAllDeleted();
+                switch (operationType) {
+                    case EXPENSE:
+                        return dao.getAllDeletedByOperationType(OperationTypeFilter.EXPENSE.getIndex());
+                    case INCOME:
+                        return dao.getAllDeletedByOperationType(OperationTypeFilter.INCOME.getIndex());
+                    case ALL:
+                    default:
+                        return dao.getAllDeleted();
+                }
             case ALL:
             default:
                 return dao.getAll();

@@ -1,23 +1,39 @@
 package com.sadengineer.budgetmaster.backend.entity;
 
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+
 /**
  * Фильтр типов операций бюджетов
  */
 public enum OperationTypeFilter {
     /**
-     * Только активные бюджеты для расходов (operation_type = 1)
+     * Только бюджеты для расходов (operation_type = 1)
      */
-    EXPENSE,
+    EXPENSE(ModelConstants.OPERATION_TYPE_EXPENSE),
     
     /**
-     * Только активные бюджеты для доходов (operation_type = 2)
+     * Только  бюджеты для доходов (operation_type = 2)
      */
-    INCOME,
+    INCOME(ModelConstants.OPERATION_TYPE_INCOME),
 
     /**
-     * Все бюджеты (включая активные для расходов и доходов)
+     * Все бюджеты (для расходов и доходов)
      */
-    ALL
+    ALL(null);
+
+    private final Integer operationType;
+
+    OperationTypeFilter(Integer operationType) {
+        this.operationType = operationType;
+    }
+
+    /**
+     * Получить значение типа операции
+     * @return значение типа операции или null для ALL
+     */
+    public Integer getIndex() {
+        return operationType;
+    }
 } 
 
 

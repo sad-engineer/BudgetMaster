@@ -26,7 +26,11 @@ import java.util.ArrayList;
 public class BudgetEditActivity extends BaseEditActivity<Budget> {
     
     private static final String TAG = "BudgetEditActivity";
-    
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
     private EditText budgetAmountEdit;
     private Spinner budgetCategorySpinner;
     private Spinner budgetCurrencySpinner;
@@ -67,8 +71,8 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         setupCommonEditActions(R.id.position_change_button);
 
         // Инициализация сервисов
-        budgetService = new BudgetService(this, "default_user");
-        currencyService = new CurrencyService(this, "default_user");
+        budgetService = new BudgetService(this, userName);
+        currencyService = new CurrencyService(this, userName);
         
         // Настраиваем спиннеры
         setupSpinners();
@@ -106,6 +110,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     /**
      * Загружает данные бюджета из Intent
      */
+    @SuppressWarnings("deprecation") 
     private void loadBudgetData() {
         Intent intent = getIntent();
         if (intent != null) {

@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 
@@ -19,6 +18,11 @@ import java.util.concurrent.Executors;
 public class BudgetSharedViewModel extends ViewModel {
     
     private static final String TAG = "BudgetSharedViewModel";
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     
     private final MutableLiveData<Boolean> selectionMode = new MutableLiveData<>(false);
@@ -59,8 +63,7 @@ public class BudgetSharedViewModel extends ViewModel {
         
         executor.execute(() -> {
             try {
-                BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(null);
-                BudgetService budgetService = new BudgetService(null, "system");
+                BudgetService budgetService = new BudgetService(null, userName);
                 
                 int deletedCount = 0;
                 for (Budget budget : selectedBudgets) {

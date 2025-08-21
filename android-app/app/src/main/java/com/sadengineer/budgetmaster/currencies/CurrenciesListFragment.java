@@ -3,7 +3,6 @@ package com.sadengineer.budgetmaster.currencies;
 import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
@@ -69,8 +68,8 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
      */
     @Override
     protected void performDataLoading() {
-        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-        database.currencyDao().getAll().observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        CurrencyService service = getServiceInstance();
+        service.getAll().observe(getViewLifecycleOwner(), this::handleDataLoaded);
     }
 
     /**

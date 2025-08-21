@@ -1,15 +1,17 @@
 package com.sadengineer.budgetmaster.budget;
 
-import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.base.BaseListFragment;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
+import com.sadengineer.budgetmaster.base.BaseListFragment;      
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
+import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter; 
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,26 @@ import java.util.stream.Collectors;
 public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter, BudgetSharedViewModel, BudgetService> {
     
     private static final String TAG = "BudgetLimitsFragment";   
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
+    
+    private BudgetService budgetService;
+    private CurrencyService currencyService;
+    private CategoryService categoryService;
+    
+    private OperationTypeFilter operationType = OperationTypeFilter.EXPENSE;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Инициализируем сервисы с правильным контекстом
+        budgetService = new BudgetService(requireContext(), userName);
+        currencyService = new CurrencyService(requireContext(), userName);
+        categoryService = new CategoryService(requireContext(), userName);
+    }
 
     @Override
     protected int getLayoutResourceId() {
@@ -51,13 +73,13 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         return 0; // 0 = Лимиты
     }
 
+    /**
+     * Загружаем бюджеты только для категорий расходов (operation_type = 1)
+     */
     @Override
     protected void performDataLoading() {
-        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-        
-        // Загружаем только бюджеты для категорий расходов (operation_type = 1)
-        database.budgetDao().getAllActiveForExpenses().observe(getViewLifecycleOwner(), this::handleDataLoaded);
-        Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = 1)");
+        budgetService.getAll(EntityFilter.ACTIVE, operationType).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = " + operationType.getIndex() + ")");
     }
     
     @Override
@@ -83,28 +105,20 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
      * Загружает категории и валюты один раз при создании фрагмента
      */
     private void loadCategoriesAndCurrencies() {
-        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-        
-        // Загружаем только категории расходов (operation_type = 1)
-        database.categoryDao().getAllActive().observe(getViewLifecycleOwner(), allCategories -> {
-            if (allCategories != null) {
-                // Фильтруем только категории расходов
-                List<Category> expenseCategories = allCategories.stream()
-                    .filter(category -> category.getOperationType() ==  ModelConstants.OPERATION_TYPE_EXPENSE) // 1 = расход
-                    .collect(Collectors.toList());
-                
-                if (adapter != null) {
-                    adapter.setCategories(expenseCategories);
-                    Log.d(TAG, "Установлено категорий расходов в адаптер: " + expenseCategories.size());
+        // Загружаем категории для текущего типа операций
+        categoryService.getAllByOperationType(operationType.getIndex(), EntityFilter.ACTIVE)
+            .observe(getViewLifecycleOwner(), categories -> {
+                if (adapter != null && categories != null) {
+                    adapter.setCategories(categories);
+                    Log.d(TAG, "Установлено категорий в адаптер: " + categories.size());
                 }
-            }
-        });
+            });
         
-        // Загружаем валюты один раз
-        database.currencyDao().getAll().observe(getViewLifecycleOwner(), currencies -> {
-            if (adapter != null) {
+        // Загружаем валюты
+        currencyService.getAll().observe(getViewLifecycleOwner(), currencies -> {
+            if (adapter != null && currencies != null) {
                 adapter.setCurrencies(currencies);
-                Log.d(TAG, "Установлено валют в адаптер: " + (currencies != null ? currencies.size() : 0));
+                Log.d(TAG, "Установлено валют в адаптер: " + currencies.size());
             }
         });
     }

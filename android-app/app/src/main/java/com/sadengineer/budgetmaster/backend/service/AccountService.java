@@ -243,6 +243,16 @@ public class AccountService {
     public LiveData<List<Account>> getAll(EntityFilter filter) {
         return repo.getAll(filter);
     }
+
+    /**
+     * Получить все счета по типу
+     * @param type тип счета
+     * @param filter фильтр для выборки счетов
+     * @return LiveData со списком всех счетов
+     */
+    public LiveData<List<Account>> getAllByType(EntityFilter filter, int type) {
+        return repo.getAllByType(filter, type);
+    }
     
     /**
      * Получить все счета (включая удаленные)

@@ -3,10 +3,11 @@ package com.sadengineer.budgetmaster.accounts;
 import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
 
 import java.util.List;
 
@@ -14,6 +15,9 @@ import java.util.List;
  * Фрагмент для отображения текущих счетов (тип 1)
  */
 public class CurrentAccountsFragment extends BaseListFragment<Account, AccountsAdapter, AccountsSharedViewModel, AccountService> {
+    
+    private final int ACCOUNT_TYPE = ModelConstants.ACCOUNT_TYPE_CURRENT;
+    
     /**
      * Возвращает layout для фрагмента
      */
@@ -51,7 +55,7 @@ public class CurrentAccountsFragment extends BaseListFragment<Account, AccountsA
      */
     @Override
     protected Object getLoadParameters() {
-        return "1"; // Тип текущих счетов
+        return ACCOUNT_TYPE; // Тип текущих счетов
     }
 
     /**
@@ -67,8 +71,11 @@ public class CurrentAccountsFragment extends BaseListFragment<Account, AccountsA
      */
     @Override
     protected void performDataLoading() {
-        BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(requireContext());
-        database.accountDao().getAllByType("1").observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        // Используем сервис из базового класса
+        AccountService service = getServiceInstance();
+        if (service != null) {
+            service.getAllByType(EntityFilter.ALL, ACCOUNT_TYPE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        }
     }
 
     /**

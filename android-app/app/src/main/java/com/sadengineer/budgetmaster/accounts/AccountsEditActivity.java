@@ -32,17 +32,17 @@ import java.util.ArrayList;
 public class AccountsEditActivity extends BaseEditActivity<Account> {
     
     private static final String TAG = "AccountsEditActivity";
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
     
     private EditText accountNameEdit;
     private EditText accountBalanceEdit;
     private Spinner accountCurrencySpinner;
     private Spinner accountTypeSpinner;
     private CheckBox accountClosedCheckbox;
-
-    /** Имя пользователя по умолчанию */
-    /** TODO: передлать на получение имени пользователя из SharedPreferences */
-    private String userName = "default_user";
-
+    
     // Сервисы для работы с данными
     private AccountService accountService = new AccountService(this, userName);
     private CurrencyService currencyService = new CurrencyService(this, userName);
@@ -118,6 +118,15 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                 
                 // Сохраняем список валют для получения ID
                 this.currencies = currencies;
+                
+                // Устанавливаем выбранную валюту ПОСЛЕ загрузки валют
+                if (isEditMode && currentAccount != null) {
+                    // В режиме редактирования устанавливаем валюту счета
+                    setSelectedCurrencyId(currentAccount.getCurrencyId());
+                } else {
+                    // В режиме создания устанавливаем валюту по умолчанию
+                    setSelectedCurrencyId(DEFAULT_CURRENCY_ID);
+                }
             }
         });
         
@@ -189,7 +198,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
      private void setDefaultData() {
         accountBalanceEdit.setText(formatter.format(DEFAULT_ACCOUNT_BALANCE));
         accountTypeSpinner.setSelection(DEFAULT_ACCOUNT_TYPE - 1);
-        setSelectedCurrencyId(DEFAULT_CURRENCY_ID);
+        // Валюта будет установлена после загрузки валют в setupSpinners()
     }
 
     /** 
@@ -212,8 +221,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
          // Устанавливаем статус закрытия
          accountClosedCheckbox.setChecked(currentAccount.getClosed() == 1);
          
-         // Устанавливаем валюту (будет установлена после загрузки валют)
-         setSelectedCurrencyId(currentAccount.getCurrencyId());
+         // Валюта будет установлена после загрузки валют в setupSpinners()
     }
     
     /**

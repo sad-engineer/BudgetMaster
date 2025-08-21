@@ -103,7 +103,7 @@ public interface AccountDao {
      * @return список счетов с указанным типом, отсортированных по позиции (счета с позицией 0 в конце)
      */
     @Query("SELECT * FROM accounts WHERE type = :type ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Account>> getAllByType(String type);
+    LiveData<List<Account>> getAllByType(int type);
 
     /**
      * Получает все активные счета по типу (включая удаленные)
@@ -111,7 +111,7 @@ public interface AccountDao {
      * @return список счетов с указанным типом
      */
     @Query("SELECT * FROM accounts WHERE type = :type AND deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Account>> getAllActiveByType(String type);
+    LiveData<List<Account>> getAllActiveByType(int type);
 
     /**
      * Получает все удаленные счета по типу
@@ -119,7 +119,7 @@ public interface AccountDao {
      * @return список счетов с указанным типом
      */
     @Query("SELECT * FROM accounts WHERE type = :type AND deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Account>> getAllDeletedByType(String type);
+    LiveData<List<Account>> getAllDeletedByType(int type);
     
     /**
      * Получает счет по ID (включая удаленные)
