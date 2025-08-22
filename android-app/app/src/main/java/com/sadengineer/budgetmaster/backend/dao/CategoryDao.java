@@ -11,6 +11,18 @@ import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Category;
 
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TABLE_CATEGORIES;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ENTITY_FILTER_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ACTIVE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.DELETED_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ID_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TITLE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TYPE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.PARENT_ID_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION_0_END;
+
 import java.util.List;
 
 /**
@@ -19,25 +31,12 @@ import java.util.List;
 @Dao
 public interface CategoryDao {
     /**
-     * Количество активных категорий
-     * @return количество активных категорий
+     * Общее количество категорий по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return общее количество категорий по фильтру
      */
-    @Query("SELECT COUNT(*) FROM categories WHERE deleteTime IS NULL")
-    int countActive();
-
-    /**
-     * Количество удаленных категорий
-     * @return количество удаленных категорий
-     */
-    @Query("SELECT COUNT(*) FROM categories WHERE deleteTime IS NOT NULL")
-    int countDeleted();
-
-    /**
-     * Общее количество категорий (включая удаленные)
-     * @return общее количество категорий
-     */
-    @Query("SELECT COUNT(*) FROM categories")
-    int count();
+    @Query("SELECT COUNT(*) FROM " + TABLE_CATEGORIES + " WHERE " + ENTITY_FILTER_CONDITION)
+    int count(EntityFilter filter);
 
     /**
      * Удаляет категорию из базы данных
@@ -49,115 +48,57 @@ public interface CategoryDao {
     /**
      * Удаляет все категории из базы данных
      */
-    @Query("DELETE FROM categories")
+    @Query("DELETE FROM " + TABLE_CATEGORIES)
     void deleteAll();
     
     /**
-     * Получает все категории, включая удаленные
+     * Получает все категории по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список категорий, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Category>> getAll();
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    LiveData<List<Category>> getAll(EntityFilter filter);
 
     /**
      * Получает все категории синхронно, включая удаленные
      * @return список категорий, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    @Query("SELECT * FROM " + TABLE + " ORDER BY " + SORT_CONDITION_0_END)
     List<Category> getAllSync();
 
     /**
-     * Получает все активные категории
-     * @return список активных категорий, отсортированных по позиции
-     */
-    @Query("SELECT * FROM categories WHERE deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllActive();
-
-    /**
-     * Получает все удаленные категории
-     * @return список удаленных категорий, отсортированных по позиции
-     */
-    @Query("SELECT * FROM categories WHERE deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllDeleted();
-
-    /**
-     * Получает все категории по типу операции (включая удаленные)
+     * Получает все категории по типу операции по фильтру
      * @param operationType тип операции
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories WHERE operationType = :operationType ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Category>> getAllByOperationType(int operationType);
+    @Query("SELECT * FROM " + TABLE + " WHERE " + TYPE_CONDITION + " ORDER BY " + SORT_CONDITION_0_END)
+    LiveData<List<Category>> getAllByOperationType(int operationType, EntityFilter filter);
 
     /**
-     * Получает все активные категории по типу операции
-     * @param operationType тип операции
-     * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE operationType = :operationType AND deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllActiveByOperationType(int operationType);
-
-    /**
-     * Получает все удаленные категории по типу операции
-     * @param operationType тип операции
-     * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE operationType = :operationType AND deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllDeletedByOperationType(int operationType);
-
-    /**
-     * Получает все категории по ID родителя (включая удаленные)
+     * Получает все категории по ID родителя по фильтру
      * @param parentId ID родителя
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories WHERE parentId = :parentId ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Category>> getAllByParentId(int parentId);
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + PARENT_ID_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    LiveData<List<Category>> getAllByParentId(int parentId, EntityFilter filter);
 
     /**
-     * Получает все активные категории по ID родителя
-     * @param parentId ID родителя
-     * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllActiveByParentId(int parentId);
-
-    /**
-     * Получает все удаленные категории по ID родителя
-     * @param parentId ID родителя
-     * @return список категорий с указанным ID родителя, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE parentId = :parentId AND deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllDeletedByParentId(int parentId);
-
-    /**
-     * Получает все категории по типу (включая удаленные)
+     * Получает все категории по типу по фильтру
      * @param type тип категории
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories WHERE type = :type ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Category>> getAllByType(String type);
-
-    /**
-     * Получает все активные категории по типу
-     * @param type тип категории
-     * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE type = :type AND deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllActiveByType(String type);
-
-    /**
-     * Получает все удаленные категории по типу
-     * @param type тип категории
-     * @return список категорий с указанным типом, отсортированных по позиции (категории с позицией 0 в конце)
-     */
-    @Query("SELECT * FROM categories WHERE type = :type AND deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Category>> getAllDeletedByType(String type);
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + TYPE_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    LiveData<List<Category>> getAllByType(String type, EntityFilter filter);
 
     /**
      * Получает категорию по ID (включая удаленные)
      * @param id ID категории
      * @return категория с указанным ID
      */
-    @Query("SELECT * FROM categories WHERE id = :id")
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + ID_CONDITION)
     LiveData<Category> getById(int id);
         
     /**
@@ -165,7 +106,7 @@ public interface CategoryDao {
      * @param position позиция категории
      * @return категория с указанной позицией
      */
-    @Query("SELECT * FROM categories WHERE position = :position")
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + POSITION_CONDITION)
     LiveData<Category> getByPosition(int position);
     
     /**
@@ -173,14 +114,14 @@ public interface CategoryDao {
      * @param title название категории
      * @return категория с указанным названием
      */
-    @Query("SELECT * FROM categories WHERE title = :title")
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + TITLE_CONDITION)
     LiveData<Category> getByTitle(String title);
 
     /**
      * Получает максимальную позицию среди категорий
      * @return максимальная позиция или null, если категорий нет
      */
-    @Query("SELECT MAX(position) FROM categories")
+    @Query("SELECT MAX(position) FROM " + TABLE_CATEGORIES)
     Integer getMaxPosition();
 
     /**
@@ -196,21 +137,21 @@ public interface CategoryDao {
      * @param searchQuery подстрока для поиска
      * @return список категорий, содержащих подстроку в названии
      */
-    @Query("SELECT * FROM categories WHERE title LIKE '%' || :searchQuery || '%' ORDER BY position ASC")
+    @Query("SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + TITLE_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION)
     LiveData<List<Category>> searchByTitle(String searchQuery);
     
     /**
      * Сдвигает позиции счетов вниз начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE categories SET position = position - 1 WHERE position > :fromPosition")
+    @Query("UPDATE " + TABLE_CATEGORIES + " SET position = position - 1 WHERE position > :fromPosition")
     void shiftPositionsDown(int fromPosition);
 
     /**
      * Сдвигает позиции категорий вверх начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE categories SET position = position + 1 WHERE position >= :fromPosition")
+    @Query("UPDATE " + TABLE_CATEGORIES + " SET position = position + 1 WHERE position >= :fromPosition")
     void shiftPositionsUp(int fromPosition);
 
     /**
@@ -228,14 +169,14 @@ public interface CategoryDao {
      */
     @Query("WITH RECURSIVE descendants AS (" +
            "  SELECT * " +
-           "  FROM categories " +
+           "  FROM " + TABLE_CATEGORIES + 
            "  WHERE parentId = :categoryId " +
            "  UNION ALL " +
            "  SELECT c.* " +
-           "  FROM categories c " +
+           "  FROM " + TABLE_CATEGORIES + " c " +
            "  INNER JOIN descendants d ON c.parentId = d.id" +
            ") " +
-           "SELECT * FROM descendants ORDER BY position ASC")
+           "SELECT * FROM descendants ORDER BY " + POSITION_SORT_CONDITION)
     LiveData<List<Category>> getAllDescendants(int categoryId);
     
     /**
@@ -245,15 +186,15 @@ public interface CategoryDao {
      */
     @Query("WITH RECURSIVE descendants AS (" +
            "  SELECT * " +
-           "  FROM categories " +
+           "  FROM " + TABLE_CATEGORIES + 
            "  WHERE parentId = :categoryId AND deleteTime IS NULL " +
            "  UNION ALL " +
            "  SELECT c.* " +
-           "  FROM categories c " +
+           "  FROM " + TABLE_CATEGORIES + " c " +
            "  INNER JOIN descendants d ON c.parentId = d.id " +
            "  WHERE c.deleteTime IS NULL" +
            ") " +
-           "SELECT * FROM descendants ORDER BY position ASC")
+           "SELECT * FROM descendants ORDER BY " + POSITION_SORT_CONDITION)
     LiveData<List<Category>> getAllActiveDescendants(int categoryId);
     
     /**
@@ -263,14 +204,14 @@ public interface CategoryDao {
      */
     @Query("WITH RECURSIVE descendants AS (" +
            "  SELECT * " +
-           "  FROM categories " +
+           "  FROM " + TABLE_CATEGORIES + 
            "  WHERE parentId = :categoryId AND deleteTime IS NOT NULL " +
            "  UNION ALL " +
            "  SELECT c.* " +
-           "  FROM categories c " +
+           "  FROM " + TABLE_CATEGORIES + " c " +
            "  INNER JOIN descendants d ON c.parentId = d.id " +
-           "  WHERE c.deleteTime IS NOT NULL" +
+           "  WHERE c.deleteTime IS NOT NULL " +
            ") " +
-           "SELECT * FROM descendants ORDER BY position ASC")
+           "SELECT * FROM descendants ORDER BY " + POSITION_SORT_CONDITION)
     LiveData<List<Category>> getAllDeletedDescendants(int categoryId);
 } 

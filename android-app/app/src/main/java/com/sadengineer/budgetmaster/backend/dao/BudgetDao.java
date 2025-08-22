@@ -6,14 +6,23 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Transaction;
 import androidx.room.Update;
 
+import com.sadengineer.budgetmaster.backend.constants.SqlConstants;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
-import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
 
-import java.time.LocalDateTime;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TABLE_BUDGETS;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ENTITY_FILTER_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ACTIVE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.DELETED_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ID_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TITLE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TYPE_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.PARENT_ID_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION;
+import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION_0_END; 
+
 import java.util.List;
 
 /**
@@ -22,26 +31,13 @@ import java.util.List;
 @Dao
 public interface BudgetDao {
 
-      /**
-     * Количество активных бюджетов
-     * @return количество активных бюджетов
-     */
-    @Query("SELECT COUNT(*) FROM budgets WHERE deleteTime IS NULL")
-    int countActive();
-
     /**
-     * Количество удаленных бюджетов
-     * @return количество удаленных бюджетов
+     * Общее количество бюджетов по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return общее количество бюджетов по фильтру
      */
-    @Query("SELECT COUNT(*) FROM budgets WHERE deleteTime IS NOT NULL")
-    int countDeleted();
-
-    /**
-     * Общее количество бюджетов (включая удаленные)
-     * @return общее количество бюджетов
-     */
-    @Query("SELECT COUNT(*) FROM budgets")
-    int count();
+    @Query("SELECT COUNT(*) FROM " + TABLE_BUDGETS + " WHERE " + ENTITY_FILTER_CONDITION)
+    int count(EntityFilter filter);
 
     /**
      * Удаляет бюджет из базы данных
@@ -53,80 +49,44 @@ public interface BudgetDao {
     /**
      * Удаляет все бюджеты из базы данных
      */
-    @Query("DELETE FROM budgets")
+    @Query("DELETE FROM " + TABLE_BUDGETS)
     void deleteAll();
     
     /**
-     * Получает все бюджеты, включая удаленные
+     * Получает все бюджеты по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список бюджетов, отсортированных по позиции (бюджеты с позицией 0 в конце)
      */
-    @Query("SELECT * FROM budgets ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Budget>> getAll();
+    @Query("SELECT * FROM " + TABLE_BUDGETS + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    LiveData<List<Budget>> getAll(EntityFilter filter);
 
     /**
-     * Получает все активные бюджеты
-     * @return список активных счетов, отсортированных по позиции
-     */
-    @Query("SELECT * FROM budgets WHERE deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Budget>> getAllActive();
-
-    /**
-     * Получает все активные бюджеты по типу операций категорий
+     * Получает все бюджеты по типу операций категорий и по фильтру
+     * @param operationType тип операции
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список активных бюджетов для расходов, отсортированных по позиции
      */
-    @Query("SELECT b.* FROM budgets b " +
-           "INNER JOIN categories c ON b.categoryId = c.id " +
+    @Query("SELECT b.* FROM " + TABLE_BUDGETS + " b " +
+           "INNER JOIN " + TABLE_CATEGORIES + " c ON b.categoryId = c.id " +
            "WHERE b.deleteTime IS NULL AND c.deleteTime IS NULL AND c.operationType = :operationType " +
-           "ORDER BY b.position ASC")
-    LiveData<List<Budget>> getAllActiveByOperationType(int operationType);
+           "ORDER BY b." + POSITION_SORT_CONDITION)
+    LiveData<List<Budget>> getAllByOperationType(int operationType, EntityFilter filter);
 
     /**
-     * Получает все удаленные бюджеты
-     * @return список удаленных бюджетов, отсортированных по позиции
-     */
-    @Query("SELECT * FROM budgets WHERE deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Budget>> getAllDeleted();
-
-    /**
-     * Получает все удаленные бюджеты по типу операций категорий
-     * @return список удаленных бюджетов для расходов, отсортированных по позиции
-     */
-    @Query("SELECT b.* FROM budgets b " +
-           "INNER JOIN categories c ON b.categoryId = c.id " +
-           "WHERE b.deleteTime IS NOT NULL AND c.deleteTime IS NULL AND c.operationType = :operationType " +
-           "ORDER BY b.position ASC")
-    LiveData<List<Budget>> getAllDeletedByOperationType(int operationType);
-
-    /**
-     * Получает все бюджеты по ID валюты (включая удаленные)
+     * Получает все бюджеты по ID валюты и по фильтру
      * @param currencyId ID валюты
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список бюджетов с указанным ID валюты, отсортированных по позиции (бюджеты с позицией 0 в конце)
      */
-    @Query("SELECT * FROM budgets WHERE currencyId = :currencyId ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
-    LiveData<List<Budget>> getAllByCurrency(int currencyId);
-    
-    /**
-     * Получает все активные бюджеты по ID валюты (включая удаленные)
-     * @param currencyId ID валюты
-     * @return список бюджетов с указанным ID валюты
-     */
-    @Query("SELECT * FROM budgets WHERE currencyId = :currencyId AND deleteTime IS NULL ORDER BY position ASC")
-    LiveData<List<Budget>> getAllActiveByCurrency(int currencyId);
-
-    /**
-     * Получает все удаленные бюджеты по ID валюты
-     * @param currencyId ID валюты
-     * @return список удаленных бюджетов с указанным ID валюты
-     */
-    @Query("SELECT * FROM budgets WHERE currencyId = :currencyId AND deleteTime IS NOT NULL ORDER BY position ASC")
-    LiveData<List<Budget>> getAllDeletedByCurrency(int currencyId);
+    @Query("SELECT * FROM " + TABLE_BUDGETS + " WHERE " + CURRENCY_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    LiveData<List<Budget>> getAllByCurrency(int currencyId, EntityFilter filter);
 
     /**
      * Получает бюджет по ID категории (включая удаленные)
      * @param categoryId ID категории
      * @return бюджет с указанным ID категории
      */
-    @Query("SELECT * FROM budgets WHERE categoryId = :categoryId")
+    @Query("SELECT * FROM " + TABLE_BUDGETS + " WHERE " + CATEGORY_CONDITION)
     LiveData<Budget> getByCategory(int categoryId);
     
     /**
@@ -134,7 +94,7 @@ public interface BudgetDao {
      * @param id ID бюджета
      * @return бюджет с указанным ID
      */
-    @Query("SELECT * FROM budgets WHERE id = :id")
+    @Query("SELECT * FROM " + TABLE_BUDGETS + " WHERE " + ID_CONDITION)
     LiveData<Budget> getById(int id);
         
     /**
@@ -142,14 +102,14 @@ public interface BudgetDao {
      * @param position позиция бюджета
      * @return бюджет с указанной позицией
      */
-    @Query("SELECT * FROM budgets WHERE position = :position")
+    @Query("SELECT * FROM " + TABLE_BUDGETS + " WHERE " + POSITION_CONDITION)
     LiveData<Budget> getByPosition(int position);
 
     /**
      * Получает максимальную позицию среди бюджетов
      * @return максимальная позиция или 0, если бюджетов нет
      */
-    @Query("SELECT COALESCE(MAX(position), 0) FROM budgets")
+    @Query("SELECT COALESCE(MAX(position), 0) FROM " + TABLE_BUDGETS)
     int getMaxPosition();
 
     /**
@@ -164,14 +124,14 @@ public interface BudgetDao {
      * Сдвигает позиции бюджетов вниз начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE budgets SET position = position - 1 WHERE position > :fromPosition")
+    @Query("UPDATE " + TABLE_BUDGETS + " SET position = position - 1 WHERE position > :fromPosition")
     void shiftPositionsDown(int fromPosition);
 
     /**
      * Сдвигает позиции бюджетов вверх начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE budgets SET position = position + 1 WHERE position >= :fromPosition")
+    @Query("UPDATE " + TABLE_BUDGETS + " SET position = position + 1 WHERE position >= :fromPosition")
     void shiftPositionsUp(int fromPosition);
 
     /**
