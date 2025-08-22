@@ -63,18 +63,18 @@ public class BudgetValidator {
         CommonValidator.validatePosition(budget.getPosition());
     }
     
-     /**
+    /**
      * Валидирует сумму бюджета
-     * @param amount сумма для валидации
-     * @throws IllegalArgumentException если сумма некорректная
+     * @param amount - сумма бюджета для валидации
+     * @throws IllegalArgumentException если сумма невалидна
      */
-    public static void validateBudgetAmount(int amount) {
+    public static void validateBudgetAmount(double amount) {
         if (Double.isNaN(amount)) {
             throw new IllegalArgumentException("Сумма бюджета не может быть NaN");
         }
         
         if (Double.isInfinite(amount)) {
-            throw new IllegalArgumentException("Сумма бюджета не может быть бесконечной");
+            throw new IllegalArgumentException("Сумма бюджета не может быть бесконечным");
         }
         
         // Можно добавить дополнительные проверки, например максимальный баланс
@@ -82,7 +82,6 @@ public class BudgetValidator {
             throw new IllegalArgumentException("Сумма бюджета не может превышать 999,999,999.99");
         }
     }
-
 
 
 } 

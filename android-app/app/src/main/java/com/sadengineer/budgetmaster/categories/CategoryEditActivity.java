@@ -20,10 +20,10 @@ import android.util.TypedValue;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
-
 
 
 /**
@@ -43,7 +43,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     private ImageButton backButton;
     private ImageButton menuButton;
     private CategoryService categoryService;
-    
+    private CategoryValidator validator = new CategoryValidator();
     // Поля для хранения данных категории
     private Category currentCategory;
     private boolean isEditMode = false;
@@ -237,11 +237,14 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      */
     private boolean saveCategory() {
         String title = categoryNameEdit.getText().toString().trim();
-        
-        if (TextUtils.isEmpty(title)) {
-            categoryNameEdit.setError("Название категории не может быть пустым");
+
+        try {
+            validator.validateTitle(title);
+        } catch (IllegalArgumentException e) {
+            categoryNameEdit.setError(e.getMessage());
+            categoryNameEdit.requestFocus();
             return false;
-        }
+        }       
         
         try {
             if (isEditMode) {

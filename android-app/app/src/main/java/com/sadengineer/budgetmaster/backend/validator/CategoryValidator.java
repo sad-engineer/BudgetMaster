@@ -11,6 +11,12 @@ import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
  */
 public class CategoryValidator {
     
+    // Минимальная длина названия категории
+    private static final int MIN_TITLE_LENGTH = 1;
+    
+    // Максимальная длина названия категории
+    private static final int MAX_TITLE_LENGTH = 200;
+    
     /**
      * Валидирует категорию
      * @param category категория для валидации
@@ -64,5 +70,35 @@ public class CategoryValidator {
         CommonValidator.validateCategoryType(category.getOperationType());
         CommonValidator.validateParentId(category.getParentId());
         CommonValidator.validateNotSelfParent(category.getId(), category.getParentId());
+    }
+
+    /**
+     * Валидирует название категории
+     * @param title - название категории для валидации
+     * @throws IllegalArgumentException если название невалидно
+     */
+    public static void validateTitle(String title) {
+        if (title == null) {
+            throw new IllegalArgumentException("Название категории не может быть пустым");
+        }
+        
+        String trimmedTitle = title.trim();
+        
+        if (trimmedTitle.isEmpty()) {
+            throw new IllegalArgumentException("Название категории не может быть пустым");
+        }
+        
+        if (trimmedTitle.length() < MIN_TITLE_LENGTH) {
+            throw new IllegalArgumentException("Название категории должно содержать минимум " + MIN_TITLE_LENGTH + " символ");
+        }
+        
+        if (trimmedTitle.length() > MAX_TITLE_LENGTH) {
+            throw new IllegalArgumentException("Название категории не может быть длиннее " + MAX_TITLE_LENGTH + " символов");
+        }
+        
+        // Проверяем на специальные символы
+        if (!trimmedTitle.matches("^[a-zA-Zа-яА-Я0-9\\s\\-_\\.]+$")) {
+            throw new IllegalArgumentException("Название категории содержит недопустимые символы");
+        }
     }
 } 

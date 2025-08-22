@@ -133,6 +133,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     
     /**
      * Сохраняет валюту в базу данных
+     * @return true если сохранение прошло успешно, false если была ошибка валидации
      */
     private boolean saveCurrency() {
         String currencyName = currencyNameEdit.getText().toString().trim();
@@ -143,7 +144,8 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             CurrencyValidator.validateTitle(currencyName);
         } catch (IllegalArgumentException e) {
             // при ошибке выделять поле ввода красной рамкой
-            currencyNameEdit.setError("Не верное название валюты: \n" + e.getMessage());
+            Log.e(TAG, "Ошибка валидации названия валюты: " + e.getMessage(), e);
+            currencyNameEdit.setError(e.getMessage());
             currencyNameEdit.requestFocus();
             return false;
         }
@@ -153,7 +155,8 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             CurrencyValidator.validateShortName(currencyShortName);
         } catch (IllegalArgumentException e) {
             // при ошибке выделять поле ввода красной рамкой
-            currencyShortNameEdit.setError("Не верное короткое имя валюты: \n" + e.getMessage());
+            Log.e(TAG, "Ошибка валидации короткого имени валюты: " + e.getMessage(), e);
+            currencyShortNameEdit.setError(e.getMessage());
             currencyShortNameEdit.requestFocus();
             return false;
         }

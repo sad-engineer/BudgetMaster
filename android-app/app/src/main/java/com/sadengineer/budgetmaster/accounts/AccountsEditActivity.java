@@ -271,8 +271,9 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     
     /**
      * Сохраняет данные из полей окна в счет и сохраняет его в базу данных
+     * @return true если сохранение прошло успешно, false если была ошибка валидации
      */
-    private void saveAccount() {
+    private boolean saveAccount() {
         int balance = DEFAULT_ACCOUNT_BALANCE;
 
         // Валидация названия счета
@@ -283,7 +284,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
             Log.e(TAG, "Ошибка валидации названия счета: " + e.getMessage(), e);
             accountNameEdit.setError(e.getMessage());
             accountNameEdit.requestFocus();
-            return;
+            return false;
         }
 
         // Валидация баланса
@@ -299,7 +300,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                 // Показываем ошибку в поле ввода
                 accountBalanceEdit.setError("Неверный формат суммы. Используйте числа и запятую или точку (например: 1500,50)");
                 accountBalanceEdit.requestFocus();
-                return; // Прерываем сохранение
+                return false; // Прерываем сохранение
             }
         }
 
@@ -311,7 +312,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
             Log.e(TAG, "Ошибка валидации типа счета: " + e.getMessage(), e);
             ((TextView) accountTypeSpinner.getSelectedView()).setError(e.getMessage());
             ((TextView) accountTypeSpinner.getSelectedView()).requestFocus();
-            return;
+            return false;
         }
 
         // Получаем статус закрытия
@@ -325,7 +326,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
             Log.e(TAG, "Ошибка валидации ID валюты: " + e.getMessage(), e);
             ((TextView) accountCurrencySpinner.getSelectedView()).setError(e.getMessage());
             ((TextView) accountCurrencySpinner.getSelectedView()).requestFocus();
-            return;
+            return false;
         }
 
         // Создаем счет
@@ -354,7 +355,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                 Account existingAccount = accountService.getByTitle(accountName).getValue();
                 if (existingAccount != null) {
                     Log.i(TAG, "Создание нового счета: " + accountName + " отменено: счёт уже существует");
-                    return;
+                    return false;
                 }
                 // Если счет не существует, то создаем его
                 accountService.create(accountName, selectedCurrencyID, balance, accountType, isClosed);
@@ -362,8 +363,10 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
             }
             // Возвращаемся к списку счетов
             returnToAccounts();
+            return true;
         } catch (Exception e) {
             Log.e(TAG, "Критическая ошибка при сохранении счета: " + e.getMessage(), e);
+            return false;
         }
     }
 
@@ -371,9 +374,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     @Override
     protected boolean validateAndSave() {
         // Выполняем сохранение существующей логикой
-        saveAccount();
-        // Если дошли сюда, считаем, что сохранение прошло (ошибки обработаны внутри saveAccount())
-        return true;
+        return saveAccount();
     }
     
     /**

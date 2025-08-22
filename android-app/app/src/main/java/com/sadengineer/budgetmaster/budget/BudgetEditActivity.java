@@ -16,6 +16,9 @@ import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,7 +33,8 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     /** Имя пользователя по умолчанию */
     /** TODO: передлать на получение имени пользователя из SharedPreferences */
     private String userName = "default_user";
-
+    
+    // View элементы
     private EditText budgetAmountEdit;
     private Spinner budgetCategorySpinner;
     private Spinner budgetCurrencySpinner;
@@ -38,13 +42,20 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
+
+    // Сервисы для работы с данными
     private BudgetService budgetService;
     private CurrencyService currencyService;
+    private BudgetValidator validator = new BudgetValidator();
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     
     // Поля для хранения данных бюджета
     private Budget currentBudget;
     private boolean isEditMode = false;
     private List<Currency> currencies = new ArrayList<>();
+
+    // Константы
+    private static final int DEFAULT_BUDGET_AMOUNT = ModelConstants.DEFAULT_BUDGET_AMOUNT;
     
     /**
      * Метод вызывается при создании Activity
@@ -172,10 +183,9 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                       ", сумма в копейках=" + currentBudget.getAmount());
             
             // Конвертируем копейки в рубли для отображения
-            double amountInRubles = currentBudget.getAmount() / 100.0;
-            budgetAmountEdit.setText(String.valueOf(amountInRubles));
-            
-            Log.d(TAG, "fillBudgetData: установлена сумма в рублях=" + amountInRubles);
+            double amount = currentBudget.getAmount() / 100.0;
+            budgetAmountEdit.setText(formatter.format(amount));
+            Log.d(TAG, "fillBudgetData: установлена сумма в рублях=" + amount);
             
             // В режиме редактирования категория не изменяется, только отображаем её ID
             Log.d(TAG, "fillBudgetData: категория бюджета ID=" + currentBudget.getCategoryId() + " (не изменяется)");
@@ -217,32 +227,33 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private boolean saveBudget() {
         Log.d(TAG, "Сохранение бюджета...");
+        int balance = DEFAULT_BUDGET_AMOUNT;    
         
         // Получаем данные из полей
         String amountText = budgetAmountEdit.getText().toString().trim();
-        int currencyPosition = budgetCurrencySpinner.getSelectedItemPosition();
-        
-        // Валидация
-        if (TextUtils.isEmpty(amountText)) {
-            budgetAmountEdit.setError("Введите сумму бюджета");
+        try {
+            // Конвертируем рубли в копейки
+            double amount = formatter.parseSafe(amountText);
+            validator.validateBudgetAmount(amount);
+            balance = (int) (amount * 100);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ошибка валидации суммы бюджета: " + e.getMessage(), e);
+            budgetAmountEdit.setError(e.getMessage());
+            budgetAmountEdit.requestFocus();
             return false;
         }
-        
+
+        int currencyPosition = budgetCurrencySpinner.getSelectedItemPosition();
         if (currencyPosition == -1 || currencyPosition >= currencies.size()) {
             Log.e(TAG, "Не выбрана валюта");
             return false;
         }
         
         try {
-            // Конвертируем рубли в копейки
-            double amountInRubles = Double.parseDouble(amountText);
-            int amountInKopecks = (int) (amountInRubles * 100);
-            
             Currency selectedCurrency = currencies.get(currencyPosition);
-            
             if (isEditMode) {
                 // Обновляем существующий бюджет (категория не изменяется)
-                return updateBudget(amountInKopecks, currentBudget.getCategoryId(), selectedCurrency.getId());
+                return updateBudget(balance, currentBudget.getCategoryId(), selectedCurrency.getId());
             } else {
                 // Создаем новый бюджет (этот код не должен выполняться)
                 Log.e(TAG, "Попытка создания бюджета в режиме редактирования");
