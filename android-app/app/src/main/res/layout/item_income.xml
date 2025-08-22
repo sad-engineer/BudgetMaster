@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/income_item_background"
+    android:layout_margin="4dp">
+
+    <!-- Основной контент -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Дата -->
+        <TextView
+            android:id="@+id/income_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="01.01.2024"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            android:textColor="@color/income_item_id_text"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Вертикальный контейнер: категория + комментарий -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Категория -->
+            <TextView
+                android:id="@+id/income_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Категория"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/income_item_text" />
+
+            <!-- Комментарий -->
+            <TextView
+                android:id="@+id/income_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Комментарий"
+                android:textSize="14sp"
+                android:textStyle="normal"
+                android:textColor="@color/income_item_id_text"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <!-- Сумма -->
+        <TextView
+            android:id="@+id/income_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.00"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/income_item_text"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Короткое имя валюты -->
+        <TextView
+            android:id="@+id/income_currency_short"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="₽"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textColor="@color/income_item_id_text" />
+
+    </LinearLayout>
+
+    <!-- Чекбокс поверх контента -->
+    <CheckBox
+        android:id="@+id/income_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="16dp"
+        android:visibility="gone" />
+        
+    <!-- Иконка чекбокса поверх контента -->
+    <ImageView
+        android:id="@+id/income_checkbox_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_checkbox_unchecked"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground" />
+
+</FrameLayout>

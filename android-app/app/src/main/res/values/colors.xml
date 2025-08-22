@@ -70,6 +70,9 @@
     <color name="income_tab_indicator">@color/white</color>
     <color name="income_tab_text_selected">@color/white</color>
     <color name="income_tab_text_normal">@color/white</color>
+    <color name="income_item_background">@color/white</color>
+    <color name="income_item_text">@color/black</color>
+    <color name="income_item_id_text">@color/gray</color>
 
     <!-- Цвета для экрана расходов -->
     <color name="expense_toolbar_background">@color/black</color>
@@ -80,6 +83,9 @@
     <color name="expense_tab_indicator">@color/white</color>
     <color name="expense_tab_text_selected">@color/white</color>
     <color name="expense_tab_text_normal">@color/white</color>
+    <color name="expense_item_background">@color/white</color>
+    <color name="expense_item_text">@color/black</color>
+    <color name="expense_item_id_text">@color/gray</color>
 
     <!-- Цвета для экрана валют -->
     <color name="currencies_toolbar_background">@color/black</color>

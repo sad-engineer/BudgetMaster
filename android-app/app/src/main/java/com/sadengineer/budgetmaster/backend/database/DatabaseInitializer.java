@@ -47,6 +47,9 @@ public class DatabaseInitializer {
         // Инициализируем бюджеты
         initializeDefaultBudgets(database);
         
+        // TODO: Инициализируем тестовые операции (удалить в продакшене)
+        initializeTestOperations(database);
+        
         Log.d(TAG, "initializeDefaultData: Инициализация завершена");
     }
     
@@ -286,16 +289,114 @@ public class DatabaseInitializer {
     }
     
     /**
+     * TODO: Инициализирует тестовые операции (удалить в продакшене)
+     */
+    private static void initializeTestOperations(BudgetMasterDatabase database) {
+        Log.d(TAG, "initializeTestOperations: Начинаем инициализацию тестовых операций");
+        
+        // Проверяем, есть ли уже операции
+        int operationCount = database.operationDao().getOperationsCount();
+        if (operationCount > 0) {
+            Log.d(TAG, "initializeTestOperations: Операции уже существуют, пропускаем");
+            return;
+        }
+        
+        // Создаем тестовые операции доходов
+        Operation[] incomeOperations = {
+            createOperation("Зарплата за январь", 5000000, 1, 3, "income", 1, LocalDateTime.now().minusDays(5)), // 50,000 руб
+            createOperation("Подработка", 1500000, 1, 4, "income", 1, LocalDateTime.now().minusDays(3)), // 15,000 руб
+            createOperation("Подарок на день рождения", 500000, 1, 5, "income", 1, LocalDateTime.now().minusDays(1)) // 5,000 руб
+        };
+        
+        for (Operation operation : incomeOperations) {
+            database.operationDao().insertOperation(operation);
+            Log.d(TAG, "initializeTestOperations: Добавлена операция дохода: " + operation.getDescription());
+        }
+        
+        // Создаем тестовые операции расходов
+        Operation[] expenseOperations = {
+            createOperation("Оплата коммунальных услуг", 800000, 1, 8, "expense", 1, LocalDateTime.now().minusDays(10)), // 8,000 руб
+            createOperation("Покупка продуктов", 2500000, 1, 9, "expense", 1, LocalDateTime.now().minusDays(7)), // 25,000 руб
+            createOperation("Проезд на метро", 50000, 1, 10, "expense", 1, LocalDateTime.now().minusDays(6)), // 500 руб
+            createOperation("Визит к врачу", 1500000, 1, 11, "expense", 1, LocalDateTime.now().minusDays(4)), // 15,000 руб
+            createOperation("Покупка одежды", 3000000, 1, 12, "expense", 1, LocalDateTime.now().minusDays(2)), // 30,000 руб
+            createOperation("Оплата налогов", 1000000, 1, 13, "expense", 1, LocalDateTime.now().minusDays(1)), // 10,000 руб
+            createOperation("Покупка бытовой техники", 1200000, 1, 14, "expense", 1, LocalDateTime.now()), // 12,000 руб
+            createOperation("Поход в кино", 800000, 1, 15, "expense", 1, LocalDateTime.now()), // 8,000 руб
+            createOperation("Ужин в ресторане", 2500000, 1, 16, "expense", 1, LocalDateTime.now()) // 25,000 руб
+        };
+        
+        for (Operation operation : expenseOperations) {
+            database.operationDao().insertOperation(operation);
+            Log.d(TAG, "initializeTestOperations: Добавлена операция расхода: " + operation.getDescription());
+        }
+        
+        // Создаем тестовую операцию перевода
+        Operation transferOperation = createTransferOperation(
+            "Перевод на сберегательный счет", 
+            1000000, // 10,000 руб
+            1, // с какого счета (зарплатная карта)
+            2, // на какой счет (сберегательный)
+            1, // валюта
+            LocalDateTime.now().minusDays(1)
+        );
+        database.operationDao().insertOperation(transferOperation);
+        Log.d(TAG, "initializeTestOperations: Добавлена операция перевода: " + transferOperation.getDescription());
+        
+        Log.d(TAG, "initializeTestOperations: Инициализация тестовых операций завершена");
+    }
+    
+    /**
+     * Создает объект операции
+     */
+    private static Operation createOperation(String description, int amount, int accountId, int categoryId, 
+                                           String type, int currencyId, LocalDateTime operationDate) {
+        Operation operation = new Operation();
+        operation.setDescription(description);
+        operation.setAmount(amount);
+        operation.setAccountId(accountId);
+        operation.setCategoryId(categoryId);
+        operation.setType(type);
+        operation.setCurrencyId(currencyId);
+        operation.setOperationDate(operationDate);
+        operation.setCreateTime(LocalDateTime.now());
+        operation.setCreatedBy("initializer");
+        return operation;
+    }
+    
+    /**
+     * Создает объект операции перевода
+     */
+    private static Operation createTransferOperation(String description, int amount, int fromAccountId, 
+                                                   int toAccountId, int currencyId, LocalDateTime operationDate) {
+        Operation operation = new Operation();
+        operation.setDescription(description);
+        operation.setAmount(amount);
+        operation.setAccountId(fromAccountId);
+        operation.setCategoryId(1); // Используем первую категорию как заглушку
+        operation.setType("transfer");
+        operation.setCurrencyId(currencyId);
+        operation.setOperationDate(operationDate);
+        operation.setToAccountId(toAccountId);
+        operation.setToCurrencyId(currencyId);
+        operation.setToAmount(amount);
+        operation.setCreateTime(LocalDateTime.now());
+        operation.setCreatedBy("initializer");
+        return operation;
+    }
+    
+    /**
      * Очищает все данные из базы
      */
     public static void clearAllData(BudgetMasterDatabase database) {
         Log.d(TAG, "clearAllData: Начинаем очистку данных");
         
+        // Очищаем в правильном порядке (сначала зависимые таблицы)
         database.operationDao().deleteAll();
+        database.budgetDao().deleteAll();
         database.accountDao().deleteAll();
         database.categoryDao().deleteAll();
         database.currencyDao().deleteAll();
-        database.budgetDao().deleteAll();
         
         Log.d(TAG, "clearAllData: Очистка данных завершена");
     }

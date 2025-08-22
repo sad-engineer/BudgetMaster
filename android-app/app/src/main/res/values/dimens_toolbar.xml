@@ -31,6 +31,16 @@
     <dimen name="toolbar_text_budget_edit">21sp</dimen>
     <dimen name="toolbar_text_budget_add">@dimen/toolbar_text</dimen>
 
+    <!-- Размеры для доходов-->
+    <dimen name="toolbar_text_income">@dimen/toolbar_text</dimen>
+    <dimen name="toolbar_text_income_edit">21sp</dimen>
+    <dimen name="toolbar_text_income_add">@dimen/toolbar_text</dimen>
+    
+    <!-- Размеры для расходов-->
+    <dimen name="toolbar_text_expense">@dimen/toolbar_text</dimen>
+    <dimen name="toolbar_text_expense_edit">21sp</dimen>
+    <dimen name="toolbar_text_expense_add">@dimen/toolbar_text</dimen>
+
     
     
 

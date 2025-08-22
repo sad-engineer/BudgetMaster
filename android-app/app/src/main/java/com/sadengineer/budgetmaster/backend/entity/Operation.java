@@ -9,6 +9,7 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -30,7 +31,7 @@ import java.time.LocalDateTime;
                 @Index("categoryId")
         })
 @TypeConverters(DateTimeConverter.class)
-public class Operation {
+public class Operation implements Serializable {
     
     @PrimaryKey(autoGenerate = true)
     private int id;

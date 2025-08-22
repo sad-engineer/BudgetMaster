@@ -29,6 +29,8 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     private TextView idText;
     private TextView sumText;
     private TextView shortNameText;
+    private TextView dateText;
+    private TextView descriptionText;
     
     // Состояние
     private boolean isSelectionMode = false;
@@ -69,6 +71,8 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         idText = findIdText(itemView);
         sumText = findSumText(itemView);
         shortNameText = findShortNameText(itemView);
+        dateText = findDateText(itemView);
+        descriptionText = findDescriptionText(itemView);
         
         setupClickListeners();
     }
@@ -92,6 +96,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundCheckbox;
         }
         
+        foundCheckbox = itemView.findViewById(R.id.expense_checkbox);
+        if (foundCheckbox != null) {
+            return foundCheckbox;
+        }
+        
+        foundCheckbox = itemView.findViewById(R.id.income_checkbox);
+        if (foundCheckbox != null) {
+            return foundCheckbox;
+        }
+        
         return null;
     }
     
@@ -110,6 +124,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         }
         
         foundIcon = itemView.findViewById(R.id.category_checkbox_icon);
+        if (foundIcon != null) {
+            return foundIcon;
+        }
+        
+        foundIcon = itemView.findViewById(R.id.expense_checkbox_icon);
+        if (foundIcon != null) {
+            return foundIcon;
+        }
+        
+        foundIcon = itemView.findViewById(R.id.income_checkbox_icon);
         if (foundIcon != null) {
             return foundIcon;
         }
@@ -158,6 +182,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundText;
         }
         
+        foundText = itemView.findViewById(R.id.expense_category);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.income_category);
+        if (foundText != null) {
+            return foundText;
+        }
+        
         return null;
     }
     
@@ -192,6 +226,16 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             return foundText;
         }
         
+        foundText = itemView.findViewById(R.id.expense_amount);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.income_amount);
+        if (foundText != null) {
+            return foundText;
+        }
+        
         return null;
     }
     
@@ -200,6 +244,50 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      */
     private TextView findShortNameText(View itemView) {
         TextView foundText = itemView.findViewById(R.id.currency_short_name);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.expense_currency_short);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.income_currency_short);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Ищет TextView для даты
+     */
+    private TextView findDateText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.expense_date);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.income_date);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Ищет TextView для описания
+     */
+    private TextView findDescriptionText(View itemView) {
+        TextView foundText = itemView.findViewById(R.id.expense_description);
+        if (foundText != null) {
+            return foundText;
+        }
+        
+        foundText = itemView.findViewById(R.id.income_description);
         if (foundText != null) {
             return foundText;
         }
@@ -398,6 +486,80 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             if (titleText != null) {
                 titleText.setPadding(0, titleText.getPaddingTop(), 
                                    titleText.getPaddingRight(), titleText.getPaddingBottom());
+            }
+        }
+    }
+    
+    /**
+     * Привязывает данные операции (доход/расход)
+     */
+    public void bindOperation(int position, String category, String description, int id, int sum, String shortName, String date, boolean isSelectionMode, boolean isSelected) {
+        this.boundItemId = id;
+        this.isSelectionMode = isSelectionMode;
+        this.isSelected = isSelected;
+        
+        Log.d(TAG, "bindOperation() для операции " + id + " (позиция " + position + "): " + 
+            "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected);
+        
+        // Устанавливаем значения
+        if (titleText != null) {
+            titleText.setText(category);
+        }
+        if (descriptionText != null) {
+            descriptionText.setText(description);
+        }
+        if (dateText != null) {
+            dateText.setText(date);
+        }
+        if (sumText != null) {
+            double rubles = sum / 100.0;
+            String formattedSum = formatter.formatCompact(rubles);
+            sumText.setText(formattedSum);
+            Log.d(TAG, "Установлена сумма операции: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
+        }
+        if (shortNameText != null) {
+            shortNameText.setText(shortName != null ? shortName : "₽");
+        }
+        
+        // Полупрозрачность для элементов с позицией 0
+        if (position == 0) {
+            itemView.setAlpha(0.5f);
+        } else {
+            itemView.setAlpha(1.0f);
+        }
+        
+        // Настройка чекбокса и отступа текста
+        if (isSelectionMode) {
+            // Показываем иконку чекбокса и смещаем текст
+            if (checkboxIcon != null) {
+                checkboxIcon.setVisibility(View.VISIBLE);
+                checkboxIcon.setImageResource(isSelected ? 
+                    R.drawable.ic_checkbox_checked : R.drawable.ic_checkbox_unchecked);
+            } else {
+                // Fallback к стандартному чекбоксу
+                checkbox.setVisibility(View.VISIBLE);
+                checkbox.setChecked(isSelected);
+            }
+            
+            // Применяем отступ к дате
+            int padding = (int) (TEXT_PADDING_DP * itemView.getContext().getResources().getDisplayMetrics().density);
+            if (dateText != null) {
+                dateText.setPadding(padding, dateText.getPaddingTop(), 
+                                 dateText.getPaddingRight(), dateText.getPaddingBottom());
+            }
+        } else {
+            // Скрываем чекбокс и возвращаем текст
+            if (checkboxIcon != null) {
+                checkboxIcon.setVisibility(View.GONE);
+            } else {
+                checkbox.setVisibility(View.GONE);
+                checkbox.setChecked(false);
+            }
+            
+            // Сбрасываем отступы
+            if (dateText != null) {
+                dateText.setPadding(0, dateText.getPaddingTop(), 
+                                 dateText.getPaddingRight(), dateText.getPaddingBottom());
             }
         }
     }
