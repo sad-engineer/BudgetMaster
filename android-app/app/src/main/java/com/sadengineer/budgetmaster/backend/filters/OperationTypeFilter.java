@@ -1,23 +1,24 @@
-package com.sadengineer.budgetmaster.backend.entity;
+package com.sadengineer.budgetmaster.backend.filters;
 
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 /**
- * Фильтр типов операций бюджетов
+ * Фильтр типов операций
  */
 public enum OperationTypeFilter {
-    /**
-     * Только бюджеты для расходов (operation_type = 1)
-     */
-    EXPENSE(ModelConstants.OPERATION_TYPE_EXPENSE),
-    
-    /**
-     * Только  бюджеты для доходов (operation_type = 2)
-     */
-    INCOME(ModelConstants.OPERATION_TYPE_INCOME),
 
     /**
-     * Все бюджеты (для расходов и доходов)
+     * Только доходы
+     */
+    INCOME(ModelConstants.OPERATION_TYPE_INCOME),
+    
+    /**
+     * Только расходы
+     */
+    EXPENSE(ModelConstants.OPERATION_TYPE_EXPENSE),
+
+    /**
+     * Все типы операций
      */
     ALL(null);
 

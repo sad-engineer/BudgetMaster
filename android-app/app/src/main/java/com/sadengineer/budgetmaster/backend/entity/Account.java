@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -6,6 +5,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
+import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 /**
  * Entity класс для счетов
  */
-@Entity(tableName = "accounts")
+@Entity(tableName = RepositoryConstants.TABLE_ACCOUNTS)
 @TypeConverters(DateTimeConverter.class)
 public class Account implements Serializable {
     
@@ -23,7 +23,7 @@ public class Account implements Serializable {
     
     private String title; // Название счета
     private int position; // Позиция для сортировки
-    private int amount; // Сумма в копейках // Баланс счета
+    private long amount; // Сумма в копейках // Баланс счета
     private int type; // Тип счета (1=current, 2=savings, 3=credit)
     private int currencyId; // ID валюты
     private int closed; // Статус закрытия (0=open, 1=closed)
@@ -69,11 +69,11 @@ public class Account implements Serializable {
         this.position = position;
     }
     
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
     
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
     

@@ -1,15 +1,13 @@
-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -28,64 +26,32 @@ public class AccountRepository {
     }
 
     /**
-     * Получить все счета
-     * @param filter фильтр для выборки счетов
+     * Получить все счета по фильтру
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех счетов
      */
     public LiveData<List<Account>> getAll(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActive();
-            case DELETED:
-                return dao.getAllDeleted();
-            case ALL:
-            default:
-                return dao.getAll();
-        }
-    }
-    
-    /**
-     * Получить все счета
-     * @return LiveData со списком всех счетов
-     */
-    public LiveData<List<Account>> getAll() {
-        return dao.getAll();
-    }
-    
-    /**
-     * Получить все счета по ID валюты
-     * @param currencyId ID валюты
-     * @param filter фильтр для выборки счетов
-     * @return LiveData со списком всех счетов
-     */
-    public LiveData<List<Account>> getAllByCurrency (int currencyId, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByCurrency(currencyId);
-            case DELETED:
-                return dao.getAllDeletedByCurrency(currencyId);
-            case ALL:
-            default:
-                return dao.getAllByCurrency(currencyId);
-        }
+        return dao.getAll(filter);
     }
 
     /**
-     * Получить все счета по типу
-     * @param type тип счета
-     * @param filter фильтр для выборки счетов
+     * Получить все счета по ID валюты и по фильтру
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех счетов
      */
-    public LiveData<List<Account>> getAllByType(EntityFilter filter, int type) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByType(type);
-            case DELETED:
-                return dao.getAllDeletedByType(type);
-            case ALL:
-            default:
-                return dao.getAllByType(type);
-        }
+    public LiveData<List<Account>> getAllByCurrency (int currencyId, EntityFilter filter) {
+        return dao.getAllByCurrency(currencyId, filter);
+    }
+
+    /**
+     * Получить все счета по типу и по фильтру
+     * @param type тип счета
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return LiveData со списком всех счетов
+     */
+    public LiveData<List<Account>> getAllByType(int type, EntityFilter filter) {
+        return dao.getAllByType(type, filter);
     }
        
     /**
@@ -173,27 +139,11 @@ public class AccountRepository {
     }
     
     /**
-     * Получить количество счетов
-     * @param filter фильтр для выборки счетов
+     * Получить количество счетов по фильтру
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
      * @return количество счетов
      */
     public int getCount(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.countActive();
-            case DELETED:
-                return dao.countDeleted();
-            case ALL:
-            default:
-                return dao.count();
-        }
+        return dao.count(filter);
     }
-
-    /**
-     * Получить общее количество счетов (включая удаленные)
-     * @return общее количество счетов
-     */
-    public int getCount() {
-        return dao.count();
-    }
-} 
+}

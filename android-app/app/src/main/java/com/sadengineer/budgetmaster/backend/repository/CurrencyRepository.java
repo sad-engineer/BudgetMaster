@@ -1,15 +1,13 @@
-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.CurrencyDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +16,7 @@ import java.util.List;
  * Repository класс для работы с Currency Entity
  */
 public class CurrencyRepository {
-    private static final String TAG = "CurrencyRepository";
-    
+
     private final CurrencyDao dao;
     
     public CurrencyRepository(Context context) {
@@ -28,29 +25,13 @@ public class CurrencyRepository {
     }
     
     /**
-     * Получить все валюты
-     * @param filter фильтр для выборки валют
+     * Получить все валюты по фильтру
+     * @param filter фильтр для выборки валют (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех валют
      */
     public LiveData<List<Currency>> getAll(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActive();
-            case DELETED:
-                return dao.getAllDeleted();
-            case ALL:
-            default:
-                return dao.getAll();
-        }
+        return dao.getAll(filter);
     }
-    
-    /**
-     * Получить все валюты (включая удаленные)
-     * @return LiveData со списком всех валют
-     */
-    public LiveData<List<Currency>> getAll() {
-        return dao.getAll();
-    }   
     
     /**
      * Получить валюту по ID (включая удаленные)
@@ -160,23 +141,7 @@ public class CurrencyRepository {
      * @return количество валют
      */
     public int getCount(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.countActive();
-            case DELETED:
-                return dao.countDeleted();
-            case ALL:
-            default:
-                return dao.count();
-        }
-    }
-    
-    /**
-     * Получить общее количество валют
-     * @return общее количество валют
-     */
-    public int getCount() {
-        return dao.count();
+        return dao.count(filter);
     }
 
     /**

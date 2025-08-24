@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -8,6 +7,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
+import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 
 import java.io.Serializable;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 /**
  * Entity класс для бюджетов
  */
-@Entity(tableName = "budgets",
+@Entity(tableName = RepositoryConstants.TABLE_BUDGETS,
         foreignKeys = {
                 @ForeignKey(entity = Category.class,
                         parentColumns = "id",
@@ -37,7 +37,7 @@ public class Budget implements Serializable{
     @PrimaryKey(autoGenerate = true)
     private int id;
     
-    private int amount; // Сумма в копейках
+    private long amount; // Сумма в копейках
     private int currencyId; // ID валюты
     private Integer categoryId; // может быть null для общего бюджета
     private int position; // Позиция для сортировки
@@ -62,11 +62,11 @@ public class Budget implements Serializable{
         this.id = id;
     }
     
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
     
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
     

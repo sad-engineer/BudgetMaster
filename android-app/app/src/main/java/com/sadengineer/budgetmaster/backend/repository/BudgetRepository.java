@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
@@ -8,8 +7,8 @@ import androidx.lifecycle.LiveData;
 import com.sadengineer.budgetmaster.backend.dao.BudgetDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
-import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 
 import java.util.List;
 
@@ -17,9 +16,7 @@ import java.util.List;
  * Repository класс для работы с Budget Entity
  */
 public class BudgetRepository {
-    
-    private static final String TAG = "BudgetRepository";
-    
+
     private final BudgetDao dao;
     
     public BudgetRepository(Context context) {
@@ -28,73 +25,34 @@ public class BudgetRepository {
     }
 
     /**
-     * Получить все бюджеты
-     * @param filter фильтр для выборки бюджетов
-     * @param operationType фильтр типа операции
+     * Получить все бюджеты по фильтру
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех бюджетов
      */
-    public LiveData<List<Budget>> getAll(EntityFilter filter, OperationTypeFilter operationType) {
-        switch (filter) {
-            case ACTIVE:
-                switch (operationType) {
-                    case EXPENSE:
-                        return dao.getAllActiveByOperationType(OperationTypeFilter.EXPENSE.getIndex());
-                    case INCOME:
-                        return dao.getAllActiveByOperationType(OperationTypeFilter.INCOME.getIndex());
-                    case ALL:
-                    default:
-                        return dao.getAllActive();
-                }
-            case DELETED:
-                switch (operationType) {
-                    case EXPENSE:
-                        return dao.getAllDeletedByOperationType(OperationTypeFilter.EXPENSE.getIndex());
-                    case INCOME:
-                        return dao.getAllDeletedByOperationType(OperationTypeFilter.INCOME.getIndex());
-                    case ALL:
-                    default:
-                        return dao.getAllDeleted();
-                }
-            case ALL:
-            default:
-                return dao.getAll();
-        }
+    public LiveData<List<Budget>> getAll(EntityFilter filter) {
+        return dao.getAll(filter);
     }
-    
-    /**
-     * Получить все бюджеты (включая удаленные)
-     * @return LiveData со списком всех бюджетов
-     */
-    public LiveData<List<Budget>> getAll() {
-        return dao.getAll();
-    }   
 
     /**
-     * Получить все бюджеты по ID валюты
+     * Получить все бюджеты по типу операции и по фильтру
+     * @param operationType фильтр типа операции (EXPENSE, INCOME, ALL)
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
+     * @return LiveData со списком всех бюджетов
+     */
+    public LiveData<List<Budget>> getAllByOperationType(OperationTypeFilter operationType, EntityFilter filter) {
+        int operationTypeIndex = operationType.getIndex();
+        return dao.getAllByOperationType(operationTypeIndex, filter);
+    }
+
+    /**
+     * Получить все бюджеты по ID валюты и по фильтру
      * @param currencyId ID валюты
-     * @param filter фильтр для выборки бюджетов
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех бюджетов
      */
     public LiveData<List<Budget>> getAllByCurrency(int currencyId, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByCurrency(currencyId);
-            case DELETED:
-                return dao.getAllDeletedByCurrency(currencyId);
-            case ALL:
-            default:
-                return dao.getAllByCurrency(currencyId);
-        }
-    }
-    
-    /**
-     * Получить все бюджеты по ID валюты (включая удаленные)
-     * @param currencyId ID валюты
-     * @return LiveData со списком всех бюджетов
-     */
-    public LiveData<List<Budget>> getAllByCurrency(int currencyId) {
-        return dao.getAllByCurrency(currencyId);
-    }
+        return dao.getAllByCurrency(currencyId, filter);
+    }   
     
     /**
      * Получить бюджет по ID категории (включая удаленные)
@@ -181,27 +139,12 @@ public class BudgetRepository {
     }
     
     /**
-     * Получить количество бюджетов
-     * @param filter фильтр для выборки бюджетов
+     * Получить количество бюджетов по фильтру
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
      * @return количество бюджетов
      */
     public int getCount(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.countActive();
-            case DELETED:
-                return dao.countDeleted();
-            case ALL:
-            default:
-                return dao.count();
-        }
+        return dao.count(filter);
     }
-    
-    /**
-     * Получить общее количество бюджетов (включая удаленные)
-     * @return общее количество бюджетов
-     */
-    public int getCount() {
-        return dao.count();
-    }
+
 } 

@@ -386,18 +386,18 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
      * Привязывает данные к элементу
      */
     public void bind(int position, String title, int id, boolean isSelectionMode, boolean isSelected) {
-        bind(position, title, id, 0, null, isSelectionMode, isSelected, true, true);
+        bind(position, title, id, 0L, null, isSelectionMode, isSelected, true, true);
     }
     
-    public void bind(int position, String title, int id, int sum, boolean isSelectionMode, boolean isSelected) {
+    public void bind(int position, String title, int id, long sum, boolean isSelectionMode, boolean isSelected) {
         bind(position, title, id, sum, null, isSelectionMode, isSelected, true, true);
     }
     
-    public void bind(int position, String title, int id, int sum, String shortName, boolean isSelectionMode, boolean isSelected) {
+    public void bind(int position, String title, int id, long sum, String shortName, boolean isSelectionMode, boolean isSelected) {
         bind(position, title, id, sum, shortName, isSelectionMode, isSelected, true, true);
     }
     
-    public void bind(int position, String title, int id, int sum, String shortName, boolean isSelectionMode, boolean isSelected, boolean showPosition, boolean showId) {
+    public void bind(int position, String title, int id, long sum, String shortName, boolean isSelectionMode, boolean isSelected, boolean showPosition, boolean showId) {
         this.boundItemId = id;
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
@@ -493,7 +493,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
     /**
      * Привязывает данные операции (доход/расход)
      */
-    public void bindOperation(int position, String category, String description, int id, int sum, String shortName, String date, boolean isSelectionMode, boolean isSelected) {
+    public void bindOperation(int position, String category, String description, int id, long sum, String shortName, String date, boolean isSelectionMode, boolean isSelected) {
         this.boundItemId = id;
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;

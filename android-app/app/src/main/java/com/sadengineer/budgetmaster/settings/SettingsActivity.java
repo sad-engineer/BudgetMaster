@@ -13,7 +13,7 @@ import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 

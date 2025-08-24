@@ -68,7 +68,7 @@ public class BudgetSharedViewModel extends ViewModel {
                 int deletedCount = 0;
                 for (Budget budget : selectedBudgets) {
                     try {
-                        budgetService.delete(true, budget); // true = softDelete
+                        budgetService.delete(budget, true); // true = softDelete
                         deletedCount++;
                         Log.d(TAG, "Бюджет мягко удален: " + budget.getId());
                     } catch (Exception e) {

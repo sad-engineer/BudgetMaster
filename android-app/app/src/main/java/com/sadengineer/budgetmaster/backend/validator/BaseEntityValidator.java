@@ -1,6 +1,7 @@
 package com.sadengineer.budgetmaster.backend.validator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Валидатор для базовой сущности с общими методами валидации
@@ -224,6 +225,224 @@ public class BaseEntityValidator {
     public static void validateNotNull(String value, String fieldName) {
         if (value == null) {
             throw new IllegalArgumentException(fieldName + " не может быть null");
+        }
+    }
+    
+    /**
+     * Проверяет, что число не null
+     * @param value число для проверки
+     * @param fieldName название поля для сообщения об ошибке
+     * @throws IllegalArgumentException если число некорректное
+     */
+    public static void validateNotNull(Integer value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException(fieldName + " не может быть null");
+        }
+    }
+    
+    /**
+     * Проверяет, что число не null
+     * @param value число для проверки
+     * @param fieldName название поля для сообщения об ошибке
+     * @throws IllegalArgumentException если число некорректное
+     */
+    public static void validateNotNull(Double value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException(fieldName + " не может быть null");
+        }
+    }
+
+    /**
+     * Проверяет, что значение не null
+     * @param value значение для проверки
+     * @param fieldName название поля для сообщения об ошибке
+     * @throws IllegalArgumentException если значение null
+     */
+    public static void validateNotNull(Long value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException(fieldName + " не может быть null");
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(int value, int minValue, String errorMessage) {
+        if (value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(Integer value, int minValue, String errorMessage) {
+        if (value != null && value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(double value, double minValue, String errorMessage) {
+        if (value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(Double value, double minValue, String errorMessage) {
+        if (value != null && value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(long value, long minValue, String errorMessage) {
+        if (value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не меньше минимального
+     * @param value значение для проверки
+     * @param minValue минимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение меньше минимального
+     */
+    public static void validateMinValue(Long value, long minValue, String errorMessage) {
+        if (value != null && value < minValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(int value, int maxValue, String errorMessage) {
+        if (value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(Integer value, int maxValue, String errorMessage) {
+        if (value != null && value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(double value, double maxValue, String errorMessage) {
+        if (value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(Double value, double maxValue, String errorMessage) {
+        if (value != null && value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(long value, long maxValue, String errorMessage) {
+        if (value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * Проверяет, что значение не больше максимального
+     * @param value значение для проверки
+     * @param maxValue максимальное значение
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение больше максимального
+     */
+    public static void validateMaxValue(Long value, long maxValue, String errorMessage) {
+        if (value != null && value > maxValue) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+    
+    /**
+     * Проверяет, что значение находится в списке допустимых значений
+     * @param value значение для проверки
+     * @param allowedValues список допустимых значений
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение некорректное
+     */
+    public static void validateInList(Integer value, List<Integer> allowedValues, String errorMessage) {
+        if (value != null && !allowedValues.contains(value)) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+    
+    /**
+     * Проверяет, что значение находится в списке допустимых значений
+     * @param value значение для проверки
+     * @param allowedValues список допустимых значений
+     * @param errorMessage сообщение об ошибке
+     * @throws IllegalArgumentException если значение некорректное
+     */
+    public static void validateInList(String value, List<String> allowedValues, String errorMessage) {
+        if (value != null && !allowedValues.contains(value)) {
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 } 

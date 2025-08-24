@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -9,19 +8,8 @@ import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
 
-import com.sadengineer.budgetmaster.backend.constants.SqlConstants;
 import com.sadengineer.budgetmaster.backend.entity.Account;
-
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TABLE_ACCOUNTS;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ACTIVE_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.DELETED_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.ID_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TITLE_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.TYPE_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.CURRENCY_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION;
-import static com.sadengineer.budgetmaster.backend.constants.SqlConstants.POSITION_SORT_CONDITION_0_END;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -36,7 +24,10 @@ public interface AccountDao {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return общее количество счетов по фильтру
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE_ACCOUNTS + " WHERE " + ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM accounts WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int count(EntityFilter filter);
 
     /**
@@ -49,7 +40,7 @@ public interface AccountDao {
     /**
      * Удаляет все счета из базы данных
      */
-    @Query("DELETE FROM " + TABLE_ACCOUNTS)
+    @Query("DELETE FROM accounts")
     void deleteAll();
     
     /**
@@ -57,7 +48,11 @@ public interface AccountDao {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список счетов, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + ENTITY_FILTER_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    @Query("SELECT * FROM accounts WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) " +
+           "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAll(EntityFilter filter);
 
     /**
@@ -66,7 +61,11 @@ public interface AccountDao {
      * @param currencyId ID валюты
      * @return список счетов с указанным ID валюты, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + CURRENCY_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    @Query("SELECT * FROM accounts WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) " +
+           "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAllByCurrency(int currencyId, EntityFilter filter);
 
     /**
@@ -75,7 +74,11 @@ public interface AccountDao {
      * @param type тип счета
      * @return список счетов с указанным типом, отсортированных по позиции (счета с позицией 0 в конце)
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + TYPE_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION_0_END)
+    @Query("SELECT * FROM accounts WHERE type = :type AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) " +
+           "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAllByType(int type, EntityFilter filter);
     
     /**
@@ -83,7 +86,7 @@ public interface AccountDao {
      * @param id ID счета
      * @return счет с указанным ID
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + ID_CONDITION)
+    @Query("SELECT * FROM accounts WHERE id = :id")
     LiveData<Account> getById(int id);
         
     /**
@@ -91,7 +94,7 @@ public interface AccountDao {
      * @param position позиция счета
      * @return счет с указанной позицией
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + POSITION_CONDITION)
+    @Query("SELECT * FROM accounts WHERE position = :position")
     LiveData<Account> getByPosition(int position);
     
     /**
@@ -99,14 +102,14 @@ public interface AccountDao {
      * @param title название счета
      * @return счет с указанным названием
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + TITLE_CONDITION)
+    @Query("SELECT * FROM accounts WHERE title = :title")
     LiveData<Account> getByTitle(String title);
 
     /**
      * Получает максимальную позицию среди счетов
      * @return максимальная позиция или 0, если счетов нет
      */
-    @Query("SELECT COALESCE(MAX(position), 0) FROM " + TABLE_ACCOUNTS)
+    @Query("SELECT COALESCE(MAX(position), 0) FROM accounts")
     int getMaxPosition();
 
     /**
@@ -115,7 +118,10 @@ public interface AccountDao {
      * @param currencyId ID валюты
      * @return общая сумма баланса по ID валюты
      */
-    @Query("SELECT SUM(amount) FROM " + TABLE_ACCOUNTS + " WHERE " + CURRENCY_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
+    @Query("SELECT SUM(amount) FROM accounts WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     Integer getTotalBalanceByCurrency(int currencyId, EntityFilter filter);
     
     /**
@@ -131,21 +137,21 @@ public interface AccountDao {
      * @param searchQuery подстрока для поиска
      * @return список счетов, содержащих подстроку в названии
      */
-    @Query("SELECT * FROM " + TABLE_ACCOUNTS + " WHERE " + TITLE_CONDITION + " ORDER BY " + POSITION_SORT_CONDITION)
+    @Query("SELECT * FROM accounts WHERE title = :searchQuery ORDER BY position ASC")
     LiveData<List<Account>> searchByTitle(String searchQuery);
     
     /**
      * Сдвигает позиции счетов вниз начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE " + TABLE_ACCOUNTS + " SET position = position - 1 WHERE position > :fromPosition")
+    @Query("UPDATE accounts SET position = position - 1 WHERE position > :fromPosition")
     void shiftPositionsDown(int fromPosition);
 
     /**
      * Сдвигает позиции счетов вверх начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE " + TABLE_ACCOUNTS + " SET position = position + 1 WHERE position >= :fromPosition")
+    @Query("UPDATE accounts SET position = position + 1 WHERE position >= :fromPosition")
     void shiftPositionsUp(int fromPosition);
 
     /**

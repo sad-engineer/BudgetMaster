@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -7,9 +6,10 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Operation;
-import com.sadengineer.budgetmaster.backend.constants.SqlConstants;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,20 +20,6 @@ import java.util.List;
 @Dao
 public interface OperationDao {
 
-    private final String ENTITY_FILTER_CONDITION = SqlConstants.ENTITY_FILTER_CONDITION;
-    private final String TYPE_CONDITION = SqlConstants.TYPE_CONDITION;
-    private final String ACCOUNT_CONDITION = SqlConstants.ACCOUNT_CONDITION;
-    private final String CATEGORY_CONDITION = SqlConstants.CATEGORY_CONDITION;
-    private final String CURRENCY_CONDITION = SqlConstants.CURRENCY_CONDITION;
-    private final String ID_CONDITION = SqlConstants.ID_CONDITION;
-    private final String DATE_CONDITION = SqlConstants.DATE_CONDITION;
-    private final String YEAR_CONDITION = SqlConstants.YEAR_CONDITION;
-    private final String MONTH_CONDITION = SqlConstants.MONTH_CONDITION;
-    private final String DATE_RANGE_CONDITION = SqlConstants.DATE_RANGE_CONDITION;
-    private final String YEAR_MONTH_CONDITION = SqlConstants.YEAR_MONTH_CONDITION;
-
-    private final String TABLE = SqlConstants.TABLE_OPERATIONS;
-
     // ----- Работа с количеством операций -----
 
     /**
@@ -41,8 +27,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int count(EntityFilter filter);
     
     /**
@@ -51,10 +39,11 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций по типу
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-            "WHERE " + TYPE_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
-    int countByType(String type, EntityFilter filter);
+    @Query("SELECT COUNT(*) FROM operations WHERE type = :type AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    int countByType(int type, EntityFilter filter);
     
     /**
      * Количество операций по счету с фильтром
@@ -62,9 +51,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций по счету
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + ACCOUNT_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE accountId = :accountId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByAccount(int accountId, EntityFilter filter);
 
     /** 
@@ -73,9 +63,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций по категории
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + CATEGORY_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE categoryId = :categoryId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByCategory(int categoryId, EntityFilter filter);
     
     /**
@@ -84,9 +75,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций по валюте
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-            "WHERE " + CURRENCY_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByCurrency(int currencyId, EntityFilter filter);
     
     /**
@@ -95,9 +87,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций по дате
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + DATE_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE operationDate = :date AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByDate(LocalDateTime date, EntityFilter filter);
 
     /**
@@ -107,9 +100,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций за месяц
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + YEAR_MONTH_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE strftime('%Y', operationDate) = :year AND strftime('%m', operationDate) = :month AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByMonth(String year, String month, EntityFilter filter);
 
     /**
@@ -118,9 +112,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций за год
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + YEAR_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE strftime('%Y', operationDate) = :year AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByYear(String year, EntityFilter filter);
 
     /**
@@ -130,9 +125,10 @@ public interface OperationDao {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return количество операций за период
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE +
-           "WHERE " + DATE_RANGE_CONDITION + " AND " +
-           ENTITY_FILTER_CONDITION)
+    @Query("SELECT COUNT(*) FROM operations WHERE operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
     int countByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
     // ----- Работа с удалением операций -----
@@ -147,7 +143,7 @@ public interface OperationDao {
     /**
      * Удаляет все операции из базы данных
      */
-    @Query("DELETE FROM " + TABLE)
+    @Query("DELETE FROM operations")
     void deleteAll();
 
     // ----- Работа с получением операций -----
@@ -156,8 +152,11 @@ public interface OperationDao {
      * Получает все операции
      * @return все операции
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ENTITY_FILTER_CONDITION)
-    List<Operation> getAll(EntityFilter filter);
+    @Query("SELECT * FROM operations WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAll(EntityFilter filter);
     
 
     /**
@@ -165,98 +164,142 @@ public interface OperationDao {
      * @param type тип операции
      * @return все операции по типу
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + TYPE_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getAllByType(String type, EntityFilter filter);
+    @Query("SELECT * FROM operations WHERE type = :type AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByType(int type, EntityFilter filter);
 
     /** 
      * Получает все операции по счету
      * @param accountId ID счета
      * @return все операции по счету
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ACCOUNT_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getAllByAccount(int accountId, EntityFilter filter);
+    @Query("SELECT * FROM operations WHERE accountId = :accountId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByAccount(int accountId, EntityFilter filter);
 
     /**
      * Получает все операции по категории
      * @param categoryId ID категории
      * @return все операции по категории
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + CATEGORY_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getAllByCategory(int categoryId, EntityFilter filter);
+    @Query("SELECT * FROM operations WHERE categoryId = :categoryId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByCategory(int categoryId, EntityFilter filter);
 
     /**
      * Получает все операции по валюте
      * @param currencyId ID валюты
      * @return все операции по валюте
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + CURRENCY_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getAllByCurrency(int currencyId, EntityFilter filter);
+    @Query("SELECT * FROM operations WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByCurrency(int currencyId, EntityFilter filter);
+       
+    /**
+     * Получает все операции по дате
+     * @param date дата
+     * @return все операции по дате
+     */
+    @Query("SELECT * FROM operations WHERE operationDate = :date AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByDate(LocalDateTime date, EntityFilter filter);
+
+    /**
+     * Получает все операции по месяцу
+     * @param year год
+     * @param month месяц
+     * @return все операции по месяцу
+     */
+    @Query("SELECT * FROM operations WHERE strftime('%Y', operationDate) = :year AND strftime('%m', operationDate) = :month AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByMonth(String year, String month, EntityFilter filter);
+
+    /**
+     * Получает все операции по году
+     * @param year год
+     * @return все операции по году
+     */
+    @Query("SELECT * FROM operations WHERE strftime('%Y', operationDate) = :year AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByYear(String year, EntityFilter filter);
+
+    /**
+     * Получает все операции по периоду
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return все операции по периоду
+     */
+    @Query("SELECT * FROM operations WHERE operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Operation>> getAllByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
     /**
      * Получает счет по ID (включая удаленные)
      * @param id ID счета
      * @return счет с указанным ID
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ID_CONDITION)
+    @Query("SELECT * FROM operations WHERE id = :id")
     LiveData<Operation> getById(int id);
-    
-    /**
-     * Получает операцию по дате
-     * @param date дата
-     * @return операцию по дате
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + DATE_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getByDate(LocalDateTime date, EntityFilter filter);
-
-    /**
-     * Получает операцию по месяцу
-     * @param year год
-     * @param month месяц
-     * @return операцию по месяцу
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + YEAR_MONTH_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getByMonth(String year, String month, EntityFilter filter);
-
-    /**
-     * Получает операцию по году
-     * @param year год
-     * @return операцию по году
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + YEAR_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getByYear(String year, EntityFilter filter);
-
-    /**
-     * Получает операцию по периоду
-     * @param startDate начало периода
-     * @param endDate конец периода
-     * @return операцию по периоду
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + DATE_RANGE_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    List<Operation> getByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
     /**
      * Получает общую сумму баланса по типу (в зависимости от фильтра)
      * @param type тип операции
      * @return общая сумма баланса по типу
      */
-    @Query("SELECT SUM(amount) FROM " + TABLE + " WHERE " + TYPE_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    Integer getTotalBalanceByType(int type, EntityFilter filter);
+    @Query("SELECT SUM(amount) FROM operations WHERE type = :type AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Integer> getTotalAmountByType(int type, EntityFilter filter);
 
     /**
      * Получает общую сумму баланса по счету (в зависимости от фильтра)
      * @param accountId ID счета
      * @return общая сумма баланса по счету
      */
-    @Query("SELECT SUM(amount) FROM " + TABLE + " WHERE " + ACCOUNT_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    Integer getTotalBalanceByAccount(int accountId, EntityFilter filter);
+    @Query("SELECT SUM(amount) FROM operations WHERE accountId = :accountId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Integer> getTotalAmountByAccount(int accountId, EntityFilter filter);
 
     /**
      * Получает общую сумму баланса по категории (в зависимости от фильтра)
      * @param categoryId ID категории
      * @return общая сумма баланса по категории
      */
-    @Query("SELECT SUM(amount) FROM " + TABLE + " WHERE " + CATEGORY_CONDITION + " AND " + ENTITY_FILTER_CONDITION)
-    Integer getTotalBalanceByCategory(int categoryId, EntityFilter filter);
+    @Query("SELECT SUM(amount) FROM operations WHERE categoryId = :categoryId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Integer> getTotalAmountByCategory(int categoryId, EntityFilter filter);
+    
+    /**
+     * Получает общую сумму баланса по валюте (в зависимости от фильтра)
+     * @param currencyId ID валюты
+     * @return общая сумма баланса по валюте
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Integer> getTotalAmountByCurrency(int currencyId, EntityFilter filter);
 
     //TODO: Прописать здесь специальные методы для получения операций какому либо условию
 

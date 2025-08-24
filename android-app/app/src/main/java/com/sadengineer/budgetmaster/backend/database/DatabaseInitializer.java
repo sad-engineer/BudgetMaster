@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.database;
 
 import android.content.Context;
@@ -12,6 +11,9 @@ import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
+import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;   
 
 import java.time.LocalDateTime;
@@ -60,7 +62,7 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeDefaultCurrencies: Начинаем инициализацию валют");
         
         // Проверяем, есть ли уже валюты
-        int currencyCount = database.currencyDao().count();
+        int currencyCount = database.currencyDao().count(EntityFilter.ALL); 
         if (currencyCount > 0) {
             Log.d(TAG, "initializeDefaultCurrencies: Валюты уже существуют, пропускаем");
             return;
@@ -88,7 +90,7 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeDefaultCategories: Начинаем инициализацию категорий");
         
         // Проверяем, есть ли уже категории
-        int categoryCount = database.categoryDao().count();
+        int categoryCount = database.categoryDao().count(EntityFilter.ALL);
         if (categoryCount > 0) {
             Log.d(TAG, "initializeDefaultCategories: Категории уже существуют, пропускаем");
             return;
@@ -171,7 +173,7 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeDefaultAccounts: Начинаем инициализацию счетов");
         
         // Проверяем, есть ли уже счета
-        int accountCount = database.accountDao().count();
+        int accountCount = database.accountDao().count(EntityFilter.ALL);
         if (accountCount > 0) {
             Log.d(TAG, "initializeDefaultAccounts: Счета уже существуют, пропускаем");
             return;
@@ -204,7 +206,7 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeDefaultBudgets: Начинаем инициализацию бюджетов");
         
         // Проверяем, есть ли уже бюджеты
-        int budgetCount = database.budgetDao().count();
+        int budgetCount = database.budgetDao().count(EntityFilter.ALL);
         if (budgetCount > 0) {
             Log.d(TAG, "initializeDefaultBudgets: Бюджеты уже существуют, пропускаем");
             return;
@@ -261,7 +263,7 @@ public class DatabaseInitializer {
     /**
      * Создает объект счета
      */
-    private static Account createAccount(String title, int position, int amount, int type, int currencyId, int closed) {
+    private static Account createAccount(String title, int position, long amount, int type, int currencyId, int closed) {
         Account account = new Account();
         account.setTitle(title);
         account.setPosition(position);
@@ -277,7 +279,7 @@ public class DatabaseInitializer {
     /**
      * Создает объект бюджета
      */
-    private static Budget createBudget(int categoryId, int amount, int currencyId, int position) {
+    private static Budget createBudget(int categoryId, long amount, int currencyId, int position) {
         Budget budget = new Budget();
         budget.setCategoryId(categoryId);
         budget.setAmount(amount);
@@ -295,7 +297,7 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeTestOperations: Начинаем инициализацию тестовых операций");
         
         // Проверяем, есть ли уже операции
-        int operationCount = database.operationDao().getOperationsCount();
+        int operationCount = database.operationDao().count(EntityFilter.ALL);
         if (operationCount > 0) {
             Log.d(TAG, "initializeTestOperations: Операции уже существуют, пропускаем");
             return;
@@ -303,31 +305,31 @@ public class DatabaseInitializer {
         
         // Создаем тестовые операции доходов
         Operation[] incomeOperations = {
-            createOperation("Зарплата за январь", 5000000, 1, 3, "income", 1, LocalDateTime.now().minusDays(5)), // 50,000 руб
-            createOperation("Подработка", 1500000, 1, 4, "income", 1, LocalDateTime.now().minusDays(3)), // 15,000 руб
-            createOperation("Подарок на день рождения", 500000, 1, 5, "income", 1, LocalDateTime.now().minusDays(1)) // 5,000 руб
+            createOperation("Зарплата за январь", 5000000, 1, 3, OperationTypeFilter.INCOME.getIndex(), 1, LocalDateTime.now().minusDays(5)), // 50,000 руб
+            createOperation("Подработка", 1500000, 1, 4, OperationTypeFilter.INCOME.getIndex(), 1, LocalDateTime.now().minusDays(3)), // 15,000 руб
+            createOperation("Подарок на день рождения", 500000, 1, 5, OperationTypeFilter.INCOME.getIndex(), 1, LocalDateTime.now().minusDays(1)) // 5,000 руб
         };
         
         for (Operation operation : incomeOperations) {
-            database.operationDao().insertOperation(operation);
+            database.operationDao().insert(operation);
             Log.d(TAG, "initializeTestOperations: Добавлена операция дохода: " + operation.getDescription());
         }
         
         // Создаем тестовые операции расходов
         Operation[] expenseOperations = {
-            createOperation("Оплата коммунальных услуг", 800000, 1, 8, "expense", 1, LocalDateTime.now().minusDays(10)), // 8,000 руб
-            createOperation("Покупка продуктов", 2500000, 1, 9, "expense", 1, LocalDateTime.now().minusDays(7)), // 25,000 руб
-            createOperation("Проезд на метро", 50000, 1, 10, "expense", 1, LocalDateTime.now().minusDays(6)), // 500 руб
-            createOperation("Визит к врачу", 1500000, 1, 11, "expense", 1, LocalDateTime.now().minusDays(4)), // 15,000 руб
-            createOperation("Покупка одежды", 3000000, 1, 12, "expense", 1, LocalDateTime.now().minusDays(2)), // 30,000 руб
-            createOperation("Оплата налогов", 1000000, 1, 13, "expense", 1, LocalDateTime.now().minusDays(1)), // 10,000 руб
-            createOperation("Покупка бытовой техники", 1200000, 1, 14, "expense", 1, LocalDateTime.now()), // 12,000 руб
-            createOperation("Поход в кино", 800000, 1, 15, "expense", 1, LocalDateTime.now()), // 8,000 руб
-            createOperation("Ужин в ресторане", 2500000, 1, 16, "expense", 1, LocalDateTime.now()) // 25,000 руб
+            createOperation("Оплата коммунальных услуг", 800000, 1, 8, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(10)), // 8,000 руб
+            createOperation("Покупка продуктов", 2500000, 1, 9, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(7)), // 25,000 руб
+            createOperation("Проезд на метро", 50000, 1, 10, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(6)), // 500 руб
+            createOperation("Визит к врачу", 1500000, 1, 11, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(4)), // 15,000 руб
+            createOperation("Покупка одежды", 3000000, 1, 12, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(2)), // 30,000 руб
+            createOperation("Оплата налогов", 1000000, 1, 13, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now().minusDays(1)), // 10,000 руб
+            createOperation("Покупка бытовой техники", 1200000, 1, 14, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now()), // 12,000 руб
+            createOperation("Поход в кино", 800000, 1, 15, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now()), // 8,000 руб
+            createOperation("Ужин в ресторане", 2500000, 1, 16, OperationTypeFilter.EXPENSE.getIndex(), 1, LocalDateTime.now()) // 25,000 руб
         };
         
         for (Operation operation : expenseOperations) {
-            database.operationDao().insertOperation(operation);
+            database.operationDao().insert(operation);
             Log.d(TAG, "initializeTestOperations: Добавлена операция расхода: " + operation.getDescription());
         }
         
@@ -340,7 +342,7 @@ public class DatabaseInitializer {
             1, // валюта
             LocalDateTime.now().minusDays(1)
         );
-        database.operationDao().insertOperation(transferOperation);
+        database.operationDao().insert(transferOperation);
         Log.d(TAG, "initializeTestOperations: Добавлена операция перевода: " + transferOperation.getDescription());
         
         Log.d(TAG, "initializeTestOperations: Инициализация тестовых операций завершена");
@@ -349,8 +351,8 @@ public class DatabaseInitializer {
     /**
      * Создает объект операции
      */
-    private static Operation createOperation(String description, int amount, int accountId, int categoryId, 
-                                           String type, int currencyId, LocalDateTime operationDate) {
+    private static Operation createOperation(String description, long amount, int accountId, int categoryId, 
+                                           int type, int currencyId, LocalDateTime operationDate) {
         Operation operation = new Operation();
         operation.setDescription(description);
         operation.setAmount(amount);
@@ -367,14 +369,14 @@ public class DatabaseInitializer {
     /**
      * Создает объект операции перевода
      */
-    private static Operation createTransferOperation(String description, int amount, int fromAccountId, 
+    private static Operation createTransferOperation(String description, long amount, int fromAccountId, 
                                                    int toAccountId, int currencyId, LocalDateTime operationDate) {
         Operation operation = new Operation();
         operation.setDescription(description);
         operation.setAmount(amount);
         operation.setAccountId(fromAccountId);
         operation.setCategoryId(1); // Используем первую категорию как заглушку
-        operation.setType("transfer");
+        operation.setType(AccountTypeFilter.CREDIT.getIndex());
         operation.setCurrencyId(currencyId);
         operation.setOperationDate(operationDate);
         operation.setToAccountId(toAccountId);

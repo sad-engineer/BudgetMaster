@@ -1,10 +1,17 @@
-
 package com.sadengineer.budgetmaster.backend.validator;
 
-import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.constants.ValidationConstants;
-import com.sadengineer.budgetmaster.backend.validator.BaseEntityValidator;
-import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
+import static com.sadengineer.budgetmaster.backend.validator.BaseEntityValidator.*;
+
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_AMOUNT_MIN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_AMOUNT_MAX;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CATEGORY_ID_INVALID;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CATEGORY_ID_NOT_FOUND;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CURRENCY_ID_INVALID;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CURRENCY_ID_NOT_FOUND;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_AMOUNT_EMPTY;
+
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_AMOUNT_VALUE;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_AMOUNT_VALUE;
 
 /**
  * Валидатор для бюджета
@@ -12,76 +19,36 @@ import com.sadengineer.budgetmaster.backend.validator.CommonValidator;
 public class BudgetValidator {
     
     /**
-     * Валидирует бюджет
-     * @param budget бюджет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validate(Budget budget) {
-        if (budget == null) {
-            throw new IllegalArgumentException("Бюджет не может быть null");
-        }
-        
-        // Валидация базовых полей
-        BaseEntityValidator.validate(budget);
-
-        // Валидация специфичных полей
-        CommonValidator.validateBudgetAmount(budget.getAmount());
-        CurrencyValidator.validateId(budget.getCurrencyId());
-        CommonValidator.validateCategoryId(budget.getCategoryId());
-        CommonValidator.validatePosition(budget.getPosition());
-    }
-    
-    /**
-     * Валидирует бюджет для создания (без ID)
-     * @param budget бюджет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForCreate(Budget budget) {
-        if (budget == null) {
-            throw new IllegalArgumentException("Бюджет не может быть null");
-        }
-        
-        CommonValidator.validateBudgetAmount(budget.getAmount());
-        CurrencyValidator.validateId(budget.getCurrencyId());
-        CommonValidator.validateCategoryId(budget.getCategoryId());
-        CommonValidator.validatePosition(budget.getPosition());
-    }
-    
-    /**
-     * Валидирует бюджет для обновления
-     * @param budget бюджет для валидации
-     * @throws IllegalArgumentException если валидация не прошла
-     */
-    public static void validateForUpdate(Budget budget) {
-        if (budget == null) {
-            throw new IllegalArgumentException("Бюджет не может быть null");
-        }
-        
-        CommonValidator.validateBudgetAmount(budget.getAmount());
-        CurrencyValidator.validateId(budget.getCurrencyId());
-        CommonValidator.validateCategoryId(budget.getCategoryId());
-        CommonValidator.validatePosition(budget.getPosition());
-    }
-    
-    /**
      * Валидирует сумму бюджета
-     * @param amount - сумма бюджета для валидации
+     * @param amount - сумма для валидации
      * @throws IllegalArgumentException если сумма невалидна
      */
-    public static void validateBudgetAmount(double amount) {
-        if (Double.isNaN(amount)) {
-            throw new IllegalArgumentException("Сумма бюджета не может быть NaN");
-        }
-        
-        if (Double.isInfinite(amount)) {
-            throw new IllegalArgumentException("Сумма бюджета не может быть бесконечным");
-        }
-        
-        // Можно добавить дополнительные проверки, например максимальный баланс
-        if (amount > 999999999.99) {
-            throw new IllegalArgumentException("Сумма бюджета не может превышать 999,999,999.99");
-        }
+    public static void validateAmount(Long amount) {
+        validateNotNull(amount, ERROR_BUDGET_AMOUNT_EMPTY);
+        String message = String.format(ERROR_BUDGET_AMOUNT_MIN, MIN_AMOUNT_VALUE);
+        validateMinValue(amount, MIN_AMOUNT_VALUE, message);
+        message = String.format(ERROR_BUDGET_AMOUNT_MAX, MAX_AMOUNT_VALUE);
+        validateMaxValue(amount, MAX_AMOUNT_VALUE, message);
     }
 
+    /**
+     * Валидирует ID категории бюджета
+     * @param categoryID - ID категории для валидации
+     * @throws IllegalArgumentException если ID категории невалиден
+     */
+    public static void validateCategoryId(Integer categoryID, int maxId) {
+        validateMinValue(categoryID, 0, ERROR_BUDGET_CATEGORY_ID_INVALID);
+        validateMaxValue(categoryID, maxId, ERROR_BUDGET_CATEGORY_ID_NOT_FOUND);
+    }
 
+    /**
+     * Валидирует ID валюты бюджета
+     * @param currencyID - валюта для валидации
+     * @param maxId - максимальный ID валюты
+     * @throws IllegalArgumentException если валюта невалидна
+     */
+    public static void validateCurrencyId(Integer currencyID, int maxId) {
+        validateMinValue(currencyID, 0, ERROR_BUDGET_CURRENCY_ID_INVALID);
+        validateMaxValue(currencyID, maxId, ERROR_BUDGET_CURRENCY_ID_NOT_FOUND);
+    }
 } 

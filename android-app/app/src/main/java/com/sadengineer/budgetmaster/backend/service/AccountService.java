@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
@@ -8,10 +7,11 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Transaction;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,12 +28,14 @@ public class AccountService {
     private final ExecutorService executorService;
     private final String user;
     private final ServiceConstants constants;
+    private final AccountValidator validator;
     
     public AccountService(Context context, String user) {
         this.repo = new AccountRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
         this.constants = new ServiceConstants();
+        this.validator = new AccountValidator();
     }
 
     /**
@@ -102,53 +104,33 @@ public class AccountService {
     /**
      * Создать новый счет
      * @param title название счета
+     * @param currencyId ID валюты
      * @param amount сумма
      * @param type тип счета
-     * @param currencyId ID валюты
      * @param closed признак закрытости счета (0 - открыт, 1 - закрыт)
      */
-    public void create(String title, Integer currencyId, Integer amount, Integer type, Integer closed) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Название счета не может быть пустым");
-        }
+    public void create(String title, Integer currencyId, Long amount, Integer type, Integer closed) {
+        validator.validateTitle(title);
+        validator.validateCurrencyId(currencyId, repo.getCount(EntityFilter.ALL));
+        validator.validateAmount(amount);
+        validator.validateType(type);
+        validator.validateClosed(closed);
+
         executorService.execute(() -> {
-            try {
-                // Создаем переменные ВНУТРИ lambda
-                int finalCurrencyId = currencyId;
-                int finalAmount = amount;
-                int finalType = type;
-                int finalClosed = closed;
-
-                // Проверяем, если ID валюты не передан, устанавливаем значение по умолчанию
-                if (currencyId == null || currencyId <= 0) {
-                    Log.d(TAG, "Для счета " + title + " не передано значение ID валюты, устанавливаем значение по умолчанию");
-                    finalCurrencyId = constants.DEFAULT_CURRENCY_ID;
-                }
-
-                // Проверяем, если сумма не передана, устанавливаем значение по умолчанию
-                if (amount == null || amount <= 0) {
-                    Log.d(TAG, "Для счета " + title + " не передано значение суммы, устанавливаем значение по умолчанию");
-                    finalAmount = constants.DEFAULT_ACCOUNT_BALANCE;
-                }
-
-                // Проверяем, если тип счета не передан, устанавливаем значение по умолчанию
-                if (type == null || type <= 0) {
-                    Log.d(TAG, "Для счета " + title + " не передано значение типа счета, устанавливаем значение по умолчанию");
-                    finalType = constants.DEFAULT_ACCOUNT_TYPE;
-                }
-
-                // Проверяем, если признак закрытости счета не передан, устанавливаем значение по умолчанию
-                if (closed == null) {
-                    Log.d(TAG, "Для счета " + title + " не передано значение признака закрытости счета, устанавливаем значение по умолчанию");
-                    finalClosed = constants.DEFAULT_ACCOUNT_STATUS_OPEN;
-                }               
-                
-                createAccountInTransaction(title, finalAmount, finalCurrencyId, finalType, finalClosed);
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при создании счета: " + e.getMessage(), e);
-            }
+            createAccountInTransaction(title, currencyId, amount, type, closed);
         });
     }   
+
+    /**
+     * Создать новый счет со значениями по умолчанию
+     * @param title название счета
+     */
+    public void create(String title) {
+        validator.validateTitle(title);
+        executorService.execute(() -> {
+            create(title, null, null, null, null);                
+        });
+    }
 
     /**
      * Транзакция для создания нового счета
@@ -159,7 +141,7 @@ public class AccountService {
      * @param closed признак закрытости счета (0 - открыт, 1 - закрыт)
      */
     @Transaction
-    private void createAccountInTransaction(String title, int amount, int currencyId, int type, int closed) {
+    private void createAccountInTransaction(String title, int currencyId, long amount, int type, int closed) {
         Log.d(TAG, "Запрос на создание счета: " + title);
         Account account = new Account();
         account.setTitle(title);
@@ -170,56 +152,12 @@ public class AccountService {
         account.setPosition(repo.getMaxPosition() + 1);
         account.setCreateTime(LocalDateTime.now());
         account.setCreatedBy(user);
-        repo.insert(account);
-        Log.d(TAG, "Счет " + title + " успешно создан");
-    }
-
-    /**
-     * Создать новый счет со значениями по умолчанию
-     * @param title название счета
-     */
-    public void create(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Название счета не может быть пустым");
+        try {
+            repo.insert(account);
+            Log.d(TAG, "Счет " + title + " успешно создан");
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при создании счета: " + e.getMessage(), e);
         }
-        executorService.execute(() -> {
-            try {
-                String trimmedTitle = title.trim();
-                create(trimmedTitle, null, null, null, null);                
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при создании счета '" + title + "': " + e.getMessage(), e);
-            }
-        });
-    }
-
-    /**
-     * Удалить счет (полное удаление - удаление строки из БД)
-     * @param account счет
-     */
-    private void delete(Account account) {
-        if (account == null) {
-            Log.e(TAG, "Счет не найден для удаления. Удаление было отменено");
-            return;
-        }
-        executorService.execute(() -> {
-            try {
-                deleteAccountInTransaction(account);
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при удалении счета '" + account.getTitle() + "': " + e.getMessage(), e);
-            }
-        });
-    }     
-    
-    /**
-     * Транзакция для удаления валюты
-     * @param currency валюта
-     */
-    @Transaction
-    private void deleteAccountInTransaction(Account account) {
-        Log.d(TAG, "Запрос на удаление счета: " + account.getTitle());
-        int deletedPosition = account.getPosition();
-        repo.delete(account);
-        Log.d(TAG, "Счет " + account.getTitle() + " успешно удален");
     }
 
     /**
@@ -227,13 +165,42 @@ public class AccountService {
      * @param softDelete true - soft delete, false - полное удаление
      * @param account счет
      */
-    public void delete(boolean softDelete, Account account) {
+    public void delete(Account account, boolean softDelete) {
+        if (account == null) {
+            Log.e(TAG, "Счет не найден для удаления. Удаление было отменено");
+            return;
+        }
         if (softDelete) {
             softDelete(account);
         } else {
             delete(account);
         }
     }
+
+    /**
+     * Удалить счет (полное удаление - удаление строки из БД)
+     * @param account счет
+     */
+    private void delete(Account account) {
+        executorService.execute(() -> {
+            deleteAccountInTransaction(account);
+        });
+    }     
+    
+    /**
+     * Транзакция для удаления валюты
+     * @param account счет
+     */
+    @Transaction
+    private void deleteAccountInTransaction(Account account) {
+        Log.d(TAG, "Запрос на удаление счета: " + account.getTitle());
+        try {
+            repo.delete(account);
+            Log.d(TAG, "Счет " + account.getTitle() + " успешно удален");
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при удалении счета: " + e.getMessage(), e);
+        }
+    }   
     
     /**
      * Получить все счета
@@ -250,8 +217,8 @@ public class AccountService {
      * @param filter фильтр для выборки счетов
      * @return LiveData со списком всех счетов
      */
-    public LiveData<List<Account>> getAllByType(EntityFilter filter, int type) {
-        return repo.getAllByType(filter, type);
+    public LiveData<List<Account>> getAllByType(int type, EntityFilter filter ) {
+        return repo.getAllByType(type, filter);
     }
     
     /**
@@ -259,7 +226,7 @@ public class AccountService {
      * @return LiveData со списком всех счетов
      */
     public LiveData<List<Account>> getAll() {
-        return repo.getAll();
+        return repo.getAll(EntityFilter.ALL);
     }
 
     /**
@@ -277,11 +244,7 @@ public class AccountService {
      */
     public void restore(Account deletedAccount) {
         executorService.execute(() -> {
-            try {
-                restoreAccountInTransaction(deletedAccount);
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при восстановлении счета: " + e.getMessage(), e);
-            }
+            restoreAccountInTransaction(deletedAccount);
         });
     }
     
@@ -291,17 +254,17 @@ public class AccountService {
      */
     @Transaction
     private void restoreAccountInTransaction(Account deletedAccount) {
-        if (deletedAccount != null) {
-            Log.d(TAG, "Запрос на восстановление счета для категории " + deletedAccount.getTitle());
-            deletedAccount.setPosition(repo.getMaxPosition() + 1);
-            deletedAccount.setDeleteTime(null);
-            deletedAccount.setDeletedBy(null);
-            deletedAccount.setUpdateTime(LocalDateTime.now());
-            deletedAccount.setUpdatedBy(user);
+        Log.d(TAG, "Запрос на восстановление счета для категории " + deletedAccount.getTitle());
+        deletedAccount.setPosition(repo.getMaxPosition() + 1);
+        deletedAccount.setDeleteTime(null);
+        deletedAccount.setDeletedBy(null);
+        deletedAccount.setUpdateTime(LocalDateTime.now());
+        deletedAccount.setUpdatedBy(user);
+        try {
             repo.update(deletedAccount);
             Log.d(TAG, "Счет " + deletedAccount.getTitle() + " успешно восстановлен");
-        } else {
-            Log.e(TAG, "Счет не найден для восстановления");
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при восстановлении счета: " + e.getMessage(), e);
         }
     }
 
@@ -310,16 +273,8 @@ public class AccountService {
      * @param account счет
      */
     private void softDelete(Account account) {
-        if (account == null) {
-            Log.e(TAG, "Счет не найден для soft delete. Удаление было отменено");
-            return;
-        }   
         executorService.execute(() -> {
-            try {
-                softDeleteAccountInTransaction(account);
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при soft delete счета: " + e.getMessage(), e);
-            }
+            softDeleteAccountInTransaction(account);
         });
     }
 
@@ -330,22 +285,18 @@ public class AccountService {
     @Transaction
     private void softDeleteAccountInTransaction(Account account) {
         Log.d(TAG, "Запрос на softDelete счета для категории " + account.getTitle());
-        Log.d(TAG, "   - До удаления: ID=" + account.getId() + ", позиция=" + account.getPosition() + 
-              ", deleteTime=" + account.getDeleteTime() + ", deletedBy=" + account.getDeletedBy());
-        
         int deletedPosition = account.getPosition();
         account.setPosition(0);
         account.setDeleteTime(LocalDateTime.now());
         account.setDeletedBy(user);
-        
-        Log.d(TAG, "   - После установки: позиция=" + account.getPosition() + 
-              ", deleteTime=" + account.getDeleteTime() + ", deletedBy=" + account.getDeletedBy());
-        
-        repo.update(account);
-        
-        // Пересчитываем позиции после soft delete
-        repo.shiftPositionsDown(deletedPosition);
-        Log.d(TAG, "Счет " + account.getTitle() + " успешно soft deleted");
+        try {
+            repo.update(account);
+            // Пересчитываем позиции после soft delete
+            repo.shiftPositionsDown(deletedPosition);
+            Log.d(TAG, "Счет " + account.getTitle() + " успешно soft deleted");
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при soft delete счета: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -359,10 +310,10 @@ public class AccountService {
         }
 
         executorService.execute(() -> {
+            Log.d(TAG, "Запрос на обновление счета для категории " + account.getTitle());
+            account.setUpdateTime(LocalDateTime.now());
+            account.setUpdatedBy(user);
             try {
-                Log.d(TAG, "Запрос на обновление счета для категории " + account.getTitle());
-                account.setUpdateTime(LocalDateTime.now());
-                account.setUpdatedBy(user);
                 repo.update(account);
                 Log.d(TAG, "Запрос на обновление счета для категории " + account.getTitle() + " успешно отправлен");
             } catch (Exception e) {
@@ -385,7 +336,7 @@ public class AccountService {
      * @return общее количество счетов
      */
     public int getCount() {
-        return repo.getCount();
+        return repo.getCount(EntityFilter.ALL);
     }
     
     /**

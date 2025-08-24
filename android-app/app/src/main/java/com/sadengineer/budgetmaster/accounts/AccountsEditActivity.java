@@ -59,7 +59,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     /** Тип счета по умолчанию 1 */
     private final int DEFAULT_ACCOUNT_TYPE = ModelConstants.DEFAULT_ACCOUNT_TYPE;
     /** Баланс счета по умолчанию 0 */
-    private final int DEFAULT_ACCOUNT_BALANCE = ModelConstants.DEFAULT_ACCOUNT_BALANCE;
+    private final long DEFAULT_ACCOUNT_BALANCE = ModelConstants.DEFAULT_ACCOUNT_BALANCE;
     /** Статус счета по умолчанию 0 */
     private final int DEFAULT_ACCOUNT_STATUS_OPEN = ModelConstants.DEFAULT_ACCOUNT_STATUS_OPEN;
     /** ID валюты по умолчанию 1 */
@@ -274,7 +274,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
      * @return true если сохранение прошло успешно, false если была ошибка валидации
      */
     private boolean saveAccount() {
-        int balance = DEFAULT_ACCOUNT_BALANCE;
+        long balance = DEFAULT_ACCOUNT_BALANCE;
 
         // Валидация названия счета
         String accountName = accountNameEdit.getText().toString().trim();
@@ -293,8 +293,8 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
             try {
                 // Конвертируем рубли в копейки
                 double amount = formatter.parseSafe(balanceText);
-                accountValidator.validateBalance(amount);
-                balance = (int) (amount * 100);
+                balance = (long) (amount * 100);
+                accountValidator.validateAmount(balance);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Ошибка парсинга баланса: " + balanceText, e);
                 // Показываем ошибку в поле ввода
@@ -321,7 +321,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
         // Валидация ID валюты
         Integer selectedCurrencyID = getSelectedCurrencyId();
         try {
-            accountValidator.validateCurrencyID(selectedCurrencyID);
+            accountValidator.validateCurrencyId(selectedCurrencyID, currencies.size());
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Ошибка валидации ID валюты: " + e.getMessage(), e);
             ((TextView) accountCurrencySpinner.getSelectedView()).setError(e.getMessage());
@@ -358,7 +358,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                     return false;
                 }
                 // Если счет не существует, то создаем его
-                accountService.create(accountName, selectedCurrencyID, balance, accountType, isClosed);
+                accountService.create(accountName, selectedCurrencyID, Long.valueOf(balance), accountType, isClosed);
                 Log.d(TAG, "Запрос на создание счета: " + accountName + " отправлен");
             }
             // Возвращаемся к списку счетов

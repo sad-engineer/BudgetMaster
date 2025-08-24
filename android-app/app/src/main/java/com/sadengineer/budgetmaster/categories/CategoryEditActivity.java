@@ -23,7 +23,7 @@ import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 
 /**
@@ -52,7 +52,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     
     private static final int PARENT = ModelConstants.CATEGORY_TYPE_PARENT;
     private static final int CHILD = ModelConstants.CATEGORY_TYPE_CHILD;
-    public static final int DEFAULT_CATEGORY_ID = ModelConstants.DEFAULT_PARENT_CATEGORY_ID;
+    public static final int DEFAULT_CATEGORY_ID = ModelConstants.DEFAULT_PARENT_ID;
     
     /**
      * Метод вызывается при создании Activity

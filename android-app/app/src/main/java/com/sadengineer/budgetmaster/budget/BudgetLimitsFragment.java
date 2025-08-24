@@ -10,8 +10,8 @@ import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
-import com.sadengineer.budgetmaster.backend.entity.OperationTypeFilter; 
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter; 
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
      */
     @Override
     protected void performDataLoading() {
-        budgetService.getAll(EntityFilter.ACTIVE, operationType).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        budgetService.getAllByOperationType(operationType, EntityFilter.ACTIVE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
         Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = " + operationType.getIndex() + ")");
     }
     
@@ -150,7 +150,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
 
     @Override
     protected void performDelete(BudgetService service, Budget item) {
-        service.delete(false, item); // false = hard delete
+        service.delete(item, false); // false = hard delete
     }
 
     @Override

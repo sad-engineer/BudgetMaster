@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.database;
 
 import androidx.room.Database;
@@ -19,6 +18,7 @@ import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
+import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 
 /**
  * Основной класс базы данных Room для BudgetMaster
@@ -63,7 +63,7 @@ public abstract class BudgetMasterDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(
                         context.getApplicationContext(),
                         BudgetMasterDatabase.class,
-                        "budget_master_database"
+                        RepositoryConstants.DATABASE_PATH
                     )
                     .fallbackToDestructiveMigration()
                     .build();

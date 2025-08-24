@@ -134,7 +134,7 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
             for (Currency currency : currenciesToDelete) {
                 try {
                     Log.d(TAG, "Удаление валюты: ID=" + currency.getId());
-                    currencyService.delete(true, currency);
+                    currencyService.delete(currency, true);
                     deletedCount++;
                     Log.d(TAG, "Валюта ID: " + currency.getId() + " успешно удалена");
                 } catch (Exception e) {

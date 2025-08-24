@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.repository;
 
 import android.content.Context;
@@ -6,9 +5,10 @@ import android.content.Context;
 import androidx.lifecycle.LiveData;
 
 import com.sadengineer.budgetmaster.backend.dao.CategoryDao;
+
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -17,8 +17,6 @@ import java.util.List;
  */
 public class CategoryRepository {
 
-    private static final String TAG = "CategoryRepository";
-    
     private final CategoryDao dao;
     
     public CategoryRepository(Context context) {
@@ -27,82 +25,42 @@ public class CategoryRepository {
     }
 
     /**
-     * Получить все счета
-     * @param filter фильтр для выборки счетов
-     * @return LiveData со списком всех счетов
+     * Получить все категории по фильтру
+     * @param filter фильтр для выборки категорий (ACTIVE, DELETED, ALL)        
+     * @return LiveData со списком всех категорий
      */
     public LiveData<List<Category>> getAll(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActive();
-            case DELETED:
-                return dao.getAllDeleted();
-            case ALL:
-            default:
-                return dao.getAll();
-        }
+        return dao.getAll(filter);
     }
     
     /**
-     * Получить все счета
-     * @return LiveData со списком всех счетов
-     */
-    public LiveData<List<Category>> getAll() {
-        return dao.getAll();
-    }
-
-    /**
      * Получить все категории по типу операции
      * @param operationType тип операции
-     * @param filter фильтр для выборки категорий
+     * @param filter фильтр для выборки категорий (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех категорий
      */
     public LiveData<List<Category>> getAllByOperationType(int operationType, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByOperationType(operationType);
-            case DELETED:
-                return dao.getAllDeletedByOperationType(operationType);
-            case ALL:
-            default:
-                return dao.getAllByOperationType(operationType);
-        }
+        return dao.getAllByOperationType(operationType, filter);
     }
 
     /**
-     * Получить все категории по ID родителя
+     * Получить все категории по ID родителя по фильтру
      * @param parentId ID родителя
-     * @param filter фильтр для выборки категорий
+     * @param filter фильтр для выборки категорий (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех категорий
      */
     public LiveData<List<Category>> getAllByParentId(int parentId, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByParentId(parentId);
-            case DELETED:
-                return dao.getAllDeletedByParentId(parentId);
-            case ALL:
-            default:
-                return dao.getAllByParentId(parentId);
-        }
+        return dao.getAllByParentId(parentId, filter);
     }
 
     /**
      * Получить все категории по типу
      * @param type тип категории
-     * @param filter фильтр для выборки категорий
+     * @param filter фильтр для выборки категорий (ACTIVE, DELETED, ALL)
      * @return LiveData со списком всех категорий
      */
     public LiveData<List<Category>> getAllByType(String type, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveByType(type);
-            case DELETED:
-                return dao.getAllDeletedByType(type);
-            case ALL:
-            default:
-                return dao.getAllByType(type);
-        }
+        return dao.getAllByType(type, filter);
     }
 
     /**
@@ -190,45 +148,11 @@ public class CategoryRepository {
     }
 
     /**
-     * Получить количество категорий
-     * @param filter фильтр для выборки категорий
+     * Получить количество категорий по фильтру
+     * @param filter фильтр для выборки категорий (ACTIVE, DELETED, ALL)
      * @return количество категорий
      */
     public int getCount(EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.countActive();
-            case DELETED:
-                return dao.countDeleted();
-            case ALL:
-            default:
-                return dao.count();
-        }
-    }
-
-    /**
-     * Получить общее количество категорий (включая удаленные)
-     * @return общее количество категорий
-     */
-    public int getCount() {
-        return dao.count();
-    }
-    
-    /**
-     * Получить все дочерние категории для заданной категории (включая вложенные)
-     * @param categoryId ID категории
-     * @param filter фильтр для выборки категорий
-     * @return LiveData со списком всех дочерних категорий
-     */
-    public LiveData<List<Category>> getAllDescendants(int categoryId, EntityFilter filter) {
-        switch (filter) {
-            case ACTIVE:
-                return dao.getAllActiveDescendants(categoryId);
-            case DELETED:
-                return dao.getAllDeletedDescendants(categoryId);
-            case ALL:
-            default:
-                return dao.getAllDescendants(categoryId);
-        }
+        return dao.count(filter);
     }
 } 

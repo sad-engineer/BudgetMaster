@@ -55,7 +55,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private List<Currency> currencies = new ArrayList<>();
 
     // Константы
-    private static final int DEFAULT_BUDGET_AMOUNT = ModelConstants.DEFAULT_BUDGET_AMOUNT;
+    private static final long DEFAULT_AMOUNT = ModelConstants.DEFAULT_AMOUNT;
     
     /**
      * Метод вызывается при создании Activity
@@ -227,15 +227,15 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private boolean saveBudget() {
         Log.d(TAG, "Сохранение бюджета...");
-        int balance = DEFAULT_BUDGET_AMOUNT;    
+        long balance = DEFAULT_AMOUNT;    
         
         // Получаем данные из полей
         String amountText = budgetAmountEdit.getText().toString().trim();
         try {
             // Конвертируем рубли в копейки
             double amount = formatter.parseSafe(amountText);
-            validator.validateBudgetAmount(amount);
-            balance = (int) (amount * 100);
+            balance = (long) (amount * 100);
+            validator.validateAmount(balance);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Ошибка валидации суммы бюджета: " + e.getMessage(), e);
             budgetAmountEdit.setError(e.getMessage());
@@ -270,7 +270,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     /**
      * Создает новый бюджет (не используется - бюджеты создаются только через категории)
      */
-    private boolean createBudget(int categoryId, int amount, int currencyId) {
+    private boolean createBudget(int categoryId, long amount, int currencyId) {
         Log.e(TAG, "Попытка создания бюджета через BudgetEditActivity - недопустимо!");
         Log.e(TAG, "Бюджеты создаются только автоматически при создании категорий");
         throw new UnsupportedOperationException("Создание бюджетов через BudgetEditActivity не предусмотрено. Бюджеты создаются автоматически при создании категорий.");
@@ -279,7 +279,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     /**
      * Обновляет существующий бюджет
      */
-    private boolean updateBudget(int amount, int categoryId, int currencyId) {
+    private boolean updateBudget(long amount, int categoryId, int currencyId) {
         if (currentBudget == null) {
             Log.e(TAG, "currentBudget равен null, невозможно обновить бюджет");
             return false;

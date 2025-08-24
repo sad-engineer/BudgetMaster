@@ -135,7 +135,7 @@ public class AccountsSharedViewModel extends AndroidViewModel implements Selecti
             for (Account account : accountsToDelete) {
                 try {
                     Log.d(TAG, "Удаление счёта: ID=" + account.getId());
-                    accountService.delete(true, account);
+                    accountService.delete(account, true);
                     deletedCount++;
                     Log.d(TAG, "Счет ID: " + account.getId() + " успешно удален");
                 } catch (Exception e) {

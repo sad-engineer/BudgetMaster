@@ -1,18 +1,37 @@
-
 package com.sadengineer.budgetmaster.backend.validator;
+
+import static com.sadengineer.budgetmaster.backend.validator.BaseEntityValidator.*;
+
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_TITLE_EMPTY;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_TITLE_TOO_SHORT;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_TITLE_TOO_LONG;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_TITLE_INVALID_CHARS;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_BALANCE_EMPTY;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_BALANCE_MIN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_BALANCE_MAX;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_ACCOUNT_TYPE_INVALID;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_ID_MIN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_ID_MAX;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.STATUS_OPEN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.STATUS_CLOSED;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CLOSED_STATUS;
+
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_TITLE_LENGTH;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_TITLE_LENGTH;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.TITLE_PATTERN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_AMOUNT_VALUE;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_AMOUNT_VALUE;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_CURRENT;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_SAVINGS;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_CREDIT;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Валидатор для счетов
  */
 public class AccountValidator {
-    
-    private static final String TAG = "AccountValidator";
-    
-    // Минимальная длина названия счета
-    private static final int MIN_TITLE_LENGTH = 1;
-    
-    // Максимальная длина названия счета
-    private static final int MAX_TITLE_LENGTH = 50;
     
     /**
      * Валидирует название счета
@@ -20,63 +39,25 @@ public class AccountValidator {
      * @throws IllegalArgumentException если название невалидно
      */
     public static void validateTitle(String title) {
-        if (title == null) {
-            throw new IllegalArgumentException("Название счета не может быть пустым");
-        }
-        
-        String trimmedTitle = title.trim();
-        
-        if (trimmedTitle.isEmpty()) {
-            throw new IllegalArgumentException("Название счета не может быть пустым");
-        }
-        
-        if (trimmedTitle.length() < MIN_TITLE_LENGTH) {
-            throw new IllegalArgumentException("Название счета должно содержать минимум " + MIN_TITLE_LENGTH + " символ");
-        }
-        
-        if (trimmedTitle.length() > MAX_TITLE_LENGTH) {
-            throw new IllegalArgumentException("Название счета не может быть длиннее " + MAX_TITLE_LENGTH + " символов");
-        }
-        
-        // Проверяем на специальные символы
-        if (!trimmedTitle.matches("^[a-zA-Zа-яА-Я0-9\\s\\-_\\.]+$")) {
-            throw new IllegalArgumentException("Название счета содержит недопустимые символы");
-        }
+        validateNotEmpty(title, ERROR_ACCOUNT_TITLE_EMPTY);
+        String message = String.format(ERROR_ACCOUNT_TITLE_TOO_SHORT, MIN_TITLE_LENGTH);
+        validateMinLength(title, MIN_TITLE_LENGTH, message);
+        message = String.format(ERROR_ACCOUNT_TITLE_TOO_LONG, MAX_TITLE_LENGTH);
+        validateMaxLength(title, MAX_TITLE_LENGTH, message);
+        validatePattern(title, TITLE_PATTERN, ERROR_ACCOUNT_TITLE_INVALID_CHARS);
     }
     
     /**
-     * Валидирует баланс счета
-     * @param balance - баланс для валидации
+     * Валидирует сумму баланса счета
+     * @param amount - сумма баланс для валидации
      * @throws IllegalArgumentException если баланс невалиден
      */
-    public static void validateBalance(double balance) {
-        if (Double.isNaN(balance)) {
-            throw new IllegalArgumentException("Баланс не может быть NaN");
-        }
-        
-        if (Double.isInfinite(balance)) {
-            throw new IllegalArgumentException("Баланс не может быть бесконечным");
-        }
-        
-        // Можно добавить дополнительные проверки, например максимальный баланс
-        if (balance > 999999999.99) {
-            throw new IllegalArgumentException("Баланс не может превышать 999,999,999.99");
-        }
-    }
-    
-    /**
-     * Валидирует тип счета
-     * @param type - тип счета для валидации
-     * @throws IllegalArgumentException если тип невалиден
-     */
-    public static void validateType(Integer type) {
-        if (type == null) {
-            throw new IllegalArgumentException("Тип счета не может быть пустым");
-        }
-        
-        if (type != 1 && type != 2 && type != 3) {
-            throw new IllegalArgumentException("Тип счета должен быть 1, 2 или 3");
-        }
+    public static void validateAmount(long amount) {
+        validateNotNull(amount, ERROR_ACCOUNT_BALANCE_EMPTY);
+        String message = String.format(ERROR_ACCOUNT_BALANCE_MIN, MIN_AMOUNT_VALUE);
+        validateMinValue(amount, MIN_AMOUNT_VALUE, message);
+        message = String.format(ERROR_ACCOUNT_BALANCE_MAX, MAX_AMOUNT_VALUE);
+        validateMaxValue(amount, MAX_AMOUNT_VALUE, message);
     }
     
     /**
@@ -84,17 +65,31 @@ public class AccountValidator {
      * @param currencyID - валюта для валидации
      * @throws IllegalArgumentException если валюта невалидна
      */
-    public static void validateCurrencyID(int currencyID) {
-        if (currencyID < 1) {
-            throw new IllegalArgumentException("ID валюты не может быть меньше 1");
-        }
-        
-        // Проверяем, что ID валюты состоит из цифр
-        if (!String.valueOf(currencyID).matches("^[0-9]+$")) {
-            throw new IllegalArgumentException("ID валюты должен состоять из цифр");
-        }
+    public static void validateCurrencyId(Integer currencyID, int maxId) {
+        String message = String.format(ERROR_CURRENCY_ID_MIN, 0);
+        validateMinValue(currencyID, 0, message);
+        message = String.format(ERROR_CURRENCY_ID_MAX, maxId);
+        validateMaxValue(currencyID, maxId, message);
     }
-    
 
+    /**
+     * Валидирует тип счета
+     * @param type - тип счета для валидации
+     * @throws IllegalArgumentException если тип невалиден
+     */
+    public static void validateType(Integer type) {
+        List<Integer> listType = Arrays.asList(ACCOUNT_TYPE_CURRENT, ACCOUNT_TYPE_SAVINGS, ACCOUNT_TYPE_CREDIT);
+        validateInList(type, listType, ERROR_ACCOUNT_TYPE_INVALID);
+    }   
 
+    /**
+     * Валидирует статус закрытия счета
+     * @param closed - статус закрытия для валидации
+     * @throws IllegalArgumentException если статус невалиден
+     */
+    public static void validateClosed(Integer closed) {
+        List<Integer> listClosed = Arrays.asList(STATUS_OPEN, STATUS_CLOSED);
+        validateInList(closed, listClosed, ERROR_CLOSED_STATUS);
+    }
 } 
+

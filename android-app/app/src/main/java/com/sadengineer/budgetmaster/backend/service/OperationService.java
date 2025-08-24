@@ -1,16 +1,21 @@
-
 package com.sadengineer.budgetmaster.backend.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.room.Transaction;
 
-import com.sadengineer.budgetmaster.backend.entity.Account;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.OperationRepository;
+import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
+import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
+import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
+import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,291 +26,451 @@ import java.util.concurrent.ExecutorService;
  * Service класс для бизнес-логики работы с Operation
  */
 public class OperationService {
+
+    private static final String TAG = "OperationService";
     
-    private final OperationRepository operationRepository;
-    private final AccountService accountService;
-    private final CurrencyService currencyService;
+    private final OperationRepository repo;
     private final ExecutorService executorService;
     private final String user;
+    private final ServiceConstants constants;
+    private final OperationValidator validator;
+
+    private final AccountRepository accountRepo;
+    private final CategoryRepository categoryRepo;
+    private final CurrencyRepository currencyRepo;
     
     public OperationService(Context context, String user) {
-        this.operationRepository = new OperationRepository(context);
-        this.accountService = new AccountService(context, user);
-        this.currencyService = new CurrencyService(context, user);
+        this.repo = new OperationRepository(context);
+        this.accountRepo = new AccountRepository(context);
+        this.categoryRepo = new CategoryRepository(context);
+        this.currencyRepo = new CurrencyRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
+        this.constants = new ServiceConstants();
+        this.validator = new OperationValidator();
     }
     
-    // Получить все операции
-    public LiveData<List<Operation>> getAllOperations() {
-        return operationRepository.getAllOperations();
-    }
-    
-    // Получить операции по типу
-    public LiveData<List<Operation>> getOperationsByType(String type) {
-        return operationRepository.getOperationsByType(type);
-    }
-    
-    // Получить операции по счету
-    public LiveData<List<Operation>> getOperationsByAccount(int accountId) {
-        return operationRepository.getOperationsByAccount(accountId);
-    }
-    
-    // Получить операции по категории
-    public LiveData<List<Operation>> getOperationsByCategory(int categoryId) {
-        return operationRepository.getOperationsByCategory(categoryId);
-    }
-    
-    // Получить операции по валюте
-    public LiveData<List<Operation>> getOperationsByCurrency(int currencyId) {
-        return operationRepository.getOperationsByCurrency(currencyId);
-    }
-    
-    // Получить операции за день
-    public LiveData<List<Operation>> getOperationsByDay(LocalDateTime date) {
-        return operationRepository.getOperationsByDay(date);
-    }
-    
-    // Получить операции по комментарию
-    public LiveData<List<Operation>> getOperationsByComment(String comment) {
-        return operationRepository.getOperationsByComment(comment);
-    }
-    
-    // Получить операцию по ID
-    public LiveData<Operation> getOperationById(int id) {
-        return operationRepository.getOperationById(id);
-    }
-    
-    // Создать новую операцию
-    public void createOperation(String type, LocalDateTime date, int amount, String description, 
-                              int categoryId, int accountId, int currencyId) {
+    /**
+     * Операция создания новой операции (с проверками значений)
+     * @param type тип операции
+     * @param date дата операции
+     * @param amount сумма
+     * @param comment комментарий
+     * @param categoryId ID категории
+     * @param accountId ID счета
+     * @param currencyId ID валюты
+     */
+    public void create(Integer type, LocalDateTime date, Long amount, String comment, Integer categoryId, Integer accountId, Integer currencyId) {
+        validator.validateType(type);
+        validator.validateDate(date);
+        validator.validateAmount(amount);
+        validator.validateComment(comment);
+        validator.validateCategoryId(categoryId, categoryRepo.getCount(EntityFilter.ALL));
+        validator.validateAccountId(accountId, accountRepo.getCount(EntityFilter.ALL));
+        validator.validateCurrencyId(currencyId, currencyRepo.getCount(EntityFilter.ALL));
+
+        executorService.execute(() -> {
+            createOperationInTransaction(type, date, amount, comment, categoryId, accountId, currencyId);
+        });
+    }   
+
+    /**
+     * Транзакция для создания новой операции
+     * @param type тип операции
+     * @param date дата операции
+     * @param amount сумма
+     * @param comment комментарий
+     * @param categoryId ID категории
+     * @param accountId ID счета
+     * @param currencyId ID валюты
+     */
+    @Transaction
+    private void createOperationInTransaction(int type, LocalDateTime date, long amount, String comment, int categoryId, int accountId, int currencyId) {
+        Log.d(TAG, constants.MSG_CREATE_OPERATION_REQUEST);
         Operation operation = new Operation();
         operation.setType(type);
         operation.setOperationDate(date);
         operation.setAmount(amount);
-        operation.setDescription(description);
+        operation.setDescription(comment);
         operation.setCategoryId(categoryId);
         operation.setAccountId(accountId);
         operation.setCurrencyId(currencyId);
-        
-        operationRepository.insertOperation(operation, user);
+        try {
+        repo.insert(operation);
+        Log.d(TAG, constants.MSG_CREATE_OPERATION_SUCCESS);
+        } catch (Exception e) {
+            Log.e(TAG, constants.MSG_CREATE_OPERATION_ERROR + e.getMessage(), e);
+        }
     }
-    
-    // Создать операцию перевода
-    public void createTransferOperation(LocalDateTime date, int amount, String description,
-                                     int accountId, int currencyId, int toAccountId, int toCurrencyId, int toAmount) {
-        Operation operation = new Operation();
-        operation.setType("transfer");
-        operation.setOperationDate(date);
-        operation.setAmount(amount);
-        operation.setDescription(description);
-        operation.setAccountId(accountId);
-        operation.setCurrencyId(currencyId);
-        operation.setToAccountId(toAccountId);
-        operation.setToCurrencyId(toCurrencyId);
-        operation.setToAmount((int)toAmount);
-        
-        operationRepository.insertOperation(operation, user);
+
+    /**
+     * Удалить операцию по условию
+     * @param operation операция
+     * @param softDelete Условие удаления: true - soft delete, false - полное удаление
+     */
+    public void delete(Operation operation, boolean softDelete) {
+        if (operation == null) {
+            Log.e(TAG, constants.MSG_DELETE_OPERATION_NOT_FOUND);
+            return;
+        }
+        if (softDelete) {
+            softDelete(operation);
+        } else {
+            delete(operation);
+        }
     }
-    
-    // Обновить операцию
-    public void updateOperation(Operation operation) {
-        operationRepository.updateOperation(operation, user);
-    }
-    
-    // Удалить операцию (soft delete)
-    public void deleteOperation(int operationId) {
-        operationRepository.deleteOperation(operationId, user);
-    }
-    
-    // Восстановить удаленную операцию
-    public void restoreOperation(int operationId) {
+
+    /**
+     * Удалить операцию  (полное удаление - удаление строки из БД)
+     * @param operation операция
+     */
+    private void delete(Operation operation) {
         executorService.execute(() -> {
-            // Получаем удаленную операцию
-            Operation deletedOperation = operationRepository.getOperationById(operationId).getValue();
-            if (deletedOperation == null || !deletedOperation.isDeleted()) {
-                return; // Операция не найдена или уже активна
-            }
-            
-            // Очищаем поля удаления
-            deletedOperation.setDeleteTime(null);
-            deletedOperation.setDeletedBy(null);
-            deletedOperation.setUpdateTime(LocalDateTime.now());
-            deletedOperation.setUpdatedBy(user);
-            
-            // Обновляем операцию в базе
-            operationRepository.updateOperation(deletedOperation, user);
+            deleteOperationInTransaction(operation);
+        });
+    }  
+    
+    /**
+     * Транзакция для удаления операции
+     * @param operation операция
+     */
+    @Transaction
+    private void deleteOperationInTransaction(Operation operation) {
+        Log.d(TAG, constants.MSG_DELETE_OPERATION_REQUEST + getOperationText(operation));
+        try {
+            repo.delete(operation);
+            Log.d(TAG, constants.MSG_DELETE_OPERATION_SUCCESS + " " + getOperationText(operation));
+        } catch (Exception e) {
+            Log.e(TAG, constants.MSG_DELETE_OPERATION_ERROR + getOperationText(operation) + "': " + e.getMessage(), e);
+        }
+    }   
+
+    /**
+     * Получить все операции
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAll(EntityFilter filter) {
+        return repo.getAll(filter);
+    } 
+
+    /**
+     * Получить все операции по типу
+     * @param type тип операции
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByType(int type, EntityFilter filter) {
+        return repo.getAllByType(type, filter);
+    }
+
+    /**
+     * Получить все операции по счету
+     * @param accountId ID счета
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByAccount(int accountId, EntityFilter filter) {
+        return repo.getAllByAccount(accountId, filter);
+    }
+
+    /**
+     * Получить все операции по категории
+     * @param categoryId ID категории
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByCategory(int categoryId, EntityFilter filter) {
+        return repo.getAllByCategory(categoryId, filter);
+    }   
+
+    /**
+     * Получить все операции по валюте
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByCurrency(int currencyId, EntityFilter filter) {
+        return repo.getAllByCurrency(currencyId, filter);
+    }
+
+    /**
+     * Получить все операции по дате
+     * @param date дата
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByDate(LocalDateTime date, EntityFilter filter) {
+        return repo.getAllByDate(date, filter);
+    }
+
+    /**
+     * Получить все операции по месяцу
+     * @param year год
+     * @param month месяц
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByMonth(String year, String month, EntityFilter filter) {
+        return repo.getAllByMonth(year, month, filter);
+    }
+
+    /**
+     * Получить все операции по году
+     * @param year год
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAllByYear(String year, EntityFilter filter) {
+        return repo.getAllByYear(year, filter);
+    }
+    
+    /**
+     * Получает все операции по периоду с фильтром
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param filter фильтр для выборки операций (ACTIVE, DELETED, ALL)
+     * @return список операций
+     */
+    public LiveData<List<Operation>> getAllByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return repo.getAllByDateRange(startDate, endDate, filter);
+    }
+    
+    /**
+     * Получает операцию по ID
+     * @param id ID операции
+     * @return операция
+     */
+    public LiveData<Operation> getById(int id) {
+        return repo.getById(id);
+    }
+
+    /**
+     * Подсчет операций с фильтром
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций
+     */
+    public int getCount(EntityFilter filter) {
+        return repo.count(filter);
+    }
+    
+    /**
+     * Подсчет операций по типу с фильтром
+     * @param type тип операции
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций по типу
+     */
+    public int getCountByType(int type, EntityFilter filter) {
+        return repo.countByType(type, filter);
+    }
+    
+    /**
+     * Подсчет операций по счету с фильтром
+     * @param accountId ID счета
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций по счету
+     */
+    public int getCountByAccount(int accountId, EntityFilter filter) {
+        return repo.countByAccount(accountId, filter);
+    }
+    
+    /**
+     * Подсчет операций по категории с фильтром
+     * @param categoryId ID категории
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций по категории
+     */
+    public int getCountByCategory(int categoryId, EntityFilter filter) {
+        return repo.countByCategory(categoryId, filter);
+    }
+    
+    /**
+     * Подсчет операций по валюте с фильтром
+     * @param currencyId ID валюты
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций по валюте
+     */
+    public int getCountByCurrency(int currencyId, EntityFilter filter) {
+        return repo.countByCurrency(currencyId, filter);
+    }
+    
+    /**
+     * Подсчет операций за день с фильтром
+     * @param date дата
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций за день
+     */
+    public int getCountByDate(LocalDateTime date, EntityFilter filter) {
+        return repo.countByDate(date, filter);
+    }
+
+    /**
+     * Подсчет операций за месяц с фильтром
+     * @param year год
+     * @param month месяц
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций за месяц 
+     */
+    public int getCountByMonth(String year, String month, EntityFilter filter) {
+        return repo.countByMonth(year, month, filter);
+    }
+    
+    /**
+     * Подсчет операций за год с фильтром
+     * @param year год
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций за год
+     */
+    public int getCountByYear(String year, EntityFilter filter) {
+        return repo.countByYear(year, filter);
+    }
+
+    /**
+     * Подсчет операций за диапазон дат с фильтром
+     * @param startDate начало диапазона
+     * @param endDate конец диапазона
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return количество операций за диапазон дат
+     */
+    public int getCountByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return repo.countByDateRange(startDate, endDate, filter);
+    }
+
+    /**
+     * Получить текст операции для вывода в лог
+     * @param operation операция
+     * @return текст операции
+     */
+    private String getOperationText(Operation operation) {
+        int type = operation.getType();
+        LocalDateTime date = operation.getOperationDate();
+        long amount = operation.getAmount();
+        int categoryId = operation.getCategoryId();
+        String text = "Тип: " + type + ", Дата: " + date + ", Сумма: " + amount + ", Категория: " + categoryId;
+        return text;
+    }
+
+    /**
+     * Получает общую сумму операций по типу с фильтром
+     * @param type тип операции
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по типу
+     */
+    public LiveData<Integer> getTotalAmountByType(int type, EntityFilter filter) {
+        return repo.getTotalAmountByType(type, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по счету с фильтром
+     * @param accountId ID счета
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по счету
+     */
+    public LiveData<Integer> getTotalAmountByAccount(int accountId, EntityFilter filter) {
+        return repo.getTotalAmountByAccount(accountId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по категории с фильтром
+     * @param categoryId ID категории
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по категории
+     */ 
+    public LiveData<Integer> getTotalAmountByCategory(int categoryId, EntityFilter filter) {
+        return repo.getTotalAmountByCategory(categoryId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по валюте с фильтром
+     * @param currencyId ID валюты
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по валюте
+     */
+    public LiveData<Integer> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
+        return repo.getTotalAmountByCurrency(currencyId, filter);
+    }
+
+    /**
+     * Восстановить удаленную операцию (soft delete)
+     * @param deletedOperation удаленная операция
+     */
+    public void restore(Operation deletedOperation) {
+        if (deletedOperation == null) {
+            Log.e(TAG, constants.MSG_RESTORE_OPERATION_NOT_FOUND);
+            return;
+        }
+        executorService.execute(() -> {
+            restoreOperationInTransaction(deletedOperation);
         });
     }
     
-    // // Получить операции с автоматическим получением счетов и валют по названиям
-    // public LiveData<Operation> createOperationWithTitles(String type, LocalDateTime date, int amount, 
-    //                                                    String description, int categoryId, 
-    //                                                    String accountTitle, String currencyTitle) {
-    //     MutableLiveData<Operation> liveData = new MutableLiveData<>();
-    //     executorService.execute(() -> {
-    //         // Получаем счет и валюту по названиям
-    //         Account account = accountService.getAccountByTitle(accountTitle).getValue();
-    //         Currency currency = currencyService.getByTitle(currencyTitle).getValue();
-            
-    //         if (account != null && currency != null) {
-    //             Operation operation = new Operation();
-    //             operation.setType(type);
-    //             operation.setOperationDate(date);
-    //             operation.setAmount(amount);
-    //             operation.setDescription(description);
-    //             operation.setCategoryId(categoryId);
-    //             operation.setAccountId(account.getId());
-    //             operation.setCurrencyId(currency.getId());
-                
-    //             operationRepository.insertOperation(operation, user);
-    //             liveData.postValue(operation);
-    //         }
-    //     });
-    //     return liveData;
-    // }
-    
-    // // Создать перевод с автоматическим получением счетов и валют по названиям
-    // public LiveData<Operation> createTransferWithTitles(LocalDateTime date, int amount, String description,
-    //                                                   String accountTitle, String currencyTitle,
-    //                                                   String toAccountTitle, String toCurrencyTitle, int toAmount) {
-    //     MutableLiveData<Operation> liveData = new MutableLiveData<>();
-    //     executorService.execute(() -> {
-    //         // Получаем счета и валюты по названиям
-    //         Account account = accountService.getAccountByTitle(accountTitle).getValue();
-    //         Currency currency = currencyService.getByTitle(currencyTitle).getValue();
-    //         Account toAccount = accountService.getAccountByTitle(toAccountTitle).getValue();
-    //         Currency toCurrency = currencyService.getByTitle(toCurrencyTitle).getValue();
-            
-    //         if (account != null && currency != null && toAccount != null && toCurrency != null) {
-    //             Operation operation = new Operation();
-    //             operation.setType("transfer");
-    //             operation.setOperationDate(date);
-    //             operation.setAmount(amount);
-    //             operation.setDescription(description);
-    //             operation.setAccountId(account.getId());
-    //             operation.setCurrencyId(currency.getId());
-    //             operation.setToAccountId(toAccount.getId());
-    //             operation.setToCurrencyId(toCurrency.getId());
-    //             operation.setToAmount((int)toAmount);
-                
-    //             operationRepository.insertOperation(operation, user);
-    //             liveData.postValue(operation);
-    //         }
-    //     });
-    //     return liveData;
-    // }
-    
-    // // Получить счет по названию через AccountService
-    // public LiveData<Account> getAccount(String accountTitle) {
-    //     return accountService.getAccountByTitle(accountTitle);
-    // }
-    
-    // // Получить счет по названию (для внутреннего использования)
-    // public LiveData<Account> getAccountByTitle(String accountTitle) {
-    //     return accountService.getAccountByTitle(accountTitle);
-    // }
-    
-    // Получить валюту по названию через CurrencyService
-    public LiveData<Currency> getCurrency(String currencyTitle) {
-        return currencyService.getByTitle(currencyTitle);
-    }
-    
-    
-    // Получить общую сумму операций по типу
-    public LiveData<Integer> getTotalAmountByType(String type) {
-        return operationRepository.getTotalAmountByType(type);
-    }
-    
-    // Получить общую сумму операций по счету
-    public LiveData<Integer> getTotalAmountByAccount(int accountId) {
-        return operationRepository.getTotalAmountByAccount(accountId);
-    }
-    
-    // Получить общую сумму операций по категории
-    public LiveData<Integer> getTotalAmountByCategory(int categoryId) {
-        return operationRepository.getTotalAmountByCategory(categoryId);
-    }
-    
-    // Получить общую сумму операций по валюте
-    public LiveData<Integer> getTotalAmountByCurrency(int currencyId) {
-        return operationRepository.getTotalAmountByCurrency(currencyId);
-    }
-    
-    // Получить количество операций
-    public LiveData<Integer> getOperationsCount() {
-        return operationRepository.getOperationsCount();
-    }
-    
-    // Валидация операции
-    public boolean validateOperation(Operation operation) {
-        if (operation.getType() == null || operation.getType().trim().isEmpty()) {
-            return false;
+    /**
+     * Транзакция для восстановления операции
+     * @param deletedOperation удаленная операция
+     */
+    @Transaction
+    private void restoreOperationInTransaction(Operation deletedOperation) {
+        Log.d(TAG, constants.MSG_RESTORE_OPERATION_REQUEST + getOperationText(deletedOperation));
+        deletedOperation.setDeleteTime(null);
+        deletedOperation.setDeletedBy(null);
+        deletedOperation.setUpdateTime(LocalDateTime.now());
+        deletedOperation.setUpdatedBy(user);
+        try {
+            repo.update(deletedOperation);
+            Log.d(TAG, constants.MSG_RESTORE_OPERATION_SUCCESS + getOperationText(deletedOperation));
+        } catch (Exception e) {
+            Log.e(TAG, constants.MSG_RESTORE_OPERATION_ERROR + getOperationText(deletedOperation) + "': " + e.getMessage(), e);
         }
-        if (!operation.getType().equals("income") && !operation.getType().equals("expense") && !operation.getType().equals("transfer")) {
-            return false;
-        }
-        if (operation.getAmount() <= 0) {
-            return false;
-        }
-        if (operation.getAccountId() <= 0) {
-            return false;
-        }
-        if (operation.getCategoryId() <= 0) {
-            return false;
-        }
-        if (operation.getCurrencyId() <= 0) {
-            return false;
-        }
-        if (operation.getOperationDate() == null) {
-            return false;
-        }
-        return true;
     }
-    
-    // Проверить, является ли операция расходом
-    public boolean isExpense(Operation operation) {
-        return operation != null && operation.isExpense();
+
+    /**
+     * Удалить операцию (soft delete)
+     * @param operation операция
+     */
+    private void softDelete(Operation operation) {
+        executorService.execute(() -> {
+            softDeleteOperationInTransaction(operation);
+        });
     }
-    
-    // Проверить, является ли операция доходом
-    public boolean isIncome(Operation operation) {
-        return operation != null && operation.isIncome();
-    }
-    
-    // Проверить, является ли операция переводом
-    public boolean isTransfer(Operation operation) {
-        return operation != null && operation.isTransfer();
-    }
-    
-    // Получить баланс по счету
-    public LiveData<Integer> getAccountBalance(int accountId) {
-        return operationRepository.getAccountBalance(accountId);
-    }
-    
-    // Получить статистику по операциям
-    public LiveData<OperationStatistics> getOperationStatistics() {
-        return operationRepository.getOperationStatistics();
-    }
-    
-    // Класс для статистики операций
-    public static class OperationStatistics {
-        private int totalIncome;
-        private int totalExpense;
-        private int totalTransfer;
-        private int operationsCount;
-        
-        public OperationStatistics(int totalIncome, int totalExpense, int totalTransfer, int operationsCount) {
-            this.totalIncome = totalIncome;
-            this.totalExpense = totalExpense;
-            this.totalTransfer = totalTransfer;
-            this.operationsCount = operationsCount;
+
+    /**
+     * Транзакция для удаления операции (soft delete)
+     * Операция не удаляется из БД, а только помечается как удаленная
+     * @param operation операция
+     */
+    @Transaction
+    private void softDeleteOperationInTransaction(Operation operation) {
+        Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_REQUEST + getOperationText(operation));
+        operation.setDeleteTime(LocalDateTime.now());
+        operation.setDeletedBy(user);
+        try {
+            repo.update(operation);
+            Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_SUCCESS + getOperationText(operation));
+        } catch (Exception e) {
+            Log.e(TAG, constants.MSG_SOFT_DELETE_OPERATION_ERROR + getOperationText(operation) + "': " + e.getMessage(), e);
         }
-        
-        public int getTotalIncome() { return totalIncome; }
-        public int getTotalExpense() { return totalExpense; }
-        public int getTotalTransfer() { return totalTransfer; }
-        public int getOperationsCount() { return operationsCount; }
-        public int getNetAmount() { return totalIncome - totalExpense; }
+    }
+
+    /**
+     * Обновить операцию
+     * @param operation операция
+     */
+    public void update(Operation operation) {
+        if (operation == null) {
+            Log.e(TAG, constants.MSG_UPDATE_OPERATION_NOT_FOUND);
+            return;
+        }
+
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, constants.MSG_UPDATE_OPERATION_REQUEST + getOperationText(operation));
+                operation.setUpdateTime(LocalDateTime.now());
+                operation.setUpdatedBy(user);
+                repo.update(operation);
+                Log.d(TAG, constants.MSG_UPDATE_OPERATION_SUCCESS + getOperationText(operation));
+            } catch (Exception e) {
+                Log.e(TAG, constants.MSG_UPDATE_OPERATION_ERROR + getOperationText(operation) + ": " + e.getMessage(), e);
+            }
+        });
     }
 } 

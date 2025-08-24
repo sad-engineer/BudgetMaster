@@ -15,7 +15,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 import java.util.List;
@@ -157,7 +157,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
         // Удаляем категории из базы данных
         for (Category category : selectedCategories) {
             try {
-                categoryService.delete(true, category);
+                categoryService.delete(category, true);
                 Log.d(TAG, "Удалена категория: " + category.getTitle());
             } catch (Exception e) {
                 Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
@@ -207,7 +207,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
     private void deleteCategory(Category category) {
         try {
             Log.d(TAG, "Удаляем категорию из базы данных: " + category.getTitle());
-            categoryService.delete(false, category);
+            categoryService.delete(category, false);
             Log.d(TAG, "Запрос на удаление категории отправлен: " + category.getTitle());
         } catch (Exception e) {
             Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);

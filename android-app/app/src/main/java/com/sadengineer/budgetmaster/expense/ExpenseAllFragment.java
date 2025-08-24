@@ -5,7 +5,9 @@ import android.util.Log;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -70,7 +72,7 @@ public class ExpenseAllFragment extends BaseListFragment<Operation, ExpenseAdapt
         // Используем сервис из базового класса
         OperationService service = getServiceInstance();
         if (service != null) {
-            service.getOperationsByType("expense").observe(getViewLifecycleOwner(), this::handleDataLoaded);
+            service.getAllByType(OperationTypeFilter.EXPENSE.getIndex(), EntityFilter.ALL).observe(getViewLifecycleOwner(), this::handleDataLoaded);
         }
     }
 

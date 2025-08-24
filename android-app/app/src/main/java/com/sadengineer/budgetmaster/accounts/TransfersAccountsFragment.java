@@ -8,7 +8,7 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
-import com.sadengineer.budgetmaster.backend.entity.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -76,7 +76,7 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
         // Используем сервис из базового класса
         AccountService service = getServiceInstance();
         if (service != null) {
-            service.getAllByType(EntityFilter.ALL, ACCOUNT_TYPE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+            service.getAllByType(ACCOUNT_TYPE, EntityFilter.ALL).observe(getViewLifecycleOwner(), this::handleDataLoaded);
         }
     }
 
@@ -141,7 +141,7 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
      */
     @Override
     protected void performDelete(AccountService service, Account item) {
-        service.delete(false, item);
+        service.delete(item, false);
     }
 
     /**

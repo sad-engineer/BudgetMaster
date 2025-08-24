@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="budget_master" uuid="2a821c87-479c-4054-af91-73f771bf6fa6">
+    <data-source source="LOCAL" name="budget_master [2]" uuid="2e91fa28-b3fc-4dd7-b481-e54978ecf6d4">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\Korenyk.A\Documents\Prodjects\BudgetMaster\backend\com\sadengineer\budgetmaster\backend\budget_master.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:D:\src\BudgetMaster\backend\com\sadengineer\budgetmaster\backend\budget_master.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/xerial/sqlite-jdbc/3.45.1.0/sqlite-jdbc-3.45.1.0.jar</url>
+        </library>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar</url>
+        </library>
         <library>
           <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/xerial/sqlite-jdbc/3.45.1.0/sqlite-jdbc-3.45.1.0.jar</url>
         </library>

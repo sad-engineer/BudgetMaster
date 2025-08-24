@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -7,6 +6,7 @@ import androidx.room.TypeConverters;
 import androidx.room.Index;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
+import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 
 import java.io.Serializable;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  * Entity класс для валют
  */
 @Entity(
-    tableName = "currencies", 
+    tableName = RepositoryConstants.TABLE_CURRENCIES, 
     indices = {
         @Index(
             value = "title", 

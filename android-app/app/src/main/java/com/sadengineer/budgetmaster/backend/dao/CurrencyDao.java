@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.dao;
 
 import androidx.room.Dao;
@@ -9,8 +8,8 @@ import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
 
-import com.sadengineer.budgetmaster.backend.constants.SqlConstants;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.util.List;
 
@@ -19,38 +18,18 @@ import java.util.List;
  */
 @Dao
 public interface CurrencyDao {
-    // Константы для SQL запросов
-    private final String TABLE = SqlConstants.TABLE_CURRENCIES;
-    private final String ENTITY_FILTER_CONDITION = SqlConstants.ENTITY_FILTER_CONDITION;
-    private final String ACTIVE_CONDITION = SqlConstants.ACTIVE_CONDITION;
-    private final String DELETED_CONDITION = SqlConstants.DELETED_CONDITION;
-    private final String ID_CONDITION = SqlConstants.ID_CONDITION;
-    private final String POSITION_CONDITION = SqlConstants.POSITION_CONDITION;
-    private final String TITLE_CONDITION = SqlConstants.TITLE_CONDITION;
-    private final String SHORT_NAME_CONDITION = SqlConstants.SHORT_NAME_CONDITION;
-    private final String SORT_CONDITION = SqlConstants.POSITION_SORT_CONDITION;
-    private final String SORT_CONDITION_0_END = SqlConstants.POSITION_SORT_CONDITION_0_END;
+    
 
     /**
-     * Количество активных валют
-     * @return количество активных валют
-     */
-    @Query("SELECT COUNT(*) FROM " + TABLE + " WHERE " + ENTITY_FILTER_CONDITION)
-    int countActive();
-
-    /**
-     * Количество удаленных валют
-     * @return количество удаленных валют
-     */
-    @Query("SELECT COUNT(*) FROM " + TABLE + " WHERE " + DELETED_CONDITION)
-    int countDeleted();
-
-    /**
-     * Общее количество валют (включая удаленные)
+     * Общее количество валют по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return общее количество валют
      */
-    @Query("SELECT COUNT(*) FROM " + TABLE)
-    int count();
+    @Query("SELECT COUNT(*) FROM currencies WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    int count(EntityFilter filter);
 
     /**
      * Удаляет валюту из базы данных
@@ -62,36 +41,27 @@ public interface CurrencyDao {
     /**
      * Удаляет все валюты из базы данных
      */
-    @Query("DELETE FROM " + TABLE)
+    @Query("DELETE FROM currencies")
     void deleteAll();
     
     /**
-     * Получает все валюты, включая удаленные
-     * @return список валют, отсортированных по позиции (счета с позицией 0 в конце)
+     * Получает все валюты по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список валют, отсортированных по позиции (валюты с позицией 0 в конце)
      */
-    @Query("SELECT * FROM " + TABLE + " ORDER BY " + SORT_CONDITION_0_END)
-    LiveData<List<Currency>> getAll();
-
-    /**
-     * Получает все активные валюты
-     * @return список активных валют, отсортированных по позиции
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ACTIVE_CONDITION + " ORDER BY " + SORT_CONDITION)
-    LiveData<List<Currency>> getAllActive();
-
-    /**
-     * Получает все удаленные валюты
-     * @return список удаленных валют, отсортированных по позиции
-     */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + DELETED_CONDITION + " ORDER BY " + SORT_CONDITION)
-    LiveData<List<Currency>> getAllDeleted();
-
+    @Query("SELECT * FROM currencies WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) " +
+           "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
+    LiveData<List<Currency>> getAll(EntityFilter filter);
+    
     /**
      * Получает валюту по ID (включая удаленные)
      * @param id ID валюты
      * @return валюта с указанным ID
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ID_CONDITION)
+    @Query("SELECT * FROM currencies WHERE id = :id")
     LiveData<Currency> getById(int id);
     
     /**
@@ -99,7 +69,7 @@ public interface CurrencyDao {
      * @param id ID валюты
      * @return валюта с указанным ID
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + ID_CONDITION)
+    @Query("SELECT * FROM currencies WHERE id = :id")
     Currency getByIdSync(int id);
         
     /**
@@ -107,7 +77,7 @@ public interface CurrencyDao {
      * @param position позиция валюты
      * @return валюта с указанной позицией
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + POSITION_CONDITION)
+    @Query("SELECT * FROM currencies WHERE position = :position")
     LiveData<Currency> getByPosition(int position);
     
     /**
@@ -115,7 +85,7 @@ public interface CurrencyDao {
      * @param title название валюты
      * @return валюта с указанным названием
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + TITLE_CONDITION)
+    @Query("SELECT * FROM currencies WHERE title = :title")
     LiveData<Currency> getByTitle(String title);
 
     /**
@@ -123,7 +93,7 @@ public interface CurrencyDao {
      * @param shortName короткое имя валюты
      * @return валюта с указанным коротким именем
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + SHORT_NAME_CONDITION)
+    @Query("SELECT * FROM currencies WHERE shortName = :shortName")
     LiveData<Currency> getByShortName(String shortName);
 
     /**
@@ -131,7 +101,7 @@ public interface CurrencyDao {
      * @param title название валюты
      * @return true если валюта существует, false если нет
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM " + TABLE + " WHERE " + TITLE_CONDITION + ")")
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE title = :title)")
     boolean existsByTitle(String title);
 
     /**
@@ -139,7 +109,7 @@ public interface CurrencyDao {
      * @param shortName короткое имя валюты
      * @return true если валюта существует, false если нет
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM " + TABLE + " WHERE " + SHORT_NAME_CONDITION + ")")
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE shortName = :shortName)")
     boolean existsByShortName(String shortName);
 
     /**
@@ -148,7 +118,7 @@ public interface CurrencyDao {
      * @param excludeId ID валюты, которую нужно исключить из проверки
      * @return true если валюта существует, false если нет
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM " + TABLE + " WHERE " + TITLE_CONDITION + " AND id != :excludeId)")
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE title = :title AND id != :excludeId)")
     boolean existsByTitleExcludingId(String title, int excludeId);
 
     /**
@@ -157,14 +127,14 @@ public interface CurrencyDao {
      * @param excludeId ID валюты, которую нужно исключить из проверки
      * @return true если валюта существует, false если нет
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM " + TABLE + " WHERE " + SHORT_NAME_CONDITION + " AND id != :excludeId)")
+    @Query("SELECT EXISTS(SELECT 1 FROM currencies WHERE shortName = :shortName AND id != :excludeId)")
     boolean existsByShortNameExcludingId(String shortName, int excludeId);
 
     /**
      * Получает максимальную позицию среди валют
      * @return максимальная позиция или 0, если валют нет
      */
-    @Query("SELECT COALESCE(MAX(position), 0) FROM " + TABLE)
+    @Query("SELECT COALESCE(MAX(position), 0) FROM currencies")
     int getMaxPosition();
 
     /**
@@ -180,7 +150,7 @@ public interface CurrencyDao {
      * @param searchQuery подстрока для поиска
      * @return список валют, содержащих подстроку в названии
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + TITLE_CONDITION + " ORDER BY " + SORT_CONDITION)
+    @Query("SELECT * FROM currencies WHERE title = :searchQuery ORDER BY position ASC")
     LiveData<List<Currency>> searchByTitle(String searchQuery);
 
     /**
@@ -188,21 +158,21 @@ public interface CurrencyDao {
      * @param searchQuery подстрока для поиска
      * @return список валют, содержащих подстроку в названии или коротком имени
      */
-    @Query("SELECT * FROM " + TABLE + " WHERE " + TITLE_CONDITION + " OR " + SHORT_NAME_CONDITION + " ORDER BY " + SORT_CONDITION)
+    @Query("SELECT * FROM currencies WHERE title = :searchQuery OR shortName = :searchQuery ORDER BY position ASC")
     LiveData<List<Currency>> searchByTitleOrShortName(String searchQuery);
     
     /**
      * Сдвигает позиции валют вниз начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE " + TABLE + " SET position = position - 1 WHERE position > :fromPosition")
+    @Query("UPDATE currencies SET position = position - 1 WHERE position > :fromPosition")
     void shiftPositionsDown(int fromPosition);
 
     /**
      * Сдвигает позиции валют вверх начиная с указанной позиции
      * @param fromPosition позиция, с которой начинается сдвиг
      */
-    @Query("UPDATE " + TABLE + " SET position = position + 1 WHERE position >= :fromPosition")
+    @Query("UPDATE currencies SET position = position + 1 WHERE position >= :fromPosition")
     void shiftPositionsUp(int fromPosition);
 
     /**
@@ -216,7 +186,7 @@ public interface CurrencyDao {
      * выравнивает позиции валют после удаления, игнорирует записи с position = 0
      * Устраняет разрывы в позициях
      */
-    @Query("UPDATE " + TABLE + " SET position = position - 1 WHERE position > 1 AND position != 0")
+    @Query("UPDATE currencies SET position = position - 1 WHERE position > 1 AND position != 0")
     void updatePositionsAfterDelete();
 
 } 

@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.converter;
 
 import androidx.room.TypeConverter;

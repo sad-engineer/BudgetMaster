@@ -1,4 +1,3 @@
-
 package com.sadengineer.budgetmaster.backend.entity;
 
 import androidx.room.Entity;
@@ -8,6 +7,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
+import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 /**
  * Entity класс для операций (доходы/расходы)
  */
-@Entity(tableName = "operations",
+@Entity(tableName = RepositoryConstants.TABLE_OPERATIONS,
         foreignKeys = {
                 @ForeignKey(entity = Account.class,
                         parentColumns = "id",
@@ -38,14 +38,14 @@ public class Operation implements Serializable {
     
     private int accountId;
     private int categoryId;
-    private int amount; // Сумма в копейках
+    private long amount; // Сумма в копейках (long)
     private String description;
     private LocalDateTime operationDate; // Изменено с Date на LocalDateTime
-    private String type; // "income" или "expense"
+    private int type; // 1 - "income", 2 - "expense"
     private int currencyId; // ID валюты операции
     private Integer toAccountId; // ID целевого счета (для переводов)
     private Integer toCurrencyId; // ID целевой валюты (для переводов)
-    private Integer toAmount; // Сумма в целевой валюте (для переводов)
+    private Long toAmount; // Сумма в целевой валюте (для переводов)
     
     // Поля из BaseEntity
     private LocalDateTime createTime;
@@ -83,11 +83,11 @@ public class Operation implements Serializable {
         this.categoryId = categoryId;
     }
     
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
     
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
     
@@ -107,11 +107,11 @@ public class Operation implements Serializable {
         this.operationDate = operationDate;
     }
     
-    public String getType() {
+    public int getType() {
         return type;
     }
     
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
     
@@ -188,11 +188,11 @@ public class Operation implements Serializable {
         this.toCurrencyId = toCurrencyId;
     }
     
-    public Integer getToAmount() {
+    public Long getToAmount() {
         return toAmount;
     }
     
-    public void setToAmount(Integer toAmount) {
+    public void setToAmount(Long toAmount) {
         this.toAmount = toAmount;
     }
     

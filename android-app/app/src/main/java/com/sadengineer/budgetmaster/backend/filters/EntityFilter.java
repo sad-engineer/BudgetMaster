@@ -1,4 +1,4 @@
-package com.sadengineer.budgetmaster.backend.entity;
+package com.sadengineer.budgetmaster.backend.filters;
 
 /**
  * Фильтр для работы с бюджетами
