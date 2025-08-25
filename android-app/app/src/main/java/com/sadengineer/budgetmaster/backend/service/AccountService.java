@@ -155,7 +155,7 @@ public class AccountService {
      */
     @Transaction
     private void createAccountInTransaction(String title, int currencyId, long amount, int type, int closed) {
-        Log.d(TAG, "Запрос на создание счета: " + title);
+        Log.d(TAG, String.format(constants.MSG_CREATE_ACCOUNT_REQUEST, title));
         Account account = new Account();
         account.setTitle(title);
         account.setAmount(amount);
@@ -167,9 +167,9 @@ public class AccountService {
         account.setCreatedBy(user);
         try {
             repo.insert(account);
-            Log.d(TAG, "Счет " + title + " успешно создан");
+            Log.d(TAG, String.format(constants.MSG_ACCOUNT_CREATED, title));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при создании счета: " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_CREATE_ACCOUNT_ERROR, title) + e.getMessage(), e);
         }
     }
 
@@ -180,7 +180,7 @@ public class AccountService {
      */
     public void delete(Account account, boolean softDelete) {
         if (account == null) {
-            Log.e(TAG, "Счет не найден для удаления. Удаление было отменено");
+            Log.e(TAG, constants.MSG_DELETE_ACCOUNT_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -206,12 +206,12 @@ public class AccountService {
      */
     @Transaction
     private void deleteAccountInTransaction(Account account) {
-        Log.d(TAG, "Запрос на удаление счета: " + account.getTitle());
+        Log.d(TAG, String.format(constants.MSG_DELETE_ACCOUNT_REQUEST, account.getTitle()));
         try {
             repo.delete(account);
-            Log.d(TAG, "Счет " + account.getTitle() + " успешно удален");
+            Log.d(TAG, String.format(constants.MSG_ACCOUNT_DELETED, account.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при удалении счета: " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_DELETE_ACCOUNT_ERROR, account.getTitle()) + e.getMessage(), e);
         }
     }   
     
@@ -267,7 +267,7 @@ public class AccountService {
      */
     @Transaction
     private void restoreAccountInTransaction(Account deletedAccount) {
-        Log.d(TAG, "Запрос на восстановление счета для категории " + deletedAccount.getTitle());
+        Log.d(TAG, String.format(constants.MSG_RESTORE_ACCOUNT_REQUEST, deletedAccount.getTitle()));
         deletedAccount.setPosition(repo.getMaxPosition() + 1);
         deletedAccount.setDeleteTime(null);
         deletedAccount.setDeletedBy(null);
@@ -275,9 +275,9 @@ public class AccountService {
         deletedAccount.setUpdatedBy(user);
         try {
             repo.update(deletedAccount);
-            Log.d(TAG, "Счет " + deletedAccount.getTitle() + " успешно восстановлен");
+            Log.d(TAG, String.format(constants.MSG_ACCOUNT_RESTORED, deletedAccount.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при восстановлении счета: " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_RESTORE_ACCOUNT_ERROR, deletedAccount.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -297,7 +297,7 @@ public class AccountService {
      */
     @Transaction
     private void softDeleteAccountInTransaction(Account account) {
-        Log.d(TAG, "Запрос на softDelete счета для категории " + account.getTitle());
+        Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_ACCOUNT_REQUEST, account.getTitle()));
         int deletedPosition = account.getPosition();
         account.setPosition(0);
         account.setDeleteTime(LocalDateTime.now());
@@ -306,9 +306,9 @@ public class AccountService {
             repo.update(account);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, "Счет " + account.getTitle() + " успешно soft deleted");
+            Log.d(TAG, String.format(constants.MSG_ACCOUNT_SOFT_DELETED, account.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при soft delete счета: " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_ACCOUNT_ERROR, account.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -318,19 +318,19 @@ public class AccountService {
      */
     public void update(Account account) {
         if (account == null) {
-            Log.e(TAG, "Счет не найден для обновления. Обновление было отменено");
+            Log.e(TAG, constants.MSG_UPDATE_ACCOUNT_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
-            Log.d(TAG, "Запрос на обновление счета для категории " + account.getTitle());
+            Log.d(TAG, String.format(constants.MSG_UPDATE_ACCOUNT_REQUEST, account.getTitle()));
             account.setUpdateTime(LocalDateTime.now());
             account.setUpdatedBy(user);
             try {
                 repo.update(account);
-                Log.d(TAG, "Запрос на обновление счета для категории " + account.getTitle() + " успешно отправлен");
+                Log.d(TAG, String.format(constants.MSG_ACCOUNT_UPDATED, account.getTitle()));
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка при обновлении счета для категории " + account.getTitle() + ": " + e.getMessage(), e);
+                Log.e(TAG, String.format(constants.MSG_UPDATE_ACCOUNT_ERROR, account.getTitle()) + e.getMessage(), e);
             }
         });
     }

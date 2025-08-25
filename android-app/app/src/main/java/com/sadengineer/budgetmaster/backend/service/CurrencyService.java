@@ -156,7 +156,7 @@ public class CurrencyService {
      */
     @Transaction
     private void createCurrencyInTransaction(String title, String shortName) {
-        Log.d(TAG, "Запрос на создание валюты: " + title + (shortName != null ? " (" + shortName + ")" : ""));
+        Log.d(TAG, String.format(constants.MSG_CREATE_CURRENCY_REQUEST, title + (shortName != null ? " (" + shortName + ")" : "")));
         Currency currency = new Currency();
         currency.setTitle(title);
         currency.setShortName(shortName);
@@ -165,9 +165,9 @@ public class CurrencyService {
         currency.setCreatedBy(user);
         try {
             repo.insert(currency);
-            Log.d(TAG, "Валюта " + currency.getTitle() + " успешно создана");
+            Log.d(TAG, String.format(constants.MSG_CURRENCY_CREATED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_CREATE_CURRENCY_ERROR, title) + e.getMessage(), e);
         }
     }
 
@@ -189,7 +189,7 @@ public class CurrencyService {
      */
     public void delete(Currency currency, boolean softDelete) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не передана для удаления. Удаление было отменено");
+            Log.e(TAG, constants.MSG_DELETE_CURRENCY_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -215,12 +215,12 @@ public class CurrencyService {
      */
     @Transaction
     private void deleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, "Запрос на удаление валюты: " + currency.getTitle());
+        Log.d(TAG, constants.MSG_DELETE_CURRENCY_REQUEST + currency.getTitle());
         try {
             repo.delete(currency);
-            Log.d(TAG, "Валюта " + currency.getTitle() + " успешно удалена");
+            Log.d(TAG, String.format(constants.MSG_CURRENCY_DELETED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при удалении валюты '" + currency.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
         }
     }
    
@@ -301,7 +301,7 @@ public class CurrencyService {
      */
     public void restore(Currency deletedCurrency) {
         if (deletedCurrency == null) {
-            Log.e(TAG, "Валюта не передана для восстановления. Восстановление было отменено");
+            Log.e(TAG, constants.MSG_RESTORE_CURRENCY_NOT_FOUND);
             return;
         }
         executorService.execute(() -> {
@@ -315,7 +315,7 @@ public class CurrencyService {
      */
     @Transaction
     private void restoreCurrencyInTransaction(Currency deletedCurrency) {
-        Log.d(TAG, "Запрос на восстановление валюты " + deletedCurrency.getTitle());
+        Log.d(TAG, constants.MSG_RESTORE_CURRENCY_REQUEST + deletedCurrency.getTitle());
         deletedCurrency.setPosition(repo.getMaxPosition() + 1);
         deletedCurrency.setDeleteTime(null);
         deletedCurrency.setDeletedBy(null);
@@ -323,9 +323,9 @@ public class CurrencyService {
         deletedCurrency.setUpdatedBy(user);
         try {
             repo.update(deletedCurrency);
-            Log.d(TAG, "Валюта " + deletedCurrency.getTitle() + " успешно восстановлена");
+            Log.d(TAG, String.format(constants.MSG_CURRENCY_RESTORED, deletedCurrency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при восстановлении валюты '" + deletedCurrency.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_RESTORE_CURRENCY_ERROR, deletedCurrency.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -335,7 +335,7 @@ public class CurrencyService {
      */
     private void softDelete(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не найдена для soft delete. Удаление было отменено");
+            Log.e(TAG, constants.MSG_SOFT_DELETE_CURRENCY_NOT_FOUND);
             return;
         }   
 
@@ -350,7 +350,7 @@ public class CurrencyService {
      */
     @Transaction
     private void softDeleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, "Запрос на softDelete валюты " + currency.getTitle());
+        Log.d(TAG, constants.MSG_SOFT_DELETE_CURRENCY_REQUEST + currency.getTitle());
         int deletedPosition = currency.getPosition();
         currency.setPosition(0);
         currency.setDeleteTime(LocalDateTime.now());
@@ -359,9 +359,9 @@ public class CurrencyService {
             repo.update(currency);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, "Валюта " + currency.getTitle() + " успешно soft deleted");
+            Log.d(TAG, String.format(constants.MSG_CURRENCY_SOFT_DELETED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при soft delete валюты '" + currency.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
         }
     }
     
@@ -372,7 +372,7 @@ public class CurrencyService {
      */
     public void update(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не найдена для обновления. Обновление было отменено");
+            Log.e(TAG, constants.MSG_UPDATE_CURRENCY_NOT_FOUND);
             return;
         }
 
@@ -380,13 +380,13 @@ public class CurrencyService {
             try {
                 validator.validateTitleUniqueExcludingId(currency.getTitle(), currency.getId(), repo::existsByTitleExcludingId);
                 validator.validateShortNameUniqueExcludingId(currency.getShortName(), currency.getId(), repo::existsByShortNameExcludingId);
-                Log.d(TAG, "Запрос на обновление валюты " + currency.getTitle());
+                Log.d(TAG, String.format(constants.MSG_UPDATE_CURRENCY_REQUEST, currency.getTitle()));
                 currency.setUpdateTime(LocalDateTime.now());
                 currency.setUpdatedBy(user);
                 repo.update(currency);
-                Log.d(TAG, "Запрос на обновление валюты для категории " + currency.getTitle() + " успешно отправлен");
+                Log.d(TAG, String.format(constants.MSG_CURRENCY_UPDATED, currency.getTitle()));
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка при обновлении валюты для категории " + currency.getTitle() + ": " + e.getMessage(), e);
+                Log.e(TAG, String.format(constants.MSG_UPDATE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
             }
         });
     }

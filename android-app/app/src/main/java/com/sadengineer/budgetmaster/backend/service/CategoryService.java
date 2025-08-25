@@ -129,7 +129,7 @@ public class CategoryService {
      */
     @Transaction
     private void createCategoryInTransaction(String title, int operationType, int type, int parentId) {
-        Log.d(TAG, "Запрос на создание категории: " + title);
+        Log.d(TAG, String.format(constants.MSG_CREATE_CATEGORY_REQUEST, title));
         Category category = new Category();
         category.setTitle(title);
         category.setOperationType(operationType);
@@ -140,9 +140,9 @@ public class CategoryService {
         category.setCreatedBy(user);
         try {   
             repo.insert(category);
-            Log.d(TAG, "Категория " + title + " успешно создана");
+            Log.d(TAG, String.format(constants.MSG_CATEGORY_CREATED, title));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при создании категории '" + title + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_CREATE_CATEGORY_ERROR, title) + "': " + e.getMessage(), e);
         }
     }
 
@@ -174,14 +174,14 @@ public class CategoryService {
         });
     }
  
-    /**
+         /**
      * Удалить категорию (полное удаление - удаление строки из БД)
      * @param softDelete true - soft delete, false - полное удаление
      * @param category категория
      */
     public void delete(Category category, boolean softDelete) {
         if (category == null) {
-            Log.e(TAG, "Категория не найдена для удаления. Удаление было отменено");
+            Log.e(TAG, constants.MSG_DELETE_CATEGORY_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -197,7 +197,7 @@ public class CategoryService {
      */
     private void delete(Category category) {
         if (category == null) {
-            Log.e(TAG, "Категория не найдена для удаления. Удаление было отменено");
+            Log.e(TAG, constants.MSG_DELETE_CATEGORY_NOT_FOUND);
             return;
         }
         executorService.execute(() -> {
@@ -211,13 +211,13 @@ public class CategoryService {
      */
     @Transaction
     private void deleteCategoryInTransaction(Category category) {
-        Log.d(TAG, "Запрос на удаление категории: " + category.getTitle());
+        Log.d(TAG, String.format(constants.MSG_DELETE_CATEGORY_REQUEST, category.getTitle()));
         int deletedPosition = category.getPosition();
         try {
             repo.delete(category);
-            Log.d(TAG, "Категория " + category.getTitle() + " успешно удалена");
+            Log.d(TAG, String.format(constants.MSG_CATEGORY_DELETED, category.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при удалении категории '" + category.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
         }
     }
     
@@ -292,7 +292,7 @@ public class CategoryService {
      */
     public void restore(Category deletedCategory) {
         if (deletedCategory == null) {
-            Log.e(TAG, "Категория не найдена для восстановления. Восстановление было отменено");
+            Log.e(TAG, constants.MSG_RESTORE_CATEGORY_NOT_FOUND);
             return;
         }   
         executorService.execute(() -> {
@@ -306,7 +306,7 @@ public class CategoryService {
      */
     @Transaction
     private void restoreCategoryInTransaction(Category deletedCategory) {
-        Log.d(TAG, "Запрос на восстановление категории: " + deletedCategory.getTitle());
+        Log.d(TAG, String.format(constants.MSG_RESTORE_CATEGORY_REQUEST, deletedCategory.getTitle()));
         deletedCategory.setPosition(repo.getMaxPosition() + 1);
         deletedCategory.setDeleteTime(null);
         deletedCategory.setDeletedBy(null);
@@ -314,9 +314,9 @@ public class CategoryService {
         deletedCategory.setUpdatedBy(user);
         try {
             repo.update(deletedCategory);
-            Log.d(TAG, "Категория " + deletedCategory.getTitle() + " успешно восстановлена");
+            Log.d(TAG, String.format(constants.MSG_CATEGORY_RESTORED, deletedCategory.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при восстановлении категории '" + deletedCategory.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_RESTORE_CATEGORY_ERROR, deletedCategory.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -336,7 +336,7 @@ public class CategoryService {
      */
     @Transaction
     private void softDeleteCategoryInTransaction(Category category) {
-        Log.d(TAG, "Запрос на softDelete категории " + category.getTitle());
+        Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_CATEGORY_REQUEST, category.getTitle()));
         int deletedPosition = category.getPosition();
         category.setPosition(0);
         category.setDeleteTime(LocalDateTime.now());
@@ -345,9 +345,9 @@ public class CategoryService {
             repo.update(category);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, "Категория " + category.getTitle() + " успешно soft deleted");
+            Log.d(TAG, String.format(constants.MSG_CATEGORY_SOFT_DELETED, category.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при soft delete категории '" + category.getTitle() + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -357,19 +357,19 @@ public class CategoryService {
      */
     public void update(Category category) {
         if (category == null) {
-            Log.e(TAG, "Категория не найдена для обновления. Обновление было отменено");
+            Log.e(TAG, constants.MSG_UPDATE_CATEGORY_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
-            Log.d(TAG, "Запрос на обновление категории " + category.getTitle());
+            Log.d(TAG, String.format(constants.MSG_UPDATE_CATEGORY_REQUEST, category.getTitle()));
             category.setUpdateTime(LocalDateTime.now());
             category.setUpdatedBy(user);
             try {
                 repo.update(category);
-                Log.d(TAG, "Категория " + category.getTitle() + " успешно обновлена");
+                Log.d(TAG, String.format(constants.MSG_CATEGORY_UPDATED, category.getTitle()));
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка при обновлении категории '" + category.getTitle() + "': " + e.getMessage(), e);
+                Log.e(TAG, String.format(constants.MSG_UPDATE_CATEGORY_ERROR, category.getTitle()) + "': " + e.getMessage(), e);
             }
         });
     }

@@ -154,7 +154,7 @@ public class OperationService {
             repo.delete(operation);
             Log.d(TAG, constants.MSG_DELETE_OPERATION_SUCCESS + " " + getOperationText(operation));
         } catch (Exception e) {
-            Log.e(TAG, constants.MSG_DELETE_OPERATION_ERROR + getOperationText(operation) + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
         }
     }   
 
@@ -432,7 +432,7 @@ public class OperationService {
             repo.update(deletedOperation);
             Log.d(TAG, constants.MSG_RESTORE_OPERATION_SUCCESS + getOperationText(deletedOperation));
         } catch (Exception e) {
-            Log.e(TAG, constants.MSG_RESTORE_OPERATION_ERROR + getOperationText(deletedOperation) + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_RESTORE_OPERATION_ERROR, getOperationText(deletedOperation)) + e.getMessage(), e);
         }
     }
 
@@ -460,7 +460,7 @@ public class OperationService {
             repo.update(operation);
             Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_SUCCESS + getOperationText(operation));
         } catch (Exception e) {
-            Log.e(TAG, constants.MSG_SOFT_DELETE_OPERATION_ERROR + getOperationText(operation) + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
         }
     }
 
@@ -482,7 +482,7 @@ public class OperationService {
                 repo.update(operation);
                 Log.d(TAG, constants.MSG_UPDATE_OPERATION_SUCCESS + getOperationText(operation));
             } catch (Exception e) {
-                Log.e(TAG, constants.MSG_UPDATE_OPERATION_ERROR + getOperationText(operation) + ": " + e.getMessage(), e);
+                Log.e(TAG, String.format(constants.MSG_UPDATE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
             }
         });
     }

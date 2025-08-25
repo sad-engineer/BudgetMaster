@@ -129,7 +129,7 @@ public class BudgetService {
      */
     @Transaction
     private void createBudgetInTransaction(int category_id, Long amount, int currency_id) {
-        Log.d(TAG, "Запрос на создание бюджета для категории " + category_id);
+        Log.d(TAG, String.format(constants.MSG_CREATE_BUDGET_REQUEST, category_id));
         Budget budget = new Budget();
         budget.setCategoryId(category_id);
         budget.setAmount(amount);
@@ -139,9 +139,9 @@ public class BudgetService {
         budget.setCreatedBy(user);
         try {
             repo.insert(budget);
-            Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно создан");
+            Log.d(TAG, String.format(constants.MSG_BUDGET_CREATED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при создании бюджета для категории " + category_id + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_CREATE_BUDGET_ERROR, category_id) + e.getMessage(), e);
         }
     }
 
@@ -162,7 +162,7 @@ public class BudgetService {
      */
     public void delete(Budget budget, boolean softDelete) {
         if (budget == null) {
-            Log.e(TAG, "Бюджет не найден для удаления. Удаление было отменено");
+            Log.e(TAG, constants.MSG_DELETE_BUDGET_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -188,12 +188,12 @@ public class BudgetService {
      */
     @Transaction
     private void deleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, "Запрос на удаление бюджета для категории " + budget.getCategoryId());
+        Log.d(TAG, String.format(constants.MSG_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         try {
             repo.delete(budget);
-            Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно удален");
+            Log.d(TAG, String.format(constants.MSG_BUDGET_DELETED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при удалении бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_DELETE_BUDGET_ERROR, budget.getCategoryId()) + e.getMessage(), e);
         }
     }
 
@@ -248,7 +248,7 @@ public class BudgetService {
      */
     public void restore(Budget deletedBudget) {
         if (deletedBudget == null) {
-            Log.e(TAG, "Бюджет не найден для восстановления");
+            Log.e(TAG, constants.MSG_RESTORE_BUDGET_NOT_FOUND);
             return;
         }
         executorService.execute(() -> {
@@ -262,7 +262,7 @@ public class BudgetService {
      */
     @Transaction
     private void restoreBudgetInTransaction(Budget deletedBudget) {
-        Log.d(TAG, "Запрос на восстановление бюджета для категории " + deletedBudget.getCategoryId());
+        Log.d(TAG, String.format(constants.MSG_RESTORE_BUDGET_REQUEST, deletedBudget.getCategoryId()));
         deletedBudget.setPosition(repo.getMaxPosition() + 1);
         deletedBudget.setDeleteTime(null);
         deletedBudget.setDeletedBy(null);
@@ -270,9 +270,9 @@ public class BudgetService {
         deletedBudget.setUpdatedBy(user);
         try {
             repo.update(deletedBudget);
-            Log.d(TAG, "Бюджет для категории " + deletedBudget.getCategoryId() + " успешно восстановлен");
+            Log.d(TAG, String.format(constants.MSG_BUDGET_RESTORED, deletedBudget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при восстановлении бюджета для категории " + deletedBudget.getCategoryId() + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_RESTORE_BUDGET_ERROR, deletedBudget.getCategoryId()) + e.getMessage(), e);
         }
     }
 
@@ -292,7 +292,7 @@ public class BudgetService {
      */
     @Transaction
     private void softDeleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, "Запрос на softDelete бюджета для категории " + budget.getCategoryId());
+        Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         int deletedPosition = budget.getPosition();
         budget.setPosition(0);
         budget.setDeleteTime(LocalDateTime.now());
@@ -301,9 +301,9 @@ public class BudgetService {
             repo.update(budget);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, "Бюджет для категории " + budget.getCategoryId() + " успешно soft deleted");
+            Log.d(TAG, String.format(constants.MSG_BUDGET_SOFT_DELETED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при soft delete бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
         }
     }
 
@@ -313,19 +313,19 @@ public class BudgetService {
      */
     public void update(Budget budget) {
         if (budget == null) {
-            Log.e(TAG, "Бюджет не найден для обновления. Обновление было отменено");
+            Log.e(TAG, constants.MSG_UPDATE_BUDGET_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
             try {
-                Log.d(TAG, "Запрос на обновление бюджета для категории " + budget.getCategoryId());
+                Log.d(TAG, String.format(constants.MSG_UPDATE_BUDGET_REQUEST, budget.getCategoryId()));
                 budget.setUpdateTime(LocalDateTime.now());
                 budget.setUpdatedBy(user);
                 repo.update(budget);
-                Log.d(TAG, "Запрос на обновление бюджета для категории " + budget.getCategoryId() + " успешно отправлен");
+                Log.d(TAG, String.format(constants.MSG_BUDGET_UPDATED, budget.getCategoryId()));
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка при обновлении бюджета для категории " + budget.getCategoryId() + ": " + e.getMessage(), e);
+                Log.e(TAG, String.format(constants.MSG_UPDATE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
             }
         });
     }
