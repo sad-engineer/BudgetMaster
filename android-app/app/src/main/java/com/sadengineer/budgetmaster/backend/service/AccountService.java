@@ -111,12 +111,12 @@ public class AccountService {
      */
     public void create(String title, Integer currencyId, Long amount, Integer type, Integer closed) {
         validator.validateTitle(title);
-        validator.validateCurrencyId(currencyId, repo.getCount(EntityFilter.ALL));
         validator.validateAmount(amount);
         validator.validateType(type);
         validator.validateClosed(closed);
 
         executorService.execute(() -> {
+            validator.validateCurrencyId(currencyId, repo.getCount(EntityFilter.ALL));
             createAccountInTransaction(title, currencyId, amount, type, closed);
         });
     }   
@@ -129,6 +129,19 @@ public class AccountService {
         validator.validateTitle(title);
         executorService.execute(() -> {
             create(title, null, null, null, null);                
+        });
+    }
+
+    /** Создать новый счет с проверенными значениями 
+     * @param title название счета  
+     * @param currencyId ID валюты
+     * @param amount сумма
+     * @param type тип счета
+     * @param closed признак закрытости счета (0 - открыт, 1 - закрыт)
+     */
+    public void createWithoutValidation(String title, int currencyId, long amount, int type, int closed) {
+        executorService.execute(() -> {
+            createAccountInTransaction(title, currencyId, amount, type, closed);
         });
     }
 
@@ -338,14 +351,5 @@ public class AccountService {
     public int getCount() {
         return repo.getCount(EntityFilter.ALL);
     }
-    
-    /**
-     * Закрыть ExecutorService
-     * @deprecated Используйте ThreadManager.shutdown() для централизованного управления
-     */
-    @Deprecated
-    public void shutdown() {
-        // Не закрываем ExecutorService здесь, так как он общий
-        // Используйте ThreadManager.shutdown() при завершении приложения
-    }
+
 } 

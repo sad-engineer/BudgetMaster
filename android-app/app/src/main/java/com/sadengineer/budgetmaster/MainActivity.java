@@ -154,9 +154,20 @@ public class MainActivity extends BaseNavigationActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Завершаем работу общего ExecutorService
+        Log.d(TAG, "MainActivity уничтожена");
+    }
+    
+    /**
+     * Выход из приложения
+     * Вызывается при нажатии кнопки "Выход" в меню
+     */
+    public void exitApplication() {
+        Log.d(TAG, "Завершение работы приложения");
+        // Завершаем ThreadManager
         ThreadManager.shutdown();
-        Log.d(TAG, "ThreadManager завершен");
+        // Закрываем приложение
+        finish();
+        System.exit(0);
     }
 
     /**

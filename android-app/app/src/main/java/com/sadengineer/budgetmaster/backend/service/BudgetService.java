@@ -146,6 +146,16 @@ public class BudgetService {
     }
 
     /**
+     * Создать новый бюджет без проверок значений
+     * @param category_id ID категории
+     */
+    public void createWithoutValidation(int category_id, long amount, int currency_id) {
+        executorService.execute(() -> {
+            createBudgetInTransaction(category_id, amount, currency_id);
+        });
+    }
+
+    /**
      * Удалить бюджет (полное удаление - удаление строки из БД)
      * @param softDelete true - soft delete, false - полное удаление
      * @param budget бюджет
@@ -335,12 +345,5 @@ public class BudgetService {
      */
     public int getCount() {
         return repo.getCount(EntityFilter.ALL);
-    }
-    
-    /**
-     * Закрыть ExecutorService
-     */
-    public void shutdown() {
-        executorService.shutdown();
     }
 } 

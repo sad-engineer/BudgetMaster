@@ -167,6 +167,9 @@ public class CurrencyAmountFormatter {
      * @throws ParseException если не удалось распарсить
      */
     public double parse(String formattedText) throws ParseException {
+        if (currentLocale.getLanguage().equals("ru")) {
+            formattedText = formattedText.replace(".", ",");
+        }
         return formatter.parse(formattedText).doubleValue();
     }
     

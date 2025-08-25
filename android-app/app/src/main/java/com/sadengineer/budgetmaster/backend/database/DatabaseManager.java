@@ -97,13 +97,4 @@ public class DatabaseManager {
             }
         }, executor);
     }
-    
-    /**
-     * Закрывает executor
-     */
-    public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
-    }
 } 

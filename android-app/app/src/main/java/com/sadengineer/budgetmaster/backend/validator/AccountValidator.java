@@ -19,8 +19,8 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.TITLE_PATTERN;
-import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_AMOUNT_VALUE;
-import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_AMOUNT_VALUE;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_ACCOUNT_AMOUNT_VALUE;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_ACCOUNT_AMOUNT_VALUE;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_CURRENT;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_SAVINGS;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ACCOUNT_TYPE_CREDIT;
@@ -54,10 +54,10 @@ public class AccountValidator {
      */
     public static void validateAmount(long amount) {
         validateNotNull(amount, ERROR_ACCOUNT_BALANCE_EMPTY);
-        String message = String.format(ERROR_ACCOUNT_BALANCE_MIN, MIN_AMOUNT_VALUE);
-        validateMinValue(amount, MIN_AMOUNT_VALUE, message);
-        message = String.format(ERROR_ACCOUNT_BALANCE_MAX, MAX_AMOUNT_VALUE);
-        validateMaxValue(amount, MAX_AMOUNT_VALUE, message);
+        String message = String.format(ERROR_ACCOUNT_BALANCE_MIN, MIN_ACCOUNT_AMOUNT_VALUE);
+        validateMinValue(amount, MIN_ACCOUNT_AMOUNT_VALUE, message);
+        message = String.format(ERROR_ACCOUNT_BALANCE_MAX, MAX_ACCOUNT_AMOUNT_VALUE);
+        validateMaxValue(amount, MAX_ACCOUNT_AMOUNT_VALUE, message);
     }
     
     /**

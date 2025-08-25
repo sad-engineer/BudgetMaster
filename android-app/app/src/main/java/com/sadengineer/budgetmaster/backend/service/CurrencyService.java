@@ -172,6 +172,17 @@ public class CurrencyService {
     }
 
     /**
+     * Создать новую валюту без проверок значений
+     * @param title название валюты
+     * @param shortName короткое имя валюты
+     */
+    public void createWithoutValidation(String title, String shortName) {
+        executorService.execute(() -> {
+            createCurrencyInTransaction(title, shortName);
+        });
+    }
+
+    /**
      * Удалить валюту (полное удаление - удаление строки из БД)
      * @param softDelete true - soft delete, false - полное удаление
      * @param currency валюта
@@ -395,12 +406,5 @@ public class CurrencyService {
      */
     public int getCount() {
         return repo.getCount(EntityFilter.ALL);
-    }
-    
-    /**
-     * Закрыть ExecutorService
-     */
-    public void shutdown() {
-        executorService.shutdown();
-    }
+    }    
 } 

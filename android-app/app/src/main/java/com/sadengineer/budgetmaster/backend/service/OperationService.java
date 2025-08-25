@@ -104,6 +104,19 @@ public class OperationService {
     }
 
     /**
+     * Создать новую операцию без проверок значений
+     * @param type тип операции
+     * @param date дата операции
+     * @param amount сумма
+     * @param comment комментарий
+     */
+    public void createWithoutValidation(int type, LocalDateTime date, long amount, String comment, int categoryId, int accountId, int currencyId) {
+        executorService.execute(() -> {
+            createOperationInTransaction(type, date, amount, comment, categoryId, accountId, currencyId);
+        });
+    }
+
+    /**
      * Удалить операцию по условию
      * @param operation операция
      * @param softDelete Условие удаления: true - soft delete, false - полное удаление

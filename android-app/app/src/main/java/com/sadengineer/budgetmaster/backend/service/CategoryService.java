@@ -162,6 +162,19 @@ public class CategoryService {
     }
 
     /**
+     * Создать новую категорию без проверок значений
+     * @param title название категории
+     * @param operationType тип операции
+     * @param type тип категории
+     * @param parentId ID родителя
+     */
+    public void createWithoutValidation(String title, int operationType, int type, int parentId) {
+        executorService.execute(() -> {
+            createCategoryInTransaction(title, operationType, type, parentId);
+        });
+    }
+ 
+    /**
      * Удалить категорию (полное удаление - удаление строки из БД)
      * @param softDelete true - soft delete, false - полное удаление
      * @param category категория
@@ -386,15 +399,5 @@ public class CategoryService {
      */
     public LiveData<List<Category>> getAllDescendants(int parentId, EntityFilter filter) {
         return repo.getAllByParentId(parentId, filter);
-    }
-    
-    /**
-     * Закрыть ExecutorService
-     * @deprecated Используйте ThreadManager.shutdown() для централизованного управления
-     */
-    @Deprecated
-    public void shutdown() {
-        // Не закрываем ExecutorService здесь, так как он общий
-        // Используйте ThreadManager.shutdown() при завершении приложения
-    }
+    }   
 }   

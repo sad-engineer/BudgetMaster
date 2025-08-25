@@ -33,7 +33,9 @@ public class ValidationConstants {
     // Значения
     public static final double MIN_AMOUNT_VALUE = 0.01; // Минимальное значение суммы
     public static final double MAX_AMOUNT_VALUE = ModelConstants.MAX_AMOUNT; // Максимальное значение суммы
-
+    public static final double MIN_ACCOUNT_AMOUNT_VALUE = 0.00; // Минимальное значение суммы счета
+    public static final double MAX_ACCOUNT_AMOUNT_VALUE = ModelConstants.MAX_AMOUNT; // Максимальное значение суммы счета
+    
     // Регулярные выражения
     public static final String TITLE_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-\\(\\)]+$";
     public static final String CURRENCY_SHORT_NAME_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-₽$€¥£¢₹₩₪₦₨₴₸₺₼₾₿]+$";

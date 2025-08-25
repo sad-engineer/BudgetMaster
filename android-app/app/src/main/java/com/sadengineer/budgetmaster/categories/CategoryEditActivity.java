@@ -52,7 +52,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     
     private static final int PARENT = ModelConstants.CATEGORY_TYPE_PARENT;
     private static final int CHILD = ModelConstants.CATEGORY_TYPE_CHILD;
-    public static final int DEFAULT_CATEGORY_ID = ModelConstants.DEFAULT_PARENT_ID;
+    public static final int DEFAULT_CATEGORY_ID = ModelConstants.DEFAULT_CATEGORY_ID;
     
     /**
      * Метод вызывается при создании Activity
@@ -233,38 +233,55 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     }
     
     /**
-     * Сохраняет категорию
+     * Валидирует название категории
+     * @param editText поле ввода названия категории
+     * @return true если название категории валидно, false если нет
      */
-    private boolean saveCategory() {
-        String title = categoryNameEdit.getText().toString().trim();
-
+    private boolean validateCategoryName(EditText editText) {
+        String title = editText.getText().toString().trim();
         try {
             validator.validateTitle(title);
         } catch (IllegalArgumentException e) {
-            categoryNameEdit.setError(e.getMessage());
-            categoryNameEdit.requestFocus();
+            Log.e(TAG, e.getMessage());
+            editText.setError(e.getMessage());
+            editText.requestFocus();
             return false;
-        }       
+        }
+        return true;
+    }
+
+
+    /**
+     * Сохраняет категорию
+     */
+    private boolean saveCategory() {
+        Log.d(TAG, "Сохранение категории...");
+        String title = categoryNameEdit.getText().toString().trim();
+
+        if (!validateCategoryName(categoryNameEdit)) return false;
         
         try {
             if (isEditMode) {
+                Log.d(TAG, "Редактирование категории.");
+                Log.d(TAG, "Текущая категория: название=" + currentCategory.getTitle() + ", operationType=" + currentCategory.getOperationType() + ", тип=" + currentCategory.getType() + ", родитель=" + currentCategory.getParentId());
+
                 // Редактирование существующей категории
                 if (currentCategory != null) {
                     currentCategory.setTitle(title);
                     currentCategory.setOperationType(sourceOperationType);
                     currentCategory.setType(getSelectedCategoryType());
                     currentCategory.setParentId(getSelectedParentId());
-                    
+                    Log.d(TAG, "Обновленнаz категория: название=" + title + ", operationType=" + sourceOperationType + ", тип=" + getSelectedCategoryType() + ", родитель=" + getSelectedParentId());
                     categoryService.update(currentCategory);
-                    Log.d(TAG, "Категория обновлена: " + title);
+                    Log.d(TAG, "Запрос на обновление счета отправлен");
                 }
             } else {
                 // Создание новой категории
                 int categoryType = getSelectedCategoryType();
-                Integer parentId = getSelectedParentId();
-                
-                categoryService.create(title, sourceOperationType, categoryType, parentId);
-                Log.d(TAG, "Категория создана: " + title);
+                int parentId = getSelectedParentId();
+                Log.d(TAG, "Создание новой категории: " + title);
+                categoryService.createWithoutValidation(title, sourceOperationType, categoryType, parentId);
+                Log.d(TAG, "Запрос на создание счета отправлен");
             }
             
             // Возвращаемся к списку категорий

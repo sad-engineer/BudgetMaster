@@ -67,7 +67,7 @@ public interface CategoryDao {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список категорий с указанным типом операции, отсортированных по позиции (категории с позицией 0 в конце)
      */
-    @Query("SELECT * FROM categories WHERE type = :operationType AND " +
+    @Query("SELECT * FROM categories WHERE operationType = :operationType AND " +
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL')) " +

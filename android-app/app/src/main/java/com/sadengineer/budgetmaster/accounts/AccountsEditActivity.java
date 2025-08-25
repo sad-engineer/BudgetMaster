@@ -65,6 +65,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     /** ID валюты по умолчанию 1 */
     private final int DEFAULT_CURRENCY_ID = ModelConstants.DEFAULT_CURRENCY_ID;
 
+
     /**
      * Метод вызывается при создании Activity
      * @param savedInstanceState - сохраненное состояние Activity
@@ -93,8 +94,6 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
         // Получаем данные из Intent и заполняем поля
         loadAccountData();
         
-        // Настройка обработчика поля ввода суммы
-        setupAmountFieldHandler();
     }
     
     /**
@@ -225,37 +224,6 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     }
     
     /**
-     * Настраивает обработчик поля ввода суммы
-     */
-    private void setupAmountFieldHandler() {
-        accountBalanceEdit.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                // При получении фокуса убираем форматирование
-                String currentText = accountBalanceEdit.getText().toString();
-                if (!TextUtils.isEmpty(currentText)) {
-                    // Используем новый метод для преобразования в простой текст
-                    String plainText = formatter.toPlainText(currentText);
-                    accountBalanceEdit.setText(plainText);
-                    // Устанавливаем курсор в конец текста
-                    accountBalanceEdit.setSelection(plainText.length());
-                }
-            } else {
-                // При потере фокуса форматируем обратно
-                String currentText = accountBalanceEdit.getText().toString();
-                if (!TextUtils.isEmpty(currentText)) {
-                    try {
-                        // Парсим число и форматируем через форматтер
-                        double amount = formatter.parseSafe(currentText);
-                        accountBalanceEdit.setText(formatter.format(amount));
-                    } catch (Exception e) {
-                        // Если не удалось распарсить, оставляем как есть
-                    }
-                }
-            }
-        });
-    }    
-    
-    /**
      * Переопределяем настройку кнопки "назад" для перехода к списку счетов
      */
     @Override
@@ -270,68 +238,83 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     }
     
     /**
-     * Сохраняет данные из полей окна в счет и сохраняет его в базу данных
-     * @return true если сохранение прошло успешно, false если была ошибка валидации
+     * Валидирует название счета
+     * @param editText поле ввода названия счета
+     * @return true если название счета валидно, false если нет
      */
-    private boolean saveAccount() {
-        long balance = DEFAULT_ACCOUNT_BALANCE;
-
-        // Валидация названия счета
-        String accountName = accountNameEdit.getText().toString().trim();
+    private boolean validateAccountName(EditText editText) {
+        //TODO: сделать проверку уникальности имени при создании счета
+        String accountName = editText.getText().toString().trim();
         try {
             accountValidator.validateTitle(accountName);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Ошибка валидации названия счета: " + e.getMessage(), e);
-            accountNameEdit.setError(e.getMessage());
-            accountNameEdit.requestFocus();
+            editText.setError(e.getMessage());
+            editText.requestFocus();
             return false;
         }
+        return true;
+    }
 
-        // Валидация баланса
-        String balanceText = accountBalanceEdit.getText().toString().trim();
+    /**
+     * Валидирует баланс счета
+     * @param editText поле ввода баланса счета
+     * @return true если баланс счета валиден, false если нет
+     */
+    private boolean validateAccountBalance(EditText editText) {
+        String balanceText = editText.getText().toString().trim();
         if (!TextUtils.isEmpty(balanceText)) {
             try {
                 // Конвертируем рубли в копейки
-                double amount = formatter.parseSafe(balanceText);
-                balance = (long) (amount * 100);
+                String text = accountBalanceEdit.getText().toString().trim();
+                Log.d(TAG, "Введено значение суммы счета: " + text);
+                double amount = formatter.parseSafe(text);
+                Log.d(TAG, "Конвертированное значение суммы счета: " + amount);
+                long balance = Math.round(amount * 100);
+                Log.d(TAG, "Конвертированное значение суммы счета в копейки: " + balance);
                 accountValidator.validateAmount(balance);
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Ошибка парсинга баланса: " + balanceText, e);
-                // Показываем ошибку в поле ввода
-                accountBalanceEdit.setError("Неверный формат суммы. Используйте числа и запятую или точку (например: 1500,50)");
-                accountBalanceEdit.requestFocus();
-                return false; // Прерываем сохранение
+                Log.e(TAG, e.getMessage());
+                editText.setError(e.getMessage());
+                editText.requestFocus();
+                return false;
             }
         }
+        return true;
+    }
 
-        // Валидация ти счета
+    
+
+    /**
+     * Сохраняет данные из полей окна в счет и сохраняет его в базу данных
+     * @return true если сохранение прошло успешно, false если была ошибка валидации
+     */
+    private boolean saveAccount() {
+        // Валидация названия счета
+        if (!validateAccountName(accountNameEdit)) return false;
+        // Валидация баланса
+        if (!validateAccountBalance(accountBalanceEdit)) return false;
+        //валидация валюты не требуется, так как валюта выбирается из списка
+        //валидация типа счета не требуется, так как тип счета выбирается из списка
+        //валидация статуса закрытия не требуется, так как статус закрытия выбирается из чекбокса
+
+        String accountName = accountNameEdit.getText().toString().trim();
+        String text = accountBalanceEdit.getText().toString().trim();
+        Log.d(TAG, "Введено значение суммы счета: " + text);
+        double amount = formatter.parseSafe(text);
+        Log.d(TAG, "Конвертированное значение суммы счета: " + amount);
+        long balance = Math.round(amount * 100);
+        Log.d(TAG, "Конвертированное значение суммы счета: " + balance);
         int accountType = getAccountTypeFromSpinner();
-        try {
-            accountValidator.validateType(accountType);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Ошибка валидации типа счета: " + e.getMessage(), e);
-            ((TextView) accountTypeSpinner.getSelectedView()).setError(e.getMessage());
-            ((TextView) accountTypeSpinner.getSelectedView()).requestFocus();
-            return false;
-        }
-
-        // Получаем статус закрытия
+        int selectedCurrencyID = getSelectedCurrencyId();
         int isClosed = accountClosedCheckbox.isChecked() ? 1 : 0; // 0=open, 1=closed
         
-        // Валидация ID валюты
-        Integer selectedCurrencyID = getSelectedCurrencyId();
-        try {
-            accountValidator.validateCurrencyId(selectedCurrencyID, currencies.size());
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Ошибка валидации ID валюты: " + e.getMessage(), e);
-            ((TextView) accountCurrencySpinner.getSelectedView()).setError(e.getMessage());
-            ((TextView) accountCurrencySpinner.getSelectedView()).requestFocus();
-            return false;
-        }
-
         // Создаем счет
         try {
             if (isEditMode && currentAccount  != null) {
+                Log.d(TAG, "Редактирование счёта: ID=" + currentAccount.getId());
+
                 // Режим редактирования
                 // Обновляем данные счета через сервис
                 currentAccount.setTitle(accountName);
@@ -340,25 +323,17 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                 currentAccount.setCurrencyId(selectedCurrencyID);
                 currentAccount.setClosed(isClosed);
                 if (currentAccount.isDeleted()) {
-                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + " в режиме редактирования, действие: restore");
+                    Log.d(TAG, "Действие: restore");
                     accountService.restore(currentAccount);
                 } else {
-                    Log.d(TAG, "Сохранение счёта: ID=" + currentAccount.getId() + " в режиме редактирования, действие: update");
+                    Log.d(TAG, "Действие: update");
                     accountService.update(currentAccount);
                 }
-                Log.d(TAG, "Запрос на обновление счета: ID=" + currentAccount.getId() + " в режиме редактирования отправлен");
+                Log.d(TAG, "Запрос на обновление счета отправлен");
             } else {
                 // Режим создания нового счета
-                Log.d(TAG, "Запрос на создание нового счета: " + accountName + " отправлен");
-                // Проверяем существование счета 
-                //TODO: передлать на синхронный запрос к DAO и не использовать LiveData
-                Account existingAccount = accountService.getByTitle(accountName).getValue();
-                if (existingAccount != null) {
-                    Log.i(TAG, "Создание нового счета: " + accountName + " отменено: счёт уже существует");
-                    return false;
-                }
-                // Если счет не существует, то создаем его
-                accountService.create(accountName, selectedCurrencyID, Long.valueOf(balance), accountType, isClosed);
+                Log.d(TAG, "Создание нового счёта: " + accountName);
+                accountService.createWithoutValidation(accountName, selectedCurrencyID, balance, accountType, isClosed);
                 Log.d(TAG, "Запрос на создание счета: " + accountName + " отправлен");
             }
             // Возвращаемся к списку счетов
