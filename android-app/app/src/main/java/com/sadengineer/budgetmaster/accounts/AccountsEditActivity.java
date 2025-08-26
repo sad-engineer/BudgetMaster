@@ -195,7 +195,8 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
      * Устанавливает дефолтные данные вызове окна на создание нового счета или при ошибке загрузки данных счета 
      */
      private void setDefaultData() {
-        accountBalanceEdit.setText(formatter.format(DEFAULT_ACCOUNT_BALANCE));
+        // Показываем сумму в рублях (копейки -> рубли)
+        accountBalanceEdit.setText(formatter.formatFromCents(DEFAULT_ACCOUNT_BALANCE));
         accountTypeSpinner.setSelection(DEFAULT_ACCOUNT_TYPE - 1);
         // Валюта будет установлена после загрузки валют в setupSpinners()
     }
@@ -207,8 +208,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
          // Заполняем поля данными счета
          accountNameEdit.setText(currentAccount.getTitle());
          // Показываем сумму в рублях (копейки -> рубли)
-         double amount = currentAccount.getAmount() / 100.0;
-         accountBalanceEdit.setText(formatter.format(amount));
+         accountBalanceEdit.setText(formatter.formatFromCents(currentAccount.getAmount()));
          
          // Устанавливаем тип счета
          int accountType = currentAccount.getType();

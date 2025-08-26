@@ -11,6 +11,7 @@ import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
+import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class CurrencyService {
     private final String user;
     private final int defaultCurrencyID;
     private final CurrencyValidator validator;
+    private final ServiceConstants constants;
     
     public CurrencyService(Context context, String user) {
         this.repo = new CurrencyRepository(context);
@@ -36,6 +38,7 @@ public class CurrencyService {
         this.user = user;
         this.defaultCurrencyID = ModelConstants.DEFAULT_CURRENCY_ID;
         this.validator = new CurrencyValidator();
+        this.constants = new ServiceConstants();
     }
 
     /**

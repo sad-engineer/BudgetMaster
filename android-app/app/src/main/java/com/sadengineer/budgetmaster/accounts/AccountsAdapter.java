@@ -158,6 +158,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         String currencyShortName = currencyCache.getOrDefault(account.getCurrencyId(), "RUB");
         Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
         
+        // Используем новый форматтер для отображения сумм в копейках
         holder.bind(
             account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected,
             SettingsManager.isShowPosition(), SettingsManager.isShowId());

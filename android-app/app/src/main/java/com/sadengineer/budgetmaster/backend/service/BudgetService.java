@@ -14,6 +14,7 @@ import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
+import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class BudgetService {
     private final BudgetValidator validator;
     private final CategoryRepository categoryRepo;
     private final CurrencyRepository currencyRepo;
+    private final ServiceConstants constants;
 
     public BudgetService(Context context, String user) {
         this.repo = new BudgetRepository(context);
@@ -40,6 +42,7 @@ public class BudgetService {
         this.validator = new BudgetValidator();
         this.categoryRepo = new CategoryRepository(context);
         this.currencyRepo = new CurrencyRepository(context);
+        this.constants = new ServiceConstants();
     }
 
     /**

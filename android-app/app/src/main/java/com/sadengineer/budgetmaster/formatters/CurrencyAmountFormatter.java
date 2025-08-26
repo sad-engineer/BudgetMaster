@@ -7,6 +7,8 @@ import com.ibm.icu.util.ULocale;
 
 import java.util.Locale;
 import java.text.ParseException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Форматтер для отображения валютных сумм с поддержкой различных локалей
@@ -46,8 +48,10 @@ public class CurrencyAmountFormatter {
         this.formatter.setMinimumFractionDigits(2);
         this.formatter.setMaximumFractionDigits(2);
         
-        // Компактный форматтер (1.2K, 1.5M) - используем DecimalFormat с паттерном
-        this.compactFormatter = new DecimalFormat("#,##0.#K;#,##0.#M", new DecimalFormatSymbols(currentULocale));
+        // Компактный форматтер - используем обычный NumberFormat (компактное форматирование реализовано вручную)
+        this.compactFormatter = NumberFormat.getNumberInstance(currentULocale);
+        this.compactFormatter.setMaximumFractionDigits(1);
+        this.compactFormatter.setMinimumFractionDigits(0);
         
         // Валютный форматтер
         this.currencyFormatter = NumberFormat.getCurrencyInstance(currentULocale);
@@ -146,17 +150,65 @@ public class CurrencyAmountFormatter {
     }
     
     /**
-     * Форматирует сумму в компактном виде (например, 1.2K, 1.5M)
+     * Форматирует сумму в компактном виде (например, 1.2K, 1.5M, 1.2B, 1.5T, 1.2Q)
      * @param amount сумма для форматирования
      * @return отформатированная строка
      */
     public String formatCompact(double amount) {
-        if (amount >= 1000000) {
-            return String.format("%.1fM", amount / 1000000);
-        } else if (amount >= 1000) {
-            return String.format("%.1fK", amount / 1000);
+        if (amount >= 1e15) { // Квадриллионы (Q)
+            return String.format("%.1fQ", amount / 1e15);
+        } else if (amount >= 1e12) { // Триллионы (T)
+            return String.format("%.1fT", amount / 1e12);
+        } else if (amount >= 1e9) { // Миллиарды (B)
+            return String.format("%.1fB", amount / 1e9);
+        } else if (amount >= 1e6) { // Миллионы (M)
+            return String.format("%.1fM", amount / 1e6);
+        } else if (amount >= 1e3) { // Тысячи (K)
+            return String.format("%.1fK", amount / 1e3);
         } else {
             return String.format("%.2f", amount);
+        }
+    }
+    
+    /**
+     * Форматирует сумму в компактном виде для long значений (например, 1.2K, 1.5M, 1.2B, 1.5T, 1.2Q)
+     * @param amount сумма для форматирования
+     * @return отформатированная строка
+     */
+    public String formatCompact(long amount) {
+        if (amount >= 1_000_000_000_000_000L) { // Квадриллионы (Q)
+            return String.format("%.1fQ", amount / 1e15);
+        } else if (amount >= 1_000_000_000_000L) { // Триллионы (T)
+            return String.format("%.1fT", amount / 1e12);
+        } else if (amount >= 1_000_000_000L) { // Миллиарды (B)
+            return String.format("%.1fB", amount / 1e9);
+        } else if (amount >= 1_000_000L) { // Миллионы (M)
+            return String.format("%.1fM", amount / 1e6);
+        } else if (amount >= 1_000L) { // Тысячи (K)
+            return String.format("%.1fK", amount / 1e3);
+        } else {
+            return String.valueOf(amount);
+        }
+    }
+    
+    /**
+     * Форматирует сумму в компактном виде для BigDecimal значений с точными вычислениями
+     * @param amount сумма для форматирования
+     * @return отформатированная строка
+     */
+    public String formatCompact(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.valueOf(1_000_000_000_000_000L)) >= 0) { // Квадриллионы (Q)
+            return amount.divide(BigDecimal.valueOf(1_000_000_000_000_000L), 1, RoundingMode.HALF_UP) + "Q";
+        } else if (amount.compareTo(BigDecimal.valueOf(1_000_000_000_000L)) >= 0) { // Триллионы (T)
+            return amount.divide(BigDecimal.valueOf(1_000_000_000_000L), 1, RoundingMode.HALF_UP) + "T";
+        } else if (amount.compareTo(BigDecimal.valueOf(1_000_000_000L)) >= 0) { // Миллиарды (B)
+            return amount.divide(BigDecimal.valueOf(1_000_000_000L), 1, RoundingMode.HALF_UP) + "B";
+        } else if (amount.compareTo(BigDecimal.valueOf(1_000_000L)) >= 0) { // Миллионы (M)
+            return amount.divide(BigDecimal.valueOf(1_000_000L), 1, RoundingMode.HALF_UP) + "M";
+        } else if (amount.compareTo(BigDecimal.valueOf(1_000L)) >= 0) { // Тысячи (K)
+            return amount.divide(BigDecimal.valueOf(1_000L), 1, RoundingMode.HALF_UP) + "K";
+        } else {
+            return amount.setScale(2, RoundingMode.HALF_UP).toString();
         }
     }
     
@@ -273,5 +325,24 @@ public class CurrencyAmountFormatter {
      */
     public ULocale getULocale() {
         return currentULocale;
+    }
+    
+    /**
+     * Безопасно делит long значение на 100 с сохранением точности
+     * @param value значение для деления
+     * @return результат деления как BigDecimal
+     */
+    public BigDecimal divideBy100(long value) {
+        return BigDecimal.valueOf(value).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+    }
+    
+    /**
+     * Форматирует long значение, предварительно разделив его на 100 (для копеек/центов)
+     * @param value значение в минимальных единицах (например, копейки)
+     * @return отформатированная строка
+     */
+    public String formatFromCents(long value) {
+        BigDecimal amount = divideBy100(value);
+        return format(amount.doubleValue());
     }
 }
