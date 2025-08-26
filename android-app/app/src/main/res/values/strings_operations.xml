@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Заголовки операций -->
+    <string name="operation_category_label">Категория</string>
+    <string name="operation_account_label">Счет</string>
+    <string name="operation_amount_label">Сумма</string>
+    <string name="operation_date_label">Дата</string>
+    <string name="operation_comment_label">Комментарий</string>
+    
+    <!-- Подсказки для полей -->
+    <string name="operation_amount_hint">Введите сумму</string>
+    <string name="operation_date_hint">Выберите дату</string>
+    <string name="operation_comment_hint">Введите комментарий (необязательно)</string>
+    
+         <!-- Заголовки Activity -->
+     <string name="toolbar_title_operation_add">Новая операция</string>
+     <string name="toolbar_title_operation_edit">Редактирование операции</string>
+    
+    <!-- Диалог выбора даты -->
+    <string name="date_picker_title">Выберите дату</string>
+    <string name="current_month_year">Август 2024</string>
+    <string name="btn_prev_month">Предыдущий месяц</string>
+    <string name="btn_next_month">Следующий месяц</string>
+    
+    <!-- Дни недели -->
+    <string name="day_mon">Пн</string>
+    <string name="day_tue">Вт</string>
+    <string name="day_wed">Ср</string>
+    <string name="day_thu">Чт</string>
+    <string name="day_fri">Пт</string>
+    <string name="day_sat">Сб</string>
+    <string name="day_sun">Вс</string>
+    
+    <!-- Кнопки -->
+    <string name="btn_cancel">Отмена</string>
+    <string name="btn_ok">ОК</string>
+    
+    <!-- Месяцы -->
+    <string name="month_january">Январь</string>
+    <string name="month_february">Февраль</string>
+    <string name="month_march">Март</string>
+    <string name="month_april">Апрель</string>
+    <string name="month_may">Май</string>
+    <string name="month_june">Июнь</string>
+    <string name="month_july">Июль</string>
+    <string name="month_august">Август</string>
+    <string name="month_september">Сентябрь</string>
+    <string name="month_october">Октябрь</string>
+    <string name="month_november">Ноябрь</string>
+    <string name="month_december">Декабрь</string>
+    
+    <!-- Сообщения об ошибках -->
+    <string name="error_select_category">Выберите категорию</string>
+    <string name="error_select_account">Выберите счет</string>
+    <string name="error_invalid_amount">Введите корректную сумму</string>
+    <string name="error_select_date">Выберите дату</string>
+    
+</resources>

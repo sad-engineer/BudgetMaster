@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.expense;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
@@ -8,6 +9,7 @@ import com.sadengineer.budgetmaster.backend.service.OperationService;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.operations.OperationEditActivity;
 
 import java.util.List;
 
@@ -89,8 +91,7 @@ public class ExpenseAllFragment extends BaseListFragment<Operation, ExpenseAdapt
      */
     @Override
     protected Class<?> getEditActivityClass() {
-        // TODO: Создать ExpenseEditActivity
-        return null;
+        return OperationEditActivity.class;
     }
 
     /**
@@ -114,8 +115,7 @@ public class ExpenseAllFragment extends BaseListFragment<Operation, ExpenseAdapt
             @Override
             public void onExpenseClick(Operation expense) {
                 Log.d(TAG, "Переход к окну редактирования операции расхода");
-                // TODO: Реализовать переход к редактированию
-                // goToEdit(expense);
+                goToEdit(expense);
             }
         }, requireContext());
         
@@ -143,6 +143,19 @@ public class ExpenseAllFragment extends BaseListFragment<Operation, ExpenseAdapt
         // service.delete(false, item);
     }
 
+    /**
+     * Переходит на экран редактирования операции расхода
+     */
+    @Override
+    protected void goToEdit(Operation item) {
+        Log.d(TAG, "Переход к окну редактирования операции расхода ID: " + item.getId());
+        Intent intent = new Intent(getActivity(), OperationEditActivity.class);
+        intent.putExtra("operation_type", OperationTypeFilter.EXPENSE.getIndex());
+        intent.putExtra("operation", item);
+        intent.putExtra("source_tab", getSourceTab());
+        startActivity(intent);
+    }
+    
     /**
      * Возвращает заголовок элемента для логирования
      */

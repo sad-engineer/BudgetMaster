@@ -14,6 +14,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
+import com.sadengineer.budgetmaster.operations.OperationEditActivity;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -63,10 +65,11 @@ public class IncomeActivity extends BaseCardsActivity<Operation> {
      */
     @Override
     protected void onAddClicked() {
-        // TODO: Запускаем окно создания операции дохода
-        // Intent intent = new Intent(IncomeActivity.this, IncomeEditActivity.class);
-        // intent.putExtra("source_tab", viewPager != null ? viewPager.getCurrentItem() : 0);
-        // startActivity(intent);
+        // Запускаем окно создания операции дохода
+        Intent intent = new Intent(IncomeActivity.this, OperationEditActivity.class);
+        intent.putExtra("operation_type", OperationTypeFilter.INCOME.getIndex());
+        intent.putExtra("source_tab", viewPager != null ? viewPager.getCurrentItem() : 0);
+        startActivity(intent);
     }
 
     /**

@@ -182,4 +182,14 @@
     <color name="categories_edit_input_text">@color/black</color>
     <color name="categories_edit_input_hint">@color/gray</color>
 
+    <!-- Цвета для виджета выбора даты -->
+    <color name="date_picker_toolbar_background">@color/black</color>
+    <color name="date_picker_toolbar_icons">@color/green</color>
+    <color name="date_picker_toolbar_texts">@color/white</color>
+    <color name="date_picker_content_background">@color/dark_gray</color>
+    <color name="date_picker_content_icons">@color/green</color>
+    <color name="date_picker_content_titles">@color/white</color>
+    <color name="date_picker_content_texts">@color/white</color>
+    <color name="date_picker_selected_day_background">@color/green</color>
+
 </resources>
