@@ -1,0 +1,124 @@
+{
+  "activities": [
+    {
+      "class": "com.sadengineer.budgetmaster.MainActivity",
+      "name": "Главная",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.AuthorsActivity",
+      "down": "com.sadengineer.budgetmaster.instructions.InstructionsActivity",
+      "menu_id": "nav_main"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.instructions.InstructionsActivity",
+      "name": "Инструкции",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.MainActivity",
+      "down": "com.sadengineer.budgetmaster.currencies.CurrenciesActivity",
+      "menu_id": "nav_instructions"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.currencies.CurrenciesActivity",
+      "name": "Валюты",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.instructions.InstructionsActivity",
+      "down": "com.sadengineer.budgetmaster.accounts.AccountsActivity",
+      "menu_id": "nav_currencies"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.accounts.AccountsActivity",
+      "name": "Счета",
+      "tabs": ["Текущие", "Сбережения", "Переводы"],
+      "up": "com.sadengineer.budgetmaster.currencies.CurrenciesActivity",
+      "down": "com.sadengineer.budgetmaster.income.IncomeActivity",
+      "menu_id": "nav_accounts"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.income.IncomeActivity",
+      "name": "Доходы",
+      "tabs": ["Все", "Дни", "Категории", "Графики"],
+      "up": "com.sadengineer.budgetmaster.accounts.AccountsActivity",
+      "down": "com.sadengineer.budgetmaster.expense.ExpenseActivity",
+      "menu_id": "nav_income"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.expense.ExpenseActivity",
+      "name": "Расходы",
+      "tabs": ["Все", "Дни", "Категории", "Графики"],
+      "up": "com.sadengineer.budgetmaster.income.IncomeActivity",
+      "down": "com.sadengineer.budgetmaster.budget.BudgetActivity",
+      "menu_id": "nav_expense"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.budget.BudgetActivity",
+      "name": "Бюджет",
+      "tabs": ["Лимиты", "Осталось"],
+      "up": "com.sadengineer.budgetmaster.expense.ExpenseActivity",
+      "down": "com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity",
+      "menu_id": "nav_budget"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity",
+      "name": "Категории доходов",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.budget.BudgetActivity",
+      "down": "com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity",
+      "menu_id": "nav_income_categories"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity",
+      "name": "Категории расходов",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity",
+      "down": "com.sadengineer.budgetmaster.import_export.ImportDataActivity",
+      "menu_id": "nav_expense_categories"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.import_export.ImportDataActivity",
+      "name": "Импорт данных",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity",
+      "down": "com.sadengineer.budgetmaster.import_export.ExportDataActivity",
+      "menu_id": "nav_import_data"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.import_export.ExportDataActivity",
+      "name": "Экспорт данных",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.import_export.ImportDataActivity",
+      "down": "com.sadengineer.budgetmaster.statistics.StatisticsActivity",
+      "menu_id": "nav_export_data"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.statistics.StatisticsActivity",
+      "name": "Статистика",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.import_export.ExportDataActivity",
+      "down": "com.sadengineer.budgetmaster.settings.SettingsActivity",
+      "menu_id": "nav_statistics"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.settings.SettingsActivity",
+      "name": "Настройки",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.statistics.StatisticsActivity",
+      "down": "com.sadengineer.budgetmaster.VersionActivity",
+      "menu_id": "nav_settings"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.VersionActivity",
+      "name": "О приложении",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.settings.SettingsActivity",
+      "down": "com.sadengineer.budgetmaster.AuthorsActivity",
+      "menu_id": "nav_about"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.AuthorsActivity",
+      "name": "Авторы",
+      "tabs": [],
+      "up": "com.sadengineer.budgetmaster.VersionActivity",
+      "down": "com.sadengineer.budgetmaster.MainActivity",
+      "menu_id": "nav_authors"
+    }
+  ]
+}

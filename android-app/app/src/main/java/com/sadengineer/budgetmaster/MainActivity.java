@@ -50,6 +50,10 @@ public class MainActivity extends BaseNavigationActivity {
         Log.d(TAG, "Инициализация навигации");
         initializeNavigation();
         setupMenuButton(R.id.menu_button);
+        
+        // Устанавливаем targetRecyclerView в null (в MainActivity нет списка)
+        setSwipeTargetRecyclerView(null);
+        
         Log.d(TAG, "Навигация настроена");
 
         // Настройка обработки кнопки "Назад"

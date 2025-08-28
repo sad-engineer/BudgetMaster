@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
@@ -365,7 +366,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         TextView dayView = new TextView(this);
         dayView.setText(String.valueOf(day));
         dayView.setTextSize(14);
-        dayView.setTextColor(getResources().getColor(R.color.date_picker_content_texts));
+        dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_texts));
         dayView.setAlpha(0.3f); // Прозрачность для дней предыдущего месяца
         dayView.setPadding(8, 8, 8, 8);
         dayView.setGravity(android.view.Gravity.CENTER);
@@ -373,8 +374,8 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         
         // Выделяем текущую выбранную дату
         if (date.toLocalDate().equals(selectedDateInCalendar != null ? selectedDateInCalendar.toLocalDate() : selectedDate.toLocalDate())) {
-            dayView.setBackgroundColor(getResources().getColor(R.color.date_picker_selected_day_background));
-            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_titles));
+            dayView.setBackgroundColor(ContextCompat.getColor(this, R.color.date_picker_selected_day_background));
+            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_titles));
             dayView.setAlpha(1.0f); // Полная непрозрачность для выбранной даты
         }
         
@@ -413,11 +414,11 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         
         // Выделяем текущую выбранную дату
         if (date.toLocalDate().equals(selectedDateInCalendar != null ? selectedDateInCalendar.toLocalDate() : selectedDate.toLocalDate())) {
-            dayView.setBackgroundColor(getResources().getColor(R.color.date_picker_selected_day_background));
-            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_titles));
+            dayView.setBackgroundColor(ContextCompat.getColor(this, R.color.date_picker_selected_day_background));
+            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_titles));
             dayView.setAlpha(1.0f); // Полная непрозрачность для выбранной даты
         } else {
-            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_texts));
+            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_texts));
             dayView.setAlpha(0.3f); // Прозрачность для дней следующего месяца
         }
         
@@ -450,15 +451,15 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         TextView dayView = new TextView(this);
         dayView.setText(String.valueOf(day));
         dayView.setTextSize(14);
-        dayView.setTextColor(getResources().getColor(R.color.date_picker_content_texts));
+        dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_texts));
         dayView.setPadding(8, 8, 8, 8);
         dayView.setGravity(android.view.Gravity.CENTER);
         dayView.setTag(date); // Сохраняем дату в теге
         
         // Выделяем текущую выбранную дату
         if (date.toLocalDate().equals(selectedDateInCalendar != null ? selectedDateInCalendar.toLocalDate() : selectedDate.toLocalDate())) {
-            dayView.setBackgroundColor(getResources().getColor(R.color.date_picker_selected_day_background));
-            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_titles));
+            dayView.setBackgroundColor(ContextCompat.getColor(this, R.color.date_picker_selected_day_background));
+            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_titles));
             dayView.setAlpha(1.0f); // Полная непрозрачность для выбранной даты
         }
         
@@ -514,8 +515,8 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                     
                     if (date.toLocalDate().equals(selectedDateInCalendar != null ? selectedDateInCalendar.toLocalDate() : selectedDate.toLocalDate())) {
                         // Выделяем выбранную дату
-                        dayView.setBackgroundColor(getResources().getColor(R.color.date_picker_selected_day_background));
-                        dayView.setTextColor(getResources().getColor(R.color.date_picker_content_titles));
+                        dayView.setBackgroundColor(ContextCompat.getColor(this, R.color.date_picker_selected_day_background));
+                        dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_titles));
                         dayView.setAlpha(1.0f);
                     } else {
                         // Сбрасываем выделение
@@ -524,11 +525,11 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                         // Определяем тип дня и устанавливаем соответствующие цвета
                         if (date.getMonth() == selectedDate.getMonth() && date.getYear() == selectedDate.getYear()) {
                             // День текущего месяца
-                            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_texts));
+                            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_texts));
                             dayView.setAlpha(1.0f);
                         } else {
                             // День предыдущего или следующего месяца
-                            dayView.setTextColor(getResources().getColor(R.color.date_picker_content_texts));
+                            dayView.setTextColor(ContextCompat.getColor(this, R.color.date_picker_content_texts));
                             dayView.setAlpha(0.3f);
                         }
                     }

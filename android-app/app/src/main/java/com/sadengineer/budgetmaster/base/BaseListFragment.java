@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.MotionEvent;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
@@ -49,6 +50,53 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
         // Настраиваем RecyclerView
         recyclerView = view.findViewById(getRecyclerViewId());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Устанавливаем targetRecyclerView для свайпов
+        // if (getActivity() instanceof BaseNavigationActivity) { // ОТКЛЮЧЕНО
+        //     ((BaseNavigationActivity) getActivity()).setSwipeTargetRecyclerView(recyclerView); // ОТКЛЮЧЕНО
+        // } // ОТКЛЮЧЕНО
+        
+        // Добавляем обработчик касаний для RecyclerView, чтобы предотвратить конфликты со свайпами
+        // recyclerView.setOnTouchListener(new View.OnTouchListener() { // ОТКЛЮЧЕНО
+        //     private float startY = 0; // ОТКЛЮЧЕНО
+        //     private float startX = 0; // ОТКЛЮЧЕНО
+        //     private boolean isVerticalSwipe = false; // ОТКЛЮЧЕНО
+        //     // ОТКЛЮЧЕНО
+        //     @Override // ОТКЛЮЧЕНО
+        //     public boolean onTouch(View v, MotionEvent event) { // ОТКЛЮЧЕНО
+        //         switch (event.getAction()) { // ОТКЛЮЧЕНО
+        //             case MotionEvent.ACTION_DOWN: // ОТКЛЮЧЕНО
+        //                 startY = event.getY(); // ОТКЛЮЧЕНО
+        //                 startX = event.getX(); // ОТКЛЮЧЕНО
+        //                 isVerticalSwipe = false; // ОТКЛЮЧЕНО
+        //                 return false; // Позволяем стандартную обработку // ОТКЛЮЧЕНО
+        //                 // ОТКЛЮЧЕНО
+        //             case MotionEvent.ACTION_MOVE: // ОТКЛЮЧЕНО
+        //                 float deltaY = Math.abs(event.getY() - startY); // ОТКЛЮЧЕНО
+        //                 float deltaX = Math.abs(event.getX() - startX); // ОТКЛЮЧЕНО
+        //                 // ОТКЛЮЧЕНО
+        //                 // Если это вертикальный свайп с достаточной амплитудой // ОТКЛЮЧЕНО
+        //                 if (deltaY > 50 && deltaY > deltaX * 2) { // ОТКЛЮЧЕНО
+        //                     isVerticalSwipe = true; // ОТКЛЮЧЕНО
+        //                     // Блокируем стандартную прокрутку RecyclerView // ОТКЛЮЧЕНО
+        //                     return true; // ОТКЛЮЧЕНО
+        //                     // ОТКЛЮЧЕНО
+        //                 } // ОТКЛЮЧЕНО
+        //                 return false; // ОТКЛЮЧЕНО
+        //                 // ОТКЛЮЧЕНО
+        //             case MotionEvent.ACTION_UP: // ОТКЛЮЧЕНО
+        //                 if (isVerticalSwipe) { // ОТКЛЮЧЕНО
+        //                     // Это был вертикальный свайп - блокируем стандартную обработку // ОТКЛЮЧЕНО
+        //                     return true; // ОТКЛЮЧЕНО
+        //                     // ОТКЛЮЧЕНО
+        //                 } // ОТКЛЮЧЕНО
+        //                 return false; // ОТКЛЮЧЕНО
+        //                 // ОТКЛЮЧЕНО
+        //             default: // ОТКЛЮЧЕНО
+        //                 return false; // ОТКЛЮЧЕНО
+        //         } // ОТКЛЮЧЕНО
+        //     } // ОТКЛЮЧЕНО
+        // }); // ОТКЛЮЧЕНО
         
         // ViewModel из Activity
         viewModel = new ViewModelProvider(requireActivity()).get(getViewModelClass());
