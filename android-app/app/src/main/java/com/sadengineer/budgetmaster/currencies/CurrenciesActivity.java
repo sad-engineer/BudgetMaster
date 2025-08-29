@@ -33,9 +33,6 @@ public class CurrenciesActivity extends BaseCardsActivity<Currency> {
         
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-        
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_currencies, R.dimen.toolbar_text);
 

@@ -84,7 +84,6 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
 
         // Инициализация навигации
         initializeNavigation();
-        setupStandardToolbar();
         // Инициализация общих действий экрана редактирования: save/cancel могут отсутствовать
         setupCommonEditActions(R.id.position_change_button);
 
@@ -226,7 +225,6 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     /**
      * Переопределяем настройку кнопки "назад" для перехода к списку счетов
      */
-    @Override
     protected void setupBackButton(int backButtonId) {
         ImageButton back = findViewById(backButtonId);
         if (back != null) {
@@ -390,6 +388,6 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
      */
     private void returnToAccounts() {
         Log.d(TAG, "Переход к окну списка счетов, вкладка " + sourceTab);
-        returnTo(AccountsActivity.class, "selected_tab", sourceTab);
+        returnTo(AccountsActivity.class, true, "selected_tab", sourceTab);
     }
 }

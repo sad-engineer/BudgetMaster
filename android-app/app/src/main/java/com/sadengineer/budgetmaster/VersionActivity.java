@@ -28,15 +28,8 @@ public class VersionActivity extends BaseContentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_version);
 
-        // Настройка Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-        
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_version, R.dimen.toolbar_text);
 

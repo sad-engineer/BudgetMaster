@@ -54,6 +54,9 @@ public class DatabaseInitializer {
         
         Log.d(TAG, "initializeDefaultData: Инициализация завершена");
     }
+
+    
+    
     
     /**
      * Инициализирует дефолтные валюты

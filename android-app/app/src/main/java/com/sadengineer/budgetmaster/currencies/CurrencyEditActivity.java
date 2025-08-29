@@ -56,8 +56,6 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
@@ -111,16 +109,14 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     /**
      * Переопределяем настройку кнопки "назад" для перехода к списку валют
      */
-    @Override
     protected void setupBackButton(int backButtonId) {
-        super.setupBackButton(backButtonId);
-        if (backButton != null) {
-            backButton.setOnClickListener(v -> {
+        ImageButton back = findViewById(backButtonId);
+        if (back != null) {
+            back.setOnClickListener(v -> {
                 Log.d(TAG, "Нажата кнопка 'Назад'");
-                // Возвращаемся к списку валют
                 returnToCurrencies();
             });
-        }
+        }   
     }
     
     /**
@@ -199,9 +195,6 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private void returnToCurrencies() {
         // Переходим к списку валют
         Log.d(TAG, "Переходим к окну списка валют");
-        Intent intent = new Intent(this, CurrenciesActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
+        returnTo(CurrenciesActivity.class, true, "selected_tab", sourceTab);
     }   
 } 

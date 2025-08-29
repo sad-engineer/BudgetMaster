@@ -17,15 +17,10 @@ public class InstructionsActivity extends BaseContentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instructions);
-
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-        
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_instructions, R.dimen.toolbar_text);
-
         Log.d(TAG, "InstructionsActivity создана");
     }
 } 

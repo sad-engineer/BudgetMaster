@@ -23,22 +23,29 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
 
     protected ImageButton saveButton;
     protected TextView toolbarTitle;
+    protected ImageButton positionChangeButton;
 
     /**
      * Инициализация общих кнопок. Любой из идентификаторов может быть null/0, если кнопки нет в layout.
      */
-    protected void setupCommonEditActions(Integer saveButtonId) {
-        if (saveButtonId != null && saveButtonId != 0) {
-            saveButton = findViewById(saveButtonId);
-            if (saveButton != null) {
-                saveButton.setOnClickListener(v -> onSaveClicked());
-            }
-            //меняем иконку на сохранения
-            saveButton.setImageResource(R.drawable.ic_save);
+    protected void setupCommonEditActions(Integer positionChangeButtonId) {
+
+        if (positionChangeButtonId != null && positionChangeButtonId != 0) {
+            positionChangeButton = findViewById(positionChangeButtonId);
+        if (saveButton != null) {
+            saveButton.setOnClickListener(v -> onSaveClicked());
+        }
+        //меняем иконку на сохранения
+        saveButton.setImageResource(R.drawable.ic_save);
         }
     }
 
-    /** Обработчик клика «Сохранить». */
+    /** 
+     * Унаследованный метод: Обработчик клика на кнопке «Сохранить». 
+     * При нажатии на кнопку "Сохранить" для всех окон нужно 
+     * выполнять валидацию введеных данных и оправить запрос на сохранение данных в БД
+     * После чего закрываем текущую активность
+     */
     protected void onSaveClicked() {
         try {
             boolean success = validateAndSave();
@@ -50,28 +57,24 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
         }
     }
 
-    /** Выполняет валидацию и сохранение. Должен быть реализован в наследнике. */
-    protected abstract boolean validateAndSave();
-
-    /**
-     * Устанавливает заголовок тулбара
-     * @param titleResId - ресурс строки для заголовка
-     * @param textSizeResId - ресурс размера шрифта
+    /** 
+     * Выполняет валидацию и сохранение. 
+     * Должен быть реализован в наследнике. 
+     * @return true - если сохранение прошло успешно, false - если есть ошибки
+     * @throws UnsupportedOperationException - если метод не реализован в наследнике
      */
-    protected void setToolbarTitle(int titleResId, int textSizeResId) {
-        toolbarTitle = findViewById(R.id.toolbar_title);
-        if (toolbarTitle != null) {
-            toolbarTitle.setText(titleResId);
-            Log.d(TAG, "Заголовок тулбара установлен");
-            
-            // Устанавливаем размер шрифта
-            float textSize = getResources().getDimension(textSizeResId);
-            toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен");
-        }
+    protected boolean validateAndSave() {
+        throw new UnsupportedOperationException(
+            "Метод validateAndSave() должен быть реализован в наследнике"
+        );
     }
+    
 
-    /** Показать ошибку у поля ввода. */
+    /** 
+     * Показать ошибку у поля ввода. 
+     * @param editText - поле ввода
+     * @param message - сообщение об ошибке
+     */
     protected void showFieldError(EditText editText, String message) {
         if (editText != null) {
             editText.setError(message);
@@ -79,7 +82,11 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
         }
     }
 
-    /** Показать ошибку у спиннера: подсветить текущий выбранный элемент, если это TextView. */
+    /** 
+     * Показать ошибку у спиннера: подсветить текущий выбранный элемент, если это TextView. 
+     * @param spinner - спиннер
+     * @param message - сообщение об ошибке
+     */
     protected void showSpinnerError(Spinner spinner, String message) {
         if (spinner == null) return;
         View selected = spinner.getSelectedView();
@@ -90,16 +97,24 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
         }
     }
 
-    /** Навигация к другой активности с возвратом параметра. */
-    protected void returnTo(Class<?> activityClass, String name, int value) {
-        Intent intent = new Intent(this, activityClass);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(name, value);
-        startActivity(intent);
+    /** 
+     * Навигация к другой активности с закрытием текущей активности. 
+     * @param activityClass - класс активности
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param name - имя параметра
+     * @param value - значение параметра
+     */
+    protected void returnTo(Class<?> activityClass, boolean clearTop, String name, Integer value) {
+        goTo(activityClass, clearTop, name, value);
+        //закрываем текущую активность
         finish();
     }
 
-    /** Хелпер: отвязать фокус от поля ввода при касании других View (например, спиннеров). */
+    /** 
+     * Хелпер: отвязать фокус от поля ввода при касании других View (например, спиннеров). 
+     * @param toClear - поле ввода
+     * @param views - массив View
+     */
     protected void clearFocusOnTouch(EditText toClear, View... views) {
         if (toClear == null || views == null) return;
         for (View v : views) {

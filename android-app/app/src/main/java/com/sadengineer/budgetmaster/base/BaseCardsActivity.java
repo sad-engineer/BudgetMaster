@@ -21,7 +21,7 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
  */
 public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
 
-    protected final String TAG = getClass().getSimpleName();
+    protected final String TAG = "BaseCardsActivity";
 
     protected RecyclerView recyclerView;
     protected ImageButton addButton;
@@ -172,8 +172,7 @@ public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
         if (isSelectionMode) {
             setSelectionMode(false);
         } else {
-            // Для всех экранов на базе карточек кнопка «Назад» ведёт на главный экран
-            navigateToMain();
+            goToRoot();
         }
     }
 
@@ -198,23 +197,15 @@ public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
     /** Хук при смене режима выбора. Наследник может отреагировать на смену UI. */
     protected void onSelectionModeChanged(boolean enabled) { /* no-op */ }
 
-    /**
-     * Устанавливает заголовок тулбара
-     * @param titleResId - ресурс строки для заголовка
-     * @param textSizeResId - ресурс размера шрифта
-     */
-    protected void setToolbarTitle(int titleResId, int textSizeResId) {
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        if (toolbarTitle != null) {
-            toolbarTitle.setText(titleResId);
-            Log.d(TAG, "Заголовок тулбара установлен");
-            
-            // Устанавливаем размер шрифта
-            float textSize = getResources().getDimension(textSizeResId);
-            toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен");
-        }
-    }
+    // /**
+    //  * Устанавливает заголовок тулбара
+    //  * @param titleResId - ресурс строки для заголовка
+    //  * @param textSizeResId - ресурс размера шрифта
+    //  */
+//     protected void setToolbarTitle(int titleResId, int textSizeResId) {
+//         //в базовом классе 
+//     }
+
 }
 
 

@@ -72,8 +72,6 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
@@ -213,15 +211,17 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         }
     }
     
-    @Override
+    /**
+     * Переопределяем настройку кнопки "назад" для перехода к списку категорий
+     */
     protected void setupBackButton(int backButtonId) {
-        super.setupBackButton(backButtonId);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        ImageButton back = findViewById(backButtonId);
+        if (back != null) {
+            back.setOnClickListener(v -> {
+                Log.d(TAG, "Нажата кнопка 'Назад'");
+                returnToCategories();
+            });
+        }
     }
     
     /**
@@ -346,8 +346,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      * Возвращается к списку категорий
      */
     private void returnToCategories() {
-        Intent resultIntent = new Intent();
-        setResult(RESULT_OK, resultIntent);
-        finish();
+        Log.d(TAG, "Переход к окну списка категорий, вкладка " + sourceTab);
+        returnTo(CategoriesActivity.class, true, "selected_tab", sourceTab);
     }
 }

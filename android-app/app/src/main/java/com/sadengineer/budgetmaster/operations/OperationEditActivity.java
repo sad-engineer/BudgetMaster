@@ -102,7 +102,6 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
 
         // Инициализация навигации
         initializeNavigation();
-        setupStandardToolbar();
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
@@ -802,12 +801,10 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
     /**
      * Переопределяем настройку кнопки "Назад" для возврата к правильному окну
      */
-    @Override
     protected void setupBackButton(int backButtonId) {
-        super.setupBackButton(backButtonId);
-        ImageButton backButton = findViewById(backButtonId);
-        if (backButton != null) {
-            backButton.setOnClickListener(v -> {
+        ImageButton back = findViewById(backButtonId);
+        if (back != null) {
+            back.setOnClickListener(v -> {
                 // Возвращаемся к предыдущему экрану без сохранения
                 finish();
             });
@@ -827,8 +824,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      * Возвращается к предыдущему экрану
      */
     private void returnToPrevious() {
-        Intent resultIntent = new Intent();
-        setResult(RESULT_OK, resultIntent);
-        finish();
+        Log.d(TAG, "Переход к окну списка операций, вкладка " + sourceTab);
+        returnTo(OperationsActivity.class, true, "selected_tab", sourceTab);
     }
 }

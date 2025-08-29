@@ -41,12 +41,8 @@ public class ExpenseActivity extends BaseCardsActivity<Operation> {
         setContentView(R.layout.activity_expense);
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         // Устанавливаем заголовок для режима создания
-        setToolbarTitle(
-            R.string.toolbar_title_expense, 
-            R.dimen.toolbar_text_expense);
+        setToolbarTitle(R.string.toolbar_title_expense, R.dimen.toolbar_text_expense);
 
         // Общая привязка кнопок и placeholder для индикатора
         // Используем резерв в тулбаре как placeholder индикатора

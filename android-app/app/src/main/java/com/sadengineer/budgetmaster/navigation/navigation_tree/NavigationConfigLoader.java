@@ -17,6 +17,8 @@ import java.util.Map;
 
 /**
  * Загрузчик конфигурации навигации из JSON файла
+ * Содержит метод для загрузки конфигурации навигации из JSON файла
+ * и метод для парсинга конфигурации Activity из JSON
  */
 public class NavigationConfigLoader {
     
@@ -26,23 +28,55 @@ public class NavigationConfigLoader {
     /**
      * Загружает конфигурацию навигации из JSON файла
      * @param context контекст приложения
-     * @return список конфигураций Activity
+     * @return карта узлов навигации по классу Activity
      */
-    public static List<ActivityConfig> loadConfig(Context context) {
-        List<ActivityConfig> configs = new ArrayList<>();
+    public static Map<Class<?>, NavigationNode> loadConfig(Context context) {
+        Map<Class<?>, NavigationNode> nodesByClass = new HashMap<>();
+        Map<String, NavigationNode> nodesByClassName = new HashMap<>();
         
         try {
             String jsonString = loadJsonFromAssets(context, CONFIG_FILE);
             JSONObject jsonObject = new JSONObject(jsonString);
             JSONArray activitiesArray = jsonObject.getJSONArray("activities");
             
+            // Первый проход: создаем все узлы
             for (int i = 0; i < activitiesArray.length(); i++) {
                 JSONObject activityJson = activitiesArray.getJSONObject(i);
-                ActivityConfig config = parseActivityConfig(activityJson);
-                configs.add(config);
+                NavigationNode node = parseNavigationNode(activityJson);
+                if (node != null) {
+                    nodesByClass.put(node.activityClass, node);
+                    nodesByClassName.put(node.activityClass.getName(), node);
+                }
             }
             
-            Log.d(TAG, "Загружено " + configs.size() + " конфигураций Activity");
+            // Второй проход: устанавливаем связи
+            for (int i = 0; i < activitiesArray.length(); i++) {
+                JSONObject activityJson = activitiesArray.getJSONObject(i);
+                String className = activityJson.getString("class");
+                NavigationNode currentNode = nodesByClassName.get(className);
+                
+                if (currentNode != null) {
+                    // Устанавливаем связь вверх
+                    if (activityJson.has("up") && !activityJson.isNull("up")) {
+                        String upClassName = activityJson.getString("up");
+                        NavigationNode upNode = nodesByClassName.get(upClassName);
+                        if (upNode != null) {
+                            currentNode.up = upNode;
+                        }
+                    }
+                    
+                    // Устанавливаем связь вниз
+                    if (activityJson.has("down") && !activityJson.isNull("down")) {
+                        String downClassName = activityJson.getString("down");
+                        NavigationNode downNode = nodesByClassName.get(downClassName);
+                        if (downNode != null) {
+                            currentNode.down = downNode;
+                        }
+                    }
+                }
+            }
+            
+            Log.d(TAG, "Загружено " + nodesByClass.size() + " узлов навигации");
             
         } catch (JSONException e) {
             Log.e(TAG, "Ошибка парсинга JSON конфигурации", e);
@@ -50,7 +84,7 @@ public class NavigationConfigLoader {
             Log.e(TAG, "Ошибка загрузки файла конфигурации", e);
         }
         
-        return configs;
+        return nodesByClass;
     }
     
     /**
@@ -66,9 +100,9 @@ public class NavigationConfigLoader {
     }
     
     /**
-     * Парсит конфигурацию Activity из JSON
+     * Парсит узел навигации из JSON
      */
-    private static ActivityConfig parseActivityConfig(JSONObject json) throws JSONException {
+    private static NavigationNode parseNavigationNode(JSONObject json) throws JSONException {
         String className = json.getString("class");
         String name = json.getString("name");
         
@@ -79,14 +113,32 @@ public class NavigationConfigLoader {
             tabs[i] = tabsArray.getString(i);
         }
         
-        // Парсим связи
-        String upClass = json.optString("up", null);
-        String downClass = json.optString("down", null);
-        
         // Парсим ID пункта меню
         String menuId = json.optString("menu_id", null);
         
-        return new ActivityConfig(className, name, tabs, upClass, downClass, menuId);
+        try {
+            // Получаем класс Activity
+            Class<?> activityClass = Class.forName(className);
+            
+            // Создаем узел навигации
+            NavigationNode node = new NavigationNode(
+                    activityClass,
+                    name,
+                    tabs.length,
+                    tabs,
+                    menuId,
+                    null, // up - будет установлено позже
+                    null, // down - будет установлено позже
+                    null, // left - не используется
+                    null  // right - не используется
+            );
+            
+            return node;
+            
+        } catch (ClassNotFoundException e) {
+            Log.e("NavigationConfigLoader", "Класс Activity не найден: " + className, e);
+            return null;
+        }
     }
     
 

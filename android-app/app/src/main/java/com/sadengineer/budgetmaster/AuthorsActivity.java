@@ -24,16 +24,8 @@ public class AuthorsActivity extends BaseContentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authors);
-
-        // Инициализация тулбара
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_authors, R.dimen.toolbar_text);
 

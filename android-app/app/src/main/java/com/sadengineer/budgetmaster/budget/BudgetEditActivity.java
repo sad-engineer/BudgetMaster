@@ -75,8 +75,6 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
@@ -308,9 +306,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     /**
      * Переопределяем настройку кнопки "назад" для перехода к списку бюджетов
      */
-    @Override
     protected void setupBackButton(int backButtonId) {
-        super.setupBackButton(backButtonId);
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
                 Log.d(TAG, "Нажата кнопка 'Назад'");
@@ -326,9 +322,6 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private void returnToBudget() {
         // Переходим к списку бюджетов
         Log.d(TAG, "Переходим к окну списка бюджетов");
-        Intent intent = new Intent(this, BudgetActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
+        returnTo(BudgetActivity.class, true, "selected_tab", sourceTab);
     }
 }

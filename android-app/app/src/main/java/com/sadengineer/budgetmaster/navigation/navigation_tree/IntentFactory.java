@@ -6,6 +6,8 @@ import android.util.Log;
 
 /**
  * Фабрика для создания Intent'ов навигации
+ * Содержит методы для создания Intent'ов для перехода на узлы навигационного дерева
+ * и для перехода к Activity по классу
  */
 public class IntentFactory {
     

@@ -40,21 +40,15 @@ public class BudgetActivity extends BaseContentActivity {
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-        
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_budgets, R.dimen.toolbar_text);
 
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(BudgetSharedViewModel.class);
-
         // Обработчики кнопок бюджета
         setupButtons();
-
         // Кнопки скрыты, поэтому режим выбора не нужен
         Log.d(TAG, "Режим выбора отключен - кнопки скрыты");
-
         // Инициализация ViewPager2 и TabLayout
         setupViewPager();
     }

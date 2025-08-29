@@ -185,10 +185,10 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
             setAdapterData(items);
             Log.d(TAG, "Список данных обновлён");
             
-            // Сбрасываем счетчик свайпов при изменении содержимого списка
-            if (getActivity() instanceof BaseNavigationActivity) {
-                ((BaseNavigationActivity) getActivity()).resetSwipeCount();
-            }
+            // // Сбрасываем счетчик свайпов при изменении содержимого списка
+            // if (getActivity() instanceof BaseNavigationActivity) {
+            //     ((BaseNavigationActivity) getActivity()).resetSwipeCount();
+            // }
         } else {
             Log.i(TAG, "Данные не найдены");
         }

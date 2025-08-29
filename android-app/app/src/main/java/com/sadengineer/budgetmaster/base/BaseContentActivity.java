@@ -13,7 +13,7 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
  */
 public abstract class BaseContentActivity extends BaseNavigationActivity {
 
-    protected final String TAG = getClass().getSimpleName();
+    protected final String TAG = "BaseContentActivity";
 
     /**
      * Устанавливает заголовок тулбара
@@ -21,6 +21,7 @@ public abstract class BaseContentActivity extends BaseNavigationActivity {
      * @param textSizeResId - ресурс размера шрифта
      */
     protected void setToolbarTitle(int titleResId, int textSizeResId) {
+        
         TextView toolbarTitle = findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
             toolbarTitle.setText(titleResId);

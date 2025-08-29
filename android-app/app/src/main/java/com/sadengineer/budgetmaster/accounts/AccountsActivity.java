@@ -42,8 +42,6 @@ public class AccountsActivity extends BaseCardsActivity<Account> {
         setContentView(R.layout.activity_accounts);
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         // Устанавливаем заголовок для режима создания
         setToolbarTitle(
             R.string.toolbar_title_accounts, 

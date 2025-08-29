@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,7 +7,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 
 import com.sadengineer.budgetmaster.accounts.AccountsActivity;
@@ -30,73 +28,22 @@ public class MainActivity extends BaseNavigationActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "MainActivity.onCreate() - начало инициализации");
-        
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "Layout загружен");
-
         // Инициализация базы данных
-        Log.d(TAG, "Начинаем инициализацию базы данных");
         initializeDatabase();
-
         // Инициализация настроек
-        Log.d(TAG, "Инициализация настроек приложения");
         SettingsManager.init(this);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Log.d(TAG, "Toolbar настроен");
-
         // Инициализация навигации
-        Log.d(TAG, "Инициализация навигации");
-        initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        
-        // Устанавливаем targetRecyclerView в null (в MainActivity нет списка)
-        setSwipeTargetRecyclerView(null);
-        
-        Log.d(TAG, "Навигация настроена");
+        initializeNavigation(true);
 
-        // Настройка обработки кнопки "Назад"
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                }
-            }
-        });
-        Log.d(TAG, "Обработчик кнопки 'Назад' настроен");
-
-        // Обработчики кнопок toolbar
-        ImageButton incomeButton = toolbar.findViewById(R.id.income_button);
-        ImageButton expenseButton = toolbar.findViewById(R.id.expense_button);
-        incomeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, IncomeActivity.class);
-                startActivity(intent);
-            }
-        });
-        expenseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ExpenseActivity.class);
-                startActivity(intent);
-            }
-        });
-        Log.d(TAG, "Кнопки toolbar настроены");
+        // ====== Обработчики кнопок ======
 
         // Обработчик кнопки "На счетах"
         Button btnAccounts = findViewById(R.id.btn_accounts);
         btnAccounts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
-                intent.putExtra("tab_index", 0); // 0 - Текущие
-                startActivity(intent);
+                goTo(AccountsActivity.class, 0); // 0 - Текущие
             }
         });
 
@@ -105,9 +52,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnEarned.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
-                intent.putExtra("tab_index", 0); // 0 - Текущие
-                startActivity(intent);
+                goTo(AccountsActivity.class, 0); // 0 - Текущие
             }
         });
 
@@ -116,9 +61,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnSavings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
-                intent.putExtra("tab_index", 1); // 1 - Сбережения
-                startActivity(intent);
+                goTo(AccountsActivity.class, 1); // 1 - Сбережения
             }
         });
 
@@ -127,8 +70,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnIncome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, IncomeActivity.class);
-                startActivity(intent);
+                goTo(IncomeActivity.class);
             }
         });
 
@@ -137,8 +79,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnExpense.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ExpenseActivity.class);
-                startActivity(intent);
+                goTo(ExpenseActivity.class);
             }
         });
 
@@ -147,14 +88,16 @@ public class MainActivity extends BaseNavigationActivity {
         btnBudget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BudgetActivity.class);
-                startActivity(intent);
+                goTo(BudgetActivity.class); //TODO: переделать на переход к  остатку бюджета
             }
         });
         
         Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
     }
     
+    /**
+     * Уничтожение активности
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -176,6 +119,7 @@ public class MainActivity extends BaseNavigationActivity {
 
     /**
      * Инициализирует базу данных
+     * TODO: убрать логику инициализации базы данных из MainActivity, только вызов
      */
     private void initializeDatabase() {
         try {

@@ -41,12 +41,8 @@ public class IncomeActivity extends BaseCardsActivity<Operation> {
         setContentView(R.layout.activity_income);
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
         // Устанавливаем заголовок для режима создания
-        setToolbarTitle(
-            R.string.toolbar_title_income, 
-            R.dimen.toolbar_text_income);
+        setToolbarTitle(R.string.toolbar_title_income, R.dimen.toolbar_text_income);
 
         // Общая привязка кнопок и placeholder для индикатора
         // Используем резерв в тулбаре как placeholder индикатора
