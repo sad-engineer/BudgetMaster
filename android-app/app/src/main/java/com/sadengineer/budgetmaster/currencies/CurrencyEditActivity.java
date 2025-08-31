@@ -59,6 +59,9 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
+        
+        // Настройка кнопки "Назад"
+        setupBackButton(R.id.back_button);
 
         // Инициализация CurrencyService
         currencyService = new CurrencyService(this, "default_user");
@@ -195,6 +198,6 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private void returnToCurrencies() {
         // Переходим к списку валют
         Log.d(TAG, "Переходим к окну списка валют");
-        returnTo(CurrenciesActivity.class, true, "selected_tab", sourceTab);
+        returnTo(CurrenciesActivity.class, true, new String[0]);
     }   
 } 

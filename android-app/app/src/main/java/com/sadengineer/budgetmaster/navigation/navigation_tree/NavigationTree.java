@@ -24,7 +24,7 @@ public class NavigationTree {
      */
     public static void initialize(Context context) {
         if (rootNode != null) {
-            Log.d(TAG, "Навигационное дерево уже инициализировано");
+            Log.d(TAG, "Навигационное дерево уже инициализировано, пропускаем повторную инициализацию");
             return;
         }
         

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 
 import com.sadengineer.budgetmaster.R;
@@ -68,6 +69,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
     private Operation currentOperation;
     private boolean isEditMode = false;
     private int operationType = OperationTypeFilter.INCOME.getIndex(); // По умолчанию доход
+    private int sourceTab = 0; // Вкладка, с которой был вызван переход
     private List<Category> categories = new ArrayList<>();
     private List<Account> accounts = new ArrayList<>();
     private LocalDateTime selectedDate = LocalDateTime.now();
@@ -105,6 +107,9 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
+
+        // Настройка кнопки "Назад"
+        setupBackButton(R.id.back_button);
 
         // Инициализация сервисов
         operationService = new OperationService(this, userName);
@@ -548,6 +553,10 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             operationType = intent.getIntExtra("operation_type", OperationTypeFilter.INCOME.getIndex());
             Log.d(TAG, "Загружен тип операции из Intent: " + operationType);
             
+            // Получаем информацию о вкладке
+            sourceTab = intent.getIntExtra("source_tab", 0);
+            Log.d(TAG, "Загружена вкладка из Intent: " + sourceTab);
+            
             // Получаем операцию для редактирования
             currentOperation = (Operation) intent.getSerializableExtra("operation");
             
@@ -806,25 +815,39 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         if (back != null) {
             back.setOnClickListener(v -> {
                 // Возвращаемся к предыдущему экрану без сохранения
-                finish();
+                if (operationType == OperationTypeFilter.INCOME.getIndex()) {
+                    returnToIncomeActivity();
+                } else {
+                    returnToExpenseActivity();
+                }
             });
         }
     }
-    
-    /**
-     * Обработка нажатия системной кнопки "Назад"
-     */
-    @Override
-    public void onBackPressed() {
-        // Возвращаемся к предыдущему экрану без сохранения
-        finish();
+
+    private void returnToIncomeActivity() {
+        Log.d(TAG, "Переход к окну списка доходов, вкладка " + sourceTab);
+        String[] params = {"selected_tab", String.valueOf(sourceTab)};
+        returnTo(com.sadengineer.budgetmaster.income.IncomeActivity.class, true, params);
     }
-    
+
+    private void returnToExpenseActivity() {
+        Log.d(TAG, "Переход к окну списка расходов, вкладка " + sourceTab);
+        String[] params = {"selected_tab", String.valueOf(sourceTab)};
+        returnTo(com.sadengineer.budgetmaster.expense.ExpenseActivity.class, true, params);
+    }
+
     /**
      * Возвращается к предыдущему экрану
      */
     private void returnToPrevious() {
         Log.d(TAG, "Переход к окну списка операций, вкладка " + sourceTab);
-        returnTo(OperationsActivity.class, true, "selected_tab", sourceTab);
+        // Возвращаемся к соответствующему экрану операций в зависимости от типа операции
+        if (operationType == OperationTypeFilter.INCOME.getIndex()) {
+            String[] params = {"selected_tab", String.valueOf(sourceTab)};
+            returnTo(com.sadengineer.budgetmaster.income.IncomeActivity.class, true, params);
+        } else {
+            String[] params = {"selected_tab", String.valueOf(sourceTab)};
+            returnTo(com.sadengineer.budgetmaster.expense.ExpenseActivity.class, true, params);
+        }
     }
 }

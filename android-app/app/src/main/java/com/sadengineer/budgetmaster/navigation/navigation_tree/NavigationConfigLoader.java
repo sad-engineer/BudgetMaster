@@ -31,6 +31,7 @@ public class NavigationConfigLoader {
      * @return карта узлов навигации по классу Activity
      */
     public static Map<Class<?>, NavigationNode> loadConfig(Context context) {
+        Log.d(TAG, "Загрузка конфигурации навигации из JSON файла...");
         Map<Class<?>, NavigationNode> nodesByClass = new HashMap<>();
         Map<String, NavigationNode> nodesByClassName = new HashMap<>();
         
@@ -84,6 +85,7 @@ public class NavigationConfigLoader {
             Log.e(TAG, "Ошибка загрузки файла конфигурации", e);
         }
         
+        Log.d(TAG, "Конфигурация навигации загружена успешно");
         return nodesByClass;
     }
     

@@ -86,6 +86,9 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
         initializeNavigation();
         // Инициализация общих действий экрана редактирования: save/cancel могут отсутствовать
         setupCommonEditActions(R.id.position_change_button);
+        
+        // Настройка кнопки "Назад"
+        setupBackButton(R.id.back_button);
 
         // Настраиваем спиннеры
         setupSpinners();
@@ -388,6 +391,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
      */
     private void returnToAccounts() {
         Log.d(TAG, "Переход к окну списка счетов, вкладка " + sourceTab);
-        returnTo(AccountsActivity.class, true, "selected_tab", sourceTab);
+        String[] params = {"selected_tab", String.valueOf(sourceTab)};
+        returnTo(AccountsActivity.class, true, params);
     }
 }

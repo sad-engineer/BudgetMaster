@@ -52,7 +52,7 @@ public class MainActivity extends BaseNavigationActivity {
         btnEarned.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goTo(AccountsActivity.class, 0); // 0 - Текущие
+                goTo(IncomeActivity.class, 0); // 0 - Текущие
             }
         });
 
@@ -100,23 +100,13 @@ public class MainActivity extends BaseNavigationActivity {
      */
     @Override
     protected void onDestroy() {
+        // Завершаем ThreadManager при уничтожении MainActivity
+        ThreadManager.shutdown();
+
         super.onDestroy();
         Log.d(TAG, "MainActivity уничтожена");
     }
     
-    /**
-     * Выход из приложения
-     * Вызывается при нажатии кнопки "Выход" в меню
-     */
-    public void exitApplication() {
-        Log.d(TAG, "Завершение работы приложения");
-        // Завершаем ThreadManager
-        ThreadManager.shutdown();
-        // Закрываем приложение
-        finish();
-        System.exit(0);
-    }
-
     /**
      * Инициализирует базу данных
      * TODO: убрать логику инициализации базы данных из MainActivity, только вызов
@@ -143,3 +133,9 @@ public class MainActivity extends BaseNavigationActivity {
         }
     }
 }
+
+// окна создаются все норм.
+// давай вернемся к свайпам
+// Предложи реализацию свайпов с учетом новой навигации@navigation/ 
+// новый код должен удовлетворять SOLID
+// не приши код , предложи план реализации

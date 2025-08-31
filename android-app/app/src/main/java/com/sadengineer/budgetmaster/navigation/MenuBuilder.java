@@ -28,8 +28,11 @@ public class MenuBuilder {
      */
     public static void initialize(Context context) {
         if (isInitialized) {
+            Log.d(TAG, "MenuBuilder уже инициализирован, пропускаем повторную инициализацию");
             return;
         }
+        
+        Log.d(TAG, "Инициализация MenuBuilder...");
         
         // Инициализируем NavigationTree если еще не инициализирован
         NavigationTree.initialize(context);

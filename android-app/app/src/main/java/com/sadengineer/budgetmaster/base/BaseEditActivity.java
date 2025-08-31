@@ -32,11 +32,17 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
 
         if (positionChangeButtonId != null && positionChangeButtonId != 0) {
             positionChangeButton = findViewById(positionChangeButtonId);
+        }
+        
+        // Инициализируем saveButton, если он еще не инициализирован
+        if (saveButton == null && positionChangeButtonId != null && positionChangeButtonId != 0) {
+            saveButton = findViewById(positionChangeButtonId);
+        }
+        
         if (saveButton != null) {
             saveButton.setOnClickListener(v -> onSaveClicked());
-        }
-        //меняем иконку на сохранения
-        saveButton.setImageResource(R.drawable.ic_save);
+            //меняем иконку на сохранения
+            saveButton.setImageResource(R.drawable.ic_save);
         }
     }
 
@@ -101,11 +107,10 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
      * Навигация к другой активности с закрытием текущей активности. 
      * @param activityClass - класс активности
      * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
-     * @param name - имя параметра
-     * @param value - значение параметра
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    protected void returnTo(Class<?> activityClass, boolean clearTop, String name, Integer value) {
-        goTo(activityClass, clearTop, name, value);
+    protected void returnTo(Class<?> activityClass, boolean clearTop, String[] params) {
+        goTo(activityClass, clearTop, params);
         //закрываем текущую активность
         finish();
     }

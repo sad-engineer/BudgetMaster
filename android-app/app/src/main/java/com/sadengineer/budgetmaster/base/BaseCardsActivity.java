@@ -43,7 +43,11 @@ public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
         if (addButtonId != null && addButtonId != 0) {
             addButton = findViewById(addButtonId);
             if (addButton != null) {
-                addButton.setOnClickListener(v -> onAddClicked());
+                Log.d(TAG, "setupCommonCardsUi: Устанавливаем обработчик для кнопки добавления");
+                addButton.setOnClickListener(v -> {
+                    Log.d(TAG, "setupCommonCardsUi: Нажата кнопка добавления");
+                    onAddClicked();
+                });
             }
         }
 
@@ -163,18 +167,6 @@ public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
      */
     protected abstract void onDeleteClicked();
 
-
-    /**
-     * Обработчик нажатия на кнопку «Назад».
-     */
-    @Override
-    public void onBackPressed() {
-        if (isSelectionMode) {
-            setSelectionMode(false);
-        } else {
-            goToRoot();
-        }
-    }
 
     /** Установить режим выбора через базу (делегирует во ViewModel, если привязана) */
     protected void setSelectionMode(boolean enabled) {

@@ -87,9 +87,8 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
                     deleteSelectedCategories();
                 } else {
                     // Запускаем окно создания категории
-                    Intent intent = new Intent(IncomeCategoriesActivity.this, CategoryEditActivity.class);
-                    intent.putExtra("operation_type", OPERATION_TYPE);
-                    startActivity(intent);
+                    String[] params = {"operation_type", String.valueOf(OPERATION_TYPE)};
+                    goTo(CategoryEditActivity.class, false, params);
                 }
             }
         });
@@ -226,8 +225,8 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
                     adapter.setCategories(loadedCategories);
                     Log.d(TAG, "Категории доходов отображены в списке");
                     
-                    // Сбрасываем счетчик свайпов при изменении содержимого списка
-                    resetSwipeCount();
+                    // // Сбрасываем счетчик свайпов при изменении содержимого списка
+                    // resetSwipeCount();
                 } else {
                     categories.clear();
                     Log.w(TAG, "Категории доходов не найдены в базе данных");
@@ -294,9 +293,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      */
     private void goToCategoryEdit(Category category) {
         Log.d(TAG, "Переходим к окну редактирования категории");
-        Intent intent = new Intent(IncomeCategoriesActivity.this, CategoryEditActivity.class);
-        intent.putExtra("category", category);
-        intent.putExtra("operation_type", OPERATION_TYPE);
-        startActivity(intent);
+        String[] params = {"operation_type", String.valueOf(OPERATION_TYPE), "category", category.getTitle()};
+        goTo(CategoryEditActivity.class, false, params);
     }
 } 

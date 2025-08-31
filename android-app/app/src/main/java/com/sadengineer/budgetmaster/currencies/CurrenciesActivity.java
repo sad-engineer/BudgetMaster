@@ -54,9 +54,15 @@ public class CurrenciesActivity extends BaseCardsActivity<Currency> {
      */
     @Override
     protected void onAddClicked() {
+        Log.d(TAG, "onAddClicked: Нажата кнопка 'Добавить валюту'");
         // Запускаем окно создания валюты (режим выбора обрабатывается базовым классом)
-        Intent intent = new Intent(CurrenciesActivity.this, CurrencyEditActivity.class);
-        startActivity(intent);
+        try {
+            Log.d(TAG, "onAddClicked: Попытка перехода к CurrencyEditActivity");
+            goTo(CurrencyEditActivity.class, false, new String[0]);
+            Log.d(TAG, "onAddClicked: Переход к CurrencyEditActivity выполнен");
+        } catch (Exception e) {
+            Log.e(TAG, "onAddClicked: Ошибка при переходе к CurrencyEditActivity", e);
+        }
     }
 
     /**

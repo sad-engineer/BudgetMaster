@@ -62,10 +62,12 @@ public class ExpenseActivity extends BaseCardsActivity<Operation> {
     @Override
     protected void onAddClicked() {
         // Запускаем окно создания операции расхода
-        Intent intent = new Intent(ExpenseActivity.this, OperationEditActivity.class);
-        intent.putExtra("operation_type", OperationTypeFilter.EXPENSE.getIndex());
-        intent.putExtra("source_tab", viewPager != null ? viewPager.getCurrentItem() : 0);
-        startActivity(intent);
+        int source_tab = viewPager != null ? viewPager.getCurrentItem() : 0;
+        String[] params = {
+            "operation_type", String.valueOf(OperationTypeFilter.EXPENSE.getIndex()), 
+            "source_tab", String.valueOf(source_tab)
+        };
+        goTo(OperationEditActivity.class, false, params);
     }
 
     /**

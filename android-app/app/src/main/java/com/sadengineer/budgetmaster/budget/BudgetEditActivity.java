@@ -322,6 +322,6 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private void returnToBudget() {
         // Переходим к списку бюджетов
         Log.d(TAG, "Переходим к окну списка бюджетов");
-        returnTo(BudgetActivity.class, true, "selected_tab", sourceTab);
+        returnTo(BudgetActivity.class, true, null);
     }
 }

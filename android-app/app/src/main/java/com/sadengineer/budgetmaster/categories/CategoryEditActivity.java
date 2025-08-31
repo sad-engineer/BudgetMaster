@@ -24,7 +24,8 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-
+import com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity;
+import com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity;
 
 /**
  * Activity для создания/изменения категории
@@ -75,6 +76,9 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
+
+        // Настройка кнопки "Назад"
+        setupBackButton(R.id.back_button);
 
         // Инициализация сервисов
         categoryService = new CategoryService(this, userName);
@@ -338,15 +342,18 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 break;
             }
         }
-    }
-    
-
+    }    
     
     /**
      * Возвращается к списку категорий
      */
     private void returnToCategories() {
-        Log.d(TAG, "Переход к окну списка категорий, вкладка " + sourceTab);
-        returnTo(CategoriesActivity.class, true, "selected_tab", sourceTab);
+        Log.d(TAG, "Переход к окну списка категорий, вкладка " + sourceOperationType);
+        // Возвращаемся к соответствующему экрану категорий в зависимости от типа операции
+        if (sourceOperationType == ModelConstants.OPERATION_TYPE_INCOME) {
+            returnTo(IncomeCategoriesActivity.class, true, new String[0]);
+        } else {
+            returnTo(ExpenseCategoriesActivity.class, true, new String[0]);
+        }
     }
 }

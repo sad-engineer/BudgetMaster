@@ -53,9 +53,6 @@ public class SettingsActivity extends BaseContentActivity {
 
         // Инициализация навигации
         initializeNavigation();
-        setupMenuButton(R.id.menu_button);
-        setupBackButton(R.id.back_button);
-        
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_settings, R.dimen.toolbar_text);
 

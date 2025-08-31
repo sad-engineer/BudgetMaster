@@ -119,6 +119,38 @@
       "up": "com.sadengineer.budgetmaster.VersionActivity",
       "down": "com.sadengineer.budgetmaster.MainActivity",
       "menu_id": "nav_authors"
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.currencies.CurrencyEditActivity",
+      "name": "Редактирование валюты",
+      "tabs": [],
+      "up": null,
+      "down": null,
+      "menu_id": null
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.accounts.AccountsEditActivity",
+      "name": "Редактирование счета",
+      "tabs": [],
+      "up": null,
+      "down": null,
+      "menu_id": null
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.categories.CategoryEditActivity",
+      "name": "Редактирование категории",
+      "tabs": [],
+      "up": null,
+      "down": null,
+      "menu_id": null
+    },
+    {
+      "class": "com.sadengineer.budgetmaster.operations.OperationEditActivity",
+      "name": "Редактирование операции",
+      "tabs": [],
+      "up": null,
+      "down": null,
+      "menu_id": null
     }
   ]
 }

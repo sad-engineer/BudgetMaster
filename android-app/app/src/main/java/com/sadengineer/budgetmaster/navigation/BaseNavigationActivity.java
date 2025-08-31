@@ -78,6 +78,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
     
     /**
      * Переключение на вкладку (должно быть переопределено в дочерних классах)
+     * @param tabIndex - индекс вкладки
      */
     protected void switchToTab(int tabIndex) {
         Log.d(TAG, "Переключение на вкладку " + tabIndex + " (базовая реализация)");
@@ -86,10 +87,12 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
         
     /**
      * Навигация вверх по дереву
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goUp(boolean clearTop, String name, Integer value) { 
+    public void goUp(boolean clearTop, String[] params) { 
         if (navigationController != null) {
-            navigationController.goUp(clearTop, name, value);
+            navigationController.goUp(clearTop, params);
         }
     }
 
@@ -98,16 +101,18 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      */
     public void goUp() { 
         if (navigationController != null) {
-            navigationController.goUp(false, null, null);
+            navigationController.goUp(false, null);
         }
     }
     
     /**
      * Навигация вниз по дереву
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goDown(boolean clearTop, String name, Integer value) { 
+    public void goDown(boolean clearTop, String[] params) { 
         if (navigationController != null) {
-            navigationController.goDown(clearTop, name, value);
+            navigationController.goDown(clearTop, params);
         }
     }
 
@@ -116,16 +121,18 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      */
     public void goDown() { 
         if (navigationController != null) {
-            navigationController.goDown(false, null, null);
+            navigationController.goDown(false, null);
         }
     }
     
     /**
      * Навигация влево (переход к предыдущей вкладке)
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goLeft(boolean clearTop, String name, Integer value) { 
+    public void goLeft(boolean clearTop, String[] params) { 
         if (navigationController != null) {
-            navigationController.goLeft(getCurrentTabIndex(), clearTop, name, value);
+            navigationController.goLeft(getCurrentTabIndex(), clearTop, params);
         }
     }
 
@@ -134,16 +141,18 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      */
     public void goLeft() { 
         if (navigationController != null) {
-            navigationController.goLeft(getCurrentTabIndex(), false, null, null);
+            navigationController.goLeft(getCurrentTabIndex(), false, null);
         }
     }
 
     /**
      * Навигация вправо (переход к следующей вкладке)
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goRight(boolean clearTop, String name, Integer value) { 
+    public void goRight(boolean clearTop, String[] params) { 
         if (navigationController != null) {
-            navigationController.goRight(getCurrentTabIndex(), clearTop, name, value);
+            navigationController.goRight(getCurrentTabIndex(), clearTop, params);
         }
     }
     
@@ -152,43 +161,57 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      */
     public void goRight() { 
         if (navigationController != null) {
-            navigationController.goRight(getCurrentTabIndex(), false, null, null);
+            navigationController.goRight(getCurrentTabIndex(), false, null);
         }
     }
 
     /**
      * Переход к конкретной Activity
+     * @param targetActivity - класс активности
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goTo(Class<?> targetActivity, boolean clearTop, String name, Integer value) { 
+    public void goTo(Class<?> targetActivity, boolean clearTop, String[] params) { 
+        Log.d(TAG, "goTo: Попытка перехода к " + targetActivity.getSimpleName() + ", clearTop=" + clearTop);
         if (navigationController != null) {
-            navigationController.goTo(targetActivity, clearTop, name, value);
+            Log.d(TAG, "goTo: navigationController найден, делегируем переход");
+            navigationController.goTo(targetActivity, clearTop, params);
+        } else {
+            Log.e(TAG, "goTo: navigationController равен null!");
         }
     }
 
     /**
      * Переход к конкретной Activity без параметров
+     * @param targetActivity - класс активности
      */
     public void goTo(Class<?> targetActivity) { 
         if (navigationController != null) {
-            navigationController.goTo(targetActivity, false, null, null);
+            navigationController.goTo(targetActivity, false, null);
         }
     }
 
     /**
      * Переход к конкретной Activity с указанием вкладки
+     * @param targetActivity - класс активности
+     * @param tabIndex - индекс вкладки
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goTo(Class<?> targetActivity, int tabIndex, boolean clearTop, String name, Integer value) { 
+    public void goTo(Class<?> targetActivity, int tabIndex, boolean clearTop, String[] params) { 
         if (navigationController != null) {
-            navigationController.goTo(targetActivity, tabIndex, clearTop, name, value);
+            navigationController.goTo(targetActivity, tabIndex, clearTop, params);
         }
     }
 
     /**
      * Переход к конкретной Activity с указанием вкладки без параметров
+     * @param targetActivity - класс активности
+     * @param tabIndex - индекс вкладки
      */
     public void goTo(Class<?> targetActivity, int tabIndex) { 
         if (navigationController != null) {
-            navigationController.goTo(targetActivity, tabIndex, false, null, null);
+            navigationController.goTo(targetActivity, tabIndex, false, null);
         }
     }
 
@@ -203,6 +226,8 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
 
     /**
      * Установка заголовка тулбара
+     * @param titleResId - идентификатор ресурса заголовка
+     * @param textSizeResId - размер текста заголовка
      */
     protected void setToolbarTitle(int titleResId, int textSizeResId) {
         toolbarManager.setToolbarTitle(titleResId, textSizeResId);
@@ -210,6 +235,8 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
     
     /**
      * Установка заголовка тулбара
+     * @param titleText - текст заголовка
+     * @param textSize - размер текста заголовка
      */
     protected void setToolbarTitle(String titleText, float textSize) {
         toolbarManager.setToolbarTitle(titleText, textSize);

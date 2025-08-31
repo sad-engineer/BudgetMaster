@@ -1,8 +1,5 @@
 package com.sadengineer.budgetmaster.accounts;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +15,8 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -65,9 +63,9 @@ public class AccountsActivity extends BaseCardsActivity<Account> {
     @Override
     protected void onAddClicked() {
         // Запускаем окно создания счета (режим выбора обрабатывается базовым классом)
-        Intent intent = new Intent(AccountsActivity.this, AccountsEditActivity.class);
-        intent.putExtra("source_tab", viewPager != null ? viewPager.getCurrentItem() : 0);
-        startActivity(intent);
+        int source_tab = viewPager != null ? viewPager.getCurrentItem() : 0;
+        String[] params = {"source_tab", String.valueOf(source_tab)};
+        goTo(AccountsEditActivity.class, false, params);
     }
 
     /**

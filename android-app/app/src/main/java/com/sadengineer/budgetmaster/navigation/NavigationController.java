@@ -26,10 +26,9 @@ public class NavigationController {
     /**
      * Навигация вверх по дереву
      * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
-     * @param name - имя параметра
-     * @param value - значение параметра
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goUp(boolean clearTop, String name, Integer value) { 
+    public void goUp(boolean clearTop, String[] params) { 
         NavigationNode node = NavigationTree.navigateUp(currentActivityClass);
         if (node != null) {
             Intent intent = NavigationTree.createIntent(context, node, 0);
@@ -37,9 +36,7 @@ public class NavigationController {
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
                 context.startActivity(intent);
                 Log.d(TAG, "Навигация вверх к " + node.name);
             }
@@ -49,10 +46,9 @@ public class NavigationController {
     /**
      * Навигация вниз по дереву
      * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
-     * @param name - имя параметра
-     * @param value - значение параметра
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
-    public void goDown(boolean clearTop, String name, Integer value) { 
+    public void goDown(boolean clearTop, String[] params) { 
         NavigationNode node = NavigationTree.navigateDown(currentActivityClass);
         if (node != null) {
             Intent intent = NavigationTree.createIntent(context, node, 0);
@@ -60,9 +56,7 @@ public class NavigationController {
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
                 context.startActivity(intent);
                 Log.d(TAG, "Навигация вниз к " + node.name);
             }
@@ -72,7 +66,7 @@ public class NavigationController {
     /**
      * Навигация влево (переход к предыдущей вкладке)
      */
-    public void goLeft(int currentTabIndex, boolean clearTop, String name, Integer value) { 
+    public void goLeft(int currentTabIndex, boolean clearTop, String[] params) { 
         NavigationNode node = NavigationTree.navigateLeft(currentActivityClass, currentTabIndex);
         if (node != null) {
             int previousTab = NavigationTree.getPreviousTabIndex(currentActivityClass, currentTabIndex);
@@ -81,9 +75,7 @@ public class NavigationController {
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
                 context.startActivity(intent);
                 Log.d(TAG, "Навигация влево к вкладке " + previousTab);
             }
@@ -93,7 +85,7 @@ public class NavigationController {
     /**
      * Навигация вправо (переход к следующей вкладке)
      */
-    public void goRight(int currentTabIndex, boolean clearTop, String name, Integer value) { 
+    public void goRight(int currentTabIndex, boolean clearTop, String[] params) { 
         NavigationNode node = NavigationTree.navigateRight(currentActivityClass, currentTabIndex);
         if (node != null) {
             int nextTab = NavigationTree.getNextTabIndex(currentActivityClass, currentTabIndex);
@@ -102,9 +94,7 @@ public class NavigationController {
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
                 context.startActivity(intent);
                 Log.d(TAG, "Навигация вправо к вкладке " + nextTab);
             }
@@ -114,27 +104,33 @@ public class NavigationController {
     /**
      * Переход к конкретной Activity
      */
-    public void goTo(Class<?> targetActivity, boolean clearTop, String name, Integer value) { 
+    public void goTo(Class<?> targetActivity, boolean clearTop, String[] params) { 
+        Log.d(TAG, "NavigationController.goTo: Попытка перехода к " + targetActivity.getSimpleName());
         NavigationNode node = NavigationTree.navigateToActivity(targetActivity);
         if (node != null) {
+            Log.d(TAG, "NavigationController.goTo: Узел найден: " + node.name);
             Intent intent = NavigationTree.createIntent(context, node, 0);
             if (intent != null) {
+                Log.d(TAG, "NavigationController.goTo: Intent создан успешно");
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
+                Log.d(TAG, "NavigationController.goTo: Запускаем Activity");
                 context.startActivity(intent);
-                Log.d(TAG, "Переход к " + node.name);
+                Log.d(TAG, "NavigationController.goTo: Activity запущена: " + node.name);
+            } else {
+                Log.e(TAG, "NavigationController.goTo: Не удалось создать Intent для " + targetActivity.getSimpleName());
             }
+        } else {
+            Log.e(TAG, "NavigationController.goTo: Узел не найден для " + targetActivity.getSimpleName());
         }
     }
     
     /**
      * Переход к конкретной Activity с вкладкой
      */
-    public void goTo(Class<?> targetActivity, int tabIndex, boolean clearTop, String name, Integer value) { 
+    public void goTo(Class<?> targetActivity, int tabIndex, boolean clearTop, String[] params) { 
         NavigationNode node = NavigationTree.navigateToActivity(targetActivity);
         if (node != null) {
             Intent intent = NavigationTree.createIntent(context, node, tabIndex);
@@ -142,9 +138,7 @@ public class NavigationController {
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
-                if (name != null && value != null) {
-                    intent.putExtra(name, value);
-                }
+                setIntentParameters(intent, params);
                 context.startActivity(intent);
                 Log.d(TAG, "Переход к " + node.name + " на вкладку " + tabIndex);
             }
@@ -160,6 +154,51 @@ public class NavigationController {
             Intent intent = NavigationTree.createIntent(context, node, 0);
             context.startActivity(intent);
             Log.d(TAG, "Переход к главному экрану");
+        }
+    }
+
+    /**
+     * Устанавливает значения нескольких параметров в intent
+     * @param intent - Intent для установки параметров
+     * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
+     */
+    private void setIntentParameters(Intent intent, String[] params) {
+        if (params == null || params.length == 0) {
+            return;
+        }
+        
+        // Добавляем параметры в Intent
+        for (int i = 0; i < params.length; i += 2) {
+            if (i + 1 < params.length) {
+                String name = params[i];
+                String valueStr = params[i + 1];
+                
+                if (name == null || valueStr == null) {
+                    Log.w(TAG, "Пропускаем null параметр: name=" + name + ", value=" + valueStr);
+                    continue;
+                }
+                
+                // Пытаемся определить тип значения и установить его
+                try {
+                    // Проверяем, является ли значение числом
+                    if (valueStr.matches("-?\\d+")) {
+                        // Целое число
+                        intent.putExtra(name, Integer.parseInt(valueStr));
+                    } else if (valueStr.matches("-?\\d*\\.\\d+")) {
+                        // Число с плавающей точкой
+                        intent.putExtra(name, Double.parseDouble(valueStr));
+                    } else if (valueStr.equalsIgnoreCase("true") || valueStr.equalsIgnoreCase("false")) {
+                        // Булево значение
+                        intent.putExtra(name, Boolean.parseBoolean(valueStr));
+                    } else {
+                        // Строка (по умолчанию)
+                        intent.putExtra(name, valueStr);
+                    }
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "Не удалось преобразовать значение '" + valueStr + "' для параметра '" + name + "', используем как строку");
+                    intent.putExtra(name, valueStr);
+                }
+            }
         }
     }
 }
