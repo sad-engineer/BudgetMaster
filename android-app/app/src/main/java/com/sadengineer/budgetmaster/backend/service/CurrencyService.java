@@ -409,5 +409,14 @@ public class CurrencyService {
      */
     public int getCount() {
         return repo.getCount(EntityFilter.ALL);
-    }    
+    }  
+    
+    /**
+     * Получить обменный курс валюты по ID
+     * @param id ID валюты
+     * @return обменный курс валюты
+     */
+    public double getExchangeRateById(int id) {
+        return repo.getExchangeRateById(id);
+    }
 } 

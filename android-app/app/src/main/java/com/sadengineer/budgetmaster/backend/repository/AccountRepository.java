@@ -3,11 +3,13 @@ package com.sadengineer.budgetmaster.backend.repository;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
+import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 import java.util.List;
 
@@ -145,5 +147,15 @@ public class AccountRepository {
      */
     public int getCount(EntityFilter filter) {
         return dao.count(filter);
+    }
+
+    /**
+     * Получить сумму на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и валюты
+     * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return список пар "ID валюты - сумма" для всех валют
+     */
+    public List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter) {
+        return dao.getCurrencySummaryByType(type, filter);
     }
 }

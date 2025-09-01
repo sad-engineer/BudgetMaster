@@ -1,10 +1,11 @@
-package com.sadengineer.budgetmaster;
+package com.sadengineer.budgetmaster.start;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.GravityCompat;
@@ -17,12 +18,29 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
+import com.sadengineer.budgetmaster.start.MainScreenViewModel;
+import com.sadengineer.budgetmaster.start.MainScreenData;
+import com.sadengineer.budgetmaster.R;
 
 
 public class MainActivity extends BaseNavigationActivity {
     
     private static final String TAG = "MainActivity";
     private DatabaseManager databaseManager;
+    private ServiceManager serviceManager;
+    private MainScreenViewModel viewModel;
+    
+    // UI элементы для отображения данных
+    private TextView valueEarned;
+    private TextView valueAccounts;
+    private TextView valueSavings;
+    private TextView valueBudget;
+    private TextView valueReserve;
+
+    /** Имя пользователя по умолчанию */
+    /** TODO: передлать на получение имени пользователя из SharedPreferences */
+    private String userName = "default_user";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +53,21 @@ public class MainActivity extends BaseNavigationActivity {
         SettingsManager.init(this);
         // Инициализация навигации
         initializeNavigation(true);
-
+        // Инициализация менеджера сервисов
+        serviceManager = ServiceManager.getInstance(this, userName);
+        
+        // Инициализация ViewModel
+        viewModel = new MainScreenViewModel(getApplication());
+        
+        // Настройка наблюдателей LiveData
+        setupObservers();
+        
+        // Инициализация UI элементов
+        initializeUIElements();
+        
+        // Загрузка данных
+        viewModel.refreshData();
+        
         // ====== Обработчики кнопок ======
 
         // Обработчик кнопки "На счетах"
@@ -88,11 +120,84 @@ public class MainActivity extends BaseNavigationActivity {
         btnBudget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goTo(BudgetActivity.class); //TODO: переделать на переход к  остатку бюджета
+                goTo(BudgetActivity.class); 
             }
         });
         
         Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
+    }
+    
+    /**
+     * Настройка наблюдателей LiveData
+     */
+    private void setupObservers() {
+        // Наблюдаем за данными главного экрана
+        viewModel.getMainScreenData().observe(this, data -> {
+            if (data != null) {
+                updateUI(data);
+                Log.d(TAG, "Данные главного экрана обновлены: " + data);
+            }
+        });
+        
+        // Наблюдаем за состоянием загрузки
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            // TODO: показать/скрыть индикатор загрузки
+            Log.d(TAG, "Состояние загрузки: " + isLoading);
+        });
+        
+        // Наблюдаем за ошибками
+        viewModel.getErrorMessage().observe(this, error -> {
+            if (error != null && !error.isEmpty()) {
+                // TODO: показать сообщение об ошибке
+                Log.e(TAG, "Ошибка: " + error);
+            }
+        });
+    }
+    
+    /**
+     * Инициализация UI элементов
+     */
+    private void initializeUIElements() {
+        valueEarned = findViewById(R.id.value_earned);
+        valueAccounts = findViewById(R.id.value_accounts);
+        valueSavings = findViewById(R.id.value_savings);
+        valueBudget = findViewById(R.id.value_budget);
+        valueReserve = findViewById(R.id.value_reserve);
+    }
+    
+    /**
+     * Обновление UI с новыми данными
+     */
+    private void updateUI(MainScreenData data) {
+        Log.d(TAG, "Обновление UI с данными: " + data);
+        
+        // Обновляем текстовые поля с форматированными значениями
+        valueEarned.setText(viewModel.getFormattedMonthlyEarned());
+        valueAccounts.setText(viewModel.getFormattedTotalAccountsBalance());
+        valueSavings.setText(viewModel.getFormattedTotalSavingsBalance());
+        valueBudget.setText(viewModel.getFormattedTotalBudgetRemaining());
+        valueReserve.setText(viewModel.getFormattedReserveAmount());
+        
+        // Устанавливаем цвета для сумм
+        valueAccounts.setTextColor(viewModel.getAmountColor(data.getTotalAccountsBalance()));
+        valueSavings.setTextColor(viewModel.getAmountColor(data.getTotalSavingsBalance()));
+        valueBudget.setTextColor(viewModel.getBudgetRemainingColor());
+        valueReserve.setTextColor(viewModel.getAmountColor(data.getReserveAmount()));
+        valueEarned.setTextColor(viewModel.getAmountColor(data.getMonthlyEarned()));
+        
+        Log.d(TAG, "UI успешно обновлен");
+    }
+            
+    /**
+     * Возобновление активности
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Обновляем данные при возврате на главный экран
+        if (viewModel != null) {
+            viewModel.onResume();
+        }
     }
     
     /**
@@ -133,9 +238,3 @@ public class MainActivity extends BaseNavigationActivity {
         }
     }
 }
-
-// окна создаются все норм.
-// давай вернемся к свайпам
-// Предложи реализацию свайпов с учетом новой навигации@navigation/ 
-// новый код должен удовлетворять SOLID
-// не приши код , предложи план реализации

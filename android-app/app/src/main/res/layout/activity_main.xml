@@ -98,6 +98,7 @@
                 android:layout_width="match_parent"
                 android:orientation="vertical">
 
+                <!-- Заработано/мес. -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"
@@ -138,6 +139,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- На счетах -->
                 <LinearLayout 
                     android:id="@+id/main_content_container_accounts"
                     android:gravity="center_vertical"
@@ -179,6 +181,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- Сбережения -->
                 <LinearLayout 
                     android:id="@+id/main_content_container_savings"
                     android:gravity="center_vertical"
@@ -220,6 +223,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- Доходы -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"
@@ -259,6 +263,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- Расходы -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"
@@ -298,6 +303,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- До цели -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"
@@ -338,6 +344,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- Бюджет -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"
@@ -378,6 +385,7 @@
                         android:textSize="@dimen/text_size" />
             </LinearLayout>
 
+                <!-- Резерв -->
                 <LinearLayout 
                     android:gravity="center_vertical"
                     android:layout_height="wrap_content"

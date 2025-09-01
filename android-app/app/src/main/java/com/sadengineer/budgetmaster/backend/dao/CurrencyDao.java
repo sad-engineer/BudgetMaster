@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
+import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
@@ -189,4 +190,13 @@ public interface CurrencyDao {
     @Query("UPDATE currencies SET position = position - 1 WHERE position > 1 AND position != 0")
     void updatePositionsAfterDelete();
 
+
+    /**
+     * Получает обменный курс валюты по ID
+     * @param id ID валюты
+     * @return обменный курс валюты
+     */
+    @Query("SELECT exchangeRate FROM currencies WHERE id = :id")
+    double getExchangeRateById(int id);
+    
 } 

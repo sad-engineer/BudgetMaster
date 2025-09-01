@@ -7,9 +7,11 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
+import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 import java.util.List;
 
@@ -159,5 +161,18 @@ public interface AccountDao {
      * @param account счет для обновления
      */
     @Update
-    void update(Account account);  
+    void update(Account account); 
+    
+    /**
+     * Получить сводку сумм на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и валюты
+     * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return список пар "ID валюты - сумма" для всех валют
+     */
+    @Query("SELECT currencyId as pair_key, SUM(amount) as pair_value FROM accounts WHERE type = :type AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) " +
+           "GROUP BY currencyId")
+    List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter);
 } 

@@ -199,4 +199,13 @@ public class CurrencyRepository {
     public boolean existsByShortNameExcludingId(String shortName, int excludeId) {
         return dao.existsByShortNameExcludingId(shortName, excludeId);
     }
+
+    /**
+     * Получить обменный курс валюты по ID
+     * @param id ID валюты
+     * @return обменный курс валюты
+     */
+    public double getExchangeRateById(int id) {
+        return dao.getExchangeRateById(id);
+    }
 } 
