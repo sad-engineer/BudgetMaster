@@ -3,9 +3,18 @@ package com.sadengineer.budgetmaster.backend.service;
 import android.content.Context;
 import android.util.Log;
 
+import com.sadengineer.budgetmaster.backend.entity.Operation;
+import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
+import com.sadengineer.budgetmaster.backend.entity.AccountSummary;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
 /**
  * Менеджер сервисов, предоставляющий централизованный доступ ко всем сервисам приложения
- * Позволяет обращаться к сервисам через вложенную структуру: ServiceManager.accounts.getCount()
+ * Позволяет обращаться к сервисам напрямую: ServiceManager.accounts.getAll()
  */
 public class ServiceManager {
     private static final String TAG = "ServiceManager";
@@ -26,11 +35,11 @@ public class ServiceManager {
         this.userName = userName;
         
         // Инициализация вложенных классов
-        this.accounts = new Accounts();
-        this.budgets = new Budgets();
-        this.categories = new Categories();
-        this.currencies = new Currencies();
-        this.operations = new Operations();
+        this.accounts = new Accounts(context, userName);
+        this.budgets = new Budgets(context, userName);
+        this.categories = new Categories(context, userName);
+        this.currencies = new Currencies(context, userName);
+        this.operations = new Operations(context, userName);
         
         Log.d(TAG, "ServiceManager инициализирован для пользователя: " + userName);
     }
@@ -65,137 +74,56 @@ public class ServiceManager {
     
     /**
      * Вложенный класс для работы с аккаунтами
+     * Наследуется от AccountService для прямого доступа к методам
      */
-    public class Accounts {
-        private final AccountService service;
+    public class Accounts extends AccountService {
         
-        private Accounts() {
-            this.service = new AccountService(context, userName);
-        }
-        
-        /**
-         * Получить прямой доступ к AccountService
-         * Использование: ServiceManager.getInstance().accounts.service.methodName()
-         */
-        public AccountService service() {
-            return service;
+        public Accounts(Context context, String userName) {
+            super(context, userName);
         }
     }
     
     /**
      * Вложенный класс для работы с бюджетами
+     * Наследуется от BudgetService для прямого доступа к методам
      */
-    public class Budgets {
-        private final BudgetService service;
-        
-        private Budgets() {
-            this.service = new BudgetService(context, userName);
-        }
-        
-        /**
-         * Получить прямой доступ к BudgetService
-         * Использование: ServiceManager.getInstance().budgets.service.methodName()
-         */
-        public BudgetService service() {
-            return service;
+    public class Budgets extends BudgetService {
+        public Budgets(Context context, String userName) {
+            super(context, userName);
         }
     }
     
     /**
      * Вложенный класс для работы с категориями
+     * Наследуется от CategoryService для прямого доступа к методам
      */
-    public class Categories {
-        private final CategoryService service;
+    public class Categories extends CategoryService {
         
-        private Categories() {
-            this.service = new CategoryService(context, userName);
-        }
-        
-        /**
-         * Получить прямой доступ к CategoryService
-         * Использование: ServiceManager.getInstance().categories.service.methodName()
-         */
-        public CategoryService service() {
-            return service;
+        public Categories(Context context, String userName) {
+            super(context, userName);
         }
     }
     
     /**
      * Вложенный класс для работы с валютами
+     * Наследуется от CurrencyService для прямого доступа к методам
      */
-    public class Currencies {
-        private final CurrencyService service;
+    public class Currencies extends CurrencyService {
         
-        private Currencies() {
-            this.service = new CurrencyService(context, userName);
-        }
-        
-        /**
-         * Получить прямой доступ к CurrencyService
-         * Использование: ServiceManager.getInstance().currencies.service.methodName()
-         */
-        public CurrencyService service() {
-            return service;
+        public Currencies(Context context, String userName) {
+            super(context, userName);
         }
     }
     
     /**
      * Вложенный класс для работы с операциями
+     * Наследуется от OperationService для прямого доступа к методам
      */
-    public class Operations {
-        private final OperationService service;
+    public class Operations extends OperationService {
         
-        private Operations() {
-            this.service = new OperationService(context, userName);
+        public Operations(Context context, String userName) {
+            super(context, userName);
         }
-        
-        /**
-         * Получить прямой доступ к OperationService
-         * Использование: ServiceManager.getInstance().operations.service.methodName()
-         */
-        public OperationService service() {
-            return service;
-        }
-    }
-    
-    /**
-     * Получить прямой доступ к AccountService
-     * Использование: ServiceManager.getInstance().getAccountService().methodName()
-     */
-    public AccountService getAccountService() {
-        return accounts.service();
-    }
-
-    /**
-     * Получить прямой доступ к BudgetService
-     * Использование: ServiceManager.getInstance().getBudgetService().methodName()
-     */
-    public BudgetService getBudgetService() {
-        return budgets.service();
-    }
-
-    /**
-     * Получить прямой доступ к CategoryService
-     * Использование: ServiceManager.getInstance().getCategoryService().methodName()
-     */
-    public CategoryService getCategoryService() {
-        return categories.service();
-    }
-
-    /**
-     * Получить прямой доступ к CurrencyService
-     * Использование: ServiceManager.getInstance().getCurrencyService().methodName()
-     */
-    public CurrencyService getCurrencyService() {
-        return currencies.service();
-    }
-
-    /**
-     * Получить прямой доступ к OperationService
-     * Использование: ServiceManager.getInstance().getOperationService().methodName()
-     */
-    public OperationService getOperationService() {
-        return operations.service();
     }
 }
 
@@ -208,74 +136,37 @@ public class ServiceManager {
  * 2. Использование в любом месте приложения:
  *    ServiceManager sm = ServiceManager.getInstance();
  * 
- * 3. СПОСОБ 1 - Через вложенную структуру (как в Python):
+ * 3. ПРЯМОЙ ДОСТУП К СЕРВИСАМ:
  * 
  *    // Работа с аккаунтами
- *    sm.accounts.service().changePosition(account, newPosition);
- *    sm.accounts.service().getAll();
- *    sm.accounts.service().getById(id);
+ *    sm.accounts.changePosition(account, newPosition);
+ *    sm.accounts.getAll();
+ *    sm.accounts.getById(id);
  * 
  *    // Работа с бюджетами
- *    sm.budgets.service().create(budget);
- *    sm.budgets.service().update(budget);
- *    sm.budgets.service().delete(id);
+ *    sm.budgets.create(budget);
+ *    sm.budgets.update(budget);
+ *    sm.budgets.delete(id);
  * 
  *    // Работа с категориями
- *    sm.categories.service().getAll();
- *    sm.categories.service().getByType(type);
+ *    sm.categories.getAll();
+ *    sm.categories.getByType(type);
  * 
  *    // Работа с валютами
- *    sm.currencies.service().getDefault();
- *    sm.currencies.service().getAll();
+ *    sm.currencies.getDefault();
+ *    sm.currencies.getAll();
  * 
  *    // Работа с операциями
- *    sm.operations.service().getCount();
- *    sm.operations.service().getOperationsByDateRange(start, end);
- *    sm.operations.service().create(operation);
+ *    sm.operations.getCount();
+ *    sm.operations.getOperationsByDateRange(start, end);
+ *    sm.operations.create(operation);
  * 
- * 4. СПОСОБ 2 - Через прямые методы (более короткий синтаксис):
- * 
- *    // Работа с аккаунтами
- *    sm.getAccountService().changePosition(account, newPosition);
- *    sm.getAccountService().getAll();
- *    sm.getAccountService().getById(id);
- * 
- *    // Работа с бюджетами
- *    sm.getBudgetService().create(budget);
- *    sm.getBudgetService().update(budget);
- *    sm.getBudgetService().delete(id);
- * 
- *    // Работа с категориями
- *    sm.getCategoryService().getAll();
- *    sm.getCategoryService().getByType(type);
- * 
- *    // Работа с валютами
- *    sm.getCurrencyService().getDefault();
- *    sm.getCurrencyService().getAll();
- * 
- *    // Работа с операциями
- *    sm.getOperationService().getCount();
- *    sm.getOperationService().getOperationsByDateRange(start, end);
- *    sm.getOperationService().create(operation);
- * 
- * 5. Альтернативный способ получения сервиса:
- *    AccountService accountService = sm.getAccountService();
+ * 4. Альтернативный способ получения сервиса:
+ *    AccountService accountService = sm.accounts;
  *    accountService.changePosition(account, newPosition);
  * 
- * 6. Сброс экземпляра (при смене пользователя):
+ * 5. Сброс экземпляра (при смене пользователя):
  *    ServiceManager.resetInstance();
  *    ServiceManager.getInstance(context, "new_user");
  * 
- * ПРЕИМУЩЕСТВА:
- * - Централизованный доступ ко всем сервисам
- * - Единая точка инициализации
- * - Четкая структура namespace (как в Python)
- * - Легко добавлять новые сервисы
- * - Singleton паттерн для экономии памяти
- * - Два способа доступа: вложенная структура или прямые методы
- * 
- * РЕКОМЕНДАЦИИ:
- * - Используйте Способ 1 (вложенная структура) для более читаемого кода
- * - Используйте Способ 2 (прямые методы) для более короткого синтаксиса
- * - Оба способа дают одинаковый результат
  */

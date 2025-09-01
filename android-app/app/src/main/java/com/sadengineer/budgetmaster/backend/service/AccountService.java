@@ -9,7 +9,7 @@ import androidx.room.Transaction;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
@@ -17,9 +17,6 @@ import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 
 /**
@@ -33,7 +30,6 @@ public class AccountService {
     private final String user;
     private final ServiceConstants constants;
     private final AccountValidator validator;
-    private final CurrencyService currencyService;
 
     public AccountService(Context context, String user) {
         this.repo = new AccountRepository(context);
@@ -41,7 +37,6 @@ public class AccountService {
         this.user = user;
         this.constants = new ServiceConstants();
         this.validator = new AccountValidator();
-        this.currencyService = new CurrencyService(context, user);
     }
 
     /**
@@ -359,34 +354,15 @@ public class AccountService {
     }
 
     /**
-     * Получить сумму на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и валюты
+     * Получить сводку по валютам для определенного типа счетов
      * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
-     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
-     * @return сумма на счетах
+     * @param filter фильтр для выборки счетов
+     * @return список пар (currencyId, amount)
      */
-    public long getTotalAmountByType(int type, EntityFilter filter) {
-        List<KeyValuePair> summary = repo.getCurrencySummaryByType(type, filter);
-        if (summary == null || summary.isEmpty()) {
-            Log.d(TAG, "Сводка по валютам пуста для типа: " + type);
-            return 0L;
-        }
-        
-        long totalAmount = 0;
-        for (KeyValuePair pair : summary) {
-            int currencyId = pair.getKey();
-            long amount = pair.getValue();
-            double exchangeRate = currencyService.getExchangeRateById(currencyId);
-            
-            // Используем BigDecimal для точных вычислений
-            BigDecimal amountBD = BigDecimal.valueOf(amount);
-            BigDecimal rateBD = BigDecimal.valueOf(exchangeRate);
-            long convertedAmount = amountBD.multiply(rateBD)
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .longValue();
-            
-            totalAmount += convertedAmount;
-        }
-        return totalAmount;
+    public List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter) {
+        return repo.getCurrencySummaryByType(type, filter);
     }
+
+
 
 } 

@@ -266,7 +266,7 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Integer> getTotalAmountByType(int type, EntityFilter filter);
+    LiveData<Long> getTotalAmountByType(int type, EntityFilter filter);
 
     /**
      * Получает общую сумму баланса по счету (в зависимости от фильтра)
@@ -277,7 +277,7 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Integer> getTotalAmountByAccount(int accountId, EntityFilter filter);
+    LiveData<Long> getTotalAmountByAccount(int accountId, EntityFilter filter);
 
     /**
      * Получает общую сумму баланса по категории (в зависимости от фильтра)
@@ -288,7 +288,7 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Integer> getTotalAmountByCategory(int categoryId, EntityFilter filter);
+    LiveData<Long> getTotalAmountByCategory(int categoryId, EntityFilter filter);
     
     /**
      * Получает общую сумму баланса по валюте (в зависимости от фильтра)
@@ -299,7 +299,45 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Integer> getTotalAmountByCurrency(int currencyId, EntityFilter filter);
+    LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter);
+
+    /**
+     * Получает общую сумму баланса по валюте за период (в зависимости от фильтра)
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @return общая сумма баланса по валюте
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE currencyId = :currencyId AND operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByCurrencyByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter);
+       
+    /**
+     * Получает сумму расходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма расходов за период
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * Получает сумму доходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма доходов за период
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
 
     //TODO: Прописать здесь специальные методы для получения операций какому либо условию
 

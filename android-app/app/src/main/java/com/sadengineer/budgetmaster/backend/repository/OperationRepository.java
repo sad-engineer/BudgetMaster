@@ -236,7 +236,7 @@ public class OperationRepository {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по типу
      */
-    public LiveData<Integer> getTotalAmountByType(int type, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByType(int type, EntityFilter filter) {
         return dao.getTotalAmountByType(type, filter);
     }
 
@@ -246,7 +246,7 @@ public class OperationRepository {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по счету
      */
-    public LiveData<Integer> getTotalAmountByAccount(int accountId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByAccount(int accountId, EntityFilter filter) {
         return dao.getTotalAmountByAccount(accountId, filter);
     }
 
@@ -256,7 +256,7 @@ public class OperationRepository {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по категории
      */ 
-    public LiveData<Integer> getTotalAmountByCategory(int categoryId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByCategory(int categoryId, EntityFilter filter) {
         return dao.getTotalAmountByCategory(categoryId, filter);
     }
 
@@ -266,8 +266,40 @@ public class OperationRepository {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по валюте
      */
-    public LiveData<Integer> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
         return dao.getTotalAmountByCurrency(currencyId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по валюте за период с фильтром
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по валюте за период
+     */
+    public LiveData<Long> getTotalAmountByCurrencyByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
+        return dao.getTotalAmountByCurrencyByDateRange(startDate, endDate, currencyId, filter);
+    }
+
+    /**
+     * Получает сумму расходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма расходов за период
+     */
+    public LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return dao.getExpenseSumByDateRange(startDate, endDate);
+    }
+
+    /**
+     * Получает сумму доходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма доходов за период
+     */
+    public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return dao.getIncomeSumByDateRange(startDate, endDate);
     }
 
     /**

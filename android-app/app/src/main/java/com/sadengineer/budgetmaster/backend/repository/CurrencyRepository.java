@@ -208,4 +208,13 @@ public class CurrencyRepository {
     public double getExchangeRateById(int id) {
         return dao.getExchangeRateById(id);
     }
+
+    /**
+     * Получить список доступных ID валют по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют
+     */
+    public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
+        return dao.getAvalibleIds(filter);
+    }
 } 

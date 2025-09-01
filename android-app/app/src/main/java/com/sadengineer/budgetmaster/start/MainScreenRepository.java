@@ -13,6 +13,7 @@ import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -131,14 +132,14 @@ public class MainScreenRepository {
     /**
      * Загрузить заработанное за месяц
      */
-    private long loadMonthlyEarned() {
+    private LiveData<Long> loadMonthlyEarned() {
         try {
             OperationService service = sm.getOperationService();
             YearMonth currentMonth = YearMonth.now();
             LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
             LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-            long amount = service.getIncomeSumByDateRange(startOfMonth, endOfMonth);
-            return amount;
+            LiveData<Long> amount = service.getIncomeSumByDateRange(startOfMonth, endOfMonth);
+            return amount.getValue();
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки заработанного за месяц: " + e.getMessage(), e);
             throw new RuntimeException (e);

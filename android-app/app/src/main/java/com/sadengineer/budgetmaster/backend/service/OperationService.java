@@ -403,6 +403,8 @@ public class OperationService {
         return repo.getTotalAmountByCurrency(currencyId, filter);
     }
 
+    
+
     /**
      * Восстановить удаленную операцию (soft delete)
      * @param deletedOperation удаленная операция
@@ -485,5 +487,46 @@ public class OperationService {
                 Log.e(TAG, String.format(constants.MSG_UPDATE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
             }
         });
+    }
+
+    /**
+     * Получает сумму доходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма доходов за период
+     */
+    public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return repo.getIncomeSumByDateRange(startDate, endDate);
+    }
+
+    /**
+     * Получает сумму расходов за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @return сумма расходов за период
+     */
+    public LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        LiveData<List<Integer>> listCurrencyIds = currencyRepo.getAvalibleIds(EntityFilter.ACTIVE);
+        if (listCurrencyIds.getValue() == null) {
+            Log.e(TAG, "Ошибка получения списка доступных ID валют");
+            throw new RuntimeException("Ошибка получения списка доступных ID валют");
+        }
+        for (int currencyId : listCurrencyIds.getValue()) {
+            double exchangeRate = currencyService.getExchangeRateById(currencyId);
+            amount.setValue(amount.getValue() * exchangeRate);
+        }
+        return repo.getExpenseSumByDateRange(startDate, endDate);
+    }
+
+    /**
+     * Получает общую сумму операций по валюте за период с фильтром
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
+     * @return общая сумма операций по валюте за период
+     */
+    public LiveData<Long> getTotalAmountByCurrencyByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
+        return repo.getTotalAmountByCurrencyByDateRange(startDate, endDate, currencyId, filter);
     }
 } 

@@ -147,4 +147,14 @@ public class BudgetRepository {
         return dao.count(filter);
     }
 
+    /**
+     * Получить общую сумму бюджета по ID валюты по фильтру
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
+     * @return общая сумма бюджета по ID валюты
+     */
+    public LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
+        return dao.getTotalAmountByCurrency(currencyId, filter);
+    }
+
 } 

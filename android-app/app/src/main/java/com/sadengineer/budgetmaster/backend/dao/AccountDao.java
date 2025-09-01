@@ -124,7 +124,7 @@ public interface AccountDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    Integer getTotalBalanceByCurrency(int currencyId, EntityFilter filter);
+    Long getTotalBalanceByCurrency(int currencyId, EntityFilter filter);
     
     /**
      * Вставляет новый счет в базу данных

@@ -198,5 +198,16 @@ public interface CurrencyDao {
      */
     @Query("SELECT exchangeRate FROM currencies WHERE id = :id")
     double getExchangeRateById(int id);
+
+    /**
+     * Получает список доступных ID валют по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют
+     */
+    @Query("SELECT id FROM currencies WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<List<Integer>> getAvalibleIds(EntityFilter filter);
     
 } 

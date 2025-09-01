@@ -419,4 +419,13 @@ public class CurrencyService {
     public double getExchangeRateById(int id) {
         return repo.getExchangeRateById(id);
     }
+
+    /**
+     * Получить список доступных ID валют по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют
+     */
+    public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
+        return repo.getAvalibleIds(filter);
+    }
 } 

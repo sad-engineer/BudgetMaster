@@ -77,7 +77,7 @@ public class MainScreenViewModel extends AndroidViewModel {
         
         // Сбрасываем состояние обновления после небольшой задержки
         // чтобы показать анимацию pull-to-refresh
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             isRefreshing.setValue(false);
         }, 1000);
     }

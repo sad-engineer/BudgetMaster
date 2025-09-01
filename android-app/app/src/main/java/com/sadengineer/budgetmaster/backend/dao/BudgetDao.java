@@ -143,4 +143,15 @@ public interface BudgetDao {
      */
     @Update
     void update(Budget budget);  
+    
+    /**
+     * Получает общую сумму бюджета по ID валюты по фильтру
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @param currencyId ID валюты
+     */
+    @Query("SELECT SUM(amount) FROM budgets WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter);
 } 
