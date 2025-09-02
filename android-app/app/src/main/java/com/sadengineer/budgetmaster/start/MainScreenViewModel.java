@@ -8,11 +8,14 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import java.util.List;
 
 import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.start.MainScreenRepository;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.backend.service.ReactiveBudgetCalculator;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 
 /**
  * ViewModel для главного экрана
@@ -24,6 +27,7 @@ public class MainScreenViewModel extends AndroidViewModel {
     private final MainScreenRepository repository;
     private final MutableLiveData<Boolean> isRefreshing;
     private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
+    private ReactiveBudgetCalculator budgetCalculator;
 
     /** Имя пользователя по умолчанию */
     /** TODO: передлать на получение имени пользователя из SharedPreferences */
@@ -34,6 +38,13 @@ public class MainScreenViewModel extends AndroidViewModel {
         
         this.repository = new MainScreenRepository(application, userName);
         this.isRefreshing = new MutableLiveData<>(false);
+        
+        // Инициализируем реактивный калькулятор бюджетов
+        ServiceManager serviceManager = ServiceManager.getInstance(application, userName);
+        this.budgetCalculator = new ReactiveBudgetCalculator(
+            serviceManager.currencies, 
+            serviceManager.budgets
+        );
         
         Log.d(TAG, "MainScreenViewModel инициализирован");
     }
@@ -129,6 +140,22 @@ public class MainScreenViewModel extends AndroidViewModel {
         MainScreenData data = getMainScreenData().getValue();
         if (data == null) return "0.00";
         return formatter.formatFromCents(data.getReserveAmount());
+    }
+    
+    /**
+     * Получить общую сумму всех бюджетов из реактивного калькулятора
+     */
+    public LiveData<Long> getTotalBudgetAmount() {
+        return budgetCalculator.getTotalAmount();
+    }
+    
+    /**
+     * Получить отформатированную общую сумму бюджетов для отладки
+     */
+    public String getFormattedTotalBudgetAmount() {
+        Long totalAmount = getTotalBudgetAmount().getValue();
+        if (totalAmount == null) return "0.00";
+        return formatter.formatFromCents(totalAmount);
     }    
     
     /**
@@ -174,9 +201,26 @@ public class MainScreenViewModel extends AndroidViewModel {
         // Ошибки очищаются автоматически при следующем обновлении
     }
     
+    /**
+     * Принудительно пересчитать общую сумму бюджетов
+     * Полезно для отладки и тестирования
+     */
+    public void forceRecalculateBudgets() {
+        if (budgetCalculator != null) {
+            budgetCalculator.forceRecalculate();
+            Log.d(TAG, "Запрошен принудительный пересчет бюджетов");
+        }
+    }
+    
     @Override
     protected void onCleared() {
         super.onCleared();
+        
+        // Освобождаем ресурсы калькулятора
+        if (budgetCalculator != null) {
+            budgetCalculator.dispose();
+        }
+        
         Log.d(TAG, "MainScreenViewModel очищен");
     }
 }

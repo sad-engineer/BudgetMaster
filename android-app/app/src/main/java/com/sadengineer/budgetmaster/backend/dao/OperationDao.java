@@ -324,7 +324,7 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+    LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
     /**
      * Получает сумму доходов за период
@@ -336,7 +336,7 @@ public interface OperationDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
-    LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+    LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
 
     //TODO: Прописать здесь специальные методы для получения операций какому либо условию

@@ -1,7 +1,7 @@
 {
   "activities": [
     {
-      "class": "com.sadengineer.budgetmaster.MainActivity",
+      "class": "com.sadengineer.budgetmaster.start.MainActivity",
       "name": "Главная",
       "tabs": [],
       "up": "com.sadengineer.budgetmaster.AuthorsActivity",

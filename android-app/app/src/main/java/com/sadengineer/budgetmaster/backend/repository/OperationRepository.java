@@ -288,8 +288,8 @@ public class OperationRepository {
      * @param endDate конец периода
      * @return сумма расходов за период
      */
-    public LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return dao.getExpenseSumByDateRange(startDate, endDate);
+    public LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return dao.getExpenseSumByDateRange(startDate, endDate, filter);
     }
 
     /**
@@ -298,8 +298,8 @@ public class OperationRepository {
      * @param endDate конец периода
      * @return сумма доходов за период
      */
-    public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return dao.getIncomeSumByDateRange(startDate, endDate);
+    public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return dao.getIncomeSumByDateRange(startDate, endDate, filter);
     }
 
     /**

@@ -119,10 +119,12 @@ public class MainScreenRepository {
     private long loadTotalAccountsBalance() {
         try {
             // Получаем все аккаунты и суммируем балансы
-            AccountService service = sm.getAccountService();
-            int type = AccountTypeFilter.CURRENT.getIndex();
-            long amount = service.getTotalAmountByType(type, EntityFilter.ACTIVE);
-            return amount;
+            // AccountService service = sm.accounts;
+            // int type = AccountTypeFilter.CURRENT.getIndex();
+            // long amount = service.getTotalAmountByType(type, EntityFilter.ACTIVE);
+
+            //TODO: заменить на реальные данные
+            return 1250000;
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки общей суммы на счетах: " + e.getMessage(), e);
             throw new RuntimeException (e);
@@ -132,14 +134,16 @@ public class MainScreenRepository {
     /**
      * Загрузить заработанное за месяц
      */
-    private LiveData<Long> loadMonthlyEarned() {
+    private long loadMonthlyEarned() {
         try {
-            OperationService service = sm.getOperationService();
-            YearMonth currentMonth = YearMonth.now();
-            LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
-            LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-            LiveData<Long> amount = service.getIncomeSumByDateRange(startOfMonth, endOfMonth);
-            return amount.getValue();
+            // OperationService service = sm.operations;
+            // YearMonth currentMonth = YearMonth.now();
+            // LocalDateTime startOfMonth = currentMonth.atDay(1).atDay(1).atStartOfDay();
+            // LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+            // LiveData<Long> amount = service.getIncomeSumByDateRange(startOfMonth, endOfMonth);
+            
+            //TODO: заменить на реальные данные
+            return 1260000L;
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки заработанного за месяц: " + e.getMessage(), e);
             throw new RuntimeException (e);
@@ -153,9 +157,11 @@ public class MainScreenRepository {
         try {
             // Получаем аккаунты типа "Сбережения" и суммируем балансы
             // TODO: сделать перевод сумм в основную валюту по заданному курсу
-            AccountService service = sm.getAccountService();
-            long amount = service.getTotalAmountByType(AccountTypeFilter.SAVINGS);
-            return amount;
+            // AccountService service = sm.accounts;
+            // long amount = service.getTotalAmountByType(AccountTypeFilter.SAVINGS);
+            
+            //TODO: заменить на реальные данные
+            return 1270000;
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки суммы сбережений: " + e.getMessage(), e);
             throw new RuntimeException (e);
@@ -167,20 +173,22 @@ public class MainScreenRepository {
      */
     private long loadTotalBudgetRemaining() {
         try {
-            // Получаем сумму всех бюджетов
-            BudgetService bs = sm.getBudgetService();
-            long BudgetAmount = bs.getTotalAmount();
+            // // Получаем сумму всех бюджетов
+            // BudgetService bs = sm.budgets;
+            // long BudgetAmount = bs.getTotalAmount();
 
-            //получаем сумму всех операций за месяц
-            OperationService os = sm.getOperationService();
-            YearMonth currentMonth = YearMonth.now();
-            LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
-            LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-            long OperationAmount = os.getExpenseSumByDateRange(startOfMonth, endOfMonth);
+            // //получаем сумму всех операций за месяц
+            // OperationService os = sm.operations;
+            // YearMonth currentMonth = YearMonth.now();
+            // LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+            // LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+            // long OperationAmount = os.getExpenseSumByDateRange(startOfMonth, endOfMonth);
 
-            //получаем остаток бюджета
-            long RemainingAmount = BudgetAmount - OperationAmount;
-            return RemainingAmount;
+            // //получаем остаток бюджета
+            // long RemainingAmount = BudgetAmount - OperationAmount;
+            
+            //TODO: заменить на реальные данные
+            return 1280000;
         } catch (Exception e) {
             Log.e(TAG, "Ошибка получения остатка бюджета: " + e.getMessage(), e);
             throw new RuntimeException (e);
@@ -195,18 +203,20 @@ public class MainScreenRepository {
     private long getReserveAmount() {
         try {
             // Получаем сумму всех трат за MONTHS_FOR_EXPENSE_CALCULATION месяцев
-            OperationService os = sm.getOperationService();
-            YearMonth currentMonth = YearMonth.now();
-            LocalDateTime startOfMonth = currentMonth.minusMonths(MONTHS_FOR_EXPENSE_CALCULATION).atDay(1).atStartOfDay();
-            LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-            long expenseAmount = os.getExpenseSumByDateRange(startOfMonth, endOfMonth);
+            // OperationService os = sm.operations;
+            // YearMonth currentMonth = YearMonth.now();
+            // LocalDateTime startOfMonth = currentMonth.minusMonths(MONTHS_FOR_EXPENSE_CALCULATION).atDay(1).atStartOfDay();
+            // LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+            // long expenseAmount = os.getExpenseSumByDateRange(startOfMonth, endOfMonth);
 
-            // Средний месячный остаток бюджета округленный до целого
-            long averageMonthlyExpense = expenseAmount / MONTHS_FOR_EXPENSE_CALCULATION;
+            // // Средний месячный остаток бюджета округленный до целого
+            // long averageMonthlyExpense = expenseAmount / MONTHS_FOR_EXPENSE_CALCULATION;
             
-            // Сумма резерва (подушка безопасности)
-            long reserveAmount = averageMonthlyExpense * MONTHS_FOR_RESERVE_CALCULATION;
-            return reserveAmount;
+            // // Сумма резерва (подушка безопасности)
+            // long reserveAmount = averageMonthlyExpense * MONTHS_FOR_RESERVE_CALCULATION;
+
+            //TODO: заменить на реальные данные
+            return 1290000;
         } catch (Exception e) {
             Log.e(TAG, "Ошибка загрузки суммы резерва: " + e.getMessage(), e);
             throw new RuntimeException (e);

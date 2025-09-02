@@ -369,7 +369,7 @@ public class OperationService {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по типу
      */
-    public LiveData<Integer> getTotalAmountByType(int type, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByType(int type, EntityFilter filter) {
         return repo.getTotalAmountByType(type, filter);
     }
 
@@ -379,7 +379,7 @@ public class OperationService {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по счету
      */
-    public LiveData<Integer> getTotalAmountByAccount(int accountId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByAccount(int accountId, EntityFilter filter) {
         return repo.getTotalAmountByAccount(accountId, filter);
     }
 
@@ -389,7 +389,7 @@ public class OperationService {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по категории
      */ 
-    public LiveData<Integer> getTotalAmountByCategory(int categoryId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByCategory(int categoryId, EntityFilter filter) {
         return repo.getTotalAmountByCategory(categoryId, filter);
     }
 
@@ -399,7 +399,7 @@ public class OperationService {
      * @param filter тип фильтра (ALL, ACTIVE, DELETED)
      * @return общая сумма операций по валюте
      */
-    public LiveData<Integer> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
+    public LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
         return repo.getTotalAmountByCurrency(currencyId, filter);
     }
 
@@ -496,37 +496,7 @@ public class OperationService {
      * @return сумма доходов за период
      */
     public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return repo.getIncomeSumByDateRange(startDate, endDate);
+        return repo.getIncomeSumByDateRange(startDate, endDate, EntityFilter.ACTIVE);
     }
-
-    /**
-     * Получает сумму расходов за период
-     * @param startDate начало периода
-     * @param endDate конец периода
-     * @return сумма расходов за период
-     */
-    public LiveData<Long> getExpenseSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        LiveData<List<Integer>> listCurrencyIds = currencyRepo.getAvalibleIds(EntityFilter.ACTIVE);
-        if (listCurrencyIds.getValue() == null) {
-            Log.e(TAG, "Ошибка получения списка доступных ID валют");
-            throw new RuntimeException("Ошибка получения списка доступных ID валют");
-        }
-        for (int currencyId : listCurrencyIds.getValue()) {
-            double exchangeRate = currencyService.getExchangeRateById(currencyId);
-            amount.setValue(amount.getValue() * exchangeRate);
-        }
-        return repo.getExpenseSumByDateRange(startDate, endDate);
-    }
-
-    /**
-     * Получает общую сумму операций по валюте за период с фильтром
-     * @param startDate начало периода
-     * @param endDate конец периода
-     * @param currencyId ID валюты
-     * @param filter тип фильтра (ALL, ACTIVE, DELETED)
-     * @return общая сумма операций по валюте за период
-     */
-    public LiveData<Long> getTotalAmountByCurrencyByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
-        return repo.getTotalAmountByCurrencyByDateRange(startDate, endDate, currencyId, filter);
-    }
+    
 } 

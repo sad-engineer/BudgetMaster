@@ -124,6 +124,15 @@ public class MainActivity extends BaseNavigationActivity {
             }
         });
         
+        // Добавляем пересчет бюджетов при касании поля суммы
+        valueBudget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Касание поля суммы бюджетов - принудительный пересчет");
+                viewModel.forceRecalculateBudgets();
+            }
+        });
+        
         Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
     }
     
@@ -152,6 +161,14 @@ public class MainActivity extends BaseNavigationActivity {
                 Log.e(TAG, "Ошибка: " + error);
             }
         });
+        
+        // Наблюдаем за общей суммой бюджетов для отладки
+        viewModel.getTotalBudgetAmount().observe(this, totalAmount -> {
+            if (totalAmount != null) {
+                valueBudget.setText(viewModel.getFormattedTotalBudgetAmount());
+                Log.d(TAG, "Общая сумма бюджетов обновлена: " + totalAmount);
+            }
+        });
     }
     
     /**
@@ -175,7 +192,7 @@ public class MainActivity extends BaseNavigationActivity {
         valueEarned.setText(viewModel.getFormattedMonthlyEarned());
         valueAccounts.setText(viewModel.getFormattedTotalAccountsBalance());
         valueSavings.setText(viewModel.getFormattedTotalSavingsBalance());
-        valueBudget.setText(viewModel.getFormattedTotalBudgetRemaining());
+        valueBudget.setText(viewModel.getFormattedTotalBudgetAmount());
         valueReserve.setText(viewModel.getFormattedReserveAmount());
         
         // Устанавливаем цвета для сумм
@@ -205,9 +222,9 @@ public class MainActivity extends BaseNavigationActivity {
      */
     @Override
     protected void onDestroy() {
-        // Завершаем ThreadManager при уничтожении MainActivity
-        ThreadManager.shutdown();
-
+        // НЕ завершаем ThreadManager здесь, так как он может понадобиться другим компонентам
+        // ThreadManager.shutdown() должен вызываться только при завершении всего приложения
+        
         super.onDestroy();
         Log.d(TAG, "MainActivity уничтожена");
     }
