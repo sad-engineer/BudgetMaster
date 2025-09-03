@@ -28,6 +28,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     
     private EditText currencyNameEdit;
     private EditText currencyShortNameEdit;
+    private EditText exchangeRateEdit;
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
@@ -50,6 +51,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         // Инициализация всех View элементов
         currencyNameEdit = findViewById(R.id.currency_name_edit);
         currencyShortNameEdit = findViewById(R.id.currency_short_name_edit);
+        exchangeRateEdit = findViewById(R.id.exchange_rate_edit);
         saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
@@ -65,6 +67,9 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
 
         // Инициализация CurrencyService
         currencyService = new CurrencyService(this, "default_user");
+        
+        // Настраиваем поле обменного курса
+        setupExchangeRateField();
         
         // Получаем данные из Intent и заполняем поля
         loadCurrencyData();
@@ -87,6 +92,13 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 // Заполняем поля данными валюты
                 currencyNameEdit.setText(currentCurrency.getTitle());
                 currencyShortNameEdit.setText(currentCurrency.getShortName());
+                
+                // Заполняем поле обменного курса
+                if (currentCurrency.getExchangeRate() > 0) {
+                    exchangeRateEdit.setText(String.format("%.4f", currentCurrency.getExchangeRate()));
+                } else {
+                    exchangeRateEdit.setText("1.0"); // По умолчанию для новой валюты
+                }
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_currency_edit, R.dimen.toolbar_text_currencies_edit);
@@ -137,6 +149,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private boolean saveCurrency() {
         String currencyName = currencyNameEdit.getText().toString().trim();
         String currencyShortName = currencyShortNameEdit.getText().toString().trim();
+        String exchangeRateText = exchangeRateEdit.getText().toString().trim();
         
         // Валидация названия валюты
         try {
@@ -159,6 +172,29 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             currencyShortNameEdit.requestFocus();
             return false;
         }
+        
+        // Валидация обменного курса
+        double exchangeRate;
+        try {
+            if (TextUtils.isEmpty(exchangeRateText)) {
+                exchangeRate = 1.0; // По умолчанию
+            } else {
+                exchangeRate = Double.parseDouble(exchangeRateText);
+                if (exchangeRate <= 0) {
+                    throw new IllegalArgumentException("Курс должен быть больше нуля");
+                }
+            }
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Ошибка валидации обменного курса: некорректный формат", e);
+            exchangeRateEdit.setError("Введите корректный курс (например: 80.0)");
+            exchangeRateEdit.requestFocus();
+            return false;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Ошибка валидации обменного курса: " + e.getMessage(), e);
+            exchangeRateEdit.setError(e.getMessage());
+            exchangeRateEdit.requestFocus();
+            return false;
+        }
 
         try {
             if (isEditMode && currentCurrency != null) {
@@ -168,6 +204,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 // Обновляем данные валюты через сервис
                 currentCurrency.setTitle(currencyName);
                 currentCurrency.setShortName(currencyShortName);
+                currentCurrency.setExchangeRate(exchangeRate);
                 currencyService.update(currentCurrency);
                 
                 Log.d(TAG, "Запрос на обновление валюты отправлен");
@@ -177,7 +214,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 Log.d(TAG, "Попытка создания валюты '" + currencyName + "'");
 
                 // Создаем валюту через сервис (проверки уникальности внутри сервиса)
-                currencyService.create(currencyName, currencyShortName);
+                currencyService.create(currencyName, currencyShortName, exchangeRate);
                 
                 Log.d(TAG, "Запрос на создание валюты отправлен");
             }
@@ -199,5 +236,21 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         // Переходим к списку валют
         Log.d(TAG, "Переходим к окну списка валют");
         returnTo(CurrenciesActivity.class, true, new String[0]);
-    }   
+    }
+    
+    /**
+     * Настраивает поле обменного курса
+     */
+    private void setupExchangeRateField() {
+        if (exchangeRateEdit != null) {
+            // Устанавливаем подсказку
+            exchangeRateEdit.setHint("Обменный курс");
+            
+            // Добавляем валидацию для числового ввода
+            exchangeRateEdit.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | 
+                                        android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            
+            Log.d(TAG, "Поле обменного курса настроено");
+        }
+    }
 } 

@@ -34,6 +34,9 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private List<Integer> selectedBudgets = new ArrayList<>();
     private OnSelectionChangedListener selectionListener;
     
+    // Поле для общей суммы бюджетов
+    private Long totalAmount = 0L;
+    
     /**
      * Интерфейс для обработки кликов по бюджету
      */
@@ -73,6 +76,11 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         
         // Устанавливаем слушатели
         holder.setItemClickListener(itemId -> {
+            // Карточка "Итого" не кликабельна
+            if (itemId == -1) {
+                return;
+            }
+            
             if (isSelectionMode) {
                 toggleSelection(itemId);
             } else if (clickListener != null) {
@@ -84,6 +92,11 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         });
         
         holder.setItemLongClickListener(itemId -> {
+            // Карточка "Итого" не кликабельна
+            if (itemId == -1) {
+                return;
+            }
+            
             if (longClickListener != null) {
                 Budget budget = findBudgetById(itemId);
                 if (budget != null) {
@@ -96,12 +109,37 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
+     * Возвращает тип элемента для позиции
+     */
+    @Override
+    public int getItemViewType(int position) {
+        // Позиция 0 - карточка "Итого", остальные - обычные бюджеты
+        return position == 0 ? 0 : 1;
+    }
+    
+    /**
      * Привязывает данные к ViewHolder
      */
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
-        if (position < budgets.size()) {
-            Budget budget = budgets.get(position);
+        if (position == 0) {
+            // Карточка "Итого"
+            holder.bind(
+                0, // позиция
+                "Итого", // заголовок
+                -1, // специальный ID для карточки "Итого"
+                totalAmount, // общая сумма
+                "₽", // используем рубли как основную валюту
+                false, // режим выбора отключен для итоговой карточки
+                false, // не выбрана
+                false, // не показываем позицию
+                false  // не показываем ID
+            );
+            
+            Log.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + totalAmount);
+        } else if (position > 0 && position <= budgets.size()) {
+            // Обычные бюджеты (смещаем позицию на -1)
+            Budget budget = budgets.get(position - 1);
             Category category = findCategoryById(budget.getCategoryId());
             Currency currency = findCurrencyById(budget.getCurrencyId());
             
@@ -132,7 +170,8 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     @Override
     public int getItemCount() {
-        return budgets.size();
+        // +1 для карточки "Итого"
+        return budgets.size() + 1;
     }
     
     /**
@@ -260,5 +299,16 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             }
         }
         return null;
+    }
+    
+    /**
+     * Обновляет общую сумму бюджетов
+     * @param totalAmount общая сумма в копейках
+     */
+    public void updateTotalAmount(Long totalAmount) {
+        this.totalAmount = totalAmount != null ? totalAmount : 0L;
+        // Уведомляем об изменении только первой позиции (карточка "Итого")
+        notifyItemChanged(0);
+        Log.d(TAG, "Обновлена общая сумма бюджетов: " + totalAmount);
     }
 }

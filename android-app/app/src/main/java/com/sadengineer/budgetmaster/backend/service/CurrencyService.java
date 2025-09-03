@@ -126,7 +126,7 @@ public class CurrencyService {
         validator.validateTitle(trimmedTitle);
         executorService.execute(() -> {
             try {
-                createCurrencyInTransaction(trimmedTitle, null);                
+                createCurrencyInTransaction(trimmedTitle, null, 1.0);                
             } catch (Exception e) {
                 Log.e(TAG, "Ошибка при создании валюты '" + title + "': " + e.getMessage(), e);
             }
@@ -148,7 +148,27 @@ public class CurrencyService {
             // Проверяем уникальность в фоновом потоке
             validator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
             validator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
-            createCurrencyInTransaction(trimmedTitle, trimmedShortName);                
+            createCurrencyInTransaction(trimmedTitle, trimmedShortName, 1.0);                
+        });
+    }
+    
+    /**
+     * Создать новую валюту с курсом
+     * Проверяет уникальность названия и короткого имени
+     * @param title название валюты
+     * @param shortName короткое имя валюты
+     * @param exchangeRate обменный курс валюты
+     */
+    public void create(String title, String shortName, double exchangeRate) {
+        String trimmedTitle = title.trim();
+        String trimmedShortName = shortName != null ? shortName.trim() : null;
+        validator.validateTitle(trimmedTitle);
+        validator.validateShortName(trimmedShortName);
+        executorService.execute(() -> {
+            // Проверяем уникальность в фоновом потоке
+            validator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
+            validator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
+            createCurrencyInTransaction(trimmedTitle, trimmedShortName, exchangeRate);                
         });
     }
     
@@ -158,12 +178,13 @@ public class CurrencyService {
      * @param shortName короткое имя валюты
      */
     @Transaction
-    private void createCurrencyInTransaction(String title, String shortName) {
+    private void createCurrencyInTransaction(String title, String shortName, double exchangeRate) {
         Log.d(TAG, String.format(constants.MSG_CREATE_CURRENCY_REQUEST, title + (shortName != null ? " (" + shortName + ")" : "")));
         Currency currency = new Currency();
         currency.setTitle(title);
         currency.setShortName(shortName);
         currency.setPosition(repo.getMaxPosition() + 1);
+        currency.setExchangeRate(exchangeRate);
         currency.setCreateTime(LocalDateTime.now());
         currency.setCreatedBy(user);
         try {
@@ -178,10 +199,11 @@ public class CurrencyService {
      * Создать новую валюту без проверок значений
      * @param title название валюты
      * @param shortName короткое имя валюты
+     * @param exchangeRate обменный курс валюты
      */
-    public void createWithoutValidation(String title, String shortName) {
+    public void createWithoutValidation(String title, String shortName, double exchangeRate) {
         executorService.execute(() -> {
-            createCurrencyInTransaction(title, shortName);
+            createCurrencyInTransaction(title, shortName, exchangeRate);
         });
     }
 

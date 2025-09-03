@@ -69,7 +69,8 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         budgetAmountEdit = findViewById(R.id.budget_amount_edit_text);
         budgetCategorySpinner = findViewById(R.id.budget_category_spinner);
         budgetCurrencySpinner = findViewById(R.id.budget_currency_spinner);
-        categoryLabel = findViewById(R.id.category_label); // TextView с текстом "Категория"        saveButton = findViewById(R.id.position_change_button);
+        categoryLabel = findViewById(R.id.category_label); // TextView с текстом "Категория"
+        saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
 
@@ -88,6 +89,9 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         
         // Получаем данные из Intent и заполняем поля
         loadBudgetData();
+
+        // Настройка кнопки "Назад"
+        setupBackButton(R.id.back_button);
     }
     
     /**
@@ -111,10 +115,24 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 budgetCurrencySpinner.setAdapter(currencyAdapter);
                 
+                // Слушатель изменения валюты (без обновления курса)
+                budgetCurrencySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                        // Валюта изменена, но курс не обновляем здесь
+                        Log.d(TAG, "Выбрана валюта: " + currencies.get(position).getTitle());
+                    }
+                    
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+                });
+                
                 Log.d(TAG, "Спиннер валют настроен: " + currencies.size() + " валют");
             }
         });
     }
+    
+
     
     /**
      * Загружает данные бюджета из Intent
@@ -192,6 +210,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
             int currencyPosition = findCurrencyPosition(currentBudget.getCurrencyId());
             if (currencyPosition != -1) {
                 budgetCurrencySpinner.setSelection(currencyPosition);
+                Log.d(TAG, "Установлена валюта: " + currencies.get(currencyPosition).getTitle());
             }
             
             Log.d(TAG, "Данные бюджета загружены в поля");
@@ -249,6 +268,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         
         try {
             Currency selectedCurrency = currencies.get(currencyPosition);
+            
             if (isEditMode) {
                 // Обновляем существующий бюджет (категория не изменяется)
                 return updateBudget(balance, currentBudget.getCategoryId(), selectedCurrency.getId());

@@ -12,6 +12,8 @@ import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter; 
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +34,10 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     private CategoryService categoryService;
     
     private OperationTypeFilter operationType = OperationTypeFilter.EXPENSE;
+    
+    // Калькулятор для общей суммы бюджетов
+    private BudgetCalculatorViewModel budgetCalculator;
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,10 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         budgetService = new BudgetService(requireContext(), userName);
         currencyService = new CurrencyService(requireContext(), userName);
         categoryService = new CategoryService(requireContext(), userName);
+        
+        // Инициализируем калькулятор бюджетов
+        budgetCalculator = new BudgetCalculatorViewModel(requireActivity().getApplication());
+        budgetCalculator.initialize();
     }
 
     @Override
@@ -99,6 +109,9 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         
         // Загружаем категории и валюты один раз при создании адаптера
         loadCategoriesAndCurrencies();
+        
+        // Подписываемся на изменения общей суммы бюджетов
+        setupBudgetCalculatorObserver();
     }
     
     /**
@@ -121,6 +134,21 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
                 Log.d(TAG, "Установлено валют в адаптер: " + currencies.size());
             }
         });
+    }
+    
+    /**
+     * Настраивает наблюдение за изменениями общей суммы бюджетов
+     */
+    private void setupBudgetCalculatorObserver() {
+        if (budgetCalculator != null) {
+            budgetCalculator.getTotalAmount().observe(getViewLifecycleOwner(), totalAmount -> {
+                if (totalAmount != null && adapter != null) {
+                    // Обновляем карточку "Итого" в адаптере
+                    adapter.updateTotalAmount(totalAmount);
+                    Log.d(TAG, "Обновлена общая сумма бюджетов: " + formatter.formatFromCents(totalAmount));
+                }
+            });
+        }
     }
 
     @Override

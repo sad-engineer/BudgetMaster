@@ -14,7 +14,7 @@ import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.start.MainScreenRepository;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.start.BudgetCalculatorViewModel;
+import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
 import com.sadengineer.budgetmaster.settings.AppSettings;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
