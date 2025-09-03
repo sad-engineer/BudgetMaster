@@ -72,10 +72,11 @@ public class DatabaseInitializer {
         }
         
         // Создаем дефолтные валюты
+        //TODO: уточнить курсы валют в UI или запросы по сети
         Currency[] currencies = {
-            createCurrency("Рубль", "₽", 1, 1.0),
-            createCurrency("Доллар", "$", 2, 1/80),
-            createCurrency("Евро", "€", 3, 1/94)
+            createCurrency("Рубль", "₽", 1, 1.0),           // 1 рубль = 1 рубль
+            createCurrency("Доллар", "$", 2, 80.0),         // 1 доллар = 80 рублей
+            createCurrency("Евро", "€", 3, 94.0)            // 1 евро = 94 рубля
         };
         
         for (Currency currency : currencies) {

@@ -14,8 +14,9 @@ import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.start.MainScreenRepository;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.backend.service.ReactiveBudgetCalculator;
-import com.sadengineer.budgetmaster.backend.service.ServiceManager;
+import com.sadengineer.budgetmaster.start.BudgetCalculatorViewModel;
+import com.sadengineer.budgetmaster.settings.AppSettings;
+import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 /**
  * ViewModel для главного экрана
@@ -27,7 +28,8 @@ public class MainScreenViewModel extends AndroidViewModel {
     private final MainScreenRepository repository;
     private final MutableLiveData<Boolean> isRefreshing;
     private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
-    private ReactiveBudgetCalculator budgetCalculator;
+    private BudgetCalculatorViewModel budgetCalculator;
+    private AppSettings appSettings;
 
     /** Имя пользователя по умолчанию */
     /** TODO: передлать на получение имени пользователя из SharedPreferences */
@@ -39,12 +41,12 @@ public class MainScreenViewModel extends AndroidViewModel {
         this.repository = new MainScreenRepository(application, userName);
         this.isRefreshing = new MutableLiveData<>(false);
         
-        // Инициализируем реактивный калькулятор бюджетов
-        ServiceManager serviceManager = ServiceManager.getInstance(application, userName);
-        this.budgetCalculator = new ReactiveBudgetCalculator(
-            serviceManager.currencies, 
-            serviceManager.budgets
-        );
+        // Инициализируем настройки приложения
+        this.appSettings = new AppSettings(application);
+        
+        // Инициализируем калькулятор бюджетов
+        this.budgetCalculator = new BudgetCalculatorViewModel(application);
+        this.budgetCalculator.initialize();
         
         Log.d(TAG, "MainScreenViewModel инициализирован");
     }
@@ -143,7 +145,7 @@ public class MainScreenViewModel extends AndroidViewModel {
     }
     
     /**
-     * Получить общую сумму всех бюджетов из реактивного калькулятора
+     * Получить общую сумму всех бюджетов из калькулятора
      */
     public LiveData<Long> getTotalBudgetAmount() {
         return budgetCalculator.getTotalAmount();
@@ -156,6 +158,27 @@ public class MainScreenViewModel extends AndroidViewModel {
         Long totalAmount = getTotalBudgetAmount().getValue();
         if (totalAmount == null) return "0.00";
         return formatter.formatFromCents(totalAmount);
+    }
+    
+    /**
+     * Получить LiveData с отформатированной общей суммой бюджетов
+     * Автоматически обновляется при изменении totalAmount в BudgetCalculatorViewModel
+     */
+    public LiveData<String> getFormattedTotalBudgetAmountLiveData() {
+        MutableLiveData<String> formattedAmount = new MutableLiveData<>("0.00");
+        
+        // Подписываемся на изменения общей суммы и форматируем её
+        budgetCalculator.getTotalAmount().observeForever(totalAmount -> {
+            if (totalAmount != null) {
+                String formatted = formatter.formatFromCents(totalAmount);
+                formattedAmount.setValue(formatted);
+                Log.d(TAG, "Общая сумма бюджетов обновлена: " + formatted);
+            } else {
+                formattedAmount.setValue("0.00");
+            }
+        });
+        
+        return formattedAmount;
     }    
     
     /**
@@ -202,13 +225,13 @@ public class MainScreenViewModel extends AndroidViewModel {
     }
     
     /**
-     * Принудительно пересчитать общую сумму бюджетов
+     * Принудительно обновить данные калькулятора бюджетов
      * Полезно для отладки и тестирования
      */
     public void forceRecalculateBudgets() {
         if (budgetCalculator != null) {
-            budgetCalculator.forceRecalculate();
-            Log.d(TAG, "Запрошен принудительный пересчет бюджетов");
+            budgetCalculator.refreshData();
+            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора");
         }
     }
     
@@ -218,9 +241,21 @@ public class MainScreenViewModel extends AndroidViewModel {
         
         // Освобождаем ресурсы калькулятора
         if (budgetCalculator != null) {
-            budgetCalculator.dispose();
+            // ViewModel автоматически очищается системой
+            Log.d(TAG, "Калькулятор бюджетов будет очищен системой");
         }
         
         Log.d(TAG, "MainScreenViewModel очищен");
+    }
+    
+    /**
+     * Устанавливает отображаемую валюту для калькулятора бюджетов
+     * @param currencyId ID валюты для отображения
+     */
+    public void setBudgetCalculatorDisplayCurrency(int currencyId) {
+        if (budgetCalculator != null) {
+            budgetCalculator.setDisplayCurrencyId(currencyId);
+            Log.d(TAG, "Установлена отображаемая валюта для калькулятора: " + currencyId);
+        }
     }
 }

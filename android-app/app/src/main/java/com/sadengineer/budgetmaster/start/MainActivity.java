@@ -22,6 +22,7 @@ import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.start.MainScreenViewModel;
 import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.settings.AppSettings;
 
 
 public class MainActivity extends BaseNavigationActivity {
@@ -30,6 +31,7 @@ public class MainActivity extends BaseNavigationActivity {
     private DatabaseManager databaseManager;
     private ServiceManager serviceManager;
     private MainScreenViewModel viewModel;
+    private AppSettings appSettings;
     
     // UI элементы для отображения данных
     private TextView valueEarned;
@@ -51,6 +53,7 @@ public class MainActivity extends BaseNavigationActivity {
         initializeDatabase();
         // Инициализация настроек
         SettingsManager.init(this);
+        appSettings = new AppSettings(this);
         // Инициализация навигации
         initializeNavigation(true);
         // Инициализация менеджера сервисов
@@ -58,6 +61,9 @@ public class MainActivity extends BaseNavigationActivity {
         
         // Инициализация ViewModel
         viewModel = new MainScreenViewModel(getApplication());
+        
+        // Настройка отображаемой валюты для калькулятора бюджетов
+        viewModel.setBudgetCalculatorDisplayCurrency(appSettings.getDefaultCurrencyId());
         
         // Настройка наблюдателей LiveData
         setupObservers();
