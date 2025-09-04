@@ -19,18 +19,18 @@ import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
-import com.sadengineer.budgetmaster.start.MainScreenViewModel;
+import com.sadengineer.budgetmaster.start.StartScreenViewModel;
 import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.settings.AppSettings;
 
 
-public class MainActivity extends BaseNavigationActivity {
+public class StartActivity extends BaseNavigationActivity {
     
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "StartActivity";
     private DatabaseManager databaseManager;
     private ServiceManager serviceManager;
-    private MainScreenViewModel viewModel;
+    private StartScreenViewModel viewModel;
     private AppSettings appSettings;
     
     // UI элементы для отображения данных
@@ -47,7 +47,7 @@ public class MainActivity extends BaseNavigationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "MainActivity.onCreate() - начало инициализации");
+        Log.d(TAG, "StartActivity.onCreate() - начало инициализации");
         setContentView(R.layout.activity_main);
         // Инициализация базы данных
         initializeDatabase();
@@ -60,10 +60,11 @@ public class MainActivity extends BaseNavigationActivity {
         serviceManager = ServiceManager.getInstance(this, userName);
         
         // Инициализация ViewModel
-        viewModel = new MainScreenViewModel(getApplication());
+        viewModel = new StartScreenViewModel(getApplication());
         
-        // Настройка отображаемой валюты для калькулятора бюджетов
+        // Настройка отображаемой валюты для калькуляторов
         viewModel.setBudgetCalculatorDisplayCurrency(appSettings.getDefaultCurrencyId());
+        viewModel.setAccountsCalculatorDisplayCurrency(appSettings.getDefaultCurrencyId());
         
         // Настройка наблюдателей LiveData
         setupObservers();
@@ -139,18 +140,18 @@ public class MainActivity extends BaseNavigationActivity {
             }
         });
         
-        Log.d(TAG, "MainActivity.onCreate() - инициализация завершена успешно");
+        Log.d(TAG, "StartActivity.onCreate() - инициализация завершена успешно");
     }
     
     /**
      * Настройка наблюдателей LiveData
      */
     private void setupObservers() {
-        // Наблюдаем за данными главного экрана
+        // Наблюдаем за данными стартового экрана
         viewModel.getMainScreenData().observe(this, data -> {
             if (data != null) {
                 updateUI(data);
-                Log.d(TAG, "Данные главного экрана обновлены: " + data);
+                Log.d(TAG, "Данные стартового экрана обновлены: " + data);
             }
         });
         
@@ -172,7 +173,26 @@ public class MainActivity extends BaseNavigationActivity {
         viewModel.getTotalBudgetAmount().observe(this, totalAmount -> {
             if (totalAmount != null) {
                 valueBudget.setText(viewModel.getFormattedTotalBudgetAmount());
+                valueBudget.setTextColor(viewModel.getBudgetRemainingColor());
                 Log.d(TAG, "Общая сумма бюджетов обновлена: " + totalAmount);
+            }
+        });
+        
+        // Наблюдаем за суммой текущих счетов
+        viewModel.getCurrentTotalAccountsAmount().observe(this, totalAmount -> {
+            if (totalAmount != null) {
+                valueAccounts.setText(viewModel.getFormattedTotalAccountsBalance());
+                valueAccounts.setTextColor(viewModel.getAmountColor(totalAmount));
+                Log.d(TAG, "Сумма текущих счетов обновлена: " + totalAmount);
+            }
+        });
+        
+        // Наблюдаем за суммой сберегательных счетов
+        viewModel.getSavingsAccountsCalculator().getResultAmount().observe(this, totalAmount -> {
+            if (totalAmount != null) {
+                valueSavings.setText(viewModel.getFormattedTotalSavingsBalance());
+                valueSavings.setTextColor(viewModel.getAmountColor(totalAmount));
+                Log.d(TAG, "Сумма сберегательных счетов обновлена: " + totalAmount);
             }
         });
     }
@@ -196,15 +216,9 @@ public class MainActivity extends BaseNavigationActivity {
         
         // Обновляем текстовые поля с форматированными значениями
         valueEarned.setText(viewModel.getFormattedMonthlyEarned());
-        valueAccounts.setText(viewModel.getFormattedTotalAccountsBalance());
-        valueSavings.setText(viewModel.getFormattedTotalSavingsBalance());
-        valueBudget.setText(viewModel.getFormattedTotalBudgetAmount());
         valueReserve.setText(viewModel.getFormattedReserveAmount());
         
         // Устанавливаем цвета для сумм
-        valueAccounts.setTextColor(viewModel.getAmountColor(data.getTotalAccountsBalance()));
-        valueSavings.setTextColor(viewModel.getAmountColor(data.getTotalSavingsBalance()));
-        valueBudget.setTextColor(viewModel.getBudgetRemainingColor());
         valueReserve.setTextColor(viewModel.getAmountColor(data.getReserveAmount()));
         valueEarned.setTextColor(viewModel.getAmountColor(data.getMonthlyEarned()));
         
@@ -217,7 +231,7 @@ public class MainActivity extends BaseNavigationActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Обновляем данные при возврате на главный экран
+        // Обновляем данные при возврате на стартовый экран
         if (viewModel != null) {
             viewModel.onResume();
         }
@@ -232,12 +246,12 @@ public class MainActivity extends BaseNavigationActivity {
         // ThreadManager.shutdown() должен вызываться только при завершении всего приложения
         
         super.onDestroy();
-        Log.d(TAG, "MainActivity уничтожена");
+        Log.d(TAG, "StartActivity уничтожена");
     }
     
     /**
      * Инициализирует базу данных
-     * TODO: убрать логику инициализации базы данных из MainActivity, только вызов
+     * TODO: убрать логику инициализации базы данных из StartActivity, только вызов
      */
     private void initializeDatabase() {
         try {

@@ -262,8 +262,8 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
 //         goLeft(true, "name", 1); // переход к предыдущей вкладке с параметрами
 //         goRight();     // переход к следующей вкладке
 //         goRight(true, "name", 1); // переход к следующей вкладке с параметрами
-//         goTo(MainActivity.class); // переход к конкретной Activity
-//         goTo(MainActivity.class, true, "name", 1); // переход к конкретной Activity с параметрами
+//         goTo(StartActivity.class); // переход к конкретной Activity
+//         goTo(StartActivity.class, true, "name", 1); // переход к конкретной Activity с параметрами
 //         goTo(AccountsActivity.class, 1); // переход к Activity с вкладкой 1
 //         goTo(AccountsActivity.class, 1, true, "name", 1); // переход к Activity с вкладкой 1 с параметрами
 //         goToRoot(); // переход к главному экрану

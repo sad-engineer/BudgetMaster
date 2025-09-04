@@ -15,27 +15,31 @@ import com.sadengineer.budgetmaster.start.MainScreenRepository;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
+import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
 import com.sadengineer.budgetmaster.settings.AppSettings;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 
 /**
- * ViewModel для главного экрана
- * Управляет данными и бизнес-логикой главного экрана
+ * ViewModel для стартового экрана
+ * Управляет данными и бизнес-логикой стартового экрана
  */
-public class MainScreenViewModel extends AndroidViewModel {
-    private static final String TAG = "MainScreenViewModel";
+public class StartScreenViewModel extends AndroidViewModel {
+    private static final String TAG = "StartScreenViewModel";
     
     private final MainScreenRepository repository;
     private final MutableLiveData<Boolean> isRefreshing;
     private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     private BudgetCalculatorViewModel budgetCalculator;
+    private AccountCalculatorViewModel currentAccountsCalculator;
+    private AccountCalculatorViewModel savingsAccountsCalculator;
     private AppSettings appSettings;
 
     /** Имя пользователя по умолчанию */
     /** TODO: передлать на получение имени пользователя из SharedPreferences */
     private String userName = "default_user";
     
-    public MainScreenViewModel(@NonNull Application application) {
+    public StartScreenViewModel(@NonNull Application application) {
         super(application);
         
         this.repository = new MainScreenRepository(application, userName);
@@ -48,11 +52,18 @@ public class MainScreenViewModel extends AndroidViewModel {
         this.budgetCalculator = new BudgetCalculatorViewModel(application);
         this.budgetCalculator.initialize();
         
-        Log.d(TAG, "MainScreenViewModel инициализирован");
+        // Инициализируем калькуляторы счетов
+        this.currentAccountsCalculator = new AccountCalculatorViewModel(application, AccountTypeFilter.CURRENT);
+        this.currentAccountsCalculator.initialize();
+        
+        this.savingsAccountsCalculator = new AccountCalculatorViewModel(application, AccountTypeFilter.SAVINGS);
+        this.savingsAccountsCalculator.initialize();
+        
+        Log.d(TAG, "StartScreenViewModel инициализирован");
     }
     
     /**
-     * Получить данные главного экрана
+     * Получить данные стартового экрана
      */
     public LiveData<MainScreenData> getMainScreenData() {
         return repository.getMainScreenData();
@@ -115,9 +126,13 @@ public class MainScreenViewModel extends AndroidViewModel {
      * Получить отформатированную сумму для отображения
      */
     public String getFormattedTotalAccountsBalance() {
-        MainScreenData data = getMainScreenData().getValue();
-        if (data == null) return "0.00";
-        return formatter.formatFromCents(data.getTotalAccountsBalance());
+        if (currentAccountsCalculator != null) {
+            Long totalAmount = currentAccountsCalculator.getResultAmount().getValue();
+            if (totalAmount != null) {
+                return formatter.formatFromCents(totalAmount);
+            }
+        }
+        return "0.00";
     }
     
     public String getFormattedMonthlyEarned() {
@@ -127,9 +142,13 @@ public class MainScreenViewModel extends AndroidViewModel {
     }
     
     public String getFormattedTotalSavingsBalance() {
-        MainScreenData data = getMainScreenData().getValue();
-        if (data == null) return "0.00";
-        return formatter.formatFromCents(data.getTotalSavingsBalance());
+        if (savingsAccountsCalculator != null) {
+            Long totalAmount = savingsAccountsCalculator.getResultAmount().getValue();
+            if (totalAmount != null) {
+                return formatter.formatFromCents(totalAmount);
+            }
+        }
+        return "0.00";
     }
     
     public String getFormattedTotalBudgetRemaining() {
@@ -148,7 +167,27 @@ public class MainScreenViewModel extends AndroidViewModel {
      * Получить общую сумму всех бюджетов из калькулятора
      */
     public LiveData<Long> getTotalBudgetAmount() {
-        return budgetCalculator.getTotalAmount();
+        return budgetCalculator.getResultAmount();
+    }
+    
+    /**
+     * Получить общую сумму текущих счетов из калькулятора
+     */
+    public LiveData<Long> getCurrentTotalAccountsAmount() {
+        if (currentAccountsCalculator != null) {
+            return currentAccountsCalculator.getResultAmount();
+        }
+        return new MutableLiveData<>(0L);
+    }
+    
+    /**
+     * Получить общую сумму сберегательных счетов из калькулятора
+     */
+    public LiveData<Long> getSavingsTotalAccountsAmount() {
+        if (savingsAccountsCalculator != null) {
+            return savingsAccountsCalculator.getResultAmount();
+        }
+        return new MutableLiveData<>(0L);
     }
     
     /**
@@ -168,7 +207,7 @@ public class MainScreenViewModel extends AndroidViewModel {
         MutableLiveData<String> formattedAmount = new MutableLiveData<>("0.00");
         
         // Подписываемся на изменения общей суммы и форматируем её
-        budgetCalculator.getTotalAmount().observeForever(totalAmount -> {
+        budgetCalculator.getResultAmount().observeForever(totalAmount -> {
             if (totalAmount != null) {
                 String formatted = formatter.formatFromCents(totalAmount);
                 formattedAmount.setValue(formatted);
@@ -234,18 +273,46 @@ public class MainScreenViewModel extends AndroidViewModel {
             Log.d(TAG, "Запрошено принудительное обновление данных калькулятора");
         }
     }
+
+    /**Принудительно обновить данные калькулятора текущих счетов
+     * Полезно для отладки и тестирования
+     */
+    public void forceRecalculateCurrentAccounts() {
+        if (currentAccountsCalculator != null) {
+            currentAccountsCalculator.refreshData();
+            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора текущих счетов");
+        }
+    }
+
+    /**Принудительно обновить данные калькулятора сберегательных счетов
+     * Полезно для отладки и тестирования
+     */
+    public void forceRecalculateSavingsAccounts() {
+        if (savingsAccountsCalculator != null) {
+            savingsAccountsCalculator.refreshData();
+            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора сберегательных счетов");
+        }
+    }
     
     @Override
     protected void onCleared() {
         super.onCleared();
         
-        // Освобождаем ресурсы калькулятора
+        // Освобождаем ресурсы калькуляторов
         if (budgetCalculator != null) {
             // ViewModel автоматически очищается системой
             Log.d(TAG, "Калькулятор бюджетов будет очищен системой");
         }
         
-        Log.d(TAG, "MainScreenViewModel очищен");
+        if (currentAccountsCalculator != null) {
+            Log.d(TAG, "Калькулятор текущих счетов будет очищен системой");
+        }
+        
+        if (savingsAccountsCalculator != null) {
+            Log.d(TAG, "Калькулятор сберегательных счетов будет очищен системой");
+        }
+        
+        Log.d(TAG, "StartScreenViewModel очищен");
     }
     
     /**
@@ -256,6 +323,93 @@ public class MainScreenViewModel extends AndroidViewModel {
         if (budgetCalculator != null) {
             budgetCalculator.setDisplayCurrencyId(currencyId);
             Log.d(TAG, "Установлена отображаемая валюта для калькулятора: " + currencyId);
+        }
+    }
+    
+    /**
+     * Получить калькулятор бюджетов
+     * @return BudgetCalculatorViewModel для бюджетов
+     */
+    public BudgetCalculatorViewModel getBudgetCalculator() {
+        return budgetCalculator;
+    }
+    
+    /**
+     * Получить калькулятор текущих счетов
+     * @return AccountCalculatorViewModel для текущих счетов
+     */
+    public AccountCalculatorViewModel getCurrentAccountsCalculator() {
+        return currentAccountsCalculator;
+    }
+    
+    /**
+     * Получить калькулятор сберегательных счетов
+     * @return AccountCalculatorViewModel для сберегательных счетов
+     */
+    public AccountCalculatorViewModel getSavingsAccountsCalculator() {
+        return savingsAccountsCalculator;
+    }
+    
+    /**
+     * Получить LiveData с отформатированной общей суммой текущих счетов
+     * Автоматически обновляется при изменении данных
+     */
+    public LiveData<String> getFormattedCurrentAccountsAmountLiveData() {
+        MutableLiveData<String> formattedAmount = new MutableLiveData<>("0.00");
+        
+        if (currentAccountsCalculator != null) {
+            // Подписываемся на изменения общей суммы и форматируем её
+            currentAccountsCalculator.getResultAmount().observeForever(totalAmount -> {
+                if (totalAmount != null) {
+                    String formatted = formatter.formatFromCents(totalAmount);
+                    formattedAmount.setValue(formatted);
+                    Log.d(TAG, "Общая сумма текущих счетов обновлена: " + formatted);
+                } else {
+                    formattedAmount.setValue("0.00");
+                }
+            });
+        }
+        
+        return formattedAmount;
+    }
+    
+    /**
+     * Получить LiveData с отформатированной общей суммой сберегательных счетов
+     * Автоматически обновляется при изменении данных
+     */
+    public LiveData<String> getFormattedSavingsAccountsAmountLiveData() {
+        MutableLiveData<String> formattedAmount = new MutableLiveData<>("0.00");
+        
+        if (savingsAccountsCalculator != null) {
+            // Подписываемся на изменения общей суммы и форматируем её
+            savingsAccountsCalculator.getResultAmount().observeForever(totalAmount -> {
+                if (totalAmount != null) {
+                    String formatted = formatter.formatFromCents(totalAmount);
+                    formattedAmount.setValue(formatted);
+                    Log.d(TAG, "Общая сумма сберегательных счетов обновлена: " + formatted);
+                } else {
+                    formattedAmount.setValue("0.00");
+                }
+            });
+        }
+        
+        return formattedAmount;
+    }
+    
+    
+    /**
+     * Устанавливает отображаемую валюту для всех калькуляторов счетов
+     * @param currencyId ID валюты для отображения
+     */
+    public void setAccountsCalculatorDisplayCurrency(int currencyId) {
+        if (currentAccountsCalculator != null) {
+            currentAccountsCalculator.setDisplayCurrencyId(currencyId);
+            Log.d(TAG, "Установлена отображаемая валюта для калькулятора текущих счетов: " + currencyId);
+        }
+        
+        if (savingsAccountsCalculator != null) {
+            savingsAccountsCalculator.setDisplayCurrencyId(currencyId);
+            Log.d(TAG, "Установлена отображаемая валюта для калькулятора сберегательных счетов: " + currencyId);
         }
     }
 }

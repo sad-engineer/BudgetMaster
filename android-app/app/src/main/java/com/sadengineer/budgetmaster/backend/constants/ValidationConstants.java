@@ -35,7 +35,7 @@ public class ValidationConstants {
     public static final double MAX_AMOUNT_VALUE = ModelConstants.MAX_AMOUNT; // Максимальное значение суммы
     public static final double MIN_ACCOUNT_AMOUNT_VALUE = 0.00; // Минимальное значение суммы счета
     public static final double MAX_ACCOUNT_AMOUNT_VALUE = ModelConstants.MAX_AMOUNT; // Максимальное значение суммы счета
-    
+    public static final double MIN_CURRENCY_EXCHANGE_RATE_VALUE = 0.000001; // Минимальное значение обменного курса валюты
     // Регулярные выражения
     public static final String TITLE_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-\\(\\)]+$";
     public static final String CURRENCY_SHORT_NAME_PATTERN = "^[а-яА-Яa-zA-Z0-9\\s\\-₽$€¥£¢₹₩₪₦₨₴₸₺₼₾₿]+$";
@@ -59,7 +59,9 @@ public class ValidationConstants {
     public static final String ERROR_CURRENCY_UPDATE_TIME_INVALID = "Время обновления валюты не может быть в будущем";
     public static final String ERROR_CURRENCY_CREATED_BY_INVALID = "Имя пользователя, создавшего валюту, не может быть пустым";
     public static final String ERROR_CURRENCY_UPDATED_BY_INVALID = "Имя пользователя, обновившего валюту, не может быть пустым";
-    
+    public static final String ERROR_CURRENCY_EXCHANGE_RATE_EMPTY = "Обменный курс валюты не может быть пустым";
+    public static final String ERROR_CURRENCY_EXCHANGE_RATE_INVALID = "Обменный курс валюты должен быть больше %f";
+
     // Сообщения об ошибках для счетов
     public static final String ERROR_ACCOUNT_TITLE_EMPTY = "Название счета не может быть пустым";
     public static final String ERROR_ACCOUNT_TITLE_TOO_SHORT = "Название счета должно содержать минимум %d символов";

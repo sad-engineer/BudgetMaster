@@ -12,6 +12,8 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_SHORT_NAME_INVALID_CHARS;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_TITLE_ALREADY_EXISTS;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_SHORT_NAME_ALREADY_EXISTS;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_EXCHANGE_RATE_EMPTY;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_EXCHANGE_RATE_INVALID;
 
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_CURRENCY_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_CURRENCY_TITLE_LENGTH;
@@ -19,6 +21,7 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_CURRENCY_SHORT_NAME_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.TITLE_PATTERN;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.CURRENCY_SHORT_NAME_PATTERN;
+import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_CURRENCY_EXCHANGE_RATE_VALUE;
 
 import java.util.function.Function;
 import java.util.function.BiFunction;
@@ -108,6 +111,17 @@ public class CurrencyValidator {
             String message = String.format(ERROR_CURRENCY_SHORT_NAME_ALREADY_EXISTS, shortName);
             throw new IllegalArgumentException(message);
         }
+    }
+
+    /**
+     * Валидирует обменный курс валюты
+     * @param exchangeRate обменный курс для валидации
+     * @throws IllegalArgumentException если обменный курс невалиден
+     */
+    public static void validateExchangeRate(double exchangeRate) {
+        validateNotNull(exchangeRate, ERROR_CURRENCY_EXCHANGE_RATE_EMPTY);
+        String message = String.format(ERROR_CURRENCY_EXCHANGE_RATE_INVALID, MIN_CURRENCY_EXCHANGE_RATE_VALUE);
+        validateMinValue(exchangeRate, MIN_CURRENCY_EXCHANGE_RATE_VALUE, message);
     }
     
 } 

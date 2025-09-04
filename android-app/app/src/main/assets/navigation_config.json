@@ -1,7 +1,7 @@
 {
   "activities": [
     {
-      "class": "com.sadengineer.budgetmaster.start.MainActivity",
+      "class": "com.sadengineer.budgetmaster.start.StartActivity",
       "name": "Главная",
       "tabs": [],
       "up": "com.sadengineer.budgetmaster.AuthorsActivity",
@@ -12,7 +12,7 @@
       "class": "com.sadengineer.budgetmaster.instructions.InstructionsActivity",
       "name": "Инструкции",
       "tabs": [],
-      "up": "com.sadengineer.budgetmaster.MainActivity",
+      "up": "com.sadengineer.budgetmaster.StartActivity",
       "down": "com.sadengineer.budgetmaster.currencies.CurrenciesActivity",
       "menu_id": "nav_instructions"
     },
@@ -117,7 +117,7 @@
       "name": "Авторы",
       "tabs": [],
       "up": "com.sadengineer.budgetmaster.VersionActivity",
-      "down": "com.sadengineer.budgetmaster.MainActivity",
+      "down": "com.sadengineer.budgetmaster.StartActivity",
       "menu_id": "nav_authors"
     },
     {

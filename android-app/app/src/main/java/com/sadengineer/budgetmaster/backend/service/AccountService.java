@@ -13,7 +13,6 @@ import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
-import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -352,16 +351,17 @@ public class AccountService {
      */
     public int getCount() {
         return repo.getCount(EntityFilter.ALL);
-    }
+    }   
 
     /**
-     * Получить сводку по валютам для определенного типа счетов
+     * Получить общую сумму счетов по ID валюты, типу счета, фильтру
+     * @param currencyId ID валюты
      * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
-     * @param filter фильтр для выборки счетов
-     * @return список пар (currencyId, amount)
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return общая сумма счетов по ID валюты, типу счета, фильтру
      */
-    public List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter) {
-        return repo.getCurrencySummaryByType(type, filter);
+    public LiveData<Long> getTotalAmountByCurrencyAndType(int currencyId, int type, EntityFilter filter) {
+        return repo.getTotalAmountByCurrencyAndType(currencyId, type, filter);
     }
 
 

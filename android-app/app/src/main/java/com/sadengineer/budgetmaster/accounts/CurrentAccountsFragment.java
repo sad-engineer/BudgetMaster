@@ -8,6 +8,9 @@ import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
+import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
 import java.util.List;
 
@@ -17,6 +20,10 @@ import java.util.List;
 public class CurrentAccountsFragment extends BaseListFragment<Account, AccountsAdapter, AccountsSharedViewModel, AccountService> {
     
     private final int ACCOUNT_TYPE = ModelConstants.ACCOUNT_TYPE_CURRENT;
+    
+    // Калькулятор для общей суммы текущих счетов
+    private AccountCalculatorViewModel accountCalculator;
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     
     /**
      * Возвращает layout для фрагмента
@@ -132,8 +139,29 @@ public class CurrentAccountsFragment extends BaseListFragment<Account, AccountsA
         adapter.setOnSelectedAccountsChanged(selected -> {
             viewModel.setSelectedAccounts(selected);
         });
+        
+        // Инициализируем калькулятор текущих счетов
+        accountCalculator = new AccountCalculatorViewModel(requireActivity().getApplication(), AccountTypeFilter.CURRENT);
+        accountCalculator.initialize();
+        
+        // Подписываемся на изменения общей суммы текущих счетов
+        setupAccountCalculatorObserver();
     }
 
+    /**
+     * Настраивает Observer для калькулятора текущих счетов
+     */
+    private void setupAccountCalculatorObserver() {
+        if (accountCalculator != null) {
+            accountCalculator.getTotalAmount().observe(getViewLifecycleOwner(), totalAmount -> {
+                if (totalAmount != null && adapter != null) {
+                    adapter.setTotalAmount(totalAmount);
+                    Log.d(TAG, "Общая сумма текущих счетов обновлена: " + totalAmount);
+                }
+            });
+        }
+    }
+    
     /**
      * Выполняет удаление
      */

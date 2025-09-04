@@ -9,7 +9,6 @@ import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 import java.util.List;
 
@@ -150,12 +149,13 @@ public class AccountRepository {
     }
 
     /**
-     * Получить сумму на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и валюты
+     * Получить сумму на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и  Id валюты
+     * @param currencyId ID валюты
      * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
      * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
-     * @return список пар "ID валюты - сумма" для всех валют
+     * @return список пар "ID валюты - сумма" для указанной валюты
      */
-    public List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter) {
-        return dao.getCurrencySummaryByType(type, filter);
+    public LiveData<Long> getTotalAmountByCurrencyAndType(int currencyId, int type, EntityFilter filter) {
+        return dao.getTotalAmountByCurrencyAndType(currencyId, type, filter);
     }
 }

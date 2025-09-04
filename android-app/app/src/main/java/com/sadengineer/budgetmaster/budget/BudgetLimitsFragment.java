@@ -3,6 +3,8 @@ package com.sadengineer.budgetmaster.budget;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.lifecycle.ViewModelProvider;
+
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseListFragment;      
 import com.sadengineer.budgetmaster.backend.entity.Budget;
@@ -14,6 +16,7 @@ import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
+import com.sadengineer.budgetmaster.start.StartScreenViewModel;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,9 +51,10 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         currencyService = new CurrencyService(requireContext(), userName);
         categoryService = new CategoryService(requireContext(), userName);
         
-        // Инициализируем калькулятор бюджетов
-        budgetCalculator = new BudgetCalculatorViewModel(requireActivity().getApplication());
-        budgetCalculator.initialize();
+        // Получаем калькулятор бюджетов из StartScreenViewModel
+        // Это обеспечит синхронизацию с главным экраном
+        StartScreenViewModel mainScreenViewModel = new ViewModelProvider(requireActivity()).get(StartScreenViewModel.class);
+        budgetCalculator = mainScreenViewModel.getBudgetCalculator();
     }
 
     @Override
@@ -141,7 +145,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
      */
     private void setupBudgetCalculatorObserver() {
         if (budgetCalculator != null) {
-            budgetCalculator.getTotalAmount().observe(getViewLifecycleOwner(), totalAmount -> {
+            budgetCalculator.getResultAmount().observe(getViewLifecycleOwner(), totalAmount -> {
                 if (totalAmount != null && adapter != null) {
                     // Обновляем карточку "Итого" в адаптере
                     adapter.updateTotalAmount(totalAmount);

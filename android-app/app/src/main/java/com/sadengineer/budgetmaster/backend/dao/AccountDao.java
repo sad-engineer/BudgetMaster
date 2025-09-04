@@ -11,7 +11,6 @@ import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
 import java.util.List;
 
@@ -164,15 +163,15 @@ public interface AccountDao {
     void update(Account account); 
     
     /**
-     * Получить сводку сумм на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и валюты
+     * Получить сумму на счетах по типу (текущие, сбережения, кредитные) с учетом фильтра и Id валюты
+     * @param currencyId ID валюты
      * @param type тип счета (1 - текущие, 2 - сбережения, 3 - кредитные)
      * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
-     * @return список пар "ID валюты - сумма" для всех валют
+     * @return общая сумма счетов по ID валюты, типу счета, фильтру
      */
-    @Query("SELECT currencyId as pair_key, SUM(amount) as pair_value FROM accounts WHERE type = :type AND " +
+    @Query("SELECT SUM(amount) FROM accounts WHERE currencyId = :currencyId AND type = :type AND " +
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
-           "(:filter = 'ALL')) " +
-           "GROUP BY currencyId")
-    List<KeyValuePair> getCurrencySummaryByType(int type, EntityFilter filter);
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByCurrencyAndType(int currencyId, int type, EntityFilter filter);
 } 

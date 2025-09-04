@@ -9,6 +9,9 @@ import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
+import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
+import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 
 import java.util.List;
 
@@ -18,6 +21,10 @@ import java.util.List;
 public class TransfersAccountsFragment extends BaseListFragment<Account, AccountsAdapter, AccountsSharedViewModel, AccountService> {
 
     private final int ACCOUNT_TYPE = ModelConstants.ACCOUNT_TYPE_CREDIT; // Используем CREDIT для переводов
+    
+    // Калькулятор для общей суммы кредитных счетов
+    private AccountCalculatorViewModel accountCalculator;
+    private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
 
     /**
      * Возвращает layout для фрагмента
@@ -134,8 +141,29 @@ public class TransfersAccountsFragment extends BaseListFragment<Account, Account
         adapter.setOnSelectedAccountsChanged(selected -> {
             viewModel.setSelectedAccounts(selected);
         });
+        
+        // Инициализируем калькулятор кредитных счетов
+        accountCalculator = new AccountCalculatorViewModel(requireActivity().getApplication(), AccountTypeFilter.CREDIT);
+        accountCalculator.initialize();
+        
+        // Подписываемся на изменения общей суммы кредитных счетов
+        setupAccountCalculatorObserver();
     }
 
+    /**
+     * Настраивает Observer для калькулятора кредитных счетов
+     */
+    private void setupAccountCalculatorObserver() {
+        if (accountCalculator != null) {
+            accountCalculator.getTotalAmount().observe(getViewLifecycleOwner(), totalAmount -> {
+                if (totalAmount != null && adapter != null) {
+                    adapter.setTotalAmount(totalAmount);
+                    Log.d(TAG, "Общая сумма кредитных счетов обновлена: " + totalAmount);
+                }
+            });
+        }
+    }
+    
     /**
      * Выполняет удаление
      */

@@ -46,7 +46,7 @@ android:paddingEnd="0dp"
 
 ## Типы тулбаров
 
-### 1. Главный экран (MainActivity)
+### 1. Главный экран (StartActivity)
 **Структура:** Меню → Заголовок → Доходы → Расходы
 
 ```xml
@@ -170,14 +170,14 @@ app:tint="@color/[screen_name]_toolbar_icons"
 
 ### 1. Кнопка "Назад"
 **Назначение:** Возврат на главный экран
-**Логика:** Завершение текущего Activity и переход на MainActivity
+**Логика:** Завершение текущего Activity и переход на StartActivity
 
 ```java
 backButton.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
         // Возвращаемся на главный экран
-        Intent intent = new Intent(CurrentActivity.this, MainActivity.class);
+        Intent intent = new Intent(CurrentActivity.this, StartActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
@@ -194,7 +194,7 @@ menuButton.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
         // Открываем меню (если есть drawer layout) или идем на главный экран
-        Intent intent = new Intent(CurrentActivity.this, MainActivity.class);
+        Intent intent = new Intent(CurrentActivity.this, StartActivity.class);
         startActivity(intent);
     }
 });
@@ -343,7 +343,7 @@ backButton.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
         // Возвращаемся на главный экран
-        Intent intent = new Intent(CurrentActivity.this, MainActivity.class);
+        Intent intent = new Intent(CurrentActivity.this, StartActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
@@ -354,7 +354,7 @@ menuButton.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
         // Открываем меню (если есть drawer layout) или идем на главный экран
-        Intent intent = new Intent(CurrentActivity.this, MainActivity.class);
+        Intent intent = new Intent(CurrentActivity.this, StartActivity.class);
         startActivity(intent);
     }
 });

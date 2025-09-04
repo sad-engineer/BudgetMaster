@@ -153,17 +153,18 @@ public class CurrencyService {
     }
     
     /**
-     * Создать новую валюту с курсом
+     * Создать новую валюту с курсом и коротким именем
      * Проверяет уникальность названия и короткого имени
      * @param title название валюты
      * @param shortName короткое имя валюты
      * @param exchangeRate обменный курс валюты
      */
-    public void create(String title, String shortName, double exchangeRate) {
+    public void create(String title, String shortName, Double exchangeRate) {
         String trimmedTitle = title.trim();
         String trimmedShortName = shortName != null ? shortName.trim() : null;
         validator.validateTitle(trimmedTitle);
         validator.validateShortName(trimmedShortName);
+        validator.validateExchangeRate(exchangeRate);
         executorService.execute(() -> {
             // Проверяем уникальность в фоновом потоке
             validator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
@@ -201,7 +202,7 @@ public class CurrencyService {
      * @param shortName короткое имя валюты
      * @param exchangeRate обменный курс валюты
      */
-    public void createWithoutValidation(String title, String shortName, double exchangeRate) {
+    public void createWithoutValidation(String title, String shortName, Double exchangeRate) {
         executorService.execute(() -> {
             createCurrencyInTransaction(title, shortName, exchangeRate);
         });

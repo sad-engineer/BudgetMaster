@@ -33,16 +33,16 @@ public class NavigationTree {
         // Строим дерево
         nodesByClass = NavigationTreeBuilder.buildTree(context);
         
-        // Находим корневой узел (MainActivity)
+        // Находим корневой узел (StartActivity)
         for (NavigationNode node : nodesByClass.values()) {
-            if (node.activityClass.getSimpleName().equals("MainActivity")) {
+            if (node.activityClass.getSimpleName().equals("StartActivity")) {
                 rootNode = node;
                 break;
             }
         }
         
         if (rootNode == null) {
-            Log.w(TAG, "Корневой узел (MainActivity) не найден");
+            Log.w(TAG, "Корневой узел (StartActivity) не найден");
             // Берем первый узел как корневой
             if (!nodesByClass.isEmpty()) {
                 rootNode = nodesByClass.values().iterator().next();

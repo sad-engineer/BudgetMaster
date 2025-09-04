@@ -4,7 +4,7 @@
 
 ### 1. Корневой контейнер
 
-#### Главный экран (MainActivity):
+#### Главный экран (StartActivity):
 ```xml
 <androidx.drawerlayout.widget.DrawerLayout 
     android:id="@+id/drawer_layout"

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import androidx.annotation.NonNull;
 
-import com.sadengineer.budgetmaster.start.MainActivity;
+import com.sadengineer.budgetmaster.start.StartActivity;
 import com.sadengineer.budgetmaster.accounts.AccountsActivity;
 import com.sadengineer.budgetmaster.income.IncomeActivity;
 import com.sadengineer.budgetmaster.expense.ExpenseActivity;
@@ -55,7 +55,7 @@ public class SwipeNavigationHelper {
     
     // Порядок экранов для навигации вниз по дереву меню
     private final Class<?>[] navigationOrder = {
-        MainActivity.class,
+        StartActivity.class,
         InstructionsActivity.class,
         CurrenciesActivity.class,
         AccountsActivity.class,

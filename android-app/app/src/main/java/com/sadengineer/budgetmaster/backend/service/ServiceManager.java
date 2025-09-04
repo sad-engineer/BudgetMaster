@@ -130,7 +130,7 @@ public class ServiceManager {
 /*
  * ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ ServiceManager:
  * 
- * 1. Инициализация в MainActivity или Application:
+ * 1. Инициализация в StartActivity или Application:
  *    ServiceManager serviceManager = ServiceManager.getInstance(context, "user_name");
  * 
  * 2. Использование в любом месте приложения:

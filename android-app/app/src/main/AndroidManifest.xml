@@ -73,7 +73,7 @@
             android:name=".operations.OperationEditActivity"
             android:exported="false" />
         <activity
-            android:name=".start.MainActivity"
+            android:name=".start.StartActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

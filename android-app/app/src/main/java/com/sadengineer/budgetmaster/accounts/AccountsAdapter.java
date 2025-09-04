@@ -42,6 +42,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private CurrencyService currencyService;
     private Map<Integer, String> currencyCache = new HashMap<>();
     
+    /** Общая сумма всех счетов для карточки "Итого" */
+    private long totalAmount = 0L;
+    
     public interface OnAccountClickListener {
         void onAccountClick(Account account);
     }
@@ -84,6 +87,15 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     }
     
     /**
+     * Возвращает тип элемента для позиции
+     */
+    @Override
+    public int getItemViewType(int position) {
+        // Позиция 0 - карточка "Итого", остальные - обычные счета
+        return position == 0 ? 0 : 1;
+    }
+    
+    /**
      * Создает ViewHolder для элемента списка
      * @param parent родительский ViewGroup
      * @param viewType тип элемента
@@ -103,6 +115,11 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         // Настраиваем обработчики для универсального ViewHolder
         // Обработчик клика на счет
         holder.setItemClickListener(itemId -> {
+            // Карточка "Итого" не кликабельна
+            if (itemId == -1) {
+                return;
+            }
+            
             if (listener != null) {
                 Account account = findAccountById(itemId);
                 if (account != null) {
@@ -113,6 +130,11 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         
         // Обработчик длинного клика на счет
         holder.setItemLongClickListener(itemId -> {
+            // Карточка "Итого" не кликабельна
+            if (itemId == -1) {
+                return;
+            }
+            
             if (longClickListener != null) {
                 Account account = findAccountById(itemId);
                 if (account != null) {
@@ -149,19 +171,37 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     @Override
     public void onBindViewHolder(@NonNull StandartViewHolder holder, int position) {
-        Account account = accounts.get(position);
-        holder.resetToInitialState();
-        // Определяем, выбран ли текущий элемент (только для неудаленных счетов)
-        boolean isSelected = !account.isDeleted() && selectedAccounts.contains(account.getId()); 
-        
-        // Получаем короткое имя валюты из кэша
-        String currencyShortName = currencyCache.getOrDefault(account.getCurrencyId(), "RUB");
-        Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
-        
-        // Используем новый форматтер для отображения сумм в копейках
-        holder.bind(
-            account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected,
-            SettingsManager.isShowPosition(), SettingsManager.isShowId());
+        if (position == 0) {
+            // Карточка "Итого"
+            holder.bind(
+                0, // позиция
+                "Итого", // заголовок
+                -1, // специальный ID для карточки "Итого"
+                totalAmount, // общая сумма
+                "₽", // используем рубли как основную валюту
+                false, // режим выбора отключен для итоговой карточки
+                false, // не выбрана
+                false, // не показываем позицию
+                false  // не показываем ID
+            );
+            
+            Log.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + totalAmount);
+        } else if (position > 0 && position <= accounts.size()) {
+            // Обычные счета (смещаем позицию на -1)
+            Account account = accounts.get(position - 1);
+            holder.resetToInitialState();
+            // Определяем, выбран ли текущий элемент (только для неудаленных счетов)
+            boolean isSelected = !account.isDeleted() && selectedAccounts.contains(account.getId()); 
+            
+            // Получаем короткое имя валюты из кэша
+            String currencyShortName = currencyCache.getOrDefault(account.getCurrencyId(), "RUB");
+            Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
+            
+            // Используем новый форматтер для отображения сумм в копейках
+            holder.bind(
+                account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected,
+                SettingsManager.isShowPosition(), SettingsManager.isShowId());
+        }
     }
 
     /**
@@ -169,7 +209,8 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     @Override
     public int getItemCount() {
-        return accounts.size();
+        // +1 для карточки "Итого"
+        return accounts.size() + 1;
     }
     
     /**
@@ -180,6 +221,17 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
         loadCurrencyCache();
         notifyDataSetChanged();
+    }
+    
+    /**
+     * Обновляет общую сумму для карточки "Итого"
+     * @param totalAmount общая сумма всех счетов
+     */
+    public void setTotalAmount(long totalAmount) {
+        this.totalAmount = totalAmount;
+        // Обновляем только первую позицию (карточка "Итого")
+        notifyItemChanged(0);
+        Log.d(TAG, "Обновлена общая сумма счетов: " + totalAmount);
     }
     
     /**
