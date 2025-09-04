@@ -1,13 +1,8 @@
 package com.sadengineer.budgetmaster.expense;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -46,7 +41,7 @@ public class ExpenseActivity extends BaseCardsActivity<Operation> {
 
         // Общая привязка кнопок и placeholder для индикатора
         // Используем резерв в тулбаре как placeholder индикатора
-        setupCommonCardsUi(0, R.id.add_expense_button_bottom, R.id.delete_expense_button_bottom, R.id.toolbar_reserve);
+        setupCommonCardsUi(0, R.id.add_button_bottom, R.id.delete_button_bottom, R.id.toolbar_reserve);
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(ExpenseSharedViewModel.class);
         // Привязываем ViewModel к базовой логике кнопок/индикатора (важно: после setupCommonCardsUi)

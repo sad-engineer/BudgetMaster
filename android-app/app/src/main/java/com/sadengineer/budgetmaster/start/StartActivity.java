@@ -4,11 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
-
-import androidx.activity.OnBackPressedCallback;
-import androidx.core.view.GravityCompat;
 
 import com.sadengineer.budgetmaster.accounts.AccountsActivity;
 import com.sadengineer.budgetmaster.income.IncomeActivity;
@@ -17,10 +13,7 @@ import com.sadengineer.budgetmaster.budget.BudgetActivity;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 import com.sadengineer.budgetmaster.backend.database.DatabaseManager;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
-import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
-import com.sadengineer.budgetmaster.start.StartScreenViewModel;
-import com.sadengineer.budgetmaster.start.MainScreenData;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.settings.AppSettings;
 

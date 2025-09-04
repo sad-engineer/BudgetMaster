@@ -16,7 +16,7 @@
         android:layout_height="@dimen/menu_icon_size"
         android:layout_width="@dimen/menu_icon_size"
         android:src="@drawable/ic_home"
-        app:tint="@color/navigation_item_icon" />
+        app:tint="@color/content_icons" />
 
     <TextView 
         android:gravity="center_vertical"
@@ -26,7 +26,7 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:text="@string/menu_main"
-        android:textColor="@color/navigation_item_text"
+        android:textColor="@color/content_texts"
         android:textSize="@dimen/menu_text_size" />
 
 </LinearLayout> 

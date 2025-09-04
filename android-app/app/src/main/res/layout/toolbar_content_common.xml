@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,7 +17,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/icon_back"
         android:src="@drawable/ic_back"
-        android:tint="@color/toolbar_content_common_icons" />
+        app:tint="@color/toolbar_icons" />
 
     <ImageButton
         android:id="@+id/menu_button"
@@ -25,7 +26,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/icon_menu"
         android:src="@drawable/ic_menu"
-        android:tint="@color/toolbar_content_common_icons" />
+        app:tint="@color/toolbar_icons" />
 
     <TextView
         android:id="@+id/toolbar_title"
@@ -34,7 +35,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textStyle="bold"
-        android:textColor="@color/toolbar_content_common_texts" />
+        android:textColor="@color/toolbar_texts" />
 
     <View
         android:id="@+id/toolbar_reserve"
@@ -48,7 +49,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="@string/icon_position_change"
         android:src="@drawable/ic_position_change"
-        android:tint="@color/toolbar_content_common_icons" />
+        app:tint="@color/toolbar_icons" />
 
 </LinearLayout>
 

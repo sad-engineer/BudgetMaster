@@ -4,4 +4,4 @@
     android:id="@+id/loading_indicator"
     android:layout_width="@dimen/menu_button_size"
     android:layout_height="match_parent"
-    android:indeterminateTint="@color/accounts_toolbar_icons" />
+    android:indeterminateTint="@color/toolbar_icons" />

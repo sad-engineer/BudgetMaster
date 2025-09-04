@@ -10,7 +10,6 @@ import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

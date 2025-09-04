@@ -16,7 +16,7 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/toolbar_content_common_background"
+            android:background="@color/toolbar_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
@@ -32,7 +32,7 @@
 
         <!-- Контент -->
         <FrameLayout 
-            android:background="@color/authors_content_background"
+            android:background="@color/content_background"
             android:layout_height="match_parent"
             android:layout_width="match_parent">
 
@@ -53,7 +53,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/authors_info_title"
-                        android:textColor="@color/authors_titles"
+                        android:textColor="@color/content_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -63,7 +63,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/authors_info_description"
-                        android:textColor="@color/authors_texts"
+                        android:textColor="@color/content_texts"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:layout_marginBottom="16dp" />
@@ -73,10 +73,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/authors_copyright_text"
-                        android:textColor="@color/authors_texts"
+                        android:textColor="@color/content_texts"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:layout_marginBottom="24dp" />
+
+                    <View
+                        android:id="@+id/divider_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@color/content_divider" />
 
                     <!-- Информация о библиотеках -->
                     <LinearLayout
@@ -89,7 +97,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/authors_libraries_title"
-                            android:textColor="@color/authors_titles"
+                            android:textColor="@color/content_title"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="12dp" />
@@ -99,7 +107,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/authors_libraries_list"
-                            android:textColor="@color/authors_texts"
+                            android:textColor="@color/content_texts"
                             android:textSize="14sp"
                             android:lineSpacingExtra="4dp" />
 
@@ -115,14 +123,14 @@
 
     <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/navigation_background"
+        android:background="@color/content_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemTextColor="@color/content_texts"
+        app:itemIconTint="@color/content_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout> 

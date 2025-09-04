@@ -3,9 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/date_picker_content_background"
+    android:background="@color/content_background"
     android:padding="16dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Заголовок с текущей датой -->
     <TextView
@@ -39,7 +40,7 @@
             android:src="@drawable/ic_arrow_left"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/btn_prev_month"
-            android:tint="@color/date_picker_content_icons" />
+            app:tint="@color/date_picker_content_icons" />
 
         <TextView
             android:id="@+id/tv_month_year"
@@ -59,7 +60,7 @@
             android:src="@drawable/ic_arrow_right"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/btn_next_month"
-            android:tint="@color/date_picker_content_icons" />
+            app:tint="@color/date_picker_content_icons" />
 
     </LinearLayout>
 
@@ -151,20 +152,34 @@
         android:orientation="horizontal"
         android:gravity="end">
 
-        <Button
+        <TextView
             android:id="@+id/btn_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="100dp"
+            android:maxWidth="2000dp"
             android:text="@string/btn_cancel"
+            android:textColor="@color/delete_button_icon"
+            android:background="@drawable/button_background"
             android:layout_marginEnd="8dp"
-            style="@style/Widget.MaterialComponents.Button.TextButton" />
+            android:padding="12dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"/>
 
-        <Button
+        <TextView
             android:id="@+id/btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="100dp"
+            android:maxWidth="200dp"
             android:text="@string/btn_ok"
-            style="@style/Widget.MaterialComponents.Button" />
+            android:textColor="@color/add_button_icon"
+            android:background="@drawable/button_background"
+            android:padding="12dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 

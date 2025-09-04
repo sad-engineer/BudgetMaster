@@ -4,14 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
-import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 

@@ -3,7 +3,6 @@ package com.sadengineer.budgetmaster.accounts;
 import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragment;

@@ -10,9 +10,7 @@ import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
-import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

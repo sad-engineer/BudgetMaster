@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/expense_item_background"
+    android:background="@color/item_background"
     android:layout_margin="4dp">
 
     <!-- Основной контент -->
@@ -21,7 +21,7 @@
             android:text="01.01.2024"
             android:textSize="14sp"
             android:textStyle="normal"
-            android:textColor="@color/expense_item_id_text"
+            android:textColor="@color/item_text"
             android:layout_marginEnd="16dp" />
 
         <!-- Вертикальный контейнер: категория + комментарий -->
@@ -39,7 +39,7 @@
                 android:text="Категория"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/expense_item_text" />
+                android:textColor="@color/item_text" />
 
             <!-- Комментарий -->
             <TextView
@@ -49,7 +49,7 @@
                 android:text="Комментарий"
                 android:textSize="14sp"
                 android:textStyle="normal"
-                android:textColor="@color/expense_item_id_text"
+                android:textColor="@color/item_text"
                 android:layout_marginTop="2dp" />
 
         </LinearLayout>
@@ -62,7 +62,7 @@
             android:text="0.00"
             android:textSize="18sp"
             android:textStyle="normal"
-            android:textColor="@color/expense_item_text"
+            android:textColor="@color/item_text"
             android:layout_marginEnd="8dp" />
 
         <!-- Короткое имя валюты -->
@@ -73,7 +73,7 @@
             android:text="₽"
             android:textSize="16sp"
             android:textStyle="normal"
-            android:textColor="@color/expense_item_id_text" />
+            android:textColor="@color/item_text" />
 
     </LinearLayout>
 

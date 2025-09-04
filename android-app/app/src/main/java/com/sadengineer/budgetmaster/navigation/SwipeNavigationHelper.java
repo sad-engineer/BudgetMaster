@@ -25,7 +25,6 @@ import com.sadengineer.budgetmaster.import_export.ExportDataActivity;
 import com.sadengineer.budgetmaster.VersionActivity;
 import com.sadengineer.budgetmaster.AuthorsActivity;
 
-
 /**
  * Помощник для обработки свайпов навигации
  */

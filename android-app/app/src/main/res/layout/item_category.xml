@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/categories_item_background"
+    android:background="@color/item_background"
     android:layout_margin="4dp">
 
     <!-- Основной контент -->
@@ -20,7 +20,7 @@
             android:text="1"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/categories_item_text"
+            android:textColor="@color/item_text"
             android:layout_marginEnd="16dp" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:text="Название"
             android:textSize="18sp"
-            android:textColor="@color/categories_item_text" />
+            android:textColor="@color/item_text" />
 
         <TextView
             android:id="@+id/category_id"
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:text="ID: 1"
             android:textSize="12sp"
-            android:textColor="@color/categories_item_id_text" />
+            android:textColor="@color/item_text" />
 
     </LinearLayout>
 

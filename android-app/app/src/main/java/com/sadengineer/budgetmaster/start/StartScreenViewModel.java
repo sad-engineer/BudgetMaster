@@ -8,16 +8,12 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import java.util.List;
 
-import com.sadengineer.budgetmaster.start.MainScreenData;
-import com.sadengineer.budgetmaster.start.MainScreenRepository;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
 import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
 import com.sadengineer.budgetmaster.settings.AppSettings;
-import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 
 /**

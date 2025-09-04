@@ -32,5 +32,7 @@
     <string name="icon_target">Иконка цели</string>
     <string name="icon_budget">Иконка бюджета</string>
     <string name="icon_reserve">Иконка резерва</string>
+    <string name="icon_add">Иконка добавления</string>
+    <string name="icon_delete">Иконка удаления</string>
     
 </resources>

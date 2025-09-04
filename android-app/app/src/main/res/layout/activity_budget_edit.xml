@@ -16,7 +16,7 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/toolbar_content_common_background"
+            android:background="@color/toolbar_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
@@ -34,7 +34,7 @@
         <ScrollView
             android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:background="@color/accounts_content_background"
+            android:background="@color/content_background"
             android:padding="16dp">
 
             <LinearLayout
@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Сумма бюджета"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/content_title"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -58,11 +58,19 @@
                     android:layout_height="wrap_content"
                     android:hint="Введите сумму"
                     android:inputType="number"
-                    android:background="@color/account_edit_item_content_background"
-                    android:textColor="@color/account_edit_item_content_texts"
-                    android:textColorHint="@color/account_edit_item_content_hint"
+                    android:background="@color/item_background"
+                    android:textColor="@color/item_text"
+                    android:textColorHint="@color/item_hint"
                     android:padding="12dp"
                     android:layout_marginBottom="24dp" />
+
+                <View
+                    android:id="@+id/divider_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
 
                 <!-- Категория -->
                 <TextView
@@ -70,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Категория"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/content_title"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -79,16 +87,24 @@
                     android:id="@+id/budget_category_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:padding="12dp"
                     android:layout_marginBottom="24dp" />
+
+                <View
+                    android:id="@+id/divider_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
 
                 <!-- Валюта -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Валюта"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/content_title"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -97,9 +113,17 @@
                     android:id="@+id/budget_currency_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:padding="12dp"
                     android:layout_marginBottom="24dp" />
+
+                <View
+                    android:id="@+id/divider_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
 
             </LinearLayout>
 
@@ -109,14 +133,14 @@
 
     <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/navigation_background"
+        android:background="@color/content_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemTextColor="@color/content_texts"
+        app:itemIconTint="@color/content_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

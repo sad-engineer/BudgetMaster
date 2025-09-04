@@ -12,184 +12,69 @@
     <color name="yellow">#FFFFF000</color>
     <color name="gray">#FF808080</color>
 
-    <!-- Цвета для универсального тулбара -->
-    <color name="toolbar_content_common_background">@color/black</color>
-    <color name="toolbar_content_common_icons">@color/green</color>
-    <color name="toolbar_content_common_texts">@color/yellow</color>
+    <!-- ЦВЕТА ТУЛБАРА -->
+    <color name="toolbar_background">@color/black</color> // цвет тулбара
+    <color name="toolbar_icons">@color/green</color> // цвет иконок тулбара
+    <color name="toolbar_texts">@color/white</color> // цвет текста тулбара
 
-    <color name="common_icons">@color/green</color>
+    <!-- ЦВЕТА вкладок -->
+    <color name="tab_background">@color/black</color> // цвет фона вкладок
+    <color name="tab_indicator">@color/white</color> // цвет индикатора вкладок
+    <color name="tab_text_selected">@color/white</color> // цвет текста выбранной вкладки
+    <color name="tab_text_normal">@color/white</color> // цвет текста невыбранной вкладки
 
-    
-    <!-- Глобальные цвета навигации -->
-    <color name="navigation_background">@color/dark_gray</color>
-    <color name="navigation_icons">@color/white</color>
-    <color name="navigation_texts">@color/white</color>
-    <color name="navigation_header_background">@color/black</color>
-    <color name="navigation_header_icon">@color/white</color>
-    <color name="navigation_header_text">@color/white</color>
-    <color name="navigation_item_icon">@color/white</color>
-    <color name="navigation_item_text">@color/white</color>
+    <!-- ЦВЕТА КОНТЕНТА -->
+    <color name="content_background">@color/dark_gray</color> // цвет фона зоны контента
+    <color name="content_divider">@color/white</color> // цвет разделителя зоны контента
+    <color name="content_hint">@color/gray</color> // цвет текста подсказки зоны контента
+    <color name="content_icons">@color/green</color> // цвет иконок зоны контента
+    <color name="content_texts">@color/white</color> // цвет текста зоны контента
+    <color name="content_title">@color/white</color> // цвет заголовка зоны контента
 
-    <!-- Цвета для главного экрана -->
-    <color name="main_toolbar_background">@color/black</color>
-    <color name="main_toolbar_icons">@color/green</color>
-    <color name="main_toolbar_texts">@color/white</color>
-    <color name="main_content_background">@color/dark_gray</color>
-    <color name="main_content_icons">@color/green</color>
-    <color name="main_content_texts">@color/white</color>
+    <!-- ЦВЕТА ЭЛЕМЕНТОВ СПИСКА -->
+    <color name="item_background">@color/white</color> // цвет фона элемента списка
+    <color name="item_hint">@color/gray</color> // цвет текста подсказки элемента списка
+    <color name="item_icons">@color/green</color> // цвет иконок элемента списка
+    <color name="item_text">@color/black</color> // цвет текста элемента списка
+    <color name="item_title">@color/white</color> // цвет заголовка элемента списка
 
-    <!-- Цвета для экрана счетов -->
-    <color name="accounts_toolbar_background">@color/black</color>
-    <color name="accounts_toolbar_icons">@color/green</color>
-    <color name="accounts_toolbar_texts">@color/white</color>
-    <color name="accounts_content_background">@color/dark_gray</color>
-    <color name="accounts_tab_background">@color/black</color>
-    <color name="accounts_tab_indicator">@color/white</color>
-    <color name="accounts_tab_text_selected">@color/white</color>
-    <color name="accounts_tab_text_normal">@color/white</color>
-    <color name="accounts_item_background">@color/white</color>
-    <color name="accounts_item_text">@color/black</color>
-    <color name="accounts_item_id_text">@color/gray</color>
+    <!-- ЦВЕТА КНОПОК -->
+    <color name="add_button_icon">@color/white</color> // цвет иконки кнопки добавления
+    <color name="add_button_background">@color/light_gray</color> // цвет фона кнопки добавления
+    <color name="delete_button_icon">@color/white</color> // цвет иконки кнопки удаления
+    <color name="delete_button_background">@color/light_gray</color> // цвет фона кнопки удаления
 
-    <!-- Цвета для экрана бюджета -->
-    <color name="budget_toolbar_background">@color/black</color>
-    <color name="budget_toolbar_icons">@color/green</color>
-    <color name="budget_toolbar_texts">@color/white</color>
-    <color name="budget_content_background">@color/dark_gray</color>
-    <color name="budget_tab_background">@color/black</color>
-    <color name="budget_tab_indicator">@color/white</color>
-    <color name="budget_tab_text_selected">@color/white</color>
-    <color name="budget_tab_text_normal">@color/white</color>
-
-    <!-- Цвета для экрана доходов -->
-    <color name="income_toolbar_background">@color/black</color>
-    <color name="income_toolbar_icons">@color/green</color>
-    <color name="income_toolbar_texts">@color/white</color>
-    <color name="income_content_background">@color/dark_gray</color>
-    <color name="income_tab_background">@color/black</color>
-    <color name="income_tab_indicator">@color/white</color>
-    <color name="income_tab_text_selected">@color/white</color>
-    <color name="income_tab_text_normal">@color/white</color>
-    <color name="income_item_background">@color/white</color>
-    <color name="income_item_text">@color/black</color>
-    <color name="income_item_id_text">@color/gray</color>
-
-    <!-- Цвета для экрана расходов -->
-    <color name="expense_toolbar_background">@color/black</color>
-    <color name="expense_toolbar_icons">@color/green</color>
-    <color name="expense_toolbar_texts">@color/white</color>
-    <color name="expense_content_background">@color/dark_gray</color>
-    <color name="expense_tab_background">@color/black</color>
-    <color name="expense_tab_indicator">@color/white</color>
-    <color name="expense_tab_text_selected">@color/white</color>
-    <color name="expense_tab_text_normal">@color/white</color>
-    <color name="expense_item_background">@color/white</color>
-    <color name="expense_item_text">@color/black</color>
-    <color name="expense_item_id_text">@color/gray</color>
-
-    <!-- Цвета для экрана валют -->
-    <color name="currencies_toolbar_background">@color/black</color>
-    <color name="currencies_toolbar_icons">@color/green</color>
-    <color name="currencies_toolbar_texts">@color/white</color>
-    <color name="currencies_content_background">@color/dark_gray</color>
-    <color name="currencies_content_icons">@color/green</color>
-    <color name="currencies_content_texts">@color/white</color>
-    <color name="currencies_item_background">@color/white</color>
-    <color name="currencies_item_text">@color/black</color>
-    <color name="currencies_item_id_text">@color/gray</color>
-    <color name="currencies_add_button_icon">@color/white</color>
-    <color name="currencies_add_button_background">@color/light_gray</color>
-    <color name="currencies_delete_button_icon">@color/white</color>
-    <color name="currencies_delete_button_background">@color/light_gray</color>
-    
-    <!-- Цвета для экрана редактирования валюты -->
-    <color name="currency_edit_toolbar_background">@color/black</color>
-    <color name="currency_edit_toolbar_icons">@color/green</color>
-    <color name="currency_edit_toolbar_texts">@color/white</color>
-    <color name="currency_edit_content_background">@color/dark_gray</color>
-    
-    <!-- Цвета для экрана категорий -->
-    <color name="categories_list_text">@color/white</color>
-    <color name="currency_edit_titles">@color/white</color>
-    <color name="currency_edit_input_background">@color/white</color>
-    <color name="currency_edit_input_text">@color/black</color>
-    <color name="currency_edit_input_hint">@color/gray</color>
-    
-    <!-- Цвета для экрана редактирования счета -->
-    <color name="account_edit_toolbar_background">@color/black</color>
-    <color name="account_edit_toolbar_icons">@color/green</color>
-    <color name="account_edit_toolbar_texts">@color/white</color>
-    <color name="account_edit_content_background">@color/dark_gray</color>
-    <color name="account_edit_titles">@color/white</color>
-    <color name="account_edit_item_content_background">@color/white</color>
-    <color name="account_edit_item_content_texts">@color/black</color>
-    <color name="account_edit_item_content_hint">@color/gray</color>
-    <color name="account_edit_item_divider">@color/gray</color>
-    
-    <!-- Цвета для экрана настроек -->
-    <color name="settings_toolbar_background">@color/black</color>
-    <color name="settings_toolbar_icons">@color/white</color>
-    <color name="settings_toolbar_texts">@color/white</color>
-    <color name="settings_content_background">@color/dark_gray</color>
-    <color name="settings_titles">@color/white</color>
-    <color name="settings_text">@color/white</color>
-
-    <!-- Цвета для экрана тестирования backend -->
-    <color name="backend_test_toolbar_background">@color/black</color>
-    <color name="backend_test_toolbar_icons">@color/white</color>
-    <color name="backend_test_toolbar_texts">@color/white</color>
-    <color name="backend_test_content_background">@color/white</color>
-    <color name="backend_test_text">@color/black</color>
-
-    <!-- Цвета для фрагментов -->
-    <color name="fragment_background">@color/dark_gray</color>
-
-    <!-- Цвета для экрана версии приложения -->
-    <color name="version_toolbar_background">@color/black</color>
-    <color name="version_toolbar_icons">@color/green</color>
-    <color name="version_toolbar_texts">@color/white</color>
-    <color name="version_content_background">@color/dark_gray</color>
-    <color name="version_content_icons">@color/green</color>
-    <color name="version_content_titles">@color/white</color>
-    <color name="version_content_texts">@color/white</color>
-    <color name="version_item_background">@color/dark_gray</color>
-
-    <!-- Цвета для экрана авторов -->
-    <color name="authors_toolbar_background">@color/black</color>
-    <color name="authors_toolbar_icons">@color/green</color>
-    <color name="authors_toolbar_texts">@color/white</color>
-    <color name="authors_titles">@color/white</color>
-    <color name="authors_texts">@color/white</color>
-    <color name="authors_background">@color/dark_gray</color>
-    <color name="authors_content_background">@color/dark_gray</color>
-    <color name="authors_item_background">@color/dark_gray</color>
-
-    <!-- Цвета для экранов категорий -->
-    <color name="categories_toolbar_background">@color/black</color>
-    <color name="categories_toolbar_icons">@color/green</color>
-    <color name="categories_toolbar_texts">@color/white</color>
-    <color name="categories_content_background">@color/dark_gray</color>
-    <color name="categories_item_background">@color/white</color>
-    <color name="categories_item_text">@color/black</color>
-    <color name="categories_item_id_text">@color/gray</color>
-    
-    <!-- Цвета для экрана редактирования категории -->
-    <color name="categories_edit_toolbar_background">@color/black</color>
-    <color name="categories_edit_toolbar_icons">@color/green</color>
-    <color name="categories_edit_toolbar_texts">@color/white</color>
-    <color name="categories_edit_content_background">@color/dark_gray</color>
-    <color name="categories_edit_labels">@color/white</color>
-    <color name="categories_edit_input_text">@color/black</color>
-    <color name="categories_edit_input_hint">@color/gray</color>
-
-    <!-- Цвета для виджета выбора даты -->
-    <color name="date_picker_toolbar_background">@color/black</color>
-    <color name="date_picker_toolbar_icons">@color/green</color>
-    <color name="date_picker_toolbar_texts">@color/white</color>
+    <!-- ЦВЕТА ДЛЯ ДАТЫ -->
     <color name="date_picker_content_background">@color/dark_gray</color>
+    <color name="date_picker_toolbar_background">@color/dark_gray</color>
+    <color name="date_picker_toolbar_texts">@color/white</color>
     <color name="date_picker_content_icons">@color/green</color>
     <color name="date_picker_content_titles">@color/white</color>
     <color name="date_picker_content_texts">@color/white</color>
     <color name="date_picker_selected_day_background">@color/green</color>
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ПОЛЕЙ ВВОДА -->
+    // используй content_...
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ВЕРСИИ -->
+    // используй content_...
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ АВТОРОВ -->
+    // используй content_...
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ТЕСТИРОВАНИЯ -->
+    // используй content_...
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ФРАГМЕНТОВ -->
+    // используй content_...
+
+
+    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ НАСТРОЕК -->
+    // используй content_...
+    
+    <!-- Глобальные цвета навигации -->
+    // используй content_...
+
+    
 
 </resources>

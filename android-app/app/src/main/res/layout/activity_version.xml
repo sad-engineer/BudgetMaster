@@ -16,7 +16,7 @@
 
         <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
-            android:background="@color/toolbar_content_common_background"
+            android:background="@color/toolbar_background"
             android:id="@+id/toolbar"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
@@ -31,7 +31,7 @@
         </androidx.appcompat.widget.Toolbar>
 
         <!-- Контент -->
-        <FrameLayout android:background="@color/version_content_background"
+        <FrameLayout android:background="@color/content_background"
             android:layout_height="match_parent"
             android:layout_width="match_parent">
 
@@ -60,7 +60,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:padding="12dp"
-                            android:background="@color/version_item_background">
+                            android:background="@color/content_background">
 
                             <ImageView
                                 android:layout_width="24dp"
@@ -68,7 +68,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:src="@drawable/ic_android"
                                 android:contentDescription="@string/version_icon_frontend"
-                                android:tint="@color/version_content_icons" />
+                                app:tint="@color/content_icons" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -81,7 +81,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/frontend_version"
-                                    android:textColor="@color/version_content_titles"
+                                    android:textColor="@color/content_title"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
                                     android:layout_marginTop="4dp"
                                     android:text="0.0.001"
                                     android:textSize="14sp"
-                                    android:textColor="@color/version_content_texts" />
+                                    android:textColor="@color/content_texts" />
 
                             </LinearLayout>
 
@@ -105,7 +105,7 @@
                             android:layout_marginTop="12dp"
                             android:orientation="horizontal"
                             android:padding="12dp"
-                            android:background="@color/version_item_background">
+                            android:background="@color/content_background">
 
                             <ImageView
                                 android:layout_width="24dp"
@@ -113,7 +113,7 @@
                                 android:layout_gravity="center_vertical"
                                 android:src="@drawable/ic_server"
                                 android:contentDescription="@string/version_icon_backend"
-                                android:tint="@color/version_content_icons" />
+                                app:tint="@color/content_icons" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -126,7 +126,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/backend_version"
-                                    android:textColor="@color/version_content_titles"
+                                    android:textColor="@color/content_title"
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
@@ -137,7 +137,7 @@
                                     android:layout_marginTop="4dp"
                                     android:text="0.0.001"
                                     android:textSize="14sp"
-                                    android:textColor="@color/version_content_texts" />
+                                    android:textColor="@color/content_texts" />
 
                             </LinearLayout>
 
@@ -157,7 +157,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/version_info_title"
-                            android:textColor="@color/version_content_titles"
+                            android:textColor="@color/content_title"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="12dp" />
@@ -166,7 +166,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/version_info_description"
-                            android:textColor="@color/version_content_texts"
+                            android:textColor="@color/content_texts"
                             android:textSize="14sp"
                             android:lineSpacingExtra="4dp"
                             android:textIsSelectable="false"
@@ -185,14 +185,14 @@
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/navigation_background"
+        android:background="@color/content_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemTextColor="@color/content_texts"
+        app:itemIconTint="@color/content_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout> 

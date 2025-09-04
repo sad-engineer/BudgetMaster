@@ -7,15 +7,11 @@ import java.util.HashSet;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
-import android.util.TypedValue;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
@@ -24,8 +20,6 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-import com.sadengineer.budgetmaster.categories.IncomeCategoriesActivity;
-import com.sadengineer.budgetmaster.categories.ExpenseCategoriesActivity;
 
 /**
  * Activity для создания/изменения категории

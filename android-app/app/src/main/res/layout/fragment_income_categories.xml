@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout 
-    android:background="@color/fragment_background"
+    android:background="@color/content_background"
     android:id="@+id/income_categories_fragment_container"
     android:layout_height="match_parent"
     android:layout_width="match_parent"

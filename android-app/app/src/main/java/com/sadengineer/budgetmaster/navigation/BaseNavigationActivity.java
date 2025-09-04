@@ -9,8 +9,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import com.sadengineer.budgetmaster.R;
 
-import com.sadengineer.budgetmaster.navigation.MenuBuilder;
-
 /**
  * Базовый класс для всех Activity с навигацией
  * Использует отдельные менеджеры для управления тулбаром, меню и навигацией

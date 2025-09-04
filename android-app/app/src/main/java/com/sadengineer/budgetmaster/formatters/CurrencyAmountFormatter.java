@@ -1,8 +1,6 @@
 package com.sadengineer.budgetmaster.formatters;
 
 import com.ibm.icu.text.NumberFormat;
-import com.ibm.icu.text.DecimalFormat;
-import com.ibm.icu.text.DecimalFormatSymbols;
 import com.ibm.icu.util.ULocale;
 
 import java.util.Locale;

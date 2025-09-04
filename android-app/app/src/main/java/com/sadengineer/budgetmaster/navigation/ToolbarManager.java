@@ -1,8 +1,6 @@
 package com.sadengineer.budgetmaster.navigation;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageButton;
@@ -12,8 +10,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationTree;
-import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationNode;
 
 /**
  * Менеджер для управления тулбаром

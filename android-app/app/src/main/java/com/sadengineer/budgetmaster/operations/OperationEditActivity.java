@@ -15,8 +15,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 
 import com.sadengineer.budgetmaster.R;

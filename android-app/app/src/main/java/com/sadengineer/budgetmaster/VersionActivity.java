@@ -1,12 +1,9 @@
 package com.sadengineer.budgetmaster;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.util.Log;
-import androidx.appcompat.widget.Toolbar;
+
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 
 /**

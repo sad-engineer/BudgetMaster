@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.currencies;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,9 +8,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-
-import java.util.List;
-import java.util.ArrayList;
 
 
 /**

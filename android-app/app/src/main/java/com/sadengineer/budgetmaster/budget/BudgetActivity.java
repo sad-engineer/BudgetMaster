@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.budget;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,14 +10,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
-import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.budget.BudgetAdapter;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.util.List;
-import java.util.ArrayList;
 
 public class BudgetActivity extends BaseContentActivity {
 
@@ -57,8 +51,8 @@ public class BudgetActivity extends BaseContentActivity {
      * Настраивает кнопки
      */
     private void setupButtons() {
-        addBudgetButton = findViewById(R.id.add_budget_button_bottom);
-        deleteBudgetButton = findViewById(R.id.delete_budget_button_bottom);
+        addBudgetButton = findViewById(R.id.add_button_bottom);
+        deleteBudgetButton = findViewById(R.id.delete_button_bottom);
 
         // Скрываем кнопки, так как бюджеты создаются только через категории
         addBudgetButton.setVisibility(View.GONE);

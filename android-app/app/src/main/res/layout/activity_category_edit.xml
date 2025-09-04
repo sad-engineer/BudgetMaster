@@ -12,14 +12,14 @@
         android:id="@+id/category_edit_root_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/categories_edit_content_background">
+        android:background="@color/content_background">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
             android:layout_width="0dp"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
-            android:background="@color/toolbar_content_common_background"
+            android:background="@color/toolbar_background"
             android:elevation="4dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -57,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/category_name_label"
-                    android:textColor="@color/categories_edit_labels"
+                    android:textColor="@color/content_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -66,14 +66,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:background="@drawable/version_item_background"
+                    android:background="@color/item_background"
                     android:hint="@string/category_name_hint"
                     android:inputType="text"
                     android:padding="12dp"
-                    android:textColor="@color/categories_edit_input_text"
-                    android:textColorHint="@color/categories_edit_input_hint"
+                    android:textColor="@color/content_texts"
+                    android:textColorHint="@color/content_hint"
                     android:textSize="16sp" />
-                    
+
+                <View
+                    android:id="@+id/divider_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
+
                 <!-- Родительская категория -->
                 <TextView
                     android:id="@+id/category_parent_label"
@@ -81,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/category_parent_label"
-                    android:textColor="@color/categories_edit_labels"
+                    android:textColor="@color/content_title"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -90,8 +98,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:background="@drawable/version_item_background"
+                    android:background="@color/item_background"
                     android:padding="12dp" />
+
+                <View
+                    android:id="@+id/divider_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
 
             </LinearLayout>
 
@@ -101,14 +117,14 @@
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/navigation_background"
+        android:background="@color/content_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemTextColor="@color/content_texts"
+        app:itemIconTint="@color/content_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

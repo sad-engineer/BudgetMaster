@@ -1,8 +1,6 @@
 package com.sadengineer.budgetmaster.base;
 
-import android.content.Intent;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;

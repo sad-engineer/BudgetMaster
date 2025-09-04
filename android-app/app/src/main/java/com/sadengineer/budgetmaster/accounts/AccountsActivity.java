@@ -1,10 +1,8 @@
 package com.sadengineer.budgetmaster.accounts;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -14,10 +12,6 @@ import com.sadengineer.budgetmaster.backend.entity.Account;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.util.List;
-import java.util.ArrayList;
-
 
 /**
  * Activity для отображения списка счетов
@@ -47,7 +41,7 @@ public class AccountsActivity extends BaseCardsActivity<Account> {
 
         // Общая привязка кнопок и placeholder для индикатора
         // Используем резерв в тулбаре как placeholder индикатора
-        setupCommonCardsUi(0, R.id.add_account_button_bottom, R.id.delete_account_button_bottom, R.id.toolbar_reserve);
+        setupCommonCardsUi(0, R.id.add_button_bottom, R.id.delete_button_bottom, R.id.toolbar_reserve);
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(AccountsSharedViewModel.class);
         // Привязываем ViewModel к базовой логике кнопок/индикатора (важно: после setupCommonCardsUi)

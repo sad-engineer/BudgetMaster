@@ -40,7 +40,7 @@
         android:text="1"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@color/categories_list_text"
+        android:textColor="@color/item_text"
         android:layout_marginEnd="16dp" />
 
     <!-- Название категории -->
@@ -50,17 +50,17 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textSize="16sp"
-        android:textColor="@color/categories_list_text"
+        android:textColor="@color/item_text"
         android:maxLines="1"
         android:ellipsize="end" />
 
     <!-- ID категории -->
     <TextView
-        android:id="@+id/category_id"
+        android:id="@+id/category_tree_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ID: 1"
         android:textSize="12sp"
-        android:textColor="@color/categories_item_id_text" />
+        android:textColor="@color/item_hint" />
 
 </LinearLayout>

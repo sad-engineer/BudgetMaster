@@ -8,15 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
-import com.sadengineer.budgetmaster.start.MainScreenData;
-import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
-import com.sadengineer.budgetmaster.backend.service.AccountService;
-import com.sadengineer.budgetmaster.backend.service.BudgetService;
-import com.sadengineer.budgetmaster.backend.service.OperationService;
-import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-
-import java.time.LocalDateTime;
-import java.time.YearMonth;
 
 /**
  * Repository для агрегации данных главного экрана

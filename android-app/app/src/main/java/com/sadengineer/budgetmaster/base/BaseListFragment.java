@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.MotionEvent;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
@@ -18,9 +17,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.sadengineer.budgetmaster.R;
-import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
 
 import java.io.Serializable;
 import java.util.List;

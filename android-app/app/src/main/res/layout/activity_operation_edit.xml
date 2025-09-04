@@ -12,7 +12,7 @@
         android:id="@+id/operation_edit_root_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/account_edit_content_background"
+        android:background="@color/content_background"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:layout_marginTop="@dimen/toolbar_margin_top"
-            android:background="@color/toolbar_content_common_background"
+            android:background="@color/toolbar_background"
             android:elevation="4dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:contentInsetStart="0dp"
@@ -51,14 +51,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/operation_category_label"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/item_title"
                     android:textSize="16sp" />
 
                 <Spinner
                     android:id="@+id/operation_category_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:padding="12dp" />
 
                 <View
@@ -67,7 +67,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="16dp"
-                    android:background="@color/account_edit_item_divider" />
+                    android:background="@color/content_divider" />
 
                 <!-- Счет -->
                 <TextView
@@ -76,14 +76,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/operation_account_label"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/item_title"
                     android:textSize="16sp" />
 
                 <Spinner
                     android:id="@+id/operation_account_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:padding="12dp" />
 
                 <View
@@ -92,7 +92,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="16dp"
-                    android:background="@color/account_edit_item_divider" />
+                    android:background="@color/content_divider" />
 
                 <!-- Сумма -->
                 <TextView
@@ -101,19 +101,19 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/operation_amount_label"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/item_title"
                     android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/operation_amount_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:hint="@string/operation_amount_hint"
                     android:inputType="numberDecimal"
                     android:padding="12dp"
-                    android:textColor="@color/account_edit_item_content_texts"
-                    android:textColorHint="@color/account_edit_item_content_hint"
+                    android:textColor="@color/item_text"
+                    android:textColorHint="@color/item_hint"
                     android:textSize="16sp" />
 
                 <View
@@ -122,7 +122,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="16dp"
-                    android:background="@color/account_edit_item_divider" />
+                    android:background="@color/content_divider" />
 
                 <!-- Дата -->
                 <TextView
@@ -131,21 +131,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/operation_date_label"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/item_title"
                     android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/operation_date_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:hint="@string/operation_date_hint"
                     android:inputType="number"
                     android:focusable="true"
                     android:clickable="true"
                     android:padding="12dp"
-                    android:textColor="@color/account_edit_item_content_texts"
-                    android:textColorHint="@color/account_edit_item_content_hint"
+                    android:textColor="@color/item_text"
+                    android:textColorHint="@color/item_hint"
                     android:textSize="16sp" />
 
                 <View
@@ -154,7 +154,7 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="16dp"
-                    android:background="@color/account_edit_item_divider" />
+                    android:background="@color/content_divider" />
 
                 <!-- Комментарий -->
                 <TextView
@@ -163,22 +163,30 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/operation_comment_label"
-                    android:textColor="@color/account_edit_titles"
+                    android:textColor="@color/item_title"
                     android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/operation_comment_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/account_edit_item_content_background"
+                    android:background="@color/item_background"
                     android:hint="@string/operation_comment_hint"
                     android:inputType="textMultiLine"
                     android:minLines="2"
                     android:maxLines="4"
                     android:padding="12dp"
-                    android:textColor="@color/account_edit_item_content_texts"
-                    android:textColorHint="@color/account_edit_item_content_hint"
+                    android:textColor="@color/item_text"
+                    android:textColorHint="@color/item_hint"
                     android:textSize="16sp" />
+
+                <View
+                    android:id="@+id/divider_6"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/content_divider" />
 
             </LinearLayout>
 
@@ -188,14 +196,14 @@
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView 
-        android:background="@color/navigation_background"
+        android:background="@color/content_background"
         android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_drawer_header"
         app:menu="@menu/nav_drawer_menu"
-        app:itemTextColor="@color/navigation_texts"
-        app:itemIconTint="@color/navigation_icons" />
+        app:itemTextColor="@color/content_texts"
+        app:itemIconTint="@color/content_icons" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
