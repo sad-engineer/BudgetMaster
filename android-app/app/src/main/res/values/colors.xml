@@ -37,6 +37,8 @@
     <color name="item_icons">@color/green</color> // цвет иконок элемента списка
     <color name="item_text">@color/black</color> // цвет текста элемента списка
     <color name="item_title">@color/white</color> // цвет заголовка элемента списка
+    <color name="item_text_positive_operation">@color/green</color> // цвет текста положительной операции
+    <color name="item_text_negative_operation">@color/red</color> // цвет текста отрицательной операции
 
     <!-- ЦВЕТА КНОПОК -->
     <color name="add_button_icon">@color/white</color> // цвет иконки кнопки добавления
@@ -52,29 +54,5 @@
     <color name="date_picker_content_titles">@color/white</color>
     <color name="date_picker_content_texts">@color/white</color>
     <color name="date_picker_selected_day_background">@color/green</color>
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ПОЛЕЙ ВВОДА -->
-    // используй content_...
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ВЕРСИИ -->
-    // используй content_...
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ АВТОРОВ -->
-    // используй content_...
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ТЕСТИРОВАНИЯ -->
-    // используй content_...
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ ФРАГМЕНТОВ -->
-    // используй content_...
-
-
-    <!-- УНИВЕРСАЛЬНЫЕ ЦВЕТА ДЛЯ НАСТРОЕК -->
-    // используй content_...
-    
-    <!-- Глобальные цвета навигации -->
-    // используй content_...
-
-    
 
 </resources>

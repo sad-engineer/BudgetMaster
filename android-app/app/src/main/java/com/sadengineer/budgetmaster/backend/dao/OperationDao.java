@@ -370,6 +370,20 @@ public interface OperationDao {
     LiveData<Long> getTotalAmountByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter);
 
     /**
+     * Получить операции по типу и диапазону дат
+     * @param type тип операции
+     * @param startDate начальная дата
+     * @param endDate конечная дата
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком операций
+     */
+    @Query("SELECT * FROM operations WHERE type = :type AND operationDate BETWEEN :startDate AND :endDate AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) ORDER BY operationDate DESC")
+    LiveData<List<Operation>> getByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
+
+    /**
      * Получает общую сумму операций по категории за период
      * @param categoryId ID категории
      * @param startDate начало периода

@@ -17,7 +17,7 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
  */
 public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
 
-    protected final String TAG = getClass().getSimpleName();
+    protected final String TAG = this.getClass().getSimpleName();
 
     protected ImageButton saveButton;
     protected TextView toolbarTitle;

@@ -33,7 +33,7 @@ import java.util.ArrayList;
  */
 public abstract class BaseListFragment<T extends Serializable, A extends RecyclerView.Adapter, V extends ViewModel, S> extends Fragment {
     
-    protected final String TAG = getClass().getSimpleName();
+    protected final String TAG = this.getClass().getSimpleName();
     protected RecyclerView recyclerView;
     protected A adapter;
     protected V viewModel;

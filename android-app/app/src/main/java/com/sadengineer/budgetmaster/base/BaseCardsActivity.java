@@ -19,7 +19,7 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
  */
 public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
 
-    protected final String TAG = "BaseCardsActivity";
+    protected final String TAG = this.getClass().getSimpleName();
 
     protected RecyclerView recyclerView;
     protected ImageButton addButton;

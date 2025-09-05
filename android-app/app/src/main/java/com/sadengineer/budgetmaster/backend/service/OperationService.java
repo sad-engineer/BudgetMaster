@@ -552,12 +552,24 @@ public class OperationService {
      * @param entityFilter фильтр сущностей
      * @return общая сумма операций по типу за период
      */
-    public LiveData<Long> getTotalAmountByTypeAndDateRange(int type, 
-                                                          LocalDateTime startDate, 
-                                                          LocalDateTime endDate, 
-                                                          int currencyId,
-                                                          EntityFilter entityFilter) {
+        public LiveData<Long> getTotalAmountByTypeAndDateRange(int type,
+                                                           LocalDateTime startDate,
+                                                           LocalDateTime endDate,
+                                                           int currencyId,
+                                                           EntityFilter entityFilter) {
         return repo.getTotalAmountByTypeAndDateRange(type, startDate, endDate, currencyId, entityFilter);
+    }
+
+    /**
+     * Получить операции по типу и диапазону дат
+     * @param type тип операции
+     * @param startDate начальная дата
+     * @param endDate конечная дата
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком операций
+     */
+    public LiveData<List<Operation>> getByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return repo.getByTypeAndDateRange(type, startDate, endDate, filter);
     }
     
     /**

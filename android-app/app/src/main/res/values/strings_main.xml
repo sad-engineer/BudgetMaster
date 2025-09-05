@@ -35,4 +35,7 @@
     <string name="icon_add">Иконка добавления</string>
     <string name="icon_delete">Иконка удаления</string>
     
+    <!-- Строки для карточек итогов -->
+    <string name="total_message">Итого</string>
+    
 </resources>

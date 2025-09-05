@@ -328,6 +328,18 @@ public class OperationRepository {
     }
 
     /**
+     * Получить операции по типу и диапазону дат
+     * @param type тип операции
+     * @param startDate начальная дата
+     * @param endDate конечная дата
+     * @param filter фильтр для выборки операций
+     * @return LiveData со списком операций
+     */
+    public LiveData<List<Operation>> getByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter) {
+        return dao.getByTypeAndDateRange(type, startDate, endDate, filter);
+    }
+
+    /**
      * Получает общую сумму операций по категории за период
      * @param categoryId ID категории
      * @param startDate начало периода

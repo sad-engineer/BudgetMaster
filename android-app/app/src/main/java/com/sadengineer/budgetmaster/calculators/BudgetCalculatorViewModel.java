@@ -19,9 +19,9 @@ import java.util.Map;
  * Автоматически отслеживает изменения в базе данных и пересчитывает общую сумму
  */
 public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
-
-    private static final String TAG = "BudgetCalculatorViewModel";
     
+    private static final String TAG = "BudgetCalculatorViewModel";
+
     /** Сервис для работы с бюджетами */
     private final BudgetService budgetService;
     

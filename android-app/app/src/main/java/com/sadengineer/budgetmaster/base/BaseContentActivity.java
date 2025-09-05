@@ -13,7 +13,7 @@ import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
  */
 public abstract class BaseContentActivity extends BaseNavigationActivity {
 
-    protected final String TAG = "BaseContentActivity";
+    protected final String TAG = this.getClass().getSimpleName();
 
     /**
      * Устанавливает заголовок тулбара
