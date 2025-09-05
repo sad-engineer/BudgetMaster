@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
                     
-                    <!-- Заголовок -->
+                    <!-- Заголовок импорта данных -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
 
-                    <!-- Описание -->
+                    <!-- Описание импорта данных из файлов -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

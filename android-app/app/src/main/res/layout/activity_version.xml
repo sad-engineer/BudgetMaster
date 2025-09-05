@@ -41,20 +41,21 @@
                 android:layout_height="match_parent"
                 android:padding="16dp">
 
+                <!-- Контент -->
                 <LinearLayout
                     android:id="@+id/version_content_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Version Information -->
+                    <!-- Заголовок информации о версии -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="16dp">
 
-                        <!-- Frontend Version -->
+                        <!-- Версия фронтенда -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -62,6 +63,7 @@
                             android:padding="12dp"
                             android:background="@color/content_background">
 
+                            <!-- Иконка -->
                             <ImageView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
@@ -70,6 +72,7 @@
                                 android:contentDescription="@string/version_icon_frontend"
                                 app:tint="@color/content_icons" />
 
+                            <!-- Текст -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -77,6 +80,7 @@
                                 android:layout_marginStart="16dp"
                                 android:orientation="vertical">
 
+                                <!-- Название версии фронтенда -->
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -85,6 +89,7 @@
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
+                                <!-- Текст версии фронтенда -->
                                 <TextView
                                     android:id="@+id/frontend_version_text"
                                     android:layout_width="wrap_content"
@@ -98,7 +103,7 @@
 
                         </LinearLayout>
 
-                        <!-- Backend Version -->
+                        <!-- Версия бекенда -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -107,6 +112,7 @@
                             android:padding="12dp"
                             android:background="@color/content_background">
 
+                            <!-- Иконка -->
                             <ImageView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
@@ -115,6 +121,7 @@
                                 android:contentDescription="@string/version_icon_backend"
                                 app:tint="@color/content_icons" />
 
+                            <!-- Текст -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -122,6 +129,7 @@
                                 android:layout_marginStart="16dp"
                                 android:orientation="vertical">
 
+                                <!-- Название версии бекенда -->
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -130,6 +138,7 @@
                                     android:textSize="16sp"
                                     android:textStyle="bold" />
 
+                                <!-- Текст версии бекенда -->
                                 <TextView
                                     android:id="@+id/backend_version_text"
                                     android:layout_width="wrap_content"
@@ -145,7 +154,7 @@
 
                     </LinearLayout>
 
-                    <!-- Additional Info -->
+                    <!-- Дополнительная информация -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -153,6 +162,7 @@
                         android:orientation="vertical"
                         android:padding="16dp">
 
+                        <!-- Заголовок дополнительной информации -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -162,6 +172,7 @@
                             android:textStyle="bold"
                             android:layout_marginBottom="12dp" />
 
+                        <!-- Текст дополнительной информации -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -183,7 +194,7 @@
 
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
         android:background="@color/content_background"
         android:id="@+id/nav_view"

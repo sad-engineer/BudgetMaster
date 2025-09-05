@@ -15,6 +15,7 @@
         android:background="@color/content_background"
         android:orientation="vertical">
 
+        <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -31,12 +32,14 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <!-- Контент -->
         <ScrollView
             android:id="@+id/account_edit_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true">
 
+            <!-- Контент -->
             <LinearLayout
                 android:id="@+id/account_edit_content_layout"
                 android:layout_width="match_parent"
@@ -44,7 +47,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Название -->
+                <!-- Название счета -->
                 <TextView
                     android:id="@+id/account_name_label"
                     android:layout_width="wrap_content"
@@ -54,6 +57,7 @@
                     android:textColor="@color/content_title"
                     android:textSize="16sp" />
 
+                <!-- Поле ввода названия счет -->
                 <EditText
                     android:id="@+id/account_name_edit_text"
                     android:layout_width="match_parent"
@@ -66,6 +70,7 @@
                     android:textColorHint="@color/item_hint"
                     android:textSize="16sp" />
 
+                <!-- Разделитель -->
                 <View
                     android:id="@+id/divider_1"
                     android:layout_width="match_parent"
@@ -84,6 +89,7 @@
                     android:textColor="@color/content_title"
                     android:textSize="16sp" />
 
+                <!-- Поле ввода баланса -->
                 <EditText
                     android:id="@+id/account_balance_edit_text"
                     android:layout_width="match_parent"
@@ -96,6 +102,7 @@
                     android:textColorHint="@color/item_hint"
                     android:textSize="16sp" />
 
+                <!-- Разделитель -->
                 <View
                     android:id="@+id/divider_2"
                     android:layout_width="match_parent"
@@ -114,6 +121,7 @@
                     android:textColor="@color/content_title"
                     android:textSize="16sp" />
 
+                <!-- Поле ввода валюты -->
                 <Spinner
                     android:id="@+id/account_currency_spinner"
                     android:layout_width="match_parent"
@@ -121,6 +129,7 @@
                     android:background="@color/item_background"
                     android:padding="12dp" />
 
+                <!-- Разделитель -->
                 <View
                     android:id="@+id/divider_3"
                     android:layout_width="match_parent"
@@ -139,6 +148,7 @@
                     android:textColor="@color/content_title"
                     android:textSize="16sp" />
 
+                <!-- Поле ввода типа счета -->
                 <Spinner
                     android:id="@+id/account_type_spinner"
                     android:layout_width="match_parent"
@@ -146,6 +156,7 @@
                     android:background="@color/item_background"
                     android:padding="12dp" />
 
+                <!-- Разделитель -->
                 <View
                     android:id="@+id/divider_4"
                     android:layout_width="match_parent"
@@ -154,7 +165,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@color/content_divider" />
 
-                <!-- Закрыт -->
+                <!-- чекбокс открыт/закрыт -->
                 <CheckBox
                     android:id="@+id/account_closed_checkbox"
                     android:layout_width="match_parent"
@@ -170,7 +181,7 @@
 
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
         android:background="@color/content_background"
         android:id="@+id/nav_view"

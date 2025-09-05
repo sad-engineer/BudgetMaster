@@ -72,8 +72,8 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * Настраивает кнопки
      */
     private void setupButtons() {
-        addCategoryButton = findViewById(R.id.add_category_button_bottom);
-        deleteCategoryButton = findViewById(R.id.delete_category_button_bottom);
+        addCategoryButton = findViewById(R.id.add_button_bottom);
+        deleteCategoryButton = findViewById(R.id.delete_button_bottom);
 
         /**
          * Обработчик нажатия на кнопку добавления категории

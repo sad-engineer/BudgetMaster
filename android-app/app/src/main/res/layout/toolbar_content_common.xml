@@ -10,6 +10,7 @@
     android:paddingEnd="0dp"
     android:layout_gravity="fill">
 
+    <!-- Кнопка назад -->
     <ImageButton
         android:id="@+id/back_button"
         android:layout_width="@dimen/menu_button_size"
@@ -19,6 +20,7 @@
         android:src="@drawable/ic_back"
         app:tint="@color/toolbar_icons" />
 
+    <!-- Кнопка меню -->
     <ImageButton
         android:id="@+id/menu_button"
         android:layout_width="@dimen/menu_button_size"
@@ -28,6 +30,7 @@
         android:src="@drawable/ic_menu"
         app:tint="@color/toolbar_icons" />
 
+    <!-- Название -->
     <TextView
         android:id="@+id/toolbar_title"
         android:layout_width="0dp"
@@ -37,11 +40,13 @@
         android:textStyle="bold"
         android:textColor="@color/toolbar_texts" />
 
+    <!-- Зарезервированное пространство -->
     <View
         android:id="@+id/toolbar_reserve"
         android:layout_width="@dimen/menu_button_size"
         android:layout_height="match_parent" />
 
+    <!-- Кнопка изменения позиции -->
     <ImageButton
         android:id="@+id/position_change_button"
         android:layout_width="@dimen/menu_button_size"

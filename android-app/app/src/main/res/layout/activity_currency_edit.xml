@@ -15,6 +15,7 @@
         android:background="@color/content_background"
         android:orientation="vertical">
 
+        <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
             android:layout_width="match_parent"
@@ -31,12 +32,14 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <!-- Контент -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Название валюты -->
             <TextView
                 android:id="@+id/currency_name_label"
                 android:layout_width="wrap_content"
@@ -47,6 +50,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Поле ввода названия валюты -->
             <EditText
                 android:id="@+id/currency_name_edit"
                 android:layout_width="match_parent"
@@ -61,6 +65,7 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
+            <!-- Разделитель -->
             <View
                 android:id="@+id/divider_1"
                 android:layout_width="match_parent"
@@ -69,6 +74,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@color/content_divider" />
 
+            <!-- Название короткого названия валюты -->
             <TextView
                 android:id="@+id/currency_short_name_label"
                 android:layout_width="wrap_content"
@@ -80,6 +86,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Поле ввода короткого названия валюты -->
             <EditText
                 android:id="@+id/currency_short_name_edit"
                 android:layout_width="match_parent"
@@ -94,6 +101,7 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
+            <!-- Разделитель -->
             <View
                 android:id="@+id/divider_2"
                 android:layout_width="match_parent"
@@ -102,6 +110,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@color/content_divider" />
 
+            <!-- Название обменного курса -->
             <TextView
                 android:id="@+id/exchange_rate_label"
                 android:layout_width="wrap_content"
@@ -113,6 +122,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Поле ввода обменного курса -->
             <EditText
                 android:id="@+id/exchange_rate_edit"
                 android:layout_width="match_parent"
@@ -127,6 +137,7 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
+            <!-- Разделитель -->
             <View
                 android:id="@+id/divider_3"
                 android:layout_width="match_parent"
@@ -140,6 +151,7 @@
 
     </LinearLayout>
 
+    <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView
         android:background="@color/content_background"
         android:id="@+id/nav_view"

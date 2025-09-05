@@ -33,6 +33,7 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="16dp">
 
+        <!-- Кнопка назад -->
         <ImageButton
             android:id="@+id/btn_prev_month"
             android:layout_width="48dp"
@@ -42,6 +43,7 @@
             android:contentDescription="@string/btn_prev_month"
             app:tint="@color/date_picker_content_icons" />
 
+        <!-- Текст месяца и года -->
         <TextView
             android:id="@+id/tv_month_year"
             android:layout_width="0dp"
@@ -53,6 +55,7 @@
             android:textStyle="bold"
             android:gravity="center" />
 
+        <!-- Кнопка вперед -->
         <ImageButton
             android:id="@+id/btn_next_month"
             android:layout_width="48dp"
@@ -71,6 +74,7 @@
         android:orientation="horizontal"
         android:layout_marginBottom="8dp">
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -80,6 +84,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -89,6 +94,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -98,6 +104,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -107,6 +114,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -116,6 +124,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -125,6 +134,7 @@
             android:textSize="14sp"
             android:gravity="center" />
 
+        <!-- День недели -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -152,6 +162,7 @@
         android:orientation="horizontal"
         android:gravity="end">
 
+        <!-- Кнопка отмена -->
         <TextView
             android:id="@+id/btn_cancel"
             android:layout_width="wrap_content"
@@ -167,6 +178,7 @@
             android:clickable="true"
             android:focusable="true"/>
 
+        <!-- Кнопка OK -->
         <TextView
             android:id="@+id/btn_ok"
             android:layout_width="wrap_content"

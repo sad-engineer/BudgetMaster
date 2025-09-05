@@ -42,13 +42,14 @@
                 android:layout_height="match_parent"
                 android:padding="16dp">
 
+                <!-- Контент -->
                 <LinearLayout
                     android:id="@+id/export_data_content_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
                     
-                    <!-- Заголовок -->
+                    <!-- Заголовок экспорта данных -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -58,7 +59,7 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
 
-                    <!-- Описание -->
+                    <!-- Описание экспорта данных в файлы -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

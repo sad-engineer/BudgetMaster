@@ -18,6 +18,7 @@
         android:padding="16dp"
         android:layout_marginBottom="8dp">
 
+        <!-- Кнопка назад -->
         <ImageButton
             android:id="@+id/btn_prev_month"
             android:layout_width="48dp"
@@ -26,7 +27,8 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/btn_prev_month"
             app:tint="@color/date_picker_content_icons" />
-
+        
+        <!-- Текст месяца и года -->
         <TextView
             android:id="@+id/tv_month_year"
             android:layout_width="0dp"
@@ -38,6 +40,7 @@
             android:textStyle="bold"
             android:gravity="center" />
 
+        <!-- Кнопка вперед -->
         <ImageButton
             android:id="@+id/btn_next_month"
             android:layout_width="48dp"
@@ -59,6 +62,7 @@
         android:layout_marginBottom="8dp"
         android:elevation="2dp">
 
+        <!-- Текст итого -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -68,6 +72,7 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
+        <!-- Текст суммы -->
         <TextView
             android:id="@+id/tv_total_amount"
             android:layout_width="wrap_content"
@@ -79,6 +84,7 @@
 
     </LinearLayout>
 
+    <!-- RecyclerView для списка операций -->
     <androidx.recyclerview.widget.RecyclerView 
         android:id="@+id/expense_all_recycler"
         android:layout_height="0dp"

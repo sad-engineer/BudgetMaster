@@ -17,6 +17,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".income.IncomeActivity">
 
+        <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar 
             android:background="@color/toolbar_background"
             android:id="@+id/toolbar2"
@@ -46,6 +47,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar2">
 
+            <!-- Табы -->
             <com.google.android.material.tabs.TabLayout 
                 android:background="@color/tab_background"
                 android:id="@+id/income_tab_layout"
@@ -58,6 +60,7 @@
                 app:tabSelectedTextColor="@color/tab_text_selected"
                 app:tabTextColor="@color/tab_text_normal" />
 
+            <!-- Вкладки -->
             <androidx.viewpager2.widget.ViewPager2 
                 android:id="@+id/income_view_pager"
                 android:layout_height="0dp"
@@ -67,7 +70,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/income_tab_layout" />
 
-            <!-- Кнопки создания и удаления доходов внизу справа -->
+            <!-- Кнопки создания и удаления доходов -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,7 +81,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Кнопки создания и удаления -->
+            <!-- Кнопки создания и удаления доходов -->
             <include layout="@layout/buttons_add_delete" />
 
             </LinearLayout>
@@ -87,7 +90,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
         android:background="@color/content_background"
         android:id="@+id/nav_view"

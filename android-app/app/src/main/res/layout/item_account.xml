@@ -13,6 +13,7 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <!-- Позиция -->
         <TextView
             android:id="@+id/account_position"
             android:layout_width="wrap_content"
@@ -23,6 +24,7 @@
             android:textColor="@color/item_text"
             android:layout_marginEnd="16dp" />
 
+        <!-- Название -->
         <TextView
             android:id="@+id/account_title"
             android:layout_width="0dp"
@@ -33,6 +35,7 @@
             android:textStyle="normal"
             android:textColor="@color/item_text" />
 
+        <!-- ID -->
         <TextView
             android:id="@+id/account_id"
             android:layout_width="wrap_content"
@@ -42,6 +45,7 @@
             android:textStyle="normal"
             android:textColor="@color/item_text" />
 
+        <!-- Сумма -->
         <TextView
             android:id="@+id/account_sum"
             android:layout_width="wrap_content"

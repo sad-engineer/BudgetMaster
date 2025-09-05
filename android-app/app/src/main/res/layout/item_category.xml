@@ -13,6 +13,7 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <!-- Позиция -->
         <TextView
             android:id="@+id/category_position"
             android:layout_width="wrap_content"
@@ -23,6 +24,7 @@
             android:textColor="@color/item_text"
             android:layout_marginEnd="16dp" />
 
+        <!-- Название -->
         <TextView
             android:id="@+id/category_title"
             android:layout_width="0dp"
@@ -32,6 +34,7 @@
             android:textSize="18sp"
             android:textColor="@color/item_text" />
 
+        <!-- ID -->
         <TextView
             android:id="@+id/category_id"
             android:layout_width="wrap_content"

@@ -18,6 +18,7 @@
         android:orientation="vertical"
         tools:context=".settings.SettingsActivity">
 
+        <!-- Тулбар -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
             android:layout_width="match_parent"
@@ -34,6 +35,7 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <!-- Контент -->
         <ScrollView
             android:id="@+id/settings_scroll_view"
             android:layout_width="match_parent"
@@ -41,13 +43,14 @@
             android:background="@color/content_background"
             android:padding="16dp">
 
+            <!-- Контент -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@color/content_background">
 
-                <!-- Заголовок раздела настроек -->
+                <!-- Заголовок раздела отображения -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -58,7 +61,7 @@
                     android:layout_marginBottom="16dp"
                     android:padding="8dp" />
 
-                <!-- Чекбокс для отображения позиции -->
+                <!-- Чекбокс для отображения позиции в списке -->
                 <LinearLayout
                     android:id="@+id/checkbox_show_position_container"
                     android:layout_width="match_parent"
@@ -70,6 +73,7 @@
                     android:focusable="true"
                     android:gravity="center_vertical">
 
+                    <!-- Иконка -->
                     <ImageView
                         android:id="@+id/checkbox_show_position_icon"
                         android:layout_width="24dp"
@@ -77,6 +81,7 @@
                         android:src="@drawable/ic_checkbox_unchecked"
                         android:layout_marginEnd="12dp" />
 
+                    <!-- Текст -->
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -87,7 +92,7 @@
 
                 </LinearLayout>
 
-                <!-- Чекбокс для отображения ID -->
+                <!-- Чекбокс для отображения ID в списке -->
                 <LinearLayout
                     android:id="@+id/checkbox_show_id_container"
                     android:layout_width="match_parent"
@@ -99,6 +104,7 @@
                     android:focusable="true"
                     android:gravity="center_vertical">
 
+                    <!-- Иконка -->
                     <ImageView
                         android:id="@+id/checkbox_show_id_icon"
                         android:layout_width="24dp"
@@ -106,6 +112,7 @@
                         android:src="@drawable/ic_checkbox_unchecked"
                         android:layout_marginEnd="12dp" />
 
+                    <!-- Текст -->
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -116,7 +123,7 @@
 
                 </LinearLayout>
 
-                <!-- Разделитель -->
+                <!-- Разделитель между разделами -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -125,7 +132,7 @@
                     android:layout_marginBottom="16dp"
                     android:alpha="0.3" />
 
-                <!-- Заголовок раздела валют -->
+                <!-- Заголовок раздела валюты -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -136,7 +143,7 @@
                     android:layout_marginBottom="16dp"
                     android:padding="8dp" />
 
-                <!-- Выбор валюты по умолчанию -->
+                <!-- Поле выбора валюты по умолчанию -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -144,6 +151,7 @@
                     android:padding="12dp"
                     android:background="@color/content_background">
 
+                    <!-- Название поля выбора валюты по умолчанию -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -152,6 +160,7 @@
                         android:textColor="@color/content_texts"
                         android:layout_marginBottom="8dp" />
 
+                    <!-- Поле выбора валюты по умолчанию -->
                     <Spinner
                         android:id="@+id/spinner_default_currency"
                         android:layout_width="match_parent"
@@ -163,7 +172,7 @@
 
                 </LinearLayout>
 
-                <!-- Разделитель -->
+                <!-- Разделитель между разделами -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -172,7 +181,7 @@
                     android:layout_marginBottom="16dp"
                     android:alpha="0.3" />
 
-                <!-- Информация о backend -->
+                <!-- Заголовок раздела информации о backend -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -183,6 +192,7 @@
                     android:layout_marginBottom="8dp"
                     android:padding="8dp" />
 
+                <!-- Поле информации о backend -->
                 <TextView
                     android:id="@+id/info_text_view"
                     android:layout_width="match_parent"
@@ -202,7 +212,7 @@
 
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Боковое меню -->
     <com.google.android.material.navigation.NavigationView 
         android:background="@color/content_background"
         android:id="@+id/nav_view"
