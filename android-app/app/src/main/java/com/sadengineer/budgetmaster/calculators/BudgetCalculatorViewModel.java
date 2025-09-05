@@ -10,6 +10,7 @@ import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,8 @@ import java.util.Map;
  * Автоматически отслеживает изменения в базе данных и пересчитывает общую сумму
  */
 public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
+
+    private static final String TAG = "BudgetCalculatorViewModel";
     
     /** Сервис для работы с бюджетами */
     private final BudgetService budgetService;
@@ -34,7 +37,7 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
         super(application);
         
         // Инициализируем сервис бюджетов
-        budgetService = new BudgetService(application, "default_user");
+        budgetService = new BudgetService(application, "BudgetCalculator");
         
         Log.d(TAG, "BudgetCalculatorViewModel создан");
     }

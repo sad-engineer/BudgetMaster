@@ -13,8 +13,14 @@ import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
 import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
+import com.sadengineer.budgetmaster.calculators.OperationCalculatorViewModel;
 import com.sadengineer.budgetmaster.settings.AppSettings;
 import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
+import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
+
+import java.time.LocalDate;
 
 /**
  * ViewModel для стартового экрана
@@ -29,6 +35,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     private BudgetCalculatorViewModel budgetCalculator;
     private AccountCalculatorViewModel currentAccountsCalculator;
     private AccountCalculatorViewModel savingsAccountsCalculator;
+    private OperationCalculatorViewModel monthlyEarnedCalculator;
     private AppSettings appSettings;
 
     /** Имя пользователя по умолчанию */
@@ -54,6 +61,14 @@ public class StartScreenViewModel extends AndroidViewModel {
         
         this.savingsAccountsCalculator = new AccountCalculatorViewModel(application, AccountTypeFilter.SAVINGS);
         this.savingsAccountsCalculator.initialize();
+        
+        // Инициализируем калькулятор месячного дохода
+        this.monthlyEarnedCalculator = new OperationCalculatorViewModel(application);
+        this.monthlyEarnedCalculator.initialize();
+        this.monthlyEarnedCalculator.setPeriod(OperationPeriod.MONTH);
+        this.monthlyEarnedCalculator.setBaseDate(LocalDate.now());
+        this.monthlyEarnedCalculator.setOperationType(OperationTypeFilter.INCOME);
+        this.monthlyEarnedCalculator.setEntityFilter(EntityFilter.ACTIVE);
         
         Log.d(TAG, "StartScreenViewModel инициализирован");
     }
@@ -132,9 +147,13 @@ public class StartScreenViewModel extends AndroidViewModel {
     }
     
     public String getFormattedMonthlyEarned() {
-        MainScreenData data = getMainScreenData().getValue();
-        if (data == null) return "0.00";
-        return formatter.formatFromCents(data.getMonthlyEarned());
+        if (monthlyEarnedCalculator != null) {
+            Long totalAmount = monthlyEarnedCalculator.getResultAmount().getValue();
+            if (totalAmount != null) {
+                return formatter.formatFromCents(totalAmount);
+            }
+        }
+        return "0.00";
     }
     
     public String getFormattedTotalSavingsBalance() {
@@ -347,6 +366,14 @@ public class StartScreenViewModel extends AndroidViewModel {
     }
     
     /**
+     * Получить калькулятор месячного дохода
+     * @return OperationCalculatorViewModel для расчета месячного дохода
+     */
+    public OperationCalculatorViewModel getMonthlyEarnedCalculator() {
+        return monthlyEarnedCalculator;
+    }
+    
+    /**
      * Получить LiveData с отформатированной общей суммой текущих счетов
      * Автоматически обновляется при изменении данных
      */
@@ -406,6 +433,17 @@ public class StartScreenViewModel extends AndroidViewModel {
         if (savingsAccountsCalculator != null) {
             savingsAccountsCalculator.setDisplayCurrencyId(currencyId);
             Log.d(TAG, "Установлена отображаемая валюта для калькулятора сберегательных счетов: " + currencyId);
+        }
+    }
+    
+    /**
+     * Устанавливает отображаемую валюту для калькулятора операций
+     * @param currencyId ID валюты для отображения
+     */
+    public void setOperationsCalculatorDisplayCurrency(int currencyId) {
+        if (monthlyEarnedCalculator != null) {
+            monthlyEarnedCalculator.setDisplayCurrencyId(currencyId);
+            Log.d(TAG, "Установлена отображаемая валюта для калькулятора операций: " + currencyId);
         }
     }
 }

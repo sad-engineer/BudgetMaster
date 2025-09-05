@@ -56,7 +56,7 @@ public class MenuBuilder {
             NavigationNode node = entry.getValue();
             
             // Проверяем, есть ли у узла пункт в меню
-            if (node.hasMenu()) {
+            if (node.hasMenu() && node.menuId != null) {
                 // Получаем ID пункта меню из ресурсов
                 Integer menuId = getMenuIdFromResources(node.menuId);
                 
@@ -79,6 +79,7 @@ public class MenuBuilder {
      */
     private static Integer getMenuIdFromResources(String menuIdString) {
         if (menuIdString == null || menuIdString.isEmpty()) {
+            Log.w(TAG, "menuIdString is null or empty, skipping");
             return null;
         }
         

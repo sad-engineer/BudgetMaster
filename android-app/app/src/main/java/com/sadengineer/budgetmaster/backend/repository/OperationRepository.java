@@ -303,6 +303,88 @@ public class OperationRepository {
     }
 
     /**
+     * Получает общую сумму операций за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за период
+     */
+    public LiveData<Long> getTotalAmountByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
+        return dao.getTotalAmountByDateRange(startDate, endDate, currencyId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по типу за период
+     * @param type тип операций
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за период
+     */
+    public LiveData<Long> getTotalAmountByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
+        return dao.getTotalAmountByTypeAndDateRange(type, startDate, endDate, currencyId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по категории за период
+     * @param categoryId ID категории
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по категории за период
+     */
+    public LiveData<Long> getTotalAmountByCategoryAndDateRange(Integer categoryId, LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter) {
+        return dao.getTotalAmountByCategoryAndDateRange(categoryId, startDate, endDate, currencyId, filter);
+    }
+
+    /**
+     * Получает общую сумму операций за месяц
+     * @param year год
+     * @param month месяц
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за месяц
+     */
+    public LiveData<Long> getTotalAmountByMonth(String year, String month, EntityFilter filter) {
+        return dao.getTotalAmountByMonth(year, month, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по типу за месяц
+     * @param type тип операций
+     * @param year год
+     * @param month месяц
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за месяц
+     */
+    public LiveData<Long> getTotalAmountByTypeAndMonth(int type, String year, String month, EntityFilter filter) {
+        return dao.getTotalAmountByTypeAndMonth(type, year, month, filter);
+    }
+
+    /**
+     * Получает общую сумму операций за год
+     * @param year год
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за год
+     */
+    public LiveData<Long> getTotalAmountByYear(String year, EntityFilter filter) {
+        return dao.getTotalAmountByYear(year, filter);
+    }
+
+    /**
+     * Получает общую сумму операций по типу за год
+     * @param type тип операций
+     * @param year год
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за год
+     */
+    public LiveData<Long> getTotalAmountByTypeAndYear(int type, String year, EntityFilter filter) {
+        return dao.getTotalAmountByTypeAndYear(type, year, filter);
+    }
+
+    /**
      * Вставить новую операцию
      * @param operation операция для вставки
      * @return операция

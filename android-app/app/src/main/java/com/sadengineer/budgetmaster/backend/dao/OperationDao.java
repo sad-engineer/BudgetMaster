@@ -338,6 +338,104 @@ public interface OperationDao {
            "(:filter = 'ALL'))")
     LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate, EntityFilter filter);
 
+    /**
+     * Получает общую сумму операций за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за период
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE operationDate BETWEEN :startDate AND :endDate AND " +
+           "currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByDateRange(LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций по типу за период
+     * @param type тип операций
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за период
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE type = :type AND operationDate BETWEEN :startDate AND :endDate AND " +
+           "currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByTypeAndDateRange(int type, LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций по категории за период
+     * @param categoryId ID категории
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по категории за период
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE categoryId = :categoryId AND operationDate BETWEEN :startDate AND :endDate AND " +
+           "currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByCategoryAndDateRange(Integer categoryId, LocalDateTime startDate, LocalDateTime endDate, int currencyId, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций за месяц
+     * @param year год
+     * @param month месяц
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за месяц
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE strftime('%Y', operationDate) = :year AND strftime('%m', operationDate) = :month AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByMonth(String year, String month, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций по типу за месяц
+     * @param type тип операций
+     * @param year год
+     * @param month месяц
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за месяц
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE type = :type AND strftime('%Y', operationDate) = :year AND strftime('%m', operationDate) = :month AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByTypeAndMonth(int type, String year, String month, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций за год
+     * @param year год
+     * @param filter фильтр сущностей
+     * @return общая сумма операций за год
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE strftime('%Y', operationDate) = :year AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByYear(String year, EntityFilter filter);
+
+    /**
+     * Получает общую сумму операций по типу за год
+     * @param type тип операций
+     * @param year год
+     * @param filter фильтр сущностей
+     * @return общая сумма операций по типу за год
+     */
+    @Query("SELECT SUM(amount) FROM operations WHERE type = :type AND strftime('%Y', operationDate) = :year AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    LiveData<Long> getTotalAmountByTypeAndYear(int type, String year, EntityFilter filter);
 
     //TODO: Прописать здесь специальные методы для получения операций какому либо условию
 

@@ -267,8 +267,8 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         ImageButton prevButton = dialogView.findViewById(R.id.btn_prev_month);
         ImageButton nextButton = dialogView.findViewById(R.id.btn_next_month);
         GridLayout calendarGrid = dialogView.findViewById(R.id.calendar_grid);
-        Button cancelButton = dialogView.findViewById(R.id.btn_cancel);
-        Button okButton = dialogView.findViewById(R.id.btn_ok);
+        TextView cancelButton = dialogView.findViewById(R.id.btn_cancel);
+        TextView okButton = dialogView.findViewById(R.id.btn_ok);
         
         // Инициализируем выбранную дату в календаре текущей выбранной датой
         selectedDateInCalendar = selectedDate;

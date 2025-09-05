@@ -10,7 +10,9 @@ import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.backend.entity.KeyValuePair;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,8 @@ import java.util.Map;
  * Автоматически отслеживает изменения в базе данных и пересчитывает общую сумму
  */
 public class AccountCalculatorViewModel extends BasicCalculatorForCurrencyItems {
+
+    private static final String TAG = "AccountCalculatorViewModel";
 
     /** Сервис для работы со счетами */
     private final AccountService accountService;
@@ -39,7 +43,7 @@ public class AccountCalculatorViewModel extends BasicCalculatorForCurrencyItems 
         super(application);
         
         // Инициализируем сервис счетов
-        accountService = new AccountService(application, "default_user");
+        accountService = new AccountService(application, "AccountCalculator");
         this.accountTypeFilter = accountTypeFilter;
         
         Log.d(TAG, "AccountCalculatorViewModel создан с фильтром: " + accountTypeFilter);

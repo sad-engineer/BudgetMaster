@@ -9,6 +9,9 @@ import androidx.room.Transaction;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
+import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
+import com.sadengineer.budgetmaster.calculators.OperationCalculatorConfig;
 import com.sadengineer.budgetmaster.backend.repository.OperationRepository;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
 import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
@@ -497,6 +500,154 @@ public class OperationService {
      */
     public LiveData<Long> getIncomeSumByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return repo.getIncomeSumByDateRange(startDate, endDate, EntityFilter.ACTIVE);
+    }
+    
+    /**
+     * Получает общую сумму операций по конфигурации
+     * @param config конфигурация калькулятора операций
+     * @return общая сумма операций
+     */
+    public LiveData<Long> getTotalAmountByConfig(OperationCalculatorConfig config) {
+        // TODO: сделать валидатор для конфигурации
+        if (config == null || !config.isValid()) {
+            Log.e(TAG, "Invalid OperationCalculatorConfig provided");
+            return new androidx.lifecycle.MutableLiveData<>(0L);
+        }
+        
+        LocalDateTime startDate = config.getStartDate().atStartOfDay();
+        LocalDateTime endDate = config.getEndDate().atTime(23, 59, 59);
+        
+        // Если указана категория, используем метод по категории
+        if (config.getCategoryId() != null) {
+            return repo.getTotalAmountByCategoryAndDateRange(
+                config.getCategoryId(), 
+                startDate, 
+                endDate, 
+                config.getCurrencyId(),
+                config.getEntityFilter()
+            );
+        }
+        
+        // Если указан тип операций, используем метод по типу
+        if (config.getOperationType() != OperationTypeFilter.ALL) {
+            return repo.getTotalAmountByTypeAndDateRange(
+                config.getOperationType().getIndex(), 
+                startDate, 
+                endDate, 
+                config.getCurrencyId(),
+                config.getEntityFilter()
+            );
+        }
+        
+        // Иначе используем общий метод по периоду
+        return repo.getTotalAmountByDateRange(startDate, endDate, config.getCurrencyId(), config.getEntityFilter());
+    }
+    
+    /**
+     * Получает общую сумму операций по типу за период
+     * @param type тип операций
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций по типу за период
+     */
+    public LiveData<Long> getTotalAmountByTypeAndDateRange(int type, 
+                                                          LocalDateTime startDate, 
+                                                          LocalDateTime endDate, 
+                                                          int currencyId,
+                                                          EntityFilter entityFilter) {
+        return repo.getTotalAmountByTypeAndDateRange(type, startDate, endDate, currencyId, entityFilter);
+    }
+    
+    /**
+     * Получает общую сумму операций по категории за период
+     * @param categoryId ID категории
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций по категории за период
+     */
+    public LiveData<Long> getTotalAmountByCategoryAndDateRange(Integer categoryId, 
+                                                             LocalDateTime startDate, 
+                                                             LocalDateTime endDate, 
+                                                             int currencyId,
+                                                             EntityFilter entityFilter) {
+        return repo.getTotalAmountByCategoryAndDateRange(categoryId, startDate, endDate, currencyId, entityFilter);
+    }
+    
+    /**
+     * Получает общую сумму операций за день
+     * @param date дата
+     * @param type тип операций
+     * @param currencyId ID валюты
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций за день
+     */
+    public LiveData<Long> getTotalAmountByDay(LocalDateTime date, 
+                                             OperationTypeFilter operationType, 
+                                             int currencyId,
+                                             EntityFilter entityFilter) {
+        LocalDateTime startDate = date.toLocalDate().atStartOfDay();
+        LocalDateTime endDate = date.toLocalDate().atTime(23, 59, 59);
+        
+        if (operationType == OperationTypeFilter.ALL) {
+            return repo.getTotalAmountByDateRange(startDate, endDate, currencyId, entityFilter);
+        } else {
+            return repo.getTotalAmountByTypeAndDateRange(operationType.getIndex(), startDate, endDate, currencyId, entityFilter);
+        }
+    }
+    
+    /**
+     * Получает общую сумму операций за месяц
+     * @param year год
+     * @param month месяц
+     * @param type тип операций
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций за месяц
+     */
+    public LiveData<Long> getTotalAmountByMonth(String year, 
+                                               String month, 
+                                               OperationTypeFilter operationType, 
+                                               EntityFilter entityFilter) {
+        if (operationType == OperationTypeFilter.ALL) {
+            return repo.getTotalAmountByMonth(year, month, entityFilter);
+        } else {
+            return repo.getTotalAmountByTypeAndMonth(operationType.getIndex(), year, month, entityFilter);
+        }
+    }
+    
+    /**
+     * Получает общую сумму операций за год
+     * @param year год
+     * @param type тип операций
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций за год
+     */
+    public LiveData<Long> getTotalAmountByYear(String year, 
+                                              OperationTypeFilter operationType, 
+                                              EntityFilter entityFilter) {
+        if (operationType == OperationTypeFilter.ALL) {
+            return repo.getTotalAmountByYear(year, entityFilter);
+        } else {
+            return repo.getTotalAmountByTypeAndYear(operationType.getIndex(), year, entityFilter);
+        }
+    }
+    
+    /**
+     * Получает общую сумму операций за период
+     * @param startDate начало периода
+     * @param endDate конец периода
+     * @param currencyId ID валюты
+     * @param entityFilter фильтр сущностей
+     * @return общая сумма операций за период
+     */
+    public LiveData<Long> getTotalAmountByDateRange(LocalDateTime startDate, 
+                                                   LocalDateTime endDate, 
+                                                   int currencyId,
+                                                   EntityFilter entityFilter) {
+        return repo.getTotalAmountByDateRange(startDate, endDate, currencyId, entityFilter);
     }
     
 } 

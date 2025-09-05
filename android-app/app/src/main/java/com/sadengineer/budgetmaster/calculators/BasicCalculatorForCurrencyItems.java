@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.backend.util.CurrencyConverter;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
 
 import java.util.HashMap;
 import java.util.List;
