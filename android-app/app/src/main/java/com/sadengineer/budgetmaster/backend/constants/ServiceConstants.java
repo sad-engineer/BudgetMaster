@@ -18,7 +18,7 @@ public class ServiceConstants {
     public static final int DEFAULT_CATEGORY_OPERATION_TYPE = ModelConstants.DEFAULT_CATEGORY_OPERATION_TYPE;  // Тип операции по умолчанию
     public static final int DEFAULT_CATEGORY_TYPE = ModelConstants.DEFAULT_CATEGORY_TYPE;                      // Тип категории по умолчанию
     public static final Integer DEFAULT_PARENT_CATEGORY_ID = ModelConstants.DEFAULT_PARENT_ID;          // ID родителя по умолчанию (корневая категория)
-
+    
     // ========================================
     // СООБЩЕНИЯ ДЛЯ OPERATION SERVICE
     // ========================================
@@ -200,4 +200,18 @@ public class ServiceConstants {
     public static final String MSG_UPDATE_CURRENCY_SUCCESS = " успешно отправлен";
     public static final String MSG_UPDATE_CURRENCY_ERROR = "Ошибка при обновлении валюты для категории %s: ";
     public static final String MSG_CURRENCY_UPDATED = "Запрос на обновление валюты для категории %s успешно отправлен";
+
+    // ========================================
+    // СООБЩЕНИЯ ДЛЯ SERVICE MANAGER
+    // ========================================
+    
+    // Создание категории с бюджетом
+    public static final String MSG_CREATE_CATEGORY_WITH_BUDGET_REQUEST = "Создание категории '%s' с бюджетом: %s";
+    public static final String MSG_CREATE_CATEGORY_WITH_BUDGET_SUCCESS = "Бюджет создан для категории '%s' с суммой %d";
+    public static final String MSG_CREATE_CATEGORY_WITH_BUDGET_ERROR = "Не удалось найти созданную категорию '%s'";
+    public static final String MSG_DELETE_CATEGORY_WITH_BUDGET_REQUEST = "Запрос на удаление категории '%s' с бюджетом";
+    public static final String MSG_DELETE_CATEGORY_WITH_BUDGET_NOT_FOUND = "Категория не найдена для удаления. Удаление было отменено";
+    public static final String MSG_DELETE_CATEGORY_WITH_BUDGET_SUCCESS = "Категория '%s' с бюджетом успешно удалена";
+    public static final String MSG_DELETE_CATEGORY_WITH_BUDGET_ERROR = "Ошибка при удалении категории '%s' с бюджетом: ";
+
 }

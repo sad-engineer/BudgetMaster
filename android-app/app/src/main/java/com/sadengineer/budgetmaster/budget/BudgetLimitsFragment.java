@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.budget;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,9 +10,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseListFragment;      
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.service.BudgetService;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
-import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter; 
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Фрагмент для отображения лимитов бюджетов
  */
-public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter, BudgetSharedViewModel, BudgetService> {
+public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter, BudgetSharedViewModel, ServiceManager.Budgets> {
     
     private static final String TAG = "BudgetLimitsFragment";   
 
@@ -32,9 +31,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     /** TODO: передлать на получение имени пользователя из SharedPreferences */
     private String userName = "default_user";
     
-    private BudgetService budgetService;
-    private CurrencyService currencyService;
-    private CategoryService categoryService;
+    private ServiceManager serviceManager;
     
     private OperationTypeFilter operationType = OperationTypeFilter.EXPENSE;
     
@@ -46,10 +43,8 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Инициализируем сервисы с правильным контекстом
-        budgetService = new BudgetService(requireContext(), userName);
-        currencyService = new CurrencyService(requireContext(), userName);
-        categoryService = new CategoryService(requireContext(), userName);
+        // Инициализируем ServiceManager
+        serviceManager = ServiceManager.getInstance(getContext(), userName);
         
         // Получаем калькулятор бюджетов из StartScreenViewModel
         // Это обеспечит синхронизацию с главным экраном
@@ -73,8 +68,8 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     }
 
     @Override
-    protected Class<BudgetService> getServiceClass() {
-        return BudgetService.class;
+    protected Class<ServiceManager.Budgets> getServiceClass() {
+        return ServiceManager.Budgets.class;
     }
 
     @Override
@@ -92,7 +87,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
      */
     @Override
     protected void performDataLoading() {
-        budgetService.getAllByOperationType(operationType, EntityFilter.ACTIVE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        serviceManager.budgets.getAllByOperationType(operationType, EntityFilter.ACTIVE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
         Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = " + operationType.getIndex() + ")");
     }
     
@@ -123,7 +118,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
      */
     private void loadCategoriesAndCurrencies() {
         // Загружаем категории для текущего типа операций
-        categoryService.getAllByOperationType(operationType.getIndex(), EntityFilter.ACTIVE)
+        serviceManager.categories.getAllByOperationType(operationType.getIndex(), EntityFilter.ACTIVE)
             .observe(getViewLifecycleOwner(), categories -> {
                 if (adapter != null && categories != null) {
                     adapter.setCategories(categories);
@@ -132,7 +127,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
             });
         
         // Загружаем валюты
-        currencyService.getAll().observe(getViewLifecycleOwner(), currencies -> {
+        serviceManager.currencies.getAll().observe(getViewLifecycleOwner(), currencies -> {
             if (adapter != null && currencies != null) {
                 adapter.setCurrencies(currencies);
                 Log.d(TAG, "Установлено валют в адаптер: " + currencies.size());
@@ -181,7 +176,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     }
 
     @Override
-    protected void performDelete(BudgetService service, Budget item) {
+    protected void performDelete(ServiceManager.Budgets service, Budget item) {
         service.delete(item, false); // false = hard delete
     }
 

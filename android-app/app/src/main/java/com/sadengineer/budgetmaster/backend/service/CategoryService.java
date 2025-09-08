@@ -29,7 +29,7 @@ public class CategoryService {
     private final ExecutorService executorService;
     private final String user;
     private final ServiceConstants constants;
-    private final CategoryValidator validator;
+    public final CategoryValidator validator;
 
     public CategoryService(Context context, String user) {
         this.repo = new CategoryRepository(context);
@@ -126,9 +126,10 @@ public class CategoryService {
      * @param operationType тип операции
      * @param type тип категории
      * @param parentId ID родителя
+     * @return ID созданной категории
      */
     @Transaction
-    private void createCategoryInTransaction(String title, int operationType, int type, int parentId) {
+    public long createCategoryInTransaction(String title, int operationType, int type, int parentId) {
         Log.d(TAG, String.format(constants.MSG_CREATE_CATEGORY_REQUEST, title));
         Category category = new Category();
         category.setTitle(title);
@@ -139,10 +140,12 @@ public class CategoryService {
         category.setCreateTime(LocalDateTime.now());
         category.setCreatedBy(user);
         try {   
-            repo.insert(category);
+            long categoryId = repo.insert(category);
             Log.d(TAG, String.format(constants.MSG_CATEGORY_CREATED, title));
+            return categoryId;
         } catch (Exception e) {
             Log.e(TAG, String.format(constants.MSG_CREATE_CATEGORY_ERROR, title) + "': " + e.getMessage(), e);
+            return -1; // Возвращаем -1 в случае ошибки
         }
     }
 

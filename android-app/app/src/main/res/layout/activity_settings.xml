@@ -168,7 +168,7 @@
                         android:background="@drawable/spinner_background"
                         android:padding="12dp"
                         android:textSize="16sp"
-                        android:textColor="@color/content_texts" />
+                        android:popupBackground="@color/content_background" />
 
                 </LinearLayout>
 

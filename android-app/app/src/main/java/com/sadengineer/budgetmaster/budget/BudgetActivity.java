@@ -36,7 +36,6 @@ public class BudgetActivity extends BaseContentActivity {
         initializeNavigation();
         // Устанавливаем заголовок
         setToolbarTitle(R.string.toolbar_title_budgets, R.dimen.toolbar_text);
-
         // Shared ViewModel для управления режимом выбора и мягким удалением
         viewModel = new ViewModelProvider(this).get(BudgetSharedViewModel.class);
         // Обработчики кнопок бюджета

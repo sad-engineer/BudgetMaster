@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
@@ -15,7 +16,7 @@ import android.widget.ArrayAdapter;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
-import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
@@ -37,7 +38,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
-    private CategoryService categoryService;
+    private ServiceManager serviceManager;
     private CategoryValidator validator = new CategoryValidator();
     // Поля для хранения данных категории
     private Category currentCategory;
@@ -75,7 +76,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         setupBackButton(R.id.back_button);
 
         // Инициализация сервисов
-        categoryService = new CategoryService(this, userName);
+        serviceManager = ServiceManager.getInstance(this, userName);
         
         // Получаем данные из Intent ПЕРЕД настройкой спиннеров
         loadCategoryData();
@@ -104,7 +105,8 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      */
     private void loadParentCategories() {
         // Используем тип операции, переданный из Intent
-        categoryService.getAllByOperationType(sourceOperationType, EntityFilter.ACTIVE).observe(this, categories -> {
+        //TODO: убрать вложенный observe
+        serviceManager.categories.getAllByOperationType(sourceOperationType, EntityFilter.ACTIVE).observe(this, categories -> {
             if (categories != null) {
                 List<String> parentOptions = new ArrayList<>();
                 List<Category> parentCategories = new ArrayList<>();
@@ -116,7 +118,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                 // Если это режим редактирования, исключаем дочерние категории
                 if (isEditMode && currentCategory != null) {
                     // Получаем все дочерние категории редактируемой категории
-                    categoryService.getAllDescendants(currentCategory.getId(), EntityFilter.ACTIVE).observe(this, descendants -> {
+                    serviceManager.categories.getAllDescendants(currentCategory.getId(), EntityFilter.ACTIVE).observe(this, descendants -> {
                         if (descendants != null) {
                             // Создаем множество ID дочерних категорий для быстрого поиска
                             Set<Integer> descendantIds = new HashSet<>();
@@ -270,16 +272,16 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                     currentCategory.setType(getSelectedCategoryType());
                     currentCategory.setParentId(getSelectedParentId());
                     Log.d(TAG, "Обновленнаz категория: название=" + title + ", operationType=" + sourceOperationType + ", тип=" + getSelectedCategoryType() + ", родитель=" + getSelectedParentId());
-                    categoryService.update(currentCategory);
+                    serviceManager.categories.update(currentCategory);
                     Log.d(TAG, "Запрос на обновление счета отправлен");
                 }
             } else {
-                // Создание новой категории
+                // Создание новой категории с бюджетом
                 int categoryType = getSelectedCategoryType();
                 int parentId = getSelectedParentId();
-                Log.d(TAG, "Создание новой категории: " + title);
-                categoryService.createWithoutValidation(title, sourceOperationType, categoryType, parentId);
-                Log.d(TAG, "Запрос на создание счета отправлен");
+                Log.d(TAG, "Создание новой категории с бюджетом: " + title);
+                serviceManager.createCategoryWithBudgetWithoutValidation(title, sourceOperationType, categoryType, parentId, null, null);
+                Log.d(TAG, "Запрос на создание категории с бюджетом отправлен");
             }
             
             // Возвращаемся к списку категорий

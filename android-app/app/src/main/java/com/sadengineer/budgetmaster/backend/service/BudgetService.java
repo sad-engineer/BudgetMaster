@@ -30,7 +30,7 @@ public class BudgetService {
     private final BudgetRepository repo;
     private final ExecutorService executorService;
     private final String user;
-    private final BudgetValidator validator;
+    public final BudgetValidator validator;
     private final CategoryRepository categoryRepo;
     private final CurrencyRepository currencyRepo;
     private final ServiceConstants constants;
@@ -131,7 +131,7 @@ public class BudgetService {
      * @param currency_id ID валюты
      */
     @Transaction
-    private void createBudgetInTransaction(int category_id, Long amount, int currency_id) {
+    public void createBudgetInTransaction(int category_id, Long amount, int currency_id) {
         Log.d(TAG, String.format(constants.MSG_CREATE_BUDGET_REQUEST, category_id));
         Budget budget = new Budget();
         budget.setCategoryId(category_id);
@@ -234,6 +234,15 @@ public class BudgetService {
      */
     public LiveData<Budget> getByCategory(int category_id) {
         return repo.getByCategory(category_id);
+    }
+    
+    /**
+     * Получить бюджет по категории синхронно (для транзакций)
+     * @param category_id ID категории
+     * @return бюджет или null
+     */
+    public Budget getByCategorySync(int category_id) {
+        return repo.getByCategorySync(category_id);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.sadengineer.budgetmaster.categories;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
 import com.sadengineer.budgetmaster.backend.entity.Category;
-import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
@@ -37,7 +38,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
     private CategoryTreeAdapter adapter;
     private ImageButton addCategoryButton;
     private ImageButton deleteCategoryButton;
-    private CategoryService categoryService;
+    private ServiceManager serviceManager;
     private boolean isSelectionMode = false;
     private List<Category> categories = new ArrayList<>();
 
@@ -55,8 +56,8 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_income_categories, R.dimen.toolbar_text);
 
-        // Инициализация CategoryService
-        categoryService = new CategoryService(this, userName);
+        // Инициализация ServiceManager
+        serviceManager = ServiceManager.getInstance(this, userName);
 
         // Инициализация RecyclerView
         setupRecyclerView();
@@ -152,7 +153,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         // Удаляем категории из базы данных
         for (Category category : selectedCategories) {
             try {
-                categoryService.delete(category, true);
+                serviceManager.categories.delete(category, true);
                 Log.d(TAG, "Удалена категория: " + category.getTitle());
             } catch (Exception e) {
                 Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
@@ -169,7 +170,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
      */
     private void setupRecyclerView() {
         recyclerView = findViewById(R.id.income_categories_recycler_view);
-        adapter = new CategoryTreeAdapter(this::onCategoryClick);
+        adapter = new CategoryTreeAdapter(this, this::onCategoryClick);
         adapter.setOnCategoryLongClickListener(this::onCategoryLongClick);
         adapter.setOnSelectedCategoriesChanged(this::onSelectedCategoriesChanged);
         
@@ -202,7 +203,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
     private void deleteCategory(Category category) {
         try {
             Log.d(TAG, "Удаляем категорию из базы данных: " + category.getTitle());
-            categoryService.delete(category, false);
+            serviceManager.categories.delete(category, false);
             Log.d(TAG, "Запрос на удаление категории отправлен: " + category.getTitle());
         } catch (Exception e) {
             Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
@@ -216,7 +217,7 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         Log.d(TAG, "Загружаем категории доходов из базы данных...");
         
         try {
-            categoryService.getAllByOperationType(OPERATION_TYPE, EntityFilter.ALL).observe(this, loadedCategories -> {
+            serviceManager.categories.getAllByOperationType(OPERATION_TYPE, EntityFilter.ALL).observe(this, loadedCategories -> {
                 Log.d(TAG, "Загружено категорий доходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
                 if (loadedCategories != null && !loadedCategories.isEmpty()) {
                     categories.clear();
@@ -294,5 +295,15 @@ public class IncomeCategoriesActivity extends BaseContentActivity {
         Log.d(TAG, "Переходим к окну редактирования категории");
         String[] params = {"operation_type", String.valueOf(OPERATION_TYPE), "category", category.getTitle()};
         goTo(CategoryEditActivity.class, false, params);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        // Обновляем отображение настроек (ID, позиция)
+        if (adapter != null) {
+            adapter.refreshSettings();
+        }
     }
 } 

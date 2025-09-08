@@ -60,26 +60,8 @@
                 android:gravity="end"
                 android:layout_gravity="bottom|end">
 
-                <!-- Кнопка удаления (меньше) -->
-                <ImageButton
-                    android:id="@+id/delete_category_button_bottom"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@color/delete_button_background"
-                    android:contentDescription="@string/icon_delete_category"
-                    android:src="@drawable/ic_delete"
-                    app:tint="@color/delete_button_icon" />
-
-                <!-- Кнопка создания (больше) -->
-                <ImageButton
-                    android:id="@+id/add_category_button_bottom"
-                    android:layout_width="76dp"
-                    android:layout_height="76dp"
-                    android:background="@color/add_button_background"
-                    android:contentDescription="@string/icon_add_category"
-                    android:src="@drawable/ic_add"
-                    app:tint="@color/add_button_icon" />
+            <!-- Кнопки создания и удаления -->
+            <include layout="@layout/buttons_add_delete" />
 
             </LinearLayout>
 

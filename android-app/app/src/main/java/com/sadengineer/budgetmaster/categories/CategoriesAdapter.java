@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.categories;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,8 +44,15 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
     private OnCategoryLongClickListener itemLongClickListener;
     private OnSelectedCategoriesChanged itemSelectionListener;
     
-    public CategoriesAdapter(OnCategoryClickListener listener) {
+    // Контекст для инициализации SettingsManager
+    private Context context;
+    
+    public CategoriesAdapter(Context context, OnCategoryClickListener listener) {
+        this.context = context;
         this.itemClickListener = listener;
+        
+        // Инициализируем SettingsManager
+        SettingsManager.init(context);
     }
     
     public void setOnCategoryLongClickListener(OnCategoryLongClickListener listener) {

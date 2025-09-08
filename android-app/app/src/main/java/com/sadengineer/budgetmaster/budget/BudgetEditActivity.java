@@ -1,6 +1,7 @@
 package com.sadengineer.budgetmaster.budget;
 
 import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,8 +12,7 @@ import android.widget.ArrayAdapter;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
-import com.sadengineer.budgetmaster.backend.service.BudgetService;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
@@ -43,8 +43,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     private ImageButton menuButton;
 
     // Сервисы для работы с данными
-    private BudgetService budgetService;
-    private CurrencyService currencyService;
+    private ServiceManager serviceManager;
     private BudgetValidator validator = new BudgetValidator();
     private CurrencyAmountFormatter formatter = new CurrencyAmountFormatter();
     
@@ -79,9 +78,8 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         // Инициализация общих действий экрана редактирования
         setupCommonEditActions(R.id.position_change_button);
 
-        // Инициализация сервисов
-        budgetService = new BudgetService(this, userName);
-        currencyService = new CurrencyService(this, userName);
+        // Инициализация ServiceManager
+        serviceManager = ServiceManager.getInstance(this, userName);
         
         // Настраиваем спиннеры
         setupSpinners();
@@ -98,7 +96,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private void setupSpinners() {
         // Настройка спиннера валют
-        currencyService.getAll().observe(this, currencies -> {
+        serviceManager.currencies.getAll().observe(this, currencies -> {
             if (currencies != null && !currencies.isEmpty()) {
                 this.currencies = currencies;
                 
@@ -154,7 +152,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 hideCategorySelection();
                 
                 // Загружаем актуальные данные из базы
-                budgetService.getById(budget.getId()).observe(this, loadedBudget -> {
+                serviceManager.budgets.getById(budget.getId()).observe(this, loadedBudget -> {
                     if (loadedBudget != null) {
                         currentBudget = loadedBudget;
                         fillBudgetData();
@@ -311,7 +309,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
             currentBudget.setAmount(amount);
             // Категория не изменяется - оставляем как есть
             currentBudget.setCurrencyId(currencyId);
-            budgetService.update(currentBudget);
+            serviceManager.budgets.update(currentBudget);
             
             Log.d(TAG, "Бюджет обновлен успешно");
             returnToBudget();

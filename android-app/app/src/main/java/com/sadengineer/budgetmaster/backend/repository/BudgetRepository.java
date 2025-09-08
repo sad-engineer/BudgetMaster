@@ -64,6 +64,15 @@ public class BudgetRepository {
     }
     
     /**
+     * Получить бюджет по категории синхронно (для транзакций)
+     * @param categoryId ID категории
+     * @return бюджет или null
+     */
+    public Budget getByCategorySync(int categoryId) {
+        return dao.getByCategorySync(categoryId);
+    }
+    
+    /**
      * Получить бюджет по ID (включая удаленные)
      * @param id ID бюджета
      * @return LiveData с бюджетом

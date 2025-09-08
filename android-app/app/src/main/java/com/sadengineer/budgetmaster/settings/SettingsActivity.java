@@ -133,8 +133,8 @@ public class SettingsActivity extends BaseContentActivity {
                 
                 // Создаем адаптер для спиннера
                 currencyAdapter = new ArrayAdapter<>(this, 
-                    android.R.layout.simple_spinner_item, currencyNames);
-                currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    R.layout.spinner_item_custom, currencyNames);
+                currencyAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
                 spinnerDefaultCurrency.setAdapter(currencyAdapter);
                 
                 // Устанавливаем текущую валюту по умолчанию

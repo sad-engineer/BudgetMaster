@@ -93,11 +93,10 @@ public class CategoryRepository {
     /**
      * Вставить новый категорию
      * @param category категория для вставки
-     * @return LiveData с вставленной категорией
+     * @return ID вставленной категории
      */
-    public LiveData<Category> insert(Category category) {
-        long id = dao.insert(category);
-        return dao.getById((int)id);
+    public long insert(Category category) {
+        return dao.insert(category);
     }
     
     /**

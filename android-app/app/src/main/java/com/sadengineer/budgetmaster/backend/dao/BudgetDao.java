@@ -93,6 +93,14 @@ public interface BudgetDao {
     LiveData<Budget> getByCategory(int categoryId);
     
     /**
+     * Получить бюджет по категории синхронно (для транзакций)
+     * @param categoryId ID категории
+     * @return бюджет или null
+     */
+    @Query("SELECT * FROM budgets WHERE categoryId = :categoryId")
+    Budget getByCategorySync(int categoryId);
+    
+    /**
      * Получает бюджет по ID (включая удаленные)
      * @param id ID бюджета
      * @return бюджет с указанным ID

@@ -1,5 +1,6 @@
 package com.sadengineer.budgetmaster.categories;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,8 +53,46 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
     private boolean isSelectionMode = false;
     private Set<Integer> selectedCategories = new HashSet<>();
     
+    // Контекст для инициализации SettingsManager
+    private Context context;
+
+    // Переменные для настроек
+    private boolean showPosition;
+    private boolean showId;
+    
+    public CategoryTreeAdapter(Context context, OnCategoryClickListener listener) {
+        this.context = context;
+        this.itemClickListener = listener;
+        
+        // Инициализируем SettingsManager
+        SettingsManager.init(context);
+        this.showPosition = SettingsManager.isShowPosition();
+        this.showId = SettingsManager.isShowId();
+        
+    }
+    
+    // Старый конструктор для обратной совместимости (deprecated)
+    @Deprecated
     public CategoryTreeAdapter(OnCategoryClickListener listener) {
         this.itemClickListener = listener;
+        
+        // Устанавливаем дефолтные значения настроек
+        this.showPosition = true;
+        this.showId = true;
+    }
+    
+    /**
+     * Устанавливает контекст для инициализации SettingsManager
+     * (используется с deprecated конструктором)
+     */
+    public void setContext(Context context) {
+        this.context = context;
+        if (context != null) {
+            SettingsManager.init(context);
+            // Обновляем переменные настроек
+            this.showPosition = SettingsManager.isShowPosition();
+            this.showId = SettingsManager.isShowId();
+        }
     }
     
     public void setOnCategoryLongClickListener(OnCategoryLongClickListener listener) {
@@ -250,6 +289,20 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
     }
     
     /**
+     * Обновляет отображение настроек (ID, позиция)
+     */
+    public void refreshSettings() {
+        // Обновляем локальные переменные настроек
+        this.showPosition = SettingsManager.isShowPosition();
+        this.showId = SettingsManager.isShowId();
+        
+        Log.d(TAG, "refreshSettings: showPosition=" + showPosition + ", showId=" + showId);
+        
+        // Перерисовываем все элементы
+        notifyDataSetChanged();
+    }
+    
+    /**
      * ViewHolder для элементов дерева категорий
      */
     public class CategoryTreeViewHolder extends RecyclerView.ViewHolder {
@@ -265,7 +318,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             this.itemView = itemView;
             this.titleText = itemView.findViewById(R.id.category_title);
             this.positionText = itemView.findViewById(R.id.category_position);
-            this.idText = itemView.findViewById(R.id.category_id);
+            this.idText = itemView.findViewById(R.id.category_tree_id);
             this.expandIcon = itemView.findViewById(R.id.expand_icon);
             this.checkBox = itemView.findViewById(R.id.checkbox);
         }
@@ -281,7 +334,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             
             // Устанавливаем позицию с учетом настроек
             if (positionText != null) {
-                if (SettingsManager.isShowPosition()) {
+                if (showPosition) {
                     positionText.setText(String.valueOf(category.getPosition()));
                     positionText.setVisibility(View.VISIBLE);
                 } else {
@@ -294,8 +347,10 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             
             // Устанавливаем ID с учетом настроек
             if (idText != null) {
-                if (SettingsManager.isShowId()) {
-                    idText.setText("ID: " + category.getId());
+                if (showId) {
+                    int categoryId = category.getId();
+                    Log.d(TAG, "Category: " + category.getTitle() + ", ID: " + categoryId + ", showId: " + showId);
+                    idText.setText("ID: " + categoryId);
                     idText.setVisibility(View.VISIBLE);
                 } else {
                     idText.setVisibility(View.GONE);
