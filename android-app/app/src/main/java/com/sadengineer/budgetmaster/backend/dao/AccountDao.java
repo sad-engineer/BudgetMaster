@@ -58,8 +58,8 @@ public interface AccountDao {
 
     /**
      * Получает все счета по ID валюты по фильтру
-     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @param currencyId ID валюты
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список счетов с указанным ID валюты, отсортированных по позиции (счета с позицией 0 в конце)
      */
     @Query("SELECT * FROM accounts WHERE currencyId = :currencyId AND " +
@@ -68,6 +68,18 @@ public interface AccountDao {
            "(:filter = 'ALL')) " +
            "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Account>> getAllByCurrency(int currencyId, EntityFilter filter);
+    
+    /**
+     * Получить все счета по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return список счетов
+     */
+    @Query("SELECT * FROM accounts WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    List<Account> getAllByCurrencySync(int currencyId, EntityFilter filter);
 
     /**
      * Получает все счета по типу по фильтру
@@ -174,4 +186,5 @@ public interface AccountDao {
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
     LiveData<Long> getTotalAmountByCurrencyAndType(int currencyId, int type, EntityFilter filter);
+
 } 

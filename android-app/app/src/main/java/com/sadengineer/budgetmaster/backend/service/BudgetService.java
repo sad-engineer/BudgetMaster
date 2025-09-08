@@ -190,7 +190,7 @@ public class BudgetService {
      * @param budget бюджет
      */
     @Transaction
-    private void deleteBudgetInTransaction(Budget budget) {
+    public void deleteBudgetInTransaction(Budget budget) {
         Log.d(TAG, String.format(constants.MSG_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         try {
             repo.delete(budget);
@@ -303,7 +303,7 @@ public class BudgetService {
      * @param budget бюджет
      */
     @Transaction
-    private void softDeleteBudgetInTransaction(Budget budget) {
+    public void softDeleteBudgetInTransaction(Budget budget) {
         Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         int deletedPosition = budget.getPosition();
         budget.setPosition(0);
@@ -330,16 +330,25 @@ public class BudgetService {
         }
 
         executorService.execute(() -> {
-            try {
-                Log.d(TAG, String.format(constants.MSG_UPDATE_BUDGET_REQUEST, budget.getCategoryId()));
-                budget.setUpdateTime(LocalDateTime.now());
-                budget.setUpdatedBy(user);
-                repo.update(budget);
-                Log.d(TAG, String.format(constants.MSG_BUDGET_UPDATED, budget.getCategoryId()));
-            } catch (Exception e) {
-                Log.e(TAG, String.format(constants.MSG_UPDATE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
-            }
+            updateBudgetInTransaction(budget);
         });
+    }
+
+    /**
+     * Транзакция для обновления бюджета
+     * @param budget бюджет
+     */
+    @Transaction
+    public void updateBudgetInTransaction(Budget budget) {
+        try {
+            Log.d(TAG, String.format(constants.MSG_UPDATE_BUDGET_REQUEST, budget.getCategoryId()));
+            budget.setUpdateTime(LocalDateTime.now());
+            budget.setUpdatedBy(user);
+            repo.update(budget);
+            Log.d(TAG, String.format(constants.MSG_BUDGET_UPDATED, budget.getCategoryId()));
+        } catch (Exception e) {
+            Log.e(TAG, String.format(constants.MSG_UPDATE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -368,4 +377,15 @@ public class BudgetService {
     public LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter) {
         return repo.getTotalAmountByCurrency(currencyId, filter);
     }
+
+    /**
+     * Получить все бюджеты по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
+     * @return список бюджетов
+     */
+    public List<Budget> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return repo.getAllByCurrencySync(currencyId, filter);
+    }
+
 } 

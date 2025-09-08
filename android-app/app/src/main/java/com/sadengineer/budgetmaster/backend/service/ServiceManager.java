@@ -6,6 +6,8 @@ import android.util.Log;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
+import com.sadengineer.budgetmaster.backend.entity.Account;
+import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
@@ -20,6 +22,10 @@ import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MS
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CATEGORY_WITH_BUDGET_NOT_FOUND;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CATEGORY_WITH_BUDGET_SUCCESS;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CATEGORY_WITH_BUDGET_ERROR;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_NOT_FOUND;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_REQUEST;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_SUCCESS;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_ERROR;
 
 
 import androidx.room.Transaction;
@@ -283,6 +289,84 @@ public class ServiceManager {
             Log.e(TAG, String.format(MSG_DELETE_CATEGORY_WITH_BUDGET_ERROR, category.getTitle()) + ": " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Удалить валюту
+     * @param currency валюта
+     * @param softDelete true - soft delete, false - полное удаление
+     */
+    public void deleteCurrency(Currency currency, boolean softDelete) {
+        if (currency == null) {
+            Log.e(TAG, MSG_DELETE_CURRENCY_NOT_FOUND);
+            return;
+        }
+    
+        executorService.execute(() -> {
+            deleteCurrencyInTransaction(currency, softDelete);
+        });
+    }
+
+    /**
+     * Транзакция для удаления валюты
+     * При удалении Валюты, удаляет все связанные с ней элементы:
+     * 1 - удаляет все счета, связанные с этой валютой
+     * 2 - удаляет все операции, связанные с этой валютой
+     * 3 - бюджету устанавливается 0 и наименьший доступный Id валюты 
+     * @param currency валюта
+     * @param softDelete true - soft delete, false - полное удаление
+     */
+    @Transaction
+    private void deleteCurrencyInTransaction(Currency currency, boolean softDelete) {
+        Log.d(TAG, String.format(MSG_DELETE_CURRENCY_REQUEST, currency.getTitle()));
+        try {
+            int currencyId = currency.getId();
+            // Удаляем все счета, связанные с этой валютой - синхронно
+            List<Account> accountsList = accounts.getAllByCurrencySync(currencyId, EntityFilter.ACTIVE);
+            for (Account account : accountsList) {
+                if (softDelete) {
+                    accounts.softDeleteAccountInTransaction(account);
+                } else {
+                    accounts.deleteAccountInTransaction(account);
+                }
+            }
+            // Удаляем все операции, связанные с этой валютой - синхронно
+            List<Operation> operationsList = operations.getAllByCurrencySync(currencyId, EntityFilter.ACTIVE);
+            for (Operation operation : operationsList) {
+                if (softDelete) {
+                    operations.softDeleteOperationInTransaction(operation);
+                } else {
+                    operations.deleteOperationInTransaction(operation);
+                }
+            }
+            // Бюджету устанавливается 0 и наименьший доступный Id валюты - синхронно
+            List<Integer> avalibleIds = currencies.getAvalibleIdsSync(EntityFilter.ACTIVE);
+            // Удаляем текущую валюту из списка доступных (если она там есть)
+            avalibleIds.remove(Integer.valueOf(currencyId));
+            int minAvalibleId = avalibleIds.get(0);     // ВЫБИРАЕМ НАИМЕНЬШИЙ ДОСТУПНЫЙ ID ВАЛЮТЫ
+            List<Budget> budgetsList = budgets.getAllByCurrencySync(currencyId, EntityFilter.ACTIVE);
+            for (Budget budget : budgetsList) {
+                // Настраиваем бюджет
+                budget.setAmount(0);
+                budget.setCurrencyId(minAvalibleId);
+                // Передаем в транзакцию обновления
+                budgets.updateBudgetInTransaction(budget);
+            }
+            // Удаляем валюту
+            if (softDelete) {
+                currencies.softDeleteCurrencyInTransaction(currency);
+            } else {
+                currencies.deleteCurrencyInTransaction(currency);
+            }
+            Log.d(TAG, String.format(MSG_DELETE_CURRENCY_SUCCESS, currency.getTitle()));
+        } catch (Exception e) {
+            Log.e(TAG, String.format(MSG_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
+        }
+    }
+
+
+    
+
+
 
 }
 

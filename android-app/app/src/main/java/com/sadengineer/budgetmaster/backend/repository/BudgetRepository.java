@@ -55,6 +55,16 @@ public class BudgetRepository {
     }   
     
     /**
+     * Получить все бюджеты по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
+     * @return список бюджетов
+     */
+    public List<Budget> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return dao.getAllByCurrencySync(currencyId, filter);
+    }
+    
+    /**
      * Получить бюджет по ID категории (включая удаленные)
      * @param categoryId ID категории
      * @return LiveData с бюджетом

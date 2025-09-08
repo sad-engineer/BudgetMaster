@@ -178,6 +178,16 @@ public class OperationRepository {
     public LiveData<List<Operation>> getAllByCurrency(int currencyId, EntityFilter filter) {
         return dao.getAllByCurrency(currencyId, filter);
     }
+    
+    /**
+     * Получить все операции по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки операций (ACTIVE, DELETED, ALL)
+     * @return список операций
+     */
+    public List<Operation> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return dao.getAllByCurrencySync(currencyId, filter);
+    }
 
     /**
      * Получает все операции по дате с фильтром
@@ -413,4 +423,5 @@ public class OperationRepository {
     public void update(Operation operation) {
         dao.update(operation);
     }
+
 } 

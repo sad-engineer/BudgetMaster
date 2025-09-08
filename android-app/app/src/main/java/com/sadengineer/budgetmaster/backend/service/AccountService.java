@@ -206,7 +206,7 @@ public class AccountService {
      * @param account счет
      */
     @Transaction
-    private void deleteAccountInTransaction(Account account) {
+    public void deleteAccountInTransaction(Account account) {
         Log.d(TAG, String.format(constants.MSG_DELETE_ACCOUNT_REQUEST, account.getTitle()));
         try {
             repo.delete(account);
@@ -297,7 +297,7 @@ public class AccountService {
      * @param account счет
      */
     @Transaction
-    private void softDeleteAccountInTransaction(Account account) {
+    public void softDeleteAccountInTransaction(Account account) {
         Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_ACCOUNT_REQUEST, account.getTitle()));
         int deletedPosition = account.getPosition();
         account.setPosition(0);
@@ -364,6 +364,14 @@ public class AccountService {
         return repo.getTotalAmountByCurrencyAndType(currencyId, type, filter);
     }
 
-
+    /**
+     * Получить все счета по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки счетов
+     * @return список счетов
+     */
+    public List<Account> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return repo.getAllByCurrencySync(currencyId, filter);
+    }
 
 } 

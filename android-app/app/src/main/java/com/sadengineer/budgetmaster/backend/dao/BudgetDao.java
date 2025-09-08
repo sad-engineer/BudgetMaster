@@ -74,7 +74,7 @@ public interface BudgetDao {
     /**
      * Получает все бюджеты по ID валюты и по фильтру
      * @param currencyId ID валюты
-     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
      * @return список бюджетов с указанным ID валюты, отсортированных по позиции (бюджеты с позицией 0 в конце)
      */
     @Query("SELECT * FROM budgets WHERE currencyId = :currencyId AND " +
@@ -83,6 +83,18 @@ public interface BudgetDao {
            "(:filter = 'ALL')) " +
            "ORDER BY CASE WHEN position = 0 THEN 1 ELSE 0 END, position ASC")
     LiveData<List<Budget>> getAllByCurrency(int currencyId, EntityFilter filter);
+    
+    /**
+     * Получить все бюджеты по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки бюджетов (ACTIVE, DELETED, ALL)
+     * @return список бюджетов
+     */
+    @Query("SELECT * FROM budgets WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    List<Budget> getAllByCurrencySync(int currencyId, EntityFilter filter);
 
     /**
      * Получает бюджет по ID категории (включая удаленные)
@@ -162,4 +174,5 @@ public interface BudgetDao {
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
     LiveData<Long> getTotalAmountByCurrency(int currencyId, EntityFilter filter);
+
 } 

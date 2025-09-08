@@ -240,7 +240,7 @@ public class CurrencyService {
      * @param currency валюта
      */
     @Transaction
-    private void deleteCurrencyInTransaction(Currency currency) {
+    public void deleteCurrencyInTransaction(Currency currency) {
         Log.d(TAG, constants.MSG_DELETE_CURRENCY_REQUEST + currency.getTitle());
         try {
             repo.delete(currency);
@@ -375,7 +375,7 @@ public class CurrencyService {
      * @param currency валюта
      */
     @Transaction
-    private void softDeleteCurrencyInTransaction(Currency currency) {
+    public void softDeleteCurrencyInTransaction(Currency currency) {
         Log.d(TAG, constants.MSG_SOFT_DELETE_CURRENCY_REQUEST + currency.getTitle());
         int deletedPosition = currency.getPosition();
         currency.setPosition(0);
@@ -450,5 +450,14 @@ public class CurrencyService {
      */
     public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
         return repo.getAvalibleIds(filter);
+    }
+
+    /**
+     * Получить список доступных ID валют по фильтру (синхронно)
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют
+     */
+    public List<Integer> getAvalibleIdsSync(EntityFilter filter) {
+        return repo.getAvalibleIdsSync(filter);
     }
 } 

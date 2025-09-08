@@ -151,7 +151,7 @@ public class OperationService {
      * @param operation операция
      */
     @Transaction
-    private void deleteOperationInTransaction(Operation operation) {
+    public void deleteOperationInTransaction(Operation operation) {
         Log.d(TAG, constants.MSG_DELETE_OPERATION_REQUEST + getOperationText(operation));
         try {
             repo.delete(operation);
@@ -209,7 +209,17 @@ public class OperationService {
     public LiveData<List<Operation>> getAllByCurrency(int currencyId, EntityFilter filter) {
         return repo.getAllByCurrency(currencyId, filter);
     }
-
+    
+    /**
+     * Получить все операции по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки операций
+     * @return список операций
+     */
+    public List<Operation> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return repo.getAllByCurrencySync(currencyId, filter);
+    }
+    
     /**
      * Получить все операции по дате
      * @param date дата
@@ -457,7 +467,7 @@ public class OperationService {
      * @param operation операция
      */
     @Transaction
-    private void softDeleteOperationInTransaction(Operation operation) {
+    public void softDeleteOperationInTransaction(Operation operation) {
         Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_REQUEST + getOperationText(operation));
         operation.setDeleteTime(LocalDateTime.now());
         operation.setDeletedBy(user);
@@ -661,5 +671,5 @@ public class OperationService {
                                                    EntityFilter entityFilter) {
         return repo.getTotalAmountByDateRange(startDate, endDate, currencyId, entityFilter);
     }
-    
+
 } 

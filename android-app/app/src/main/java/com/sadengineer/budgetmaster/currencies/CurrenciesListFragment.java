@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 /**
  * Фрагмент для отображения списка валют
  */
-public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyAdapter, CurrenciesSharedViewModel, CurrencyService> {
+public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyAdapter, CurrenciesSharedViewModel, ServiceManager> {
     
     /**
      * Возвращает layout для фрагмента
@@ -43,8 +43,8 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
      * Возвращает класс сервиса для фрагмента
      */
     @Override
-    protected Class<CurrencyService> getServiceClass() {
-        return CurrencyService.class;
+    protected Class<ServiceManager> getServiceClass() {
+        return ServiceManager.class;
     }
 
     /**
@@ -68,8 +68,8 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
      */
     @Override
     protected void performDataLoading() {
-        CurrencyService service = getServiceInstance();
-        service.getAll().observe(getViewLifecycleOwner(), this::handleDataLoaded);
+        ServiceManager serviceManager = getServiceInstance();
+        serviceManager.currencies.getAll().observe(getViewLifecycleOwner(), this::handleDataLoaded);
     }
 
     /**
@@ -136,8 +136,8 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
      * Выполняет удаление валюты
      */
     @Override
-    protected void performDelete(CurrencyService service, Currency item) {
-        service.delete(item, false); // false = hard delete
+    protected void performDelete(ServiceManager serviceManager, Currency item) {
+        serviceManager.deleteCurrency(item, false); // false = hard delete
     }
 
     /**

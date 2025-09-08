@@ -217,4 +217,13 @@ public class CurrencyRepository {
     public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
         return dao.getAvalibleIds(filter);
     }
+
+    /**
+     * Получить список доступных ID валют по фильтру (синхронно)
+     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют
+     */
+    public List<Integer> getAvalibleIdsSync(EntityFilter filter) {
+        return dao.getAvalibleIdsSync(filter);
+    }
 } 

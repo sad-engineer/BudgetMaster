@@ -44,6 +44,16 @@ public class AccountRepository {
     public LiveData<List<Account>> getAllByCurrency (int currencyId, EntityFilter filter) {
         return dao.getAllByCurrency(currencyId, filter);
     }
+    
+    /**
+     * Получить все счета по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки счетов (ACTIVE, DELETED, ALL)
+     * @return список счетов
+     */
+    public List<Account> getAllByCurrencySync(int currencyId, EntityFilter filter) {
+        return dao.getAllByCurrencySync(currencyId, filter);
+    }
 
     /**
      * Получить все счета по типу и по фильтру
@@ -158,4 +168,5 @@ public class AccountRepository {
     public LiveData<Long> getTotalAmountByCurrencyAndType(int currencyId, int type, EntityFilter filter) {
         return dao.getTotalAmountByCurrencyAndType(currencyId, type, filter);
     }
+
 }

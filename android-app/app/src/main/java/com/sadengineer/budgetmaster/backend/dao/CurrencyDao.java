@@ -201,13 +201,24 @@ public interface CurrencyDao {
 
     /**
      * Получает список доступных ID валют по фильтру
-     * @param filter фильтр (ACTIVE, DELETED, ALL)
+     * @param filter фильтр для выборки валют (ACTIVE, DELETED, ALL)
      * @return список доступных ID валют
      */
     @Query("SELECT id FROM currencies WHERE " +
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
-           "(:filter = 'ALL'))")
+           "(:filter = 'ALL')) ORDER BY id ASC")
     LiveData<List<Integer>> getAvalibleIds(EntityFilter filter);
+
+    /**
+     * Получает список доступных ID валют по фильтру (синхронно)
+     * @param filter фильтр для выборки валют (ACTIVE, DELETED, ALL)
+     * @return список доступных ID валют, отсортированных по возрастанию
+     */
+    @Query("SELECT id FROM currencies WHERE " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL')) ORDER BY id ASC")
+    List<Integer> getAvalibleIdsSync(EntityFilter filter);
     
 } 

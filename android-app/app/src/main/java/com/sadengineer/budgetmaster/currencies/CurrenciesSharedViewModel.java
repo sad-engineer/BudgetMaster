@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.base.SelectionListViewModel;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
     /** Имя пользователя по умолчанию */
     private String userName = "default_user";
     
-    private CurrencyService currencyService;
+    private ServiceManager serviceManager;
     
     // LiveData для управления режимом выбора и мягким удалением
     private final MutableLiveData<Boolean> selectionMode = new MutableLiveData<>(false);
@@ -43,8 +43,8 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
      */
     public CurrenciesSharedViewModel(@NonNull Application application) {
         super(application);
-        // Сервисы для работы с данными
-        currencyService = new CurrencyService(application.getApplicationContext(), userName);
+        // Инициализация ServiceManager
+        serviceManager = ServiceManager.getInstance(application.getApplicationContext(), userName);
     }
     
     /**
@@ -134,7 +134,7 @@ public class CurrenciesSharedViewModel extends AndroidViewModel implements Selec
             for (Currency currency : currenciesToDelete) {
                 try {
                     Log.d(TAG, "Удаление валюты: ID=" + currency.getId());
-                    currencyService.delete(currency, true);
+                    serviceManager.deleteCurrency(currency, true);
                     deletedCount++;
                     Log.d(TAG, "Валюта ID: " + currency.getId() + " успешно удалена");
                 } catch (Exception e) {

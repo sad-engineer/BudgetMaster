@@ -8,7 +8,7 @@ import android.widget.ImageButton;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseEditActivity;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
+import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 
@@ -26,7 +26,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
-    private CurrencyService currencyService;
+    private ServiceManager serviceManager;
     private CurrencyValidator currencyValidator;
     
     // Поля для хранения данных валюты
@@ -60,7 +60,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         setupBackButton(R.id.back_button);
 
         // Инициализация CurrencyService
-        currencyService = new CurrencyService(this, "default_user");
+        serviceManager = ServiceManager.getInstance(this, "default_user");
         
         // Настраиваем поле обменного курса
         setupExchangeRateField();
@@ -199,7 +199,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 currentCurrency.setTitle(currencyName);
                 currentCurrency.setShortName(currencyShortName);
                 currentCurrency.setExchangeRate(exchangeRate);
-                currencyService.update(currentCurrency);
+                serviceManager.currencies.update(currentCurrency);
                 
                 Log.d(TAG, "Запрос на обновление валюты отправлен");
                 
@@ -208,7 +208,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 Log.d(TAG, "Попытка создания валюты '" + currencyName + "'");
 
                 // Создаем валюту через сервис (проверки уникальности внутри сервиса)
-                currencyService.create(currencyName, currencyShortName, exchangeRate);
+                serviceManager.currencies.create(currencyName, currencyShortName, exchangeRate);
                 
                 Log.d(TAG, "Запрос на создание валюты отправлен");
             }

@@ -195,6 +195,7 @@ public interface OperationDao {
     /**
      * Получает все операции по валюте
      * @param currencyId ID валюты
+     * @param filter фильтр для выборки операций (ACTIVE, DELETED, ALL)
      * @return все операции по валюте
      */
     @Query("SELECT * FROM operations WHERE currencyId = :currencyId AND " +
@@ -202,7 +203,19 @@ public interface OperationDao {
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL'))")
     LiveData<List<Operation>> getAllByCurrency(int currencyId, EntityFilter filter);
-       
+    
+    /**
+     * Получить все операции по ID валюты (синхронно)
+     * @param currencyId ID валюты
+     * @param filter фильтр для выборки операций (ACTIVE, DELETED, ALL)
+     * @return список операций
+     */
+    @Query("SELECT * FROM operations WHERE currencyId = :currencyId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    List<Operation> getAllByCurrencySync(int currencyId, EntityFilter filter);
+
     /**
      * Получает все операции по дате
      * @param date дата
@@ -471,4 +484,5 @@ public interface OperationDao {
      */
     @Update
     void update(Operation operation);
+
 } 
