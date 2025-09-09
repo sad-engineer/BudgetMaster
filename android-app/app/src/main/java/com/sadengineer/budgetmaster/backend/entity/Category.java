@@ -8,8 +8,8 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
+import com.sadengineer.budgetmaster.backend.interfaces.IEntity;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
                 @Index("parentId")
         })
 @TypeConverters(DateTimeConverter.class)
-public class Category implements Serializable{
+public class Category implements IEntity {
     
     @PrimaryKey(autoGenerate = true)
     private int id;

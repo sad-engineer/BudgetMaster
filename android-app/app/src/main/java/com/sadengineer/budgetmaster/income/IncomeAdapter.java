@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.service.CategoryService;
+import com.sadengineer.budgetmaster.backend.service.AccountService;
+import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 
 import java.time.format.DateTimeFormatter;
@@ -34,7 +36,10 @@ public class IncomeAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     private OnSelectedIncomesChangedListener selectedListener;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private CategoryService categoryService;
+    private AccountService accountService;
+    private CurrencyService currencyService;
     private Map<Integer, String> categoryCache = new HashMap<>();
+    private Map<Integer, String> currencyCache = new HashMap<>();
     
     public interface OnIncomeClickListener {
         void onIncomeClick(Operation income);
@@ -51,6 +56,8 @@ public class IncomeAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public IncomeAdapter(OnIncomeClickListener clickListener, Context context) {
         this.clickListener = clickListener;
         this.categoryService = new CategoryService(context, "adapter");
+        this.accountService = new AccountService(context, "adapter");
+        this.currencyService = new CurrencyService(context, "adapter");
     }
     
     @NonNull
@@ -104,7 +111,8 @@ public class IncomeAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         if (income != null) {
             // Получаем название категории
             String categoryName = getCategoryName(income.getCategoryId());
-            String currencyShortName = "₽";
+            // Получаем валюту из счета операции
+            String currencyShortName = getCurrencyShortName(income.getAccountId());
             String dateStr = income.getOperationDate() != null ? 
                 income.getOperationDate().format(dateFormatter) : "01.01.2024";
             
@@ -174,6 +182,36 @@ public class IncomeAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 categoryCache.put(categoryId, category.getTitle());
                 // Уведомляем адаптер об изменении данных
                 notifyDataSetChanged();
+            }
+        });
+        
+        return placeholder;
+    }
+    
+    /**
+     * Получает короткое название валюты по ID счета
+     */
+    private String getCurrencyShortName(int accountId) {
+        // Проверяем кэш валют
+        if (currencyCache.containsKey(accountId)) {
+            return currencyCache.get(accountId);
+        }
+        
+        // Если нет в кэше, возвращаем заглушку и загружаем асинхронно
+        String placeholder = "₽";
+        currencyCache.put(accountId, placeholder);
+        
+        // Загружаем счет асинхронно
+        accountService.getById(accountId).observeForever(account -> {
+            if (account != null) {
+                // Загружаем валюту счета
+                currencyService.getById(account.getCurrencyId()).observeForever(currency -> {
+                    if (currency != null) {
+                        currencyCache.put(accountId, currency.getShortName());
+                        // Уведомляем адаптер об изменении данных
+                        notifyDataSetChanged();
+                    }
+                });
             }
         });
         

@@ -35,9 +35,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     
     // View элементы
     private EditText budgetAmountEdit;
-    private Spinner budgetCategorySpinner;
     private Spinner budgetCurrencySpinner;
-    private View categoryLabel; 
     private ImageButton saveButton;
     private ImageButton backButton;
     private ImageButton menuButton;
@@ -65,9 +63,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
 
         // Инициализация всех View элементов
         budgetAmountEdit = findViewById(R.id.budget_amount_edit_text);
-        budgetCategorySpinner = findViewById(R.id.budget_category_spinner);
         budgetCurrencySpinner = findViewById(R.id.budget_currency_spinner);
-        categoryLabel = findViewById(R.id.category_label); // TextView с текстом "Категория"
         saveButton = findViewById(R.id.position_change_button);
         backButton = findViewById(R.id.back_button);
         menuButton = findViewById(R.id.menu_button);
@@ -147,10 +143,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_budget_edit, R.dimen.toolbar_text);
-                
-                // Скрываем элементы выбора категории в режиме редактирования
-                hideCategorySelection();
-                
+                                
                 // Загружаем актуальные данные из базы
                 serviceManager.budgets.getById(budget.getId()).observe(this, loadedBudget -> {
                     if (loadedBudget != null) {
@@ -173,20 +166,6 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
         }
     }
     
-    /**
-     * Скрывает элементы выбора категории в режиме редактирования
-     */
-    private void hideCategorySelection() {
-        if (categoryLabel != null) {
-            categoryLabel.setVisibility(View.GONE);
-            Log.d(TAG, "Скрыт лейбл категории");
-        }
-        if (budgetCategorySpinner != null) {
-            budgetCategorySpinner.setVisibility(View.GONE);
-            Log.d(TAG, "Скрыт спиннер категории");
-        }
-    }
-
     /**
      * Заполняет поля данными бюджета
      */

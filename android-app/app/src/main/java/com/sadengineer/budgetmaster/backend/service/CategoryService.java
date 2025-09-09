@@ -12,6 +12,7 @@ import com.sadengineer.budgetmaster.backend.repository.CategoryRepository;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
+import com.sadengineer.budgetmaster.backend.interfaces.IService;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Service класс для бизнес-логики работы с Category
  */
-public class CategoryService {
+public class CategoryService implements IService<Category> {
     private static final String TAG = "CategoryService";
     
     private final CategoryRepository repo;

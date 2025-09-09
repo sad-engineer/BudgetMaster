@@ -74,35 +74,6 @@
                     android:layout_marginBottom="16dp"
                     android:background="@color/content_divider" />
 
-                <!-- Категория -->
-                <TextView
-                    android:id="@+id/category_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Категория"
-                    android:textColor="@color/content_title"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- Поле ввода категории -->
-                <Spinner
-                    android:id="@+id/budget_category_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/item_background"
-                    android:padding="12dp"
-                    android:layout_marginBottom="24dp" />
-
-                <!-- Разделитель -->
-                <View
-                    android:id="@+id/divider_2"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@color/content_divider" />
-
                 <!-- Валюта -->
                 <TextView
                     android:layout_width="wrap_content"

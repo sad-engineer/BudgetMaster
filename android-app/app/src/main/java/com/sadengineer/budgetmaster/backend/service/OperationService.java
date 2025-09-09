@@ -19,6 +19,7 @@ import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.OperationValidator;
+import com.sadengineer.budgetmaster.backend.interfaces.IService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Service класс для бизнес-логики работы с Operation
  */
-public class OperationService {
+public class OperationService implements IService<Operation> {
 
     private static final String TAG = "OperationService";
     

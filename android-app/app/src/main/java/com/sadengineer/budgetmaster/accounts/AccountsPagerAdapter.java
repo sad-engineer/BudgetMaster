@@ -23,13 +23,13 @@ public class AccountsPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new CurrentAccountsFragment();
+                return new CurrentAccountsFragment(0);
             case 1:
-                return new SavingsAccountsFragment();
+                return new SavingsAccountsFragment(1);
             case 2:
-                return new TransfersAccountsFragment();
+                return new CreditAccountsFragment(2);
             default:
-                return new CurrentAccountsFragment();
+                return new CurrentAccountsFragment(0);
         }
     }
 

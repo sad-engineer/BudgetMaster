@@ -15,6 +15,7 @@ import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
+import com.sadengineer.budgetmaster.backend.interfaces.IService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Service класс для бизнес-логики работы с Budget
  */
-public class BudgetService {
+public class BudgetService implements IService<Budget> {
     private static final String TAG = "BudgetService";
     
     private final BudgetRepository repo;

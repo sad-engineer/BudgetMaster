@@ -179,6 +179,11 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                 accountSpinner.setAdapter(accountAdapter);
                 
                 Log.d(TAG, "Спиннер счетов настроен: " + accounts.size() + " счетов");
+                
+                // Если есть операция для редактирования, устанавливаем выбранный счет
+                if (currentOperation != null && isEditMode) {
+                    setSelectedAccount(currentOperation.getAccountId());
+                }
             }
         });
     }
@@ -628,8 +633,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             // Устанавливаем выбранную категорию
             setSelectedCategory(currentOperation.getCategoryId());
             
-            // Устанавливаем выбранный счет
-            setSelectedAccount(currentOperation.getAccountId());
+            // Счет будет установлен в loadAccounts() после загрузки счетов
             
             Log.d(TAG, "Данные операции загружены в поля");
         } else {

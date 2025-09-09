@@ -9,10 +9,10 @@ import androidx.room.Transaction;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.AccountRepository;
-
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.validator.AccountValidator;
+import com.sadengineer.budgetmaster.backend.interfaces.IService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Service класс для бизнес-логики работы с Account
  */
-public class AccountService {
+public class AccountService implements IService<Account> {
     private static final String TAG = "AccountService";
     
     private final AccountRepository repo;
@@ -250,6 +250,15 @@ public class AccountService {
      */
     public LiveData<Account> getByTitle(String title) {
         return repo.getByTitle(title);
+    }
+
+    /**
+     * Получить счет по ID
+     * @param id ID счета
+     * @return LiveData с счетом
+     */
+    public LiveData<Account> getById(int id) {
+        return repo.getById(id);
     }
 
     /**

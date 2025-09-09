@@ -6,6 +6,7 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
+import com.sadengineer.budgetmaster.interfaces.IEntity;
 
 import java.io.Serializable;
 
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @Entity(tableName = RepositoryConstants.TABLE_ACCOUNTS)
 @TypeConverters(DateTimeConverter.class)
-public class Account implements Serializable {
+public class Account implements IEntity {
     
     @PrimaryKey(autoGenerate = true)
     private int id;
