@@ -15,7 +15,6 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.STATUS_OPEN;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.STATUS_CLOSED;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CLOSED_STATUS;
-
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.TITLE_PATTERN;

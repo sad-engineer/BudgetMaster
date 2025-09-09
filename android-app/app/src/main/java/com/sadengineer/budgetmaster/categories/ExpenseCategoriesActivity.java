@@ -2,9 +2,7 @@ package com.sadengineer.budgetmaster.categories;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Context;
 import android.os.Bundle;
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;

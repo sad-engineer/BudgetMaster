@@ -160,6 +160,16 @@ public class OperationRepository {
     }
 
     /**
+     * Получает все операции по счету (синхронно)
+     * @param accountId ID счета
+     * @param filter фильтр для выборки операций
+     * @return список операций
+     */
+    public List<Operation> getAllByAccountSync(int accountId, EntityFilter filter) {
+        return dao.getAllByAccountSync(accountId, filter);
+    }
+
+    /**
      * Получает все операции по категории с фильтром
      * @param categoryId ID категории
      * @param filter фильтр для выборки операций (ACTIVE, DELETED, ALL)

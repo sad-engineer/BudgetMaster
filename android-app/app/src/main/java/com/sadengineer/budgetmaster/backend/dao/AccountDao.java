@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
-import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;

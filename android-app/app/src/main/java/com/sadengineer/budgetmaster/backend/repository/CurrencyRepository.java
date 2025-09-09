@@ -9,7 +9,6 @@ import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -214,8 +213,8 @@ public class CurrencyRepository {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список доступных ID валют
      */
-    public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
-        return dao.getAvalibleIds(filter);
+    public LiveData<List<Integer>> getAvailableIds(EntityFilter filter) {
+        return dao.getAvailableIds(filter);
     }
 
     /**
@@ -223,7 +222,7 @@ public class CurrencyRepository {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список доступных ID валют
      */
-    public List<Integer> getAvalibleIdsSync(EntityFilter filter) {
-        return dao.getAvalibleIdsSync(filter);
+    public List<Integer> getAvailableIdsSync(EntityFilter filter) {
+        return dao.getAvailableIdsSync(filter);
     }
 } 

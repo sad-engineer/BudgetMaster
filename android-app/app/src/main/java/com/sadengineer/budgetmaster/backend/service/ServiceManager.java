@@ -9,12 +9,12 @@ import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
-import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
+import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
 
 import static com.sadengineer.budgetmaster.backend.constants.ModelConstants.DEFAULT_AMOUNT;
-import static com.sadengineer.budgetmaster.backend.constants.ModelConstants.DEFAULT_CURRENCY_ID;
+import static com.sadengineer.budgetmaster.backend.constants.ModelConstants.DEFAULT_CATEGORY_CURRENCY_ID;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_CREATE_CATEGORY_WITH_BUDGET_REQUEST;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_CREATE_CATEGORY_WITH_BUDGET_SUCCESS;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_CREATE_CATEGORY_WITH_BUDGET_ERROR;
@@ -26,13 +26,13 @@ import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MS
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_REQUEST;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_SUCCESS;
 import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_CURRENCY_ERROR;
-
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_ACCOUNT_NOT_FOUND;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_ACCOUNT_REQUEST;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_ACCOUNT_DELETED;
+import static com.sadengineer.budgetmaster.backend.constants.ServiceConstants.MSG_DELETE_ACCOUNT_ERROR;
 
 import androidx.room.Transaction;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -95,19 +95,12 @@ public class ServiceManager {
     public static ServiceManager getInstance() {
         return instance;
     }
-    
-    /**
-     * Сбросить экземпляр (для тестирования или смены пользователя)
-     */
-    public static void resetInstance() {
-        instance = null;
-    }
-    
+
     /**
      * Вложенный класс для работы с аккаунтами
      * Наследуется от AccountService для прямого доступа к методам
      */
-    public class Accounts extends AccountService {
+    public static class Accounts extends AccountService {
         
         public Accounts(Context context, String userName) {
             super(context, userName);
@@ -118,7 +111,7 @@ public class ServiceManager {
      * Вложенный класс для работы с бюджетами
      * Наследуется от BudgetService для прямого доступа к методам
      */
-    public class Budgets extends BudgetService {
+    public static class Budgets extends BudgetService {
         public Budgets(Context context, String userName) {
             super(context, userName);
         }
@@ -128,7 +121,7 @@ public class ServiceManager {
      * Вложенный класс для работы с категориями
      * Наследуется от CategoryService для прямого доступа к методам
      */
-    public class Categories extends CategoryService {
+    public static class Categories extends CategoryService {
         
         public Categories(Context context, String userName) {
             super(context, userName);
@@ -139,7 +132,7 @@ public class ServiceManager {
      * Вложенный класс для работы с валютами
      * Наследуется от CurrencyService для прямого доступа к методам
      */
-    public class Currencies extends CurrencyService {
+    public static class Currencies extends CurrencyService {
         
         public Currencies(Context context, String userName) {
             super(context, userName);
@@ -150,7 +143,7 @@ public class ServiceManager {
      * Вложенный класс для работы с операциями
      * Наследуется от OperationService для прямого доступа к методам
      */
-    public class Operations extends OperationService {
+    public static class Operations extends OperationService {
         
         public Operations(Context context, String userName) {
             super(context, userName);
@@ -170,10 +163,10 @@ public class ServiceManager {
             Integer parentId, Long defaultBudgetAmount, Integer currencyId) {
         
         // Валидация параметров
-        categories.validator.validateTitle(title);
-        categories.validator.validateOperationType(operationType);
-        categories.validator.validateType(type);
-        categories.validator.validateParentId(parentId, categories.getCount(EntityFilter.ALL));
+        CategoryValidator.validateTitle(title);
+        CategoryValidator.validateOperationType(operationType);
+        CategoryValidator.validateType(type);
+        CategoryValidator.validateParentId(parentId, categories.getCount(EntityFilter.ALL));
 
         // Определяем финальные значения для использования в лямбде
         final long finalBudgetAmount;
@@ -183,22 +176,20 @@ public class ServiceManager {
             finalBudgetAmount = DEFAULT_AMOUNT;
         } 
         else {
-            budgets.validator.validateAmount(defaultBudgetAmount);
+            BudgetValidator.validateAmount(defaultBudgetAmount);
             finalBudgetAmount = defaultBudgetAmount;
         }
         if (currencyId == null) {
-            finalCurrencyId = DEFAULT_CURRENCY_ID;
+            finalCurrencyId = DEFAULT_CATEGORY_CURRENCY_ID;
         }
         else {
-            budgets.validator.validateCurrencyId(currencyId, currencies.getCount(EntityFilter.ALL));
+            BudgetValidator.validateCurrencyId(currencyId, currencies.getCount(EntityFilter.ALL));
             finalCurrencyId = currencyId;
         }
 
         // Создание категории и бюджета в одной транзакции
-        executorService.execute(() -> {
-            createCategoryWithBudgetInTransaction(title, operationType, type, parentId, 
-                    finalBudgetAmount, finalCurrencyId);
-        });
+        executorService.execute(() -> createCategoryWithBudgetInTransaction(title, operationType,
+                type, parentId, finalBudgetAmount, finalCurrencyId));
     }
 
     /**
@@ -215,12 +206,10 @@ public class ServiceManager {
 
         // Определяем финальные значения для использования в лямбде
         final long finalBudgetAmount = (defaultBudgetAmount != null) ? defaultBudgetAmount : DEFAULT_AMOUNT;
-        final int finalCurrencyId = (currencyId != null) ? currencyId : DEFAULT_CURRENCY_ID;
+        final int finalCurrencyId = (currencyId != null) ? currencyId : DEFAULT_CATEGORY_CURRENCY_ID;
 
-        executorService.execute(() -> {
-            createCategoryWithBudgetInTransaction(title, operationType, type, parentId, 
-                    finalBudgetAmount, finalCurrencyId);
-        });
+        executorService.execute(() -> createCategoryWithBudgetInTransaction(title, operationType,
+                type, parentId, finalBudgetAmount, finalCurrencyId));
     }
 
     /**
@@ -260,9 +249,7 @@ public class ServiceManager {
             return;
         }
         
-        executorService.execute(() -> {
-            deleteCategoryWithBudgetInTransaction(category, softDelete);
-        });
+        executorService.execute(() -> deleteCategoryWithBudgetInTransaction(category, softDelete));
     }
 
     /**
@@ -292,18 +279,20 @@ public class ServiceManager {
 
     /**
      * Удалить валюту
+     * При удалении Валюты, удаляет все связанные с ней элементы:
+     * 1 - удаляет все счета, связанные с этой валютой
+     * 2 - удаляет все операции, связанные с этой валютой
+     * 3 - бюджету устанавливается 0 и наименьший доступный Id валюты 
      * @param currency валюта
      * @param softDelete true - soft delete, false - полное удаление
      */
-    public void deleteCurrency(Currency currency, boolean softDelete) {
+    public void deleteCurrencyWithOtherElements(Currency currency, boolean softDelete) {
         if (currency == null) {
             Log.e(TAG, MSG_DELETE_CURRENCY_NOT_FOUND);
             return;
         }
     
-        executorService.execute(() -> {
-            deleteCurrencyInTransaction(currency, softDelete);
-        });
+        executorService.execute(() -> deleteCurrencyInTransaction(currency, softDelete));
     }
 
     /**
@@ -339,7 +328,7 @@ public class ServiceManager {
                 }
             }
             // Бюджету устанавливается 0 и наименьший доступный Id валюты - синхронно
-            List<Integer> avalibleIds = currencies.getAvalibleIdsSync(EntityFilter.ACTIVE);
+            List<Integer> avalibleIds = currencies.getAvailableIdsSync(EntityFilter.ACTIVE);
             // Удаляем текущую валюту из списка доступных (если она там есть)
             avalibleIds.remove(Integer.valueOf(currencyId));
             int minAvalibleId = avalibleIds.get(0);     // ВЫБИРАЕМ НАИМЕНЬШИЙ ДОСТУПНЫЙ ID ВАЛЮТЫ
@@ -363,53 +352,55 @@ public class ServiceManager {
         }
     }
 
+    /**
+     * Удалить счет
+     * При удалении Счета, удаляет все операции, связанные с этим счетом
+     * @param account счет
+     * @param softDelete true - soft delete, false - полное удаление
+     */
+    public void deleteAccountWithOtherElements(Account account, boolean softDelete) {
+        if (account == null) {
+            Log.e(TAG, MSG_DELETE_ACCOUNT_NOT_FOUND);
+            return;
+        }
+        executorService.execute(() -> deleteAccountInTransaction(account, softDelete));
+    }
 
-    
+    /**
+     * Транзакция для удаления счета
+     * При удалении Счета, удаляет все операции, связанные с этим счетом
+     * @param account счет
+     * @param softDelete true - soft delete, false - полное удаление
+     */
+    @Transaction
+    private void deleteAccountInTransaction(Account account, boolean softDelete) {
+        Log.d(TAG, String.format(MSG_DELETE_ACCOUNT_REQUEST, account.getTitle()));
+        try {
+            int accountId = account.getId();
 
+            // Удаляем все операции, связанные с этой валютой - синхронно
+            List<Operation> operationsList = operations.getAllByAccountSync(accountId, EntityFilter.ACTIVE);
+            if (softDelete) {
+                for (Operation operation : operationsList) {
+                    operations.softDeleteOperationInTransaction(operation);
+                }
+            } else {
+                for (Operation operation : operationsList) {
+                    operations.deleteOperationInTransaction(operation);
+                }
+            }
 
+            // Удаляем счет
+            if (softDelete) {
+                accounts.softDeleteAccountInTransaction(account);
+            } else {
+                accounts.deleteAccountInTransaction(account);
+            }
+
+            Log.d(TAG, String.format(MSG_ACCOUNT_DELETED, account.getTitle()));
+        } catch (Exception e) {
+            Log.e(TAG, String.format(MSG_DELETE_ACCOUNT_ERROR, account.getTitle()) + e.getMessage(), e);
+        }
+    }
 
 }
-
-/*
- * ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ ServiceManager:
- * 
- * 1. Инициализация в StartActivity или Application:
- *    ServiceManager serviceManager = ServiceManager.getInstance(context, "user_name");
- * 
- * 2. Использование в любом месте приложения:
- *    ServiceManager sm = ServiceManager.getInstance();
- * 
- * 3. ПРЯМОЙ ДОСТУП К СЕРВИСАМ:
- * 
- *    // Работа с аккаунтами
- *    sm.accounts.changePosition(account, newPosition);
- *    sm.accounts.getAll();
- *    sm.accounts.getById(id);
- * 
- *    // Работа с бюджетами
- *    sm.budgets.create(budget);
- *    sm.budgets.update(budget);
- *    sm.budgets.delete(id);
- * 
- *    // Работа с категориями
- *    sm.categories.getAll();
- *    sm.categories.getByType(type);
- * 
- *    // Работа с валютами
- *    sm.currencies.getDefault();
- *    sm.currencies.getAll();
- * 
- *    // Работа с операциями
- *    sm.operations.getCount();
- *    sm.operations.getOperationsByDateRange(start, end);
- *    sm.operations.create(operation);
- * 
- * 4. Альтернативный способ получения сервиса:
- *    AccountService accountService = sm.accounts;
- *    accountService.changePosition(account, newPosition);
- * 
- * 5. Сброс экземпляра (при смене пользователя):
- *    ServiceManager.resetInstance();
- *    ServiceManager.getInstance(context, "new_user");
- * 
- */

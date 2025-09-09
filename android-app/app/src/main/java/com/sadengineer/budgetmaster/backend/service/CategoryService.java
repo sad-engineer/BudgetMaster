@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-
 /**
  * Service класс для бизнес-логики работы с Category
  */
@@ -29,15 +28,11 @@ public class CategoryService implements IService<Category> {
     private final CategoryRepository repo;
     private final ExecutorService executorService;
     private final String user;
-    private final ServiceConstants constants;
-    public final CategoryValidator validator;
 
     public CategoryService(Context context, String user) {
         this.repo = new CategoryRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
-        this.constants = new ServiceConstants();
-        this.validator = new CategoryValidator();
     }
 
     /**
@@ -46,9 +41,7 @@ public class CategoryService implements IService<Category> {
      * @param newPosition новая позиция
      */
     public void changePosition(Category category, int newPosition) {
-        executorService.execute(() -> {
-            changePositionInTransaction(category, newPosition);
-        });
+        executorService.execute(() -> changePositionInTransaction(category, newPosition));
     }
     
     /**
@@ -111,14 +104,12 @@ public class CategoryService implements IService<Category> {
      * @param parentId ID родителя
      */
     public void create(String title, Integer operationType, Integer type, Integer parentId) {
-        validator.validateTitle(title);
-        validator.validateOperationType(operationType);
-        validator.validateType(type);
-        validator.validateParentId(parentId, repo.getCount(EntityFilter.ALL));
+        CategoryValidator.validateTitle(title);
+        CategoryValidator.validateOperationType(operationType);
+        CategoryValidator.validateType(type);
+        CategoryValidator.validateParentId(parentId, repo.getCount(EntityFilter.ALL));
         
-        executorService.execute(() -> {
-            createCategoryInTransaction(title, operationType, type, parentId);
-        });
+        executorService.execute(() -> createCategoryInTransaction(title, operationType, type, parentId));
     }   
 
     /**
@@ -131,7 +122,7 @@ public class CategoryService implements IService<Category> {
      */
     @Transaction
     public long createCategoryInTransaction(String title, int operationType, int type, int parentId) {
-        Log.d(TAG, String.format(constants.MSG_CREATE_CATEGORY_REQUEST, title));
+        Log.d(TAG, String.format(ServiceConstants.MSG_CREATE_CATEGORY_REQUEST, title));
         Category category = new Category();
         category.setTitle(title);
         category.setOperationType(operationType);
@@ -142,27 +133,25 @@ public class CategoryService implements IService<Category> {
         category.setCreatedBy(user);
         try {   
             long categoryId = repo.insert(category);
-            Log.d(TAG, String.format(constants.MSG_CATEGORY_CREATED, title));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CATEGORY_CREATED, title));
             return categoryId;
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_CREATE_CATEGORY_ERROR, title) + "': " + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_CREATE_CATEGORY_ERROR, title) + "': " + e.getMessage(), e);
             return -1; // Возвращаем -1 в случае ошибки
         }
     }
 
     /**
-     * Создать новый категорию со значениями по умолчанию
+     * Создать новую категорию со значениями по умолчанию
      * @param title название категории
      */
     public void create(String title) {
-        validator.validateTitle(title);
-        int operationType = constants.DEFAULT_CATEGORY_OPERATION_TYPE;
-        int type = constants.DEFAULT_CATEGORY_TYPE;
-        int parentId = constants.DEFAULT_PARENT_CATEGORY_ID;
+        CategoryValidator.validateTitle(title);
+        int operationType = ServiceConstants.DEFAULT_CATEGORY_OPERATION_TYPE;
+        int type = ServiceConstants.DEFAULT_CATEGORY_TYPE;
+        int parentId = ServiceConstants.DEFAULT_PARENT_CATEGORY_ID;
 
-        executorService.execute(() -> {
-            create(title, operationType, type, parentId);                
-        });
+        executorService.execute(() -> createCategoryInTransaction(title, operationType, type, parentId));
     }
 
     /**
@@ -173,9 +162,7 @@ public class CategoryService implements IService<Category> {
      * @param parentId ID родителя
      */
     public void createWithoutValidation(String title, int operationType, int type, int parentId) {
-        executorService.execute(() -> {
-            createCategoryInTransaction(title, operationType, type, parentId);
-        });
+        executorService.execute(() -> createCategoryInTransaction(title, operationType, type, parentId));
     }
  
          /**
@@ -185,7 +172,7 @@ public class CategoryService implements IService<Category> {
      */
     public void delete(Category category, boolean softDelete) {
         if (category == null) {
-            Log.e(TAG, constants.MSG_DELETE_CATEGORY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_DELETE_CATEGORY_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -201,12 +188,10 @@ public class CategoryService implements IService<Category> {
      */
     private void delete(Category category) {
         if (category == null) {
-            Log.e(TAG, constants.MSG_DELETE_CATEGORY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_DELETE_CATEGORY_NOT_FOUND);
             return;
         }
-        executorService.execute(() -> {
-            deleteCategoryInTransaction(category);
-        });
+        executorService.execute(() -> deleteCategoryInTransaction(category));
     }     
     
     /**
@@ -215,13 +200,13 @@ public class CategoryService implements IService<Category> {
      */
     @Transaction
     private void deleteCategoryInTransaction(Category category) {
-        Log.d(TAG, String.format(constants.MSG_DELETE_CATEGORY_REQUEST, category.getTitle()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_DELETE_CATEGORY_REQUEST, category.getTitle()));
         int deletedPosition = category.getPosition();
         try {
             repo.delete(category);
-            Log.d(TAG, String.format(constants.MSG_CATEGORY_DELETED, category.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CATEGORY_DELETED, category.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
         }
     }
     
@@ -296,12 +281,10 @@ public class CategoryService implements IService<Category> {
      */
     public void restore(Category deletedCategory) {
         if (deletedCategory == null) {
-            Log.e(TAG, constants.MSG_RESTORE_CATEGORY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_RESTORE_CATEGORY_NOT_FOUND);
             return;
         }   
-        executorService.execute(() -> {
-            restoreCategoryInTransaction(deletedCategory);
-        });
+        executorService.execute(() -> restoreCategoryInTransaction(deletedCategory));
     }
     
     /**
@@ -310,7 +293,7 @@ public class CategoryService implements IService<Category> {
      */
     @Transaction
     private void restoreCategoryInTransaction(Category deletedCategory) {
-        Log.d(TAG, String.format(constants.MSG_RESTORE_CATEGORY_REQUEST, deletedCategory.getTitle()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_RESTORE_CATEGORY_REQUEST, deletedCategory.getTitle()));
         deletedCategory.setPosition(repo.getMaxPosition() + 1);
         deletedCategory.setDeleteTime(null);
         deletedCategory.setDeletedBy(null);
@@ -318,9 +301,9 @@ public class CategoryService implements IService<Category> {
         deletedCategory.setUpdatedBy(user);
         try {
             repo.update(deletedCategory);
-            Log.d(TAG, String.format(constants.MSG_CATEGORY_RESTORED, deletedCategory.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CATEGORY_RESTORED, deletedCategory.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_RESTORE_CATEGORY_ERROR, deletedCategory.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_RESTORE_CATEGORY_ERROR, deletedCategory.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -329,9 +312,7 @@ public class CategoryService implements IService<Category> {
      * @param category категория
      */
     private void softDelete(Category category) {
-        executorService.execute(() -> {
-            softDeleteCategoryInTransaction(category);
-        });
+        executorService.execute(() -> softDeleteCategoryInTransaction(category));
     }
 
     /**
@@ -340,7 +321,7 @@ public class CategoryService implements IService<Category> {
      */
     @Transaction
     private void softDeleteCategoryInTransaction(Category category) {
-        Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_CATEGORY_REQUEST, category.getTitle()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_CATEGORY_REQUEST, category.getTitle()));
         int deletedPosition = category.getPosition();
         category.setPosition(0);
         category.setDeleteTime(LocalDateTime.now());
@@ -349,9 +330,9 @@ public class CategoryService implements IService<Category> {
             repo.update(category);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, String.format(constants.MSG_CATEGORY_SOFT_DELETED, category.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CATEGORY_SOFT_DELETED, category.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_CATEGORY_ERROR, category.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -361,19 +342,19 @@ public class CategoryService implements IService<Category> {
      */
     public void update(Category category) {
         if (category == null) {
-            Log.e(TAG, constants.MSG_UPDATE_CATEGORY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_UPDATE_CATEGORY_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
-            Log.d(TAG, String.format(constants.MSG_UPDATE_CATEGORY_REQUEST, category.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_UPDATE_CATEGORY_REQUEST, category.getTitle()));
             category.setUpdateTime(LocalDateTime.now());
             category.setUpdatedBy(user);
             try {
                 repo.update(category);
-                Log.d(TAG, String.format(constants.MSG_CATEGORY_UPDATED, category.getTitle()));
+                Log.d(TAG, String.format(ServiceConstants.MSG_CATEGORY_UPDATED, category.getTitle()));
             } catch (Exception e) {
-                Log.e(TAG, String.format(constants.MSG_UPDATE_CATEGORY_ERROR, category.getTitle()) + "': " + e.getMessage(), e);
+                Log.e(TAG, String.format(ServiceConstants.MSG_UPDATE_CATEGORY_ERROR, category.getTitle()) + "': " + e.getMessage(), e);
             }
         });
     }

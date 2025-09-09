@@ -59,7 +59,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
     /** Статус счета по умолчанию 0 */
     private final int DEFAULT_ACCOUNT_STATUS_OPEN = ModelConstants.DEFAULT_ACCOUNT_STATUS_OPEN;
     /** ID валюты по умолчанию 1 */
-    private final int DEFAULT_CURRENCY_ID = ModelConstants.DEFAULT_CURRENCY_ID;
+    private final int DEFAULT_ACCOUNT_CURRENCY_ID = ModelConstants.DEFAULT_ACCOUNT_CURRENCY_ID;
 
 
     /**
@@ -122,7 +122,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
                     setSelectedCurrencyId(currentAccount.getCurrencyId());
                 } else {
                     // В режиме создания устанавливаем валюту по умолчанию
-                    setSelectedCurrencyId(DEFAULT_CURRENCY_ID);
+                    setSelectedCurrencyId(DEFAULT_ACCOUNT_CURRENCY_ID);
                 }
             }
         });
@@ -357,7 +357,7 @@ public class AccountsEditActivity extends BaseEditActivity<Account> {
         if (position >= 0 && position < currencies.size()) {
             return currencies.get(position).getId();
         }
-        return DEFAULT_CURRENCY_ID; // По умолчанию RUB
+        return DEFAULT_ACCOUNT_CURRENCY_ID; // По умолчанию RUB
     }
     
     /**

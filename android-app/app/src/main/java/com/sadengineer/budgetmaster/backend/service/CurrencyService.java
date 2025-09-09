@@ -9,7 +9,6 @@ import androidx.room.Transaction;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.repository.CurrencyRepository;
-import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
 import com.sadengineer.budgetmaster.backend.constants.ServiceConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
@@ -18,7 +17,6 @@ import com.sadengineer.budgetmaster.backend.interfaces.IService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 
 /**
  * Service класс для бизнес-логики работы с Currency
@@ -29,17 +27,11 @@ public class CurrencyService implements IService<Currency> {
     private final CurrencyRepository repo;
     private final ExecutorService executorService;
     private final String user;
-    private final int defaultCurrencyID;
-    private final CurrencyValidator validator;
-    private final ServiceConstants constants;
     
     public CurrencyService(Context context, String user) {
         this.repo = new CurrencyRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
-        this.defaultCurrencyID = ModelConstants.DEFAULT_CURRENCY_ID;
-        this.validator = new CurrencyValidator();
-        this.constants = new ServiceConstants();
     }
 
     /**
@@ -48,9 +40,7 @@ public class CurrencyService implements IService<Currency> {
      * @param newPosition новая позиция
      */
     public void changePosition(Currency currency, int newPosition) {
-        executorService.execute(() -> {
-            changePositionInTransaction(currency, newPosition);
-        });
+        executorService.execute(() -> changePositionInTransaction(currency, newPosition));
     }
     
     /**
@@ -124,7 +114,7 @@ public class CurrencyService implements IService<Currency> {
      */
     public void create(String title) {
         String trimmedTitle = title.trim();
-        validator.validateTitle(trimmedTitle);
+        CurrencyValidator.validateTitle(trimmedTitle);
         executorService.execute(() -> {
             try {
                 createCurrencyInTransaction(trimmedTitle, null, 1.0);                
@@ -143,12 +133,12 @@ public class CurrencyService implements IService<Currency> {
     public void create(String title, String shortName) {
         String trimmedTitle = title.trim();
         String trimmedShortName = shortName != null ? shortName.trim() : null;
-        validator.validateTitle(trimmedTitle);
-        validator.validateShortName(trimmedShortName);
+        CurrencyValidator.validateTitle(trimmedTitle);
+        CurrencyValidator.validateShortName(trimmedShortName);
         executorService.execute(() -> {
             // Проверяем уникальность в фоновом потоке
-            validator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
-            validator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
+            CurrencyValidator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
+            CurrencyValidator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
             createCurrencyInTransaction(trimmedTitle, trimmedShortName, 1.0);                
         });
     }
@@ -163,13 +153,13 @@ public class CurrencyService implements IService<Currency> {
     public void create(String title, String shortName, Double exchangeRate) {
         String trimmedTitle = title.trim();
         String trimmedShortName = shortName != null ? shortName.trim() : null;
-        validator.validateTitle(trimmedTitle);
-        validator.validateShortName(trimmedShortName);
-        validator.validateExchangeRate(exchangeRate);
+        CurrencyValidator.validateTitle(trimmedTitle);
+        CurrencyValidator.validateShortName(trimmedShortName);
+        CurrencyValidator.validateExchangeRate(exchangeRate);
         executorService.execute(() -> {
             // Проверяем уникальность в фоновом потоке
-            validator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
-            validator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
+            CurrencyValidator.validateTitleUnique(trimmedTitle, repo::existsByTitle);
+            CurrencyValidator.validateShortNameUnique(trimmedShortName, repo::existsByShortName);
             createCurrencyInTransaction(trimmedTitle, trimmedShortName, exchangeRate);                
         });
     }
@@ -181,7 +171,7 @@ public class CurrencyService implements IService<Currency> {
      */
     @Transaction
     private void createCurrencyInTransaction(String title, String shortName, double exchangeRate) {
-        Log.d(TAG, String.format(constants.MSG_CREATE_CURRENCY_REQUEST, title + (shortName != null ? " (" + shortName + ")" : "")));
+        Log.d(TAG, String.format(ServiceConstants.MSG_CREATE_CURRENCY_REQUEST, title + (shortName != null ? " (" + shortName + ")" : "")));
         Currency currency = new Currency();
         currency.setTitle(title);
         currency.setShortName(shortName);
@@ -191,9 +181,9 @@ public class CurrencyService implements IService<Currency> {
         currency.setCreatedBy(user);
         try {
             repo.insert(currency);
-            Log.d(TAG, String.format(constants.MSG_CURRENCY_CREATED, currency.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CURRENCY_CREATED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_CREATE_CURRENCY_ERROR, title) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_CREATE_CURRENCY_ERROR, title) + e.getMessage(), e);
         }
     }
 
@@ -204,9 +194,7 @@ public class CurrencyService implements IService<Currency> {
      * @param exchangeRate обменный курс валюты
      */
     public void createWithoutValidation(String title, String shortName, Double exchangeRate) {
-        executorService.execute(() -> {
-            createCurrencyInTransaction(title, shortName, exchangeRate);
-        });
+        executorService.execute(() -> createCurrencyInTransaction(title, shortName, exchangeRate));
     }
 
     /**
@@ -216,7 +204,7 @@ public class CurrencyService implements IService<Currency> {
      */
     public void delete(Currency currency, boolean softDelete) {
         if (currency == null) {
-            Log.e(TAG, constants.MSG_DELETE_CURRENCY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_DELETE_CURRENCY_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -231,9 +219,7 @@ public class CurrencyService implements IService<Currency> {
      * @param currency валюта
      */
     private void delete(Currency currency) {
-        executorService.execute(() -> {
-            deleteCurrencyInTransaction(currency);
-        });
+        executorService.execute(() -> deleteCurrencyInTransaction(currency));
     }     
     
     /**
@@ -242,12 +228,12 @@ public class CurrencyService implements IService<Currency> {
      */
     @Transaction
     public void deleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, constants.MSG_DELETE_CURRENCY_REQUEST + currency.getTitle());
+        Log.d(TAG, ServiceConstants.MSG_DELETE_CURRENCY_REQUEST + currency.getTitle());
         try {
             repo.delete(currency);
-            Log.d(TAG, String.format(constants.MSG_CURRENCY_DELETED, currency.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CURRENCY_DELETED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
         }
     }
    
@@ -328,12 +314,10 @@ public class CurrencyService implements IService<Currency> {
      */
     public void restore(Currency deletedCurrency) {
         if (deletedCurrency == null) {
-            Log.e(TAG, constants.MSG_RESTORE_CURRENCY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_RESTORE_CURRENCY_NOT_FOUND);
             return;
         }
-        executorService.execute(() -> {
-            restoreCurrencyInTransaction(deletedCurrency);
-        });
+        executorService.execute(() -> restoreCurrencyInTransaction(deletedCurrency));
     }
     
     /**
@@ -342,7 +326,7 @@ public class CurrencyService implements IService<Currency> {
      */
     @Transaction
     private void restoreCurrencyInTransaction(Currency deletedCurrency) {
-        Log.d(TAG, constants.MSG_RESTORE_CURRENCY_REQUEST + deletedCurrency.getTitle());
+        Log.d(TAG, ServiceConstants.MSG_RESTORE_CURRENCY_REQUEST + deletedCurrency.getTitle());
         deletedCurrency.setPosition(repo.getMaxPosition() + 1);
         deletedCurrency.setDeleteTime(null);
         deletedCurrency.setDeletedBy(null);
@@ -350,9 +334,9 @@ public class CurrencyService implements IService<Currency> {
         deletedCurrency.setUpdatedBy(user);
         try {
             repo.update(deletedCurrency);
-            Log.d(TAG, String.format(constants.MSG_CURRENCY_RESTORED, deletedCurrency.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CURRENCY_RESTORED, deletedCurrency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_RESTORE_CURRENCY_ERROR, deletedCurrency.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_RESTORE_CURRENCY_ERROR, deletedCurrency.getTitle()) + e.getMessage(), e);
         }
     }
 
@@ -362,13 +346,11 @@ public class CurrencyService implements IService<Currency> {
      */
     private void softDelete(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, constants.MSG_SOFT_DELETE_CURRENCY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_SOFT_DELETE_CURRENCY_NOT_FOUND);
             return;
         }   
 
-        executorService.execute(() -> {
-            softDeleteCurrencyInTransaction(currency);
-        });
+        executorService.execute(() -> softDeleteCurrencyInTransaction(currency));
     }
     
     /**
@@ -377,7 +359,7 @@ public class CurrencyService implements IService<Currency> {
      */
     @Transaction
     public void softDeleteCurrencyInTransaction(Currency currency) {
-        Log.d(TAG, constants.MSG_SOFT_DELETE_CURRENCY_REQUEST + currency.getTitle());
+        Log.d(TAG, ServiceConstants.MSG_SOFT_DELETE_CURRENCY_REQUEST + currency.getTitle());
         int deletedPosition = currency.getPosition();
         currency.setPosition(0);
         currency.setDeleteTime(LocalDateTime.now());
@@ -386,9 +368,9 @@ public class CurrencyService implements IService<Currency> {
             repo.update(currency);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, String.format(constants.MSG_CURRENCY_SOFT_DELETED, currency.getTitle()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_CURRENCY_SOFT_DELETED, currency.getTitle()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
         }
     }
     
@@ -399,21 +381,21 @@ public class CurrencyService implements IService<Currency> {
      */
     public void update(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, constants.MSG_UPDATE_CURRENCY_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_UPDATE_CURRENCY_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
             try {
-                validator.validateTitleUniqueExcludingId(currency.getTitle(), currency.getId(), repo::existsByTitleExcludingId);
-                validator.validateShortNameUniqueExcludingId(currency.getShortName(), currency.getId(), repo::existsByShortNameExcludingId);
-                Log.d(TAG, String.format(constants.MSG_UPDATE_CURRENCY_REQUEST, currency.getTitle()));
+                CurrencyValidator.validateTitleUniqueExcludingId(currency.getTitle(), currency.getId(), repo::existsByTitleExcludingId);
+                CurrencyValidator.validateShortNameUniqueExcludingId(currency.getShortName(), currency.getId(), repo::existsByShortNameExcludingId);
+                Log.d(TAG, String.format(ServiceConstants.MSG_UPDATE_CURRENCY_REQUEST, currency.getTitle()));
                 currency.setUpdateTime(LocalDateTime.now());
                 currency.setUpdatedBy(user);
                 repo.update(currency);
-                Log.d(TAG, String.format(constants.MSG_CURRENCY_UPDATED, currency.getTitle()));
+                Log.d(TAG, String.format(ServiceConstants.MSG_CURRENCY_UPDATED, currency.getTitle()));
             } catch (Exception e) {
-                Log.e(TAG, String.format(constants.MSG_UPDATE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
+                Log.e(TAG, String.format(ServiceConstants.MSG_UPDATE_CURRENCY_ERROR, currency.getTitle()) + e.getMessage(), e);
             }
         });
     }
@@ -449,8 +431,8 @@ public class CurrencyService implements IService<Currency> {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список доступных ID валют
      */
-    public LiveData<List<Integer>> getAvalibleIds(EntityFilter filter) {
-        return repo.getAvalibleIds(filter);
+    public LiveData<List<Integer>> getAvailableIds(EntityFilter filter) {
+        return repo.getAvailableIds(filter);
     }
 
     /**
@@ -458,7 +440,7 @@ public class CurrencyService implements IService<Currency> {
      * @param filter фильтр (ACTIVE, DELETED, ALL)
      * @return список доступных ID валют
      */
-    public List<Integer> getAvalibleIdsSync(EntityFilter filter) {
-        return repo.getAvalibleIdsSync(filter);
+    public List<Integer> getAvailableIdsSync(EntityFilter filter) {
+        return repo.getAvailableIdsSync(filter);
     }
 } 

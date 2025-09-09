@@ -14,7 +14,6 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_SHORT_NAME_ALREADY_EXISTS;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_EXCHANGE_RATE_EMPTY;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CURRENCY_EXCHANGE_RATE_INVALID;
-
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_CURRENCY_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_CURRENCY_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_CURRENCY_SHORT_NAME_LENGTH;

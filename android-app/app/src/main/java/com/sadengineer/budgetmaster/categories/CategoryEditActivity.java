@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.HashSet;
 
 import android.content.Intent;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;

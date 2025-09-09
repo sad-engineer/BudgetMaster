@@ -2,6 +2,8 @@ package com.sadengineer.budgetmaster.backend;
 
 import android.util.Log;
 
+import com.sadengineer.budgetmaster.backend.constants.ThreadManagerConstants;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.Executors;
  */
 public class ThreadManager {
     private static final String TAG = "ThreadManager";
-    private static final int THREAD_POOL_SIZE = 4;
+    private static final int THREAD_POOL_SIZE = ThreadManagerConstants.THREAD_POOL_SIZE;
     
     private static final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     
@@ -29,7 +31,7 @@ public class ThreadManager {
      */
     public static void shutdown() {
         if (!executorService.isShutdown()) {
-            Log.d(TAG, "Завершение работы ThreadManager");
+            Log.d(TAG, ThreadManagerConstants.INFO_SHUTDOWN);
             executorService.shutdown();
         }
     }
@@ -40,7 +42,7 @@ public class ThreadManager {
      */
     public static void shutdownNow() {
         if (!executorService.isShutdown()) {
-            Log.d(TAG, "Принудительное завершение работы ThreadManager");
+            Log.d(TAG, ThreadManagerConstants.INFO_SHUTDOWN_NOW);
             executorService.shutdownNow();
         }
     }

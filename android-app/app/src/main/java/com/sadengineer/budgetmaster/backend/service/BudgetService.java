@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-
 /**
  * Service класс для бизнес-логики работы с Budget
  */
@@ -31,19 +30,15 @@ public class BudgetService implements IService<Budget> {
     private final BudgetRepository repo;
     private final ExecutorService executorService;
     private final String user;
-    public final BudgetValidator validator;
     private final CategoryRepository categoryRepo;
     private final CurrencyRepository currencyRepo;
-    private final ServiceConstants constants;
 
     public BudgetService(Context context, String user) {
         this.repo = new BudgetRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
-        this.validator = new BudgetValidator();
         this.categoryRepo = new CategoryRepository(context);
         this.currencyRepo = new CurrencyRepository(context);
-        this.constants = new ServiceConstants();
     }
 
     /**
@@ -52,9 +47,7 @@ public class BudgetService implements IService<Budget> {
      * @param newPosition новая позиция
      */
     public void changePosition(Budget budget, int newPosition) {
-        executorService.execute(() -> {
-            changePositionInTransaction(budget, newPosition);
-        });
+        executorService.execute(() -> changePositionInTransaction(budget, newPosition));
     }
     
     /**
@@ -112,17 +105,15 @@ public class BudgetService implements IService<Budget> {
     /**
      * Создать новый бюджет
      * @param category_id ID категории (обязательный параметр, не может быть пустым)
-     * @param amount сумма (необязательный параметр, перелайте null, для установки значения по умолчанию (0))
-     * @param currency_id ID валюты (необязательный параметр, перелайте null, для установки значения по умолчанию (1))
+     * @param amount сумма (необязательный параметр, передайте null, для установки значения по умолчанию (0))
+     * @param currency_id ID валюты (необязательный параметр, передайте null, для установки значения по умолчанию (1))
      */
     public void create(Integer category_id, Long amount, Integer currency_id) {
-        validator.validateCategoryId(category_id, categoryRepo.getCount(EntityFilter.ALL));
-        validator.validateAmount(amount);
-        validator.validateCurrencyId(currency_id, currencyRepo.getCount(EntityFilter.ALL));
+        BudgetValidator.validateCategoryId(category_id, categoryRepo.getCount(EntityFilter.ALL));
+        BudgetValidator.validateAmount(amount);
+        BudgetValidator.validateCurrencyId(currency_id, currencyRepo.getCount(EntityFilter.ALL));
 
-        executorService.execute(() -> {
-            createBudgetInTransaction(category_id, amount, currency_id);
-        });
+        executorService.execute(() -> createBudgetInTransaction(category_id, amount, currency_id));
     }
     
     /**
@@ -133,7 +124,7 @@ public class BudgetService implements IService<Budget> {
      */
     @Transaction
     public void createBudgetInTransaction(int category_id, Long amount, int currency_id) {
-        Log.d(TAG, String.format(constants.MSG_CREATE_BUDGET_REQUEST, category_id));
+        Log.d(TAG, String.format(ServiceConstants.MSG_CREATE_BUDGET_REQUEST, category_id));
         Budget budget = new Budget();
         budget.setCategoryId(category_id);
         budget.setAmount(amount);
@@ -143,9 +134,9 @@ public class BudgetService implements IService<Budget> {
         budget.setCreatedBy(user);
         try {
             repo.insert(budget);
-            Log.d(TAG, String.format(constants.MSG_BUDGET_CREATED, budget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_BUDGET_CREATED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_CREATE_BUDGET_ERROR, category_id) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_CREATE_BUDGET_ERROR, category_id) + e.getMessage(), e);
         }
     }
 
@@ -154,9 +145,7 @@ public class BudgetService implements IService<Budget> {
      * @param category_id ID категории
      */
     public void createWithoutValidation(int category_id, long amount, int currency_id) {
-        executorService.execute(() -> {
-            createBudgetInTransaction(category_id, amount, currency_id);
-        });
+        executorService.execute(() -> createBudgetInTransaction(category_id, amount, currency_id));
     }
 
     /**
@@ -166,7 +155,7 @@ public class BudgetService implements IService<Budget> {
      */
     public void delete(Budget budget, boolean softDelete) {
         if (budget == null) {
-            Log.e(TAG, constants.MSG_DELETE_BUDGET_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_DELETE_BUDGET_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -181,9 +170,7 @@ public class BudgetService implements IService<Budget> {
      * @param budget бюджет
      */
     private void delete(Budget budget) {
-        executorService.execute(() -> {
-            deleteBudgetInTransaction(budget);
-        });
+        executorService.execute(() -> deleteBudgetInTransaction(budget));
     }
     
     /**
@@ -192,12 +179,12 @@ public class BudgetService implements IService<Budget> {
      */
     @Transaction
     public void deleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, String.format(constants.MSG_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         try {
             repo.delete(budget);
-            Log.d(TAG, String.format(constants.MSG_BUDGET_DELETED, budget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_BUDGET_DELETED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_DELETE_BUDGET_ERROR, budget.getCategoryId()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_DELETE_BUDGET_ERROR, budget.getCategoryId()) + e.getMessage(), e);
         }
     }
 
@@ -261,12 +248,10 @@ public class BudgetService implements IService<Budget> {
      */
     public void restore(Budget deletedBudget) {
         if (deletedBudget == null) {
-            Log.e(TAG, constants.MSG_RESTORE_BUDGET_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_RESTORE_BUDGET_NOT_FOUND);
             return;
         }
-        executorService.execute(() -> {
-            restoreBudgetInTransaction(deletedBudget);
-        });
+        executorService.execute(() -> restoreBudgetInTransaction(deletedBudget));
     }
     
     /**
@@ -275,7 +260,7 @@ public class BudgetService implements IService<Budget> {
      */
     @Transaction
     private void restoreBudgetInTransaction(Budget deletedBudget) {
-        Log.d(TAG, String.format(constants.MSG_RESTORE_BUDGET_REQUEST, deletedBudget.getCategoryId()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_RESTORE_BUDGET_REQUEST, deletedBudget.getCategoryId()));
         deletedBudget.setPosition(repo.getMaxPosition() + 1);
         deletedBudget.setDeleteTime(null);
         deletedBudget.setDeletedBy(null);
@@ -283,9 +268,9 @@ public class BudgetService implements IService<Budget> {
         deletedBudget.setUpdatedBy(user);
         try {
             repo.update(deletedBudget);
-            Log.d(TAG, String.format(constants.MSG_BUDGET_RESTORED, deletedBudget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_BUDGET_RESTORED, deletedBudget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_RESTORE_BUDGET_ERROR, deletedBudget.getCategoryId()) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_RESTORE_BUDGET_ERROR, deletedBudget.getCategoryId()) + e.getMessage(), e);
         }
     }
 
@@ -294,9 +279,7 @@ public class BudgetService implements IService<Budget> {
      * @param budget бюджет
      */
     private void softDelete(Budget budget) {
-        executorService.execute(() -> {
-            softDeleteBudgetInTransaction(budget);
-        });
+        executorService.execute(() -> softDeleteBudgetInTransaction(budget));
     }
     
     /**
@@ -305,7 +288,7 @@ public class BudgetService implements IService<Budget> {
      */
     @Transaction
     public void softDeleteBudgetInTransaction(Budget budget) {
-        Log.d(TAG, String.format(constants.MSG_SOFT_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
+        Log.d(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_BUDGET_REQUEST, budget.getCategoryId()));
         int deletedPosition = budget.getPosition();
         budget.setPosition(0);
         budget.setDeleteTime(LocalDateTime.now());
@@ -314,9 +297,9 @@ public class BudgetService implements IService<Budget> {
             repo.update(budget);
             // Пересчитываем позиции после soft delete
             repo.shiftPositionsDown(deletedPosition);
-            Log.d(TAG, String.format(constants.MSG_BUDGET_SOFT_DELETED, budget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_BUDGET_SOFT_DELETED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
         }
     }
 
@@ -326,13 +309,11 @@ public class BudgetService implements IService<Budget> {
      */
     public void update(Budget budget) {
         if (budget == null) {
-            Log.e(TAG, constants.MSG_UPDATE_BUDGET_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_UPDATE_BUDGET_NOT_FOUND);
             return;
         }
 
-        executorService.execute(() -> {
-            updateBudgetInTransaction(budget);
-        });
+        executorService.execute(() -> updateBudgetInTransaction(budget));
     }
 
     /**
@@ -342,13 +323,13 @@ public class BudgetService implements IService<Budget> {
     @Transaction
     public void updateBudgetInTransaction(Budget budget) {
         try {
-            Log.d(TAG, String.format(constants.MSG_UPDATE_BUDGET_REQUEST, budget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_UPDATE_BUDGET_REQUEST, budget.getCategoryId()));
             budget.setUpdateTime(LocalDateTime.now());
             budget.setUpdatedBy(user);
             repo.update(budget);
-            Log.d(TAG, String.format(constants.MSG_BUDGET_UPDATED, budget.getCategoryId()));
+            Log.d(TAG, String.format(ServiceConstants.MSG_BUDGET_UPDATED, budget.getCategoryId()));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_UPDATE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_UPDATE_BUDGET_ERROR, budget.getCategoryId()) + ": " + e.getMessage(), e);
         }
     }
 

@@ -137,7 +137,7 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
      */
     @Override
     protected void performDelete(ServiceManager serviceManager, Currency item) {
-        serviceManager.deleteCurrency(item, false); // false = hard delete
+        serviceManager.deleteCurrencyWithOtherElements(item, false); // false = hard delete
     }
 
     /**

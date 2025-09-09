@@ -5,13 +5,11 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
 
 import java.time.LocalDate;

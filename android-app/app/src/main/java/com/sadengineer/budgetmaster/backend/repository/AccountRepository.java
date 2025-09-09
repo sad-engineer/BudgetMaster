@@ -3,7 +3,6 @@ package com.sadengineer.budgetmaster.backend.repository;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
-import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.dao.AccountDao;
 import com.sadengineer.budgetmaster.backend.database.BudgetMasterDatabase;
@@ -17,8 +16,6 @@ import java.util.List;
  */
 public class AccountRepository {
 
-    private static final String TAG = "AccountRepository";
-    
     private final AccountDao dao;
     
     public AccountRepository(Context context) {

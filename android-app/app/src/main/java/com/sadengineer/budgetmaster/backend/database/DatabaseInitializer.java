@@ -1,10 +1,6 @@
 package com.sadengineer.budgetmaster.backend.database;
 
-import android.content.Context;
 import android.util.Log;
-
-import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.entity.Budget;
@@ -18,8 +14,6 @@ import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Инициализатор базы данных с дефолтными данными
@@ -27,10 +21,7 @@ import java.util.concurrent.Executors;
 public class DatabaseInitializer {
     
     private static final String TAG = "DatabaseInitializer";
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
-    
 
-    
     /**
      * Инициализирует дефолтные данные в базе
      */
@@ -55,9 +46,6 @@ public class DatabaseInitializer {
         Log.d(TAG, "initializeDefaultData: Инициализация завершена");
     }
 
-    
-    
-    
     /**
      * Инициализирует дефолтные валюты
      */
@@ -183,8 +171,8 @@ public class DatabaseInitializer {
             return;
         }
         
-        // Используем константу DEFAULT_CURRENCY_ID из ModelConstants
-        int defaultCurrencyId = ModelConstants.DEFAULT_CURRENCY_ID;
+        // Используем константу DEFAULT_ACCOUNT_CURRENCY_ID из ModelConstants
+        int defaultCurrencyId = ModelConstants.DEFAULT_ACCOUNT_CURRENCY_ID;
         
         // Создаем дефолтные счета
         Account[] accounts = {
@@ -228,7 +216,7 @@ public class DatabaseInitializer {
         // Создаем бюджет для каждой категории
         int position = 1;
         for (Category category : categories) {
-            Budget budget = createBudget(category.getId(), ModelConstants.DEFAULT_BUDGET_AMOUNT, ModelConstants.DEFAULT_CURRENCY_ID, position);
+            Budget budget = createBudget(category.getId(), ModelConstants.DEFAULT_BUDGET_AMOUNT, ModelConstants.DEFAULT_BUDGET_CURRENCY_ID, position);
             database.budgetDao().insert(budget);
             Log.d(TAG, "initializeDefaultBudgets: Добавлен бюджет для категории '" + category.getTitle() + "' (ID: " + category.getId() + ")");
             position++;

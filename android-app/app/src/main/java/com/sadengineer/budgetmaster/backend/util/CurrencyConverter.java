@@ -2,12 +2,10 @@ package com.sadengineer.budgetmaster.backend.util;
 
 import android.util.Log;
 
+import com.sadengineer.budgetmaster.backend.constants.UtilConstants;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
-import androidx.core.util.Pair;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Утилитарный класс для конвертации валют
@@ -25,145 +23,123 @@ public class CurrencyConverter {
      */
     public static long convert(long amount, Currency fromCurrency, Currency toCurrency) {
         if (fromCurrency == null || toCurrency == null) {
-            Log.e(TAG, "Валюта не может быть null");
+            Log.e(TAG, UtilConstants.CURRENCY_CONVERTER_ERROR_NULL_CURRENCY);
             return amount;
         }
-        
         // Если валюты одинаковые, возвращаем исходную сумму
         if (fromCurrency.getId() == toCurrency.getId()) {
             return amount;
         }
-        
-        // Конвертируем через главную валюту
-        long amountInMainCurrency = fromCurrency.convertToMainCurrency(amount);
-        return toCurrency.convertFromMainCurrency(amountInMainCurrency);
+        // Конвертируем через отображаемую валюту
+        long amountInDisplayCurrency = fromCurrency.convertToDisplayCurrency(amount);
+        return toCurrency.convertFromDisplayCurrency(amountInDisplayCurrency);
     }
     
     /**
-     * Конвертировать сумму в главную валюту
+     * Конвертировать сумму в отображаемую валюту
      * @param amount сумма в копейках для конвертации
      * @param currency валюта исходной суммы
-     * @return сумма в главной валюте
+     * @return сумма в отображаемой валюте
      */
-    public static long convertToMainCurrency(long amount, Currency currency) {
+    public static long convertToDisplayCurrency(long amount, Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не может быть null");
+            Log.e(TAG, UtilConstants.CURRENCY_CONVERTER_ERROR_NULL_CURRENCY);
             return amount;
         }
-        
-        return currency.convertToMainCurrency(amount);
+        return currency.convertToDisplayCurrency(amount);
     }
     
     /**
-     * Конвертировать сумму из главной валюты
-     * @param amount сумма в копейках в главной валюте
+     * Конвертировать сумму из отображаемой валюты
+     * @param amount сумма в копейках в отображаемой валюте
      * @param currency целевая валюта
      * @return сумма в целевой валюте
      */
-    public static long convertFromMainCurrency(long amount, Currency currency) {
+    public static long convertFromDisplayCurrency(long amount, Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не может быть null");
+            Log.e(TAG, UtilConstants.CURRENCY_CONVERTER_ERROR_NULL_CURRENCY);
             return amount;
         }
-        
-        return currency.convertFromMainCurrency(amount);
+        return currency.convertFromDisplayCurrency(amount);
     }
     
     /**
-     * Найти главную валюту в списке валют
+     * Найти отображаемую валюту в списке валют
      * @param currencies список валют
-     * @return главная валюта или null, если не найдена
+     * @return отображаемая валюта или null, если не найдена
      */
-    public static Currency findMainCurrency(List<Currency> currencies) {
+    public static Currency findDisplayCurrency(List<Currency> currencies) {
         if (currencies == null || currencies.isEmpty()) {
             return null;
         }
-        
-        //TODO главной валюты нет, есть валюта для отображения (пересчета)
+        //TODO отображаемой валюты нет, есть валюта для отображения (пересчета)
         for (Currency currency : currencies) {
             if (currency.getExchangeRate() == 1.0) {
                 return currency;
             }
         }
-        
-        Log.w(TAG, "Главная валюта не найдена в списке валют");
+        Log.w(TAG, UtilConstants.CURRENCY_CONVERTER_WARNING_DISPLAY_CURRENCY_NOT_FOUND);
         return null;
     }
     
     /**
-     * Проверить, есть ли главная валюта в списке
+     * Проверить, есть ли отображаемая валюта в списке
      * @param currencies список валют
-     * @return true, если главная валюта найдена
+     * @return true, если отображаемая валюта найдена
      */
-    public static boolean hasMainCurrency(List<Currency> currencies) {
-        return findMainCurrency(currencies) != null;
+    public static boolean hasDisplayCurrency(List<Currency> currencies) {
+        return findDisplayCurrency(currencies) != null;
     }
     
     /**
-     * Установить валюту как главную (курс = 1.0)
-     * @param currency валюта для установки как главная
+     * Установить валюту как отображаемую (курс = 1.0)
+     * @param currency валюта для установки как отображаемая
      */
-    public static void setAsMainCurrency(Currency currency) {
+    public static void setAsDisplayCurrency(Currency currency) {
         if (currency == null) {
-            Log.e(TAG, "Валюта не может быть null");
+            Log.e(TAG, UtilConstants.CURRENCY_CONVERTER_ERROR_NULL_CURRENCY);
             return;
         }
-        
         currency.setExchangeRate(1.0);
-        Log.d(TAG, "Валюта " + currency.getTitle() + " установлена как главная");
+        Log.d(TAG, String.format(UtilConstants.CURRENCY_CONVERTER_INFO_CURRENCY_SET_AS_DISPLAY, currency.getTitle()));
     }
     
     /**
-     * Обновить курсы валют относительно новой главной валюты
+     * Обновить курсы валют относительно новой отображаемой валюты
      * @param currencies список всех валют
-     * @param newMainCurrency новая главная валюта
+     * @param newDisplayCurrency новая отображаемая валюта
      */
-    public static void updateExchangeRates(List<Currency> currencies, Currency newMainCurrency) {
-        if (currencies == null || newMainCurrency == null) {
-            Log.e(TAG, "Список валют или новая главная валюта не могут быть null");
+    public static void updateExchangeRates(List<Currency> currencies, Currency newDisplayCurrency) {
+        if (currencies == null || newDisplayCurrency == null) {
+            Log.e(TAG, UtilConstants.CURRENCY_CONVERTER_ERROR_NULL_CURRENCIES_LIST);
             return;
         }
-        
-        // Находим старую главную валюту
-        Currency oldMainCurrency = findMainCurrency(currencies);
-        if (oldMainCurrency == null) {
-            Log.w(TAG, "Старая главная валюта не найдена, устанавливаем новую");
-            setAsMainCurrency(newMainCurrency);
+        // Находим старую отображаемую валюту
+        Currency oldDisplayCurrency = findDisplayCurrency(currencies);
+        if (oldDisplayCurrency == null) {
+            Log.w(TAG, UtilConstants.CURRENCY_CONVERTER_WARNING_OLD_DISPLAY_CURRENCY_NOT_FOUND);
+            setAsDisplayCurrency(newDisplayCurrency);
             return;
         }
-        
-        // Если главная валюта не изменилась, ничего не делаем
-        if (oldMainCurrency.getId() == newMainCurrency.getId()) {
+        // Если отображаемая валюта не изменилась, ничего не делаем
+        if (oldDisplayCurrency.getId() == newDisplayCurrency.getId()) {
             return;
         }
-        
-        // Получаем курс новой главной валюты относительно старой
-        double newMainCurrencyRate = newMainCurrency.getExchangeRate();
-        
+        // Получаем курс новой отображаемой валюты относительно старой
+        double newDisplayCurrencyRate = newDisplayCurrency.getExchangeRate();
         // Обновляем курсы всех валют
         for (Currency currency : currencies) {
-            if (currency.getId() == newMainCurrency.getId()) {
-                // Новая главная валюта
+            if (currency.getId() == newDisplayCurrency.getId()) {
+                // Новая отображаемая валюта
                 currency.setExchangeRate(1.0);
-            } else if (currency.getId() == oldMainCurrency.getId()) {
-                // Старая главная валюта становится обычной
-                currency.setExchangeRate(1.0 / newMainCurrencyRate);
+            } else if (currency.getId() == oldDisplayCurrency.getId()) {
+                // Старая отображаемая валюта становится обычной
+                currency.setExchangeRate(1.0 / newDisplayCurrencyRate);
             } else {
-                // Остальные валюты: делим на курс новой главной валюты
-                currency.setExchangeRate(currency.getExchangeRate() / newMainCurrencyRate);
+                // Остальные валюты: делим на курс новой отображаемой валюты
+                currency.setExchangeRate(currency.getExchangeRate() / newDisplayCurrencyRate);
             }
         }
-        
-        Log.d(TAG, "Курсы валют обновлены. Новая главная валюта: " + newMainCurrency.getTitle());
-    }
-    
-    /**
-     * Валидация курса валюты
-     * @param exchangeRate курс для проверки
-     * @return true, если курс валиден
-     * TODO перенести в валидацию
-     */
-    public static boolean isValidExchangeRate(double exchangeRate) {
-        return exchangeRate > 0.0 && !Double.isInfinite(exchangeRate) && !Double.isNaN(exchangeRate);
+        Log.d(TAG, String.format(UtilConstants.CURRENCY_CONVERTER_INFO_EXCHANGE_RATES_UPDATED, newDisplayCurrency.getTitle()));
     }
 }

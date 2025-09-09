@@ -7,9 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Transaction;
 
 import com.sadengineer.budgetmaster.backend.entity.Operation;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
-import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.calculators.OperationCalculatorConfig;
 import com.sadengineer.budgetmaster.backend.repository.OperationRepository;
@@ -25,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-
 /**
  * Service класс для бизнес-логики работы с Operation
  */
@@ -36,8 +33,6 @@ public class OperationService implements IService<Operation> {
     private final OperationRepository repo;
     private final ExecutorService executorService;
     private final String user;
-    private final ServiceConstants constants;
-    private final OperationValidator validator;
 
     private final AccountRepository accountRepo;
     private final CategoryRepository categoryRepo;
@@ -50,8 +45,6 @@ public class OperationService implements IService<Operation> {
         this.currencyRepo = new CurrencyRepository(context);
         this.executorService = ThreadManager.getExecutor();
         this.user = user;
-        this.constants = new ServiceConstants();
-        this.validator = new OperationValidator();
     }
     
     /**
@@ -65,17 +58,16 @@ public class OperationService implements IService<Operation> {
      * @param currencyId ID валюты
      */
     public void create(Integer type, LocalDateTime date, Long amount, String comment, Integer categoryId, Integer accountId, Integer currencyId) {
-        validator.validateType(type);
-        validator.validateDate(date);
-        validator.validateAmount(amount);
-        validator.validateComment(comment);
-        validator.validateCategoryId(categoryId, categoryRepo.getCount(EntityFilter.ALL));
-        validator.validateAccountId(accountId, accountRepo.getCount(EntityFilter.ALL));
-        validator.validateCurrencyId(currencyId, currencyRepo.getCount(EntityFilter.ALL));
+        OperationValidator.validateType(type);
+        OperationValidator.validateDate(date);
+        OperationValidator.validateAmount(amount);
+        OperationValidator.validateComment(comment);
+        OperationValidator.validateCategoryId(categoryId, categoryRepo.getCount(EntityFilter.ALL));
+        OperationValidator.validateAccountId(accountId, accountRepo.getCount(EntityFilter.ALL));
+        OperationValidator.validateCurrencyId(currencyId, currencyRepo.getCount(EntityFilter.ALL));
 
-        executorService.execute(() -> {
-            createOperationInTransaction(type, date, amount, comment, categoryId, accountId, currencyId);
-        });
+        executorService.execute(() -> createOperationInTransaction(type, date, amount, comment,
+                categoryId, accountId, currencyId));
     }   
 
     /**
@@ -90,7 +82,7 @@ public class OperationService implements IService<Operation> {
      */
     @Transaction
     private void createOperationInTransaction(int type, LocalDateTime date, long amount, String comment, int categoryId, int accountId, int currencyId) {
-        Log.d(TAG, constants.MSG_CREATE_OPERATION_REQUEST);
+        Log.d(TAG, ServiceConstants.MSG_CREATE_OPERATION_REQUEST);
         Operation operation = new Operation();
         operation.setType(type);
         operation.setOperationDate(date);
@@ -101,9 +93,9 @@ public class OperationService implements IService<Operation> {
         operation.setCurrencyId(currencyId);
         try {
         repo.insert(operation);
-        Log.d(TAG, constants.MSG_CREATE_OPERATION_SUCCESS);
+        Log.d(TAG, ServiceConstants.MSG_CREATE_OPERATION_SUCCESS);
         } catch (Exception e) {
-            Log.e(TAG, constants.MSG_CREATE_OPERATION_ERROR + e.getMessage(), e);
+            Log.e(TAG, ServiceConstants.MSG_CREATE_OPERATION_ERROR + e.getMessage(), e);
         }
     }
 
@@ -115,9 +107,8 @@ public class OperationService implements IService<Operation> {
      * @param comment комментарий
      */
     public void createWithoutValidation(int type, LocalDateTime date, long amount, String comment, int categoryId, int accountId, int currencyId) {
-        executorService.execute(() -> {
-            createOperationInTransaction(type, date, amount, comment, categoryId, accountId, currencyId);
-        });
+        executorService.execute(() -> createOperationInTransaction(type, date, amount, comment,
+                categoryId, accountId, currencyId));
     }
 
     /**
@@ -127,7 +118,7 @@ public class OperationService implements IService<Operation> {
      */
     public void delete(Operation operation, boolean softDelete) {
         if (operation == null) {
-            Log.e(TAG, constants.MSG_DELETE_OPERATION_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_DELETE_OPERATION_NOT_FOUND);
             return;
         }
         if (softDelete) {
@@ -142,23 +133,21 @@ public class OperationService implements IService<Operation> {
      * @param operation операция
      */
     private void delete(Operation operation) {
-        executorService.execute(() -> {
-            deleteOperationInTransaction(operation);
-        });
-    }  
-    
+        executorService.execute(() -> deleteOperationInTransaction(operation));
+    }
+
     /**
      * Транзакция для удаления операции
      * @param operation операция
      */
     @Transaction
     public void deleteOperationInTransaction(Operation operation) {
-        Log.d(TAG, constants.MSG_DELETE_OPERATION_REQUEST + getOperationText(operation));
+        Log.d(TAG, ServiceConstants.MSG_DELETE_OPERATION_REQUEST + getOperationText(operation));
         try {
             repo.delete(operation);
-            Log.d(TAG, constants.MSG_DELETE_OPERATION_SUCCESS + " " + getOperationText(operation));
+            Log.d(TAG, ServiceConstants.MSG_DELETE_OPERATION_SUCCESS + " " + getOperationText(operation));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
         }
     }   
 
@@ -189,6 +178,16 @@ public class OperationService implements IService<Operation> {
      */
     public LiveData<List<Operation>> getAllByAccount(int accountId, EntityFilter filter) {
         return repo.getAllByAccount(accountId, filter);
+    }
+
+    /**
+     * Получить все операции по счету (синхронно)
+     * @param accountId ID счета
+     * @param filter фильтр для выборки операций
+     * @return список операций
+     */
+    public List<Operation> getAllByAccountSync(int accountId, EntityFilter filter) {
+        return repo.getAllByAccountSync(accountId, filter);
     }
 
     /**
@@ -373,8 +372,7 @@ public class OperationService implements IService<Operation> {
         LocalDateTime date = operation.getOperationDate();
         long amount = operation.getAmount();
         int categoryId = operation.getCategoryId();
-        String text = "Тип: " + type + ", Дата: " + date + ", Сумма: " + amount + ", Категория: " + categoryId;
-        return text;
+        return "Тип: " + type + ", Дата: " + date + ", Сумма: " + amount + ", Категория: " + categoryId;
     }
 
     /**
@@ -425,12 +423,10 @@ public class OperationService implements IService<Operation> {
      */
     public void restore(Operation deletedOperation) {
         if (deletedOperation == null) {
-            Log.e(TAG, constants.MSG_RESTORE_OPERATION_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_RESTORE_OPERATION_NOT_FOUND);
             return;
         }
-        executorService.execute(() -> {
-            restoreOperationInTransaction(deletedOperation);
-        });
+        executorService.execute(() -> restoreOperationInTransaction(deletedOperation));
     }
     
     /**
@@ -439,16 +435,16 @@ public class OperationService implements IService<Operation> {
      */
     @Transaction
     private void restoreOperationInTransaction(Operation deletedOperation) {
-        Log.d(TAG, constants.MSG_RESTORE_OPERATION_REQUEST + getOperationText(deletedOperation));
+        Log.d(TAG, ServiceConstants.MSG_RESTORE_OPERATION_REQUEST + getOperationText(deletedOperation));
         deletedOperation.setDeleteTime(null);
         deletedOperation.setDeletedBy(null);
         deletedOperation.setUpdateTime(LocalDateTime.now());
         deletedOperation.setUpdatedBy(user);
         try {
             repo.update(deletedOperation);
-            Log.d(TAG, constants.MSG_RESTORE_OPERATION_SUCCESS + getOperationText(deletedOperation));
+            Log.d(TAG, ServiceConstants.MSG_RESTORE_OPERATION_SUCCESS + getOperationText(deletedOperation));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_RESTORE_OPERATION_ERROR, getOperationText(deletedOperation)) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_RESTORE_OPERATION_ERROR, getOperationText(deletedOperation)) + e.getMessage(), e);
         }
     }
 
@@ -457,9 +453,7 @@ public class OperationService implements IService<Operation> {
      * @param operation операция
      */
     private void softDelete(Operation operation) {
-        executorService.execute(() -> {
-            softDeleteOperationInTransaction(operation);
-        });
+        executorService.execute(() -> softDeleteOperationInTransaction(operation));
     }
 
     /**
@@ -469,14 +463,14 @@ public class OperationService implements IService<Operation> {
      */
     @Transaction
     public void softDeleteOperationInTransaction(Operation operation) {
-        Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_REQUEST + getOperationText(operation));
+        Log.d(TAG, ServiceConstants.MSG_SOFT_DELETE_OPERATION_REQUEST + getOperationText(operation));
         operation.setDeleteTime(LocalDateTime.now());
         operation.setDeletedBy(user);
         try {
             repo.update(operation);
-            Log.d(TAG, constants.MSG_SOFT_DELETE_OPERATION_SUCCESS + getOperationText(operation));
+            Log.d(TAG, ServiceConstants.MSG_SOFT_DELETE_OPERATION_SUCCESS + getOperationText(operation));
         } catch (Exception e) {
-            Log.e(TAG, String.format(constants.MSG_SOFT_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
+            Log.e(TAG, String.format(ServiceConstants.MSG_SOFT_DELETE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
         }
     }
 
@@ -486,19 +480,19 @@ public class OperationService implements IService<Operation> {
      */
     public void update(Operation operation) {
         if (operation == null) {
-            Log.e(TAG, constants.MSG_UPDATE_OPERATION_NOT_FOUND);
+            Log.e(TAG, ServiceConstants.MSG_UPDATE_OPERATION_NOT_FOUND);
             return;
         }
 
         executorService.execute(() -> {
             try {
-                Log.d(TAG, constants.MSG_UPDATE_OPERATION_REQUEST + getOperationText(operation));
+                Log.d(TAG, ServiceConstants.MSG_UPDATE_OPERATION_REQUEST + getOperationText(operation));
                 operation.setUpdateTime(LocalDateTime.now());
                 operation.setUpdatedBy(user);
                 repo.update(operation);
-                Log.d(TAG, constants.MSG_UPDATE_OPERATION_SUCCESS + getOperationText(operation));
+                Log.d(TAG, ServiceConstants.MSG_UPDATE_OPERATION_SUCCESS + getOperationText(operation));
             } catch (Exception e) {
-                Log.e(TAG, String.format(constants.MSG_UPDATE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
+                Log.e(TAG, String.format(ServiceConstants.MSG_UPDATE_OPERATION_ERROR, getOperationText(operation)) + e.getMessage(), e);
             }
         });
     }
@@ -602,10 +596,10 @@ public class OperationService implements IService<Operation> {
     
     /**
      * Получает общую сумму операций за день
-     * @param date дата
-     * @param type тип операций
+     * @param date дата 
+     * @param operationType тип операций (ALL, INCOME, EXPENSE)
      * @param currencyId ID валюты
-     * @param entityFilter фильтр сущностей
+     * @param entityFilter фильтр сущностей (ACTIVE, DELETED, ALL)
      * @return общая сумма операций за день
      */
     public LiveData<Long> getTotalAmountByDay(LocalDateTime date, 
@@ -626,8 +620,8 @@ public class OperationService implements IService<Operation> {
      * Получает общую сумму операций за месяц
      * @param year год
      * @param month месяц
-     * @param type тип операций
-     * @param entityFilter фильтр сущностей
+     * @param operationType тип операций (ALL, INCOME, EXPENSE)
+     * @param entityFilter фильтр сущностей (ACTIVE, DELETED, ALL)
      * @return общая сумма операций за месяц
      */
     public LiveData<Long> getTotalAmountByMonth(String year, 
@@ -644,8 +638,8 @@ public class OperationService implements IService<Operation> {
     /**
      * Получает общую сумму операций за год
      * @param year год
-     * @param type тип операций
-     * @param entityFilter фильтр сущностей
+     * @param operationType тип операций (ALL, INCOME, EXPENSE)
+     * @param entityFilter фильтр сущностей (ACTIVE, DELETED, ALL)
      * @return общая сумма операций за год
      */
     public LiveData<Long> getTotalAmountByYear(String year, 
@@ -663,7 +657,7 @@ public class OperationService implements IService<Operation> {
      * @param startDate начало периода
      * @param endDate конец периода
      * @param currencyId ID валюты
-     * @param entityFilter фильтр сущностей
+     * @param entityFilter фильтр сущностей (ACTIVE, DELETED, ALL)  
      * @return общая сумма операций за период
      */
     public LiveData<Long> getTotalAmountByDateRange(LocalDateTime startDate, 

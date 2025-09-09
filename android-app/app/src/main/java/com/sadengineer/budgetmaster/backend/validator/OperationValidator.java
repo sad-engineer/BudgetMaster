@@ -16,7 +16,6 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_OPERATION_CURRENCY_ID_INVALID;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_OPERATION_CURRENCY_ID_NOT_FOUND;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_OPERATION_AMOUNT_EMPTY;
-
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.OPERATION_TYPE_INCOME;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.OPERATION_TYPE_EXPENSE;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_AMOUNT_VALUE;

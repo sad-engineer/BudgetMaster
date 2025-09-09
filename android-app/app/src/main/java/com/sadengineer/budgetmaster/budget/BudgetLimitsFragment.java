@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.budget;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseListFragment;      
 import com.sadengineer.budgetmaster.backend.entity.Budget;
-import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter; 
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
@@ -18,7 +16,6 @@ import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.start.StartScreenViewModel;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Фрагмент для отображения лимитов бюджетов

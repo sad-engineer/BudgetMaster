@@ -10,7 +10,6 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CATEGORY_TYPE_INVALID;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CATEGORY_PARENT_ID_INVALID;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_CATEGORY_PARENT_ID_NOT_FOUND;
-
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_TITLE_LENGTH;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.TITLE_PATTERN;

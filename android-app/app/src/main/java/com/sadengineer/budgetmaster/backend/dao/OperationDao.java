@@ -182,6 +182,18 @@ public interface OperationDao {
     LiveData<List<Operation>> getAllByAccount(int accountId, EntityFilter filter);
 
     /**
+     * Получает все операции по счету (синхронно)
+     * @param accountId ID счета
+     * @param filter фильтр для выборки операций
+     * @return список операций
+     */
+    @Query("SELECT * FROM operations WHERE accountId = :accountId AND " +
+           "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
+           "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
+           "(:filter = 'ALL'))")
+    List<Operation> getAllByAccountSync(int accountId, EntityFilter filter);
+    
+    /**
      * Получает все операции по категории
      * @param categoryId ID категории
      * @return все операции по категории

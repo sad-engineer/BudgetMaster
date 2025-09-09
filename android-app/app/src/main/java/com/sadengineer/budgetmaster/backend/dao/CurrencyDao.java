@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import androidx.lifecycle.LiveData;
-import androidx.core.util.Pair;
 
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
@@ -208,7 +207,7 @@ public interface CurrencyDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL')) ORDER BY id ASC")
-    LiveData<List<Integer>> getAvalibleIds(EntityFilter filter);
+    LiveData<List<Integer>> getAvailableIds(EntityFilter filter);
 
     /**
      * Получает список доступных ID валют по фильтру (синхронно)
@@ -219,6 +218,6 @@ public interface CurrencyDao {
            "((:filter = 'ACTIVE' AND deleteTime IS NULL) OR " +
            "(:filter = 'DELETED' AND deleteTime IS NOT NULL) OR " +
            "(:filter = 'ALL')) ORDER BY id ASC")
-    List<Integer> getAvalibleIdsSync(EntityFilter filter);
+    List<Integer> getAvailableIdsSync(EntityFilter filter);
     
 } 

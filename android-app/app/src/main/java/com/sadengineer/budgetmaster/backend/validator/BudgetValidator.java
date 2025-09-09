@@ -9,7 +9,6 @@ import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CURRENCY_ID_INVALID;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_CURRENCY_ID_NOT_FOUND;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.ERROR_BUDGET_AMOUNT_EMPTY;
-
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MIN_AMOUNT_VALUE;
 import static com.sadengineer.budgetmaster.backend.constants.ValidationConstants.MAX_AMOUNT_VALUE;
 

@@ -10,8 +10,6 @@ import androidx.lifecycle.Observer;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
-import com.sadengineer.budgetmaster.backend.util.CurrencyConverter;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +76,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         Log.d(TAG, "Инициализация калькулятора бюджетов...");
         
         // Подписываемся на изменения списка валют
-        LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvalibleIds(EntityFilter.ACTIVE);
+        LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvailableIds(EntityFilter.ACTIVE);
         
         if (currencyIdsLiveData != null) {
             currencyIdsObserver = new Observer<List<Integer>>() {
@@ -148,7 +146,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         }
         
         // Получаем актуальный список валют
-        LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvalibleIds(EntityFilter.ACTIVE);
+        LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvailableIds(EntityFilter.ACTIVE);
         
         if (currencyIdsLiveData != null) {
             List<Integer> currentIds = currencyIdsLiveData.getValue();
@@ -298,7 +296,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         
         // Отписываемся от LiveData для предотвращения утечек памяти
         if (currencyIdsObserver != null) {
-            LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvalibleIds(EntityFilter.ACTIVE);
+            LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvailableIds(EntityFilter.ACTIVE);
             if (currencyIdsLiveData != null) {
                 currencyIdsLiveData.removeObserver(currencyIdsObserver);
             }

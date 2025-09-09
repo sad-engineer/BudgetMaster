@@ -3,12 +3,11 @@ package com.sadengineer.budgetmaster.backend.database;
 import android.content.Context;
 import android.util.Log;
 
-import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
+import com.sadengineer.budgetmaster.backend.constants.DatabaseConstants;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -19,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 public class DatabaseManager {
     private static final String TAG = "DatabaseManager";
 
-    private static final String DATABASE_NAME = RepositoryConstants.DATABASE_PATH;
+    private static final String DATABASE_NAME = DatabaseConstants.DATABASE_PATH;
     
     private final Context context;
     private final ExecutorService executor;
@@ -36,7 +35,7 @@ public class DatabaseManager {
     public CompletableFuture<Boolean> initializeDatabase() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.d(TAG, "Проверка инициализации базы данных...");
+                Log.d(TAG, DatabaseConstants.MSG_DATABASE_INIT_CHECK);
                 
                 // Получаем экземпляр базы данных
                 BudgetMasterDatabase database = BudgetMasterDatabase.getDatabase(context);
@@ -46,7 +45,7 @@ public class DatabaseManager {
                 boolean isNewDatabase = !databaseFile.exists();
                 
                 if (isNewDatabase) {
-                    Log.d(TAG, "База данных не существует, создаем новую...");
+                    Log.d(TAG, DatabaseConstants.MSG_DATABASE_NOT_EXISTS);
                     
                     // Проверяем, есть ли дефолтные данные
                     int currencyCount = database.currencyDao().count(EntityFilter.ALL);
@@ -54,47 +53,31 @@ public class DatabaseManager {
                     int accountCount = database.accountDao().count(EntityFilter.ALL);
                     
                     if (currencyCount == 0 && categoryCount == 0 && accountCount == 0) {
-                        Log.d(TAG, "Создаем дефолтные данные...");
+                        Log.d(TAG, DatabaseConstants.MSG_CREATE_DEFAULT_DATA);
                         DatabaseInitializer.initializeDefaultData(database);
-                        Log.d(TAG, "Дефолтные данные созданы успешно");
+                        Log.d(TAG, DatabaseConstants.MSG_DEFAULT_DATA_CREATED);
                     } else {
-                        Log.d(TAG, "Дефолтные данные уже существуют");
+                        Log.d(TAG, DatabaseConstants.MSG_DEFAULT_DATA_EXISTS);
                     }
                 } else {
-                    Log.d(TAG, "База данных уже существует");
+                    Log.d(TAG, DatabaseConstants.MSG_DATABASE_EXISTS);
                     
                     // Проверяем, есть ли данные
                     int currencyCount = database.currencyDao().count(EntityFilter.ALL);
                     int categoryCount = database.categoryDao().count(EntityFilter.ALL);
                     int accountCount = database.accountDao().count(EntityFilter.ALL);
                     
-                    Log.d(TAG, "Статистика данных: " + 
-                          currencyCount + " валют, " + 
-                          categoryCount + " категорий, " + 
-                          accountCount + " счетов");
+                    Log.d(TAG, String.format(DatabaseConstants.MSG_DATA_STATISTICS, 
+                          currencyCount, categoryCount, accountCount));
                 }
                 
-                Log.d(TAG, "Инициализация базы данных завершена");
+                Log.d(TAG, DatabaseConstants.MSG_DATABASE_INIT_COMPLETE);
                 return true;
                 
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка инициализации базы данных: " + e.getMessage(), e);
+                Log.e(TAG, DatabaseConstants.MSG_DATABASE_INIT_ERROR + e.getMessage(), e);
                 return false;
             }
         }, executor);
     }
-    
-    /**
-     * Выполняет операцию с базой данных в фоновом потоке
-     */
-    public <T> CompletableFuture<T> executeDatabaseOperation(Callable<T> operation) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return operation.call();
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка выполнения операции с БД: " + e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-        }, executor);
-    }
-} 
+}

@@ -18,7 +18,7 @@ import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
-import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
+import com.sadengineer.budgetmaster.backend.constants.DatabaseConstants;
 
 /**
  * Основной класс базы данных Room для BudgetMaster
@@ -61,9 +61,9 @@ public abstract class BudgetMasterDatabase extends RoomDatabase {
             synchronized (BudgetMasterDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(
-                        context.getApplicationContext(),
-                        BudgetMasterDatabase.class,
-                        RepositoryConstants.DATABASE_PATH
+                            context.getApplicationContext(),
+                            BudgetMasterDatabase.class,
+                            DatabaseConstants.DATABASE_PATH
                     )
                     .fallbackToDestructiveMigration()
                     .build();

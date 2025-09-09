@@ -47,7 +47,8 @@ public class ModelConstants {
     public static final int DEFAULT_ACCOUNT_TYPE = ACCOUNT_TYPE_CURRENT; // Расчетный счет по умолчанию
     public static final long DEFAULT_ACCOUNT_BALANCE = DEFAULT_AMOUNT; // Баланс счета по умолчанию
     public static final int DEFAULT_ACCOUNT_STATUS_OPEN = ACCOUNT_STATUS_OPEN; // Счет открыт по умолчанию
-    
+    public static final int DEFAULT_ACCOUNT_CURRENCY_ID = DEFAULT_CURRENCY_ID; // Валюта счета по умолчанию
+
     // Значения по умолчанию для кредитных карт
     public static final long DEFAULT_CREDIT_CARD_LIMIT = DEFAULT_AMOUNT; // Лимит кредитной карты по умолчанию
     public static final long DEFAULT_CREDIT_CARD_CATEGORY_ID = DEFAULT_AMOUNT; // Категория кредитной карты по умолчанию
@@ -70,7 +71,8 @@ public class ModelConstants {
     public static final int DEFAULT_CATEGORY_TYPE = CATEGORY_TYPE_PARENT; // Тип категории по умолчанию (родительская)
     public static final Integer DEFAULT_PARENT_ID = null; // ID категории по умолчанию (нет для родительской категории)
     public static final int DEFAULT_CATEGORY_ID = 1; // ID категории по умолчанию
-    
+    public static final int DEFAULT_CATEGORY_CURRENCY_ID = DEFAULT_CURRENCY_ID; // Валюта категории по умолчанию
+
     // ========================================
     // КОНСТАНТЫ ДЛЯ БЮДЖЕТОВ (BUDGET)
     // ========================================

@@ -151,11 +151,11 @@ public class Currency implements IEntity {
     }
     
     /**
-     * Конвертировать сумму из этой валюты в главную валюту
+     * Конвертировать сумму из этой валюты в отображаемую валюту
      * @param amount сумма в копейках в текущей валюте
-     * @return сумма с копейках в главной валюте
+     * @return сумма в копейках в отображаемой валюте
      */
-    public long convertToMainCurrency(long amount) {
+    public long convertToDisplayCurrency(long amount) {
         // Используем BigDecimal для точных вычислений
         return BigDecimal.valueOf(amount)
                 .multiply(BigDecimal.valueOf(exchangeRate))
@@ -164,11 +164,11 @@ public class Currency implements IEntity {
     }
     
     /**
-     * Конвертировать сумму из главной валюты в эту валюту
-     * @param amount сумма с копейках в главной валюте
-     * @return сумма с копейках в текущей валюте
+     * Конвертировать сумму из отображаемой валюты в эту валюту
+     * @param amount сумма в копейках в отображаемой валюте
+     * @return сумма в копейках в текущей валюте
      */
-    public long convertFromMainCurrency(long amount) {
+    public long convertFromDisplayCurrency(long amount) {
         if (exchangeRate == 0L) {
             throw new ArithmeticException("Обменный курс не может быть равен нулю");
         }
@@ -179,7 +179,7 @@ public class Currency implements IEntity {
     }
     
     /**
-     * Получить обратный курс (для конвертации из главной валюты)
+     * Получить обратный курс (для конвертации из отображаемой валюты)
      */
     public double getReverseExchangeRate() {
         if (exchangeRate == 0.0) {
