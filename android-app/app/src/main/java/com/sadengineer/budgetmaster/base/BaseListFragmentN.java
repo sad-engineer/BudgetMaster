@@ -6,8 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -18,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.sadengineer.budgetmaster.interfaces.SelectionAdapter;
+import com.sadengineer.budgetmaster.interfaces.ISelectionAdapter;
 import com.sadengineer.budgetmaster.backend.interfaces.IService;
 
 import java.io.Serializable;
@@ -30,13 +28,14 @@ import java.util.ArrayList;
  * Предоставляет общую функциональность для загрузки, отображения и управления списками данных.
  * 
  * @param <T> Тип сущности (должен реализовывать Serializable)
- * @param <A> Тип адаптера
+ * @param <A> Тип адаптера (должен реализовывать ISelectionAdapter<T>)
  * @param <V> Тип ViewModel (должен наследоваться от ViewModel)
- * @param <S> Тип сервиса
- * @param <C> Тип калькулятора
- * @param <F> Тип форматтера
+ * @param <S> Тип сервиса (должен реализовывать IService<T>)
+ * @param <C> Тип калькулятора (должен наследоваться от ViewModel)
  */
-public abstract class BaseListFragmentN<T extends Serializable, A extends RecyclerView.Adapter, V extends ViewModel, S extends IService<T>, C, F> extends Fragment {
+public abstract class BaseListFragmentN<T extends Serializable,
+        A extends RecyclerView.Adapter & ISelectionAdapter<T>,
+        V extends ViewModel, S extends IService<T>, C > extends Fragment {
     // тег для логирования
     protected final String TAG = this.getClass().getSimpleName();
 
@@ -64,8 +63,6 @@ public abstract class BaseListFragmentN<T extends Serializable, A extends Recycl
     protected int sourceTab;  // передает пейджер при создании фрагмента
     // Калькулятор для итоговых полей (если есть)
     private C calculator;
-    // форматтер для отображения итоговых полей (если есть)
-    private F formatter = new F();
     
     /**
      * Создает View для фрагмента
@@ -161,8 +158,8 @@ public abstract class BaseListFragmentN<T extends Serializable, A extends Recycl
      * Устанавливает режим выбора 
      */
     public void setSelectionMode(boolean enabled) {
-        if (adapter != null && adapter instanceof SelectionAdapter) {
-            ((SelectionAdapter) adapter).setSelectionMode(enabled);
+        if (adapter != null) {
+            adapter.setSelectionMode(enabled);
         }
     }
     
@@ -170,8 +167,8 @@ public abstract class BaseListFragmentN<T extends Serializable, A extends Recycl
      * Получает выбранные элементы
      */
     public List<T> getSelectedItems() {
-        if (adapter != null && adapter instanceof SelectionAdapter) {
-            return ((SelectionAdapter<T>) adapter).getSelectedItems();
+        if (adapter != null) {
+            return adapter.getSelectedItems();
         }
         return new ArrayList<>();
     }
@@ -191,11 +188,12 @@ public abstract class BaseListFragmentN<T extends Serializable, A extends Recycl
     
     /**
      * Возвращает экземпляр сервиса
-     * todo: Лучше слазу передавать настроенный сервис а не создавать его здесь
+     * todo: Лучше сразу передавать настроенный сервис а не создавать его здесь
      */
+    @SuppressWarnings("unchecked")
     protected S getServiceInstance() {
         try {
-            return getServiceClass().getDeclaredConstructor(Context.class, String.class)
+            return (S) serviceClass.getDeclaredConstructor(Context.class, String.class)
                     .newInstance(requireContext(), userName);
         } catch (Exception e) {
             Log.e(TAG, "Ошибка создания сервиса: " + e.getMessage(), e);

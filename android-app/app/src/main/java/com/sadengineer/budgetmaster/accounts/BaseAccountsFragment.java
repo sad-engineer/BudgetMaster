@@ -2,15 +2,12 @@ package com.sadengineer.budgetmaster.accounts;
 
 import android.util.Log;
 
-import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Account;
 import com.sadengineer.budgetmaster.backend.service.AccountService;
 import com.sadengineer.budgetmaster.base.BaseListFragmentN;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.calculators.AccountCalculatorViewModel;
 import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
-import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
-import com.sadengineer.budgetmaster.accounts.AccountsEditActivity;
 
 import java.util.List;
 
@@ -18,7 +15,11 @@ import java.util.List;
  * Базовый фрагмент для отображения счетов разных типов
  * Универсальный класс, который работает с любым типом счетов
  */
-public abstract class BaseAccountsFragment extends BaseListFragmentN<Account, AccountsAdapter, AccountsSharedViewModel, AccountService, AccountCalculatorViewModel, CurrencyAmountFormatter> {
+public abstract class BaseAccountsFragment extends BaseListFragmentN<Account,
+        AccountsAdapter, AccountsSharedViewModel, AccountService, AccountCalculatorViewModel> {
+    
+    // кулькулятор для итоговых полей
+    protected AccountCalculatorViewModel calculator;
     
     // Переменные класса, которые настраиваются в наследниках
     // тип счета
@@ -33,8 +34,6 @@ public abstract class BaseAccountsFragment extends BaseListFragmentN<Account, Ac
         this.viewModelClass = AccountsSharedViewModel.class;
         this.serviceClass = AccountService.class;
         this.editActivityClass = AccountsEditActivity.class;
-        this.calculator = new AccountCalculatorViewModel();
-        this.formatter = new CurrencyAmountFormatter();
         
         // инициализируем ресурсы (layoutResourceId, recyclerViewId, accountType)
         initializeResources();
@@ -46,7 +45,7 @@ public abstract class BaseAccountsFragment extends BaseListFragmentN<Account, Ac
      * Должен быть переопределен в наследниках
      */
     protected abstract void initializeResources();
-    
+
     /**
      * Возвращает параметры для загрузки данных
      */
@@ -69,18 +68,11 @@ public abstract class BaseAccountsFragment extends BaseListFragmentN<Account, Ac
 
     /**
      * Устанавливает данные в адаптер
+     * TODO
      */
     @Override
     protected void setAdapterData(List<Account> items) {
-        adapter.setAccounts(items);
-    }
-
-    /**
-     * Возвращает класс активности для редактирования
-     */
-    @Override
-    protected Class<?> getEditActivityClass() {
-        return AccountsEditActivity.class;
+        adapter.setItems(items);
     }
 
     /**
@@ -144,13 +136,6 @@ public abstract class BaseAccountsFragment extends BaseListFragmentN<Account, Ac
         }
     }
     
-    /**
-     * Выполняет удаление
-     */
-    @Override
-    protected void performDelete(AccountService service, Account item) {
-        service.delete(item, false);
-    }
 
     /**
      * Возвращает заголовок элемента для логирования

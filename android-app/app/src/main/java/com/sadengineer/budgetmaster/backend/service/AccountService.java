@@ -124,6 +124,7 @@ public class AccountService implements IService<Account> {
         executorService.execute(() -> create(title, null, null, null, null));
     }
 
+
     /** Создать новый счет с проверенными значениями 
      * @param title название счета  
      * @param currencyId ID валюты
@@ -162,6 +163,7 @@ public class AccountService implements IService<Account> {
             Log.e(TAG, String.format(ServiceConstants.MSG_CREATE_ACCOUNT_ERROR, title) + e.getMessage(), e);
         }
     }
+
 
     /**
      * Удалить счет (полное удаление - удаление строки из БД)

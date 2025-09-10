@@ -159,7 +159,14 @@ public class OperationService implements IService<Operation> {
     public LiveData<List<Operation>> getAll(EntityFilter filter) {
         return repo.getAll(filter);
     } 
-
+    
+    /**
+     * Получить все операции
+     * @return LiveData со списком всех операций
+     */
+    public LiveData<List<Operation>> getAll() {
+        return repo.getAll(EntityFilter.ALL);
+    }
     /**
      * Получить все операции по типу
      * @param type тип операции
@@ -279,6 +286,14 @@ public class OperationService implements IService<Operation> {
     public int getCount(EntityFilter filter) {
         return repo.count(filter);
     }
+
+    /**
+     * Подсчет операций
+     * @return количество операций
+     */ 
+    public int getCount() {
+        return repo.count(EntityFilter.ALL);
+    }
     
     /**
      * Подсчет операций по типу с фильтром
@@ -288,6 +303,15 @@ public class OperationService implements IService<Operation> {
      */
     public int getCountByType(int type, EntityFilter filter) {
         return repo.countByType(type, filter);
+    }
+
+    /**
+     * Подсчет операций по типу
+     * @param type тип операции
+     * @return количество операций по типу
+     */
+    public int getCountByType(int type) {
+        return repo.countByType(type, EntityFilter.ALL);
     }
     
     /**

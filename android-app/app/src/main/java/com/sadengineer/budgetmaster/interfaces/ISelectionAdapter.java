@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Интерфейс для адаптеров с поддержкой выбора
  */
-public interface SelectionAdapter<T> {
+public interface ISelectionAdapter<T> {
     /**
      * Включает или выключает режим выбора
      * @param enabled true - включить режим выбора, false - выключить
@@ -17,4 +17,10 @@ public interface SelectionAdapter<T> {
      * @return список выбранных элементов
      */
     List<T> getSelectedItems();
+
+    /**
+     * Устанавливает данные в адаптер
+     * @param items список элементов
+     */
+    void setItems(List<T> items);
 }

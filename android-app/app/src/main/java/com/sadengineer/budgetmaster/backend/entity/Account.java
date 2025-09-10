@@ -6,9 +6,7 @@ import androidx.room.TypeConverters;
 
 import com.sadengineer.budgetmaster.backend.converter.DateTimeConverter;
 import com.sadengineer.budgetmaster.backend.constants.RepositoryConstants;
-import com.sadengineer.budgetmaster.interfaces.IEntity;
-
-import java.io.Serializable;
+import com.sadengineer.budgetmaster.backend.interfaces.IEntity;
 
 import java.time.LocalDateTime;
 

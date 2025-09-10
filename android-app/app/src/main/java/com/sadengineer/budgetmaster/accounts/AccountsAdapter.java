@@ -15,6 +15,7 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.interfaces.ISelectionAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import java.util.Set;
 /**
  * Адаптер для отображения счетов в RecyclerView
  */
-public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
+public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> implements ISelectionAdapter<Account> {
     private static final String TAG = "AccountsAdapter";
 
     /** Имя пользователя по умолчанию */
@@ -217,11 +218,12 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      * Обновляет список счетов
      * @param accounts список счетов
      */
-    public void setAccounts(List<Account> accounts) {
+    public void setItems(List<Account> accounts) {
         this.accounts = accounts != null ? accounts : new ArrayList<>();
         loadCurrencyCache();
         notifyDataSetChanged();
     }
+    
     
     /**
      * Обновляет общую сумму для карточки "Итого"

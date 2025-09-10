@@ -1,4 +1,4 @@
-package com.sadengineer.budgetmaster.interfaces;
+package com.sadengineer.budgetmaster.backend.interfaces;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
