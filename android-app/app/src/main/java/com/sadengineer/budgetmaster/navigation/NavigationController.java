@@ -2,10 +2,10 @@ package com.sadengineer.budgetmaster.navigation;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationTree;
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationNode;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Контроллер навигации
@@ -38,7 +38,7 @@ public class NavigationController {
                 }
                 setIntentParameters(intent, params);
                 context.startActivity(intent);
-                Log.d(TAG, "Навигация вверх к " + node.name);
+                LogManager.d(TAG, "Навигация вверх к " + node.name);
             }
         }
     }
@@ -58,7 +58,7 @@ public class NavigationController {
                 }
                 setIntentParameters(intent, params);
                 context.startActivity(intent);
-                Log.d(TAG, "Навигация вниз к " + node.name);
+                LogManager.d(TAG, "Навигация вниз к " + node.name);
             }
         }
     }
@@ -77,7 +77,7 @@ public class NavigationController {
                 }
                 setIntentParameters(intent, params);
                 context.startActivity(intent);
-                Log.d(TAG, "Навигация влево к вкладке " + previousTab);
+                LogManager.d(TAG, "Навигация влево к вкладке " + previousTab);
             }
         }
     }
@@ -96,7 +96,7 @@ public class NavigationController {
                 }
                 setIntentParameters(intent, params);
                 context.startActivity(intent);
-                Log.d(TAG, "Навигация вправо к вкладке " + nextTab);
+                LogManager.d(TAG, "Навигация вправо к вкладке " + nextTab);
             }
         }
     }
@@ -105,25 +105,25 @@ public class NavigationController {
      * Переход к конкретной Activity
      */
     public void goTo(Class<?> targetActivity, boolean clearTop, String[] params) { 
-        Log.d(TAG, "NavigationController.goTo: Попытка перехода к " + targetActivity.getSimpleName());
+        LogManager.d(TAG, "NavigationController.goTo: Попытка перехода к " + targetActivity.getSimpleName());
         NavigationNode node = NavigationTree.navigateToActivity(targetActivity);
         if (node != null) {
-            Log.d(TAG, "NavigationController.goTo: Узел найден: " + node.name);
+            LogManager.d(TAG, "NavigationController.goTo: Узел найден: " + node.name);
             Intent intent = NavigationTree.createIntent(context, node, 0);
             if (intent != null) {
-                Log.d(TAG, "NavigationController.goTo: Intent создан успешно");
+                LogManager.d(TAG, "NavigationController.goTo: Intent создан успешно");
                 if (clearTop) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 }
                 setIntentParameters(intent, params);
-                Log.d(TAG, "NavigationController.goTo: Запускаем Activity");
+                LogManager.d(TAG, "NavigationController.goTo: Запускаем Activity");
                 context.startActivity(intent);
-                Log.d(TAG, "NavigationController.goTo: Activity запущена: " + node.name);
+                LogManager.d(TAG, "NavigationController.goTo: Activity запущена: " + node.name);
             } else {
-                Log.e(TAG, "NavigationController.goTo: Не удалось создать Intent для " + targetActivity.getSimpleName());
+                LogManager.e(TAG, "NavigationController.goTo: Не удалось создать Intent для " + targetActivity.getSimpleName());
             }
         } else {
-            Log.e(TAG, "NavigationController.goTo: Узел не найден для " + targetActivity.getSimpleName());
+            LogManager.e(TAG, "NavigationController.goTo: Узел не найден для " + targetActivity.getSimpleName());
         }
     }
     
@@ -140,7 +140,7 @@ public class NavigationController {
                 }
                 setIntentParameters(intent, params);
                 context.startActivity(intent);
-                Log.d(TAG, "Переход к " + node.name + " на вкладку " + tabIndex);
+                LogManager.d(TAG, "Переход к " + node.name + " на вкладку " + tabIndex);
             }
         }
     }
@@ -153,7 +153,7 @@ public class NavigationController {
         if (node != null) {
             Intent intent = NavigationTree.createIntent(context, node, 0);
             context.startActivity(intent);
-            Log.d(TAG, "Переход к главному экрану");
+            LogManager.d(TAG, "Переход к главному экрану");
         }
     }
 
@@ -174,7 +174,7 @@ public class NavigationController {
                 String valueStr = params[i + 1];
                 
                 if (name == null || valueStr == null) {
-                    Log.w(TAG, "Пропускаем null параметр: name=" + name + ", value=" + valueStr);
+                    LogManager.w(TAG, "Пропускаем null параметр: name=" + name + ", value=" + valueStr);
                     continue;
                 }
                 
@@ -195,7 +195,7 @@ public class NavigationController {
                         intent.putExtra(name, valueStr);
                     }
                 } catch (NumberFormatException e) {
-                    Log.w(TAG, "Не удалось преобразовать значение '" + valueStr + "' для параметра '" + name + "', используем как строку");
+                    LogManager.w(TAG, "Не удалось преобразовать значение '" + valueStr + "' для параметра '" + name + "', используем как строку");
                     intent.putExtra(name, valueStr);
                 }
             }

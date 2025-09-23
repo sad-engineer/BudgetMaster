@@ -1,11 +1,10 @@
 package com.sadengineer.budgetmaster.currencies;
 
-import android.util.Log;
-
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.base.BaseListFragment;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -108,17 +107,17 @@ public class CurrenciesListFragment extends BaseListFragment<Currency, CurrencyA
         adapter = new CurrencyAdapter();
         
         adapter.setClickListener(currency -> {
-            Log.d(TAG, "Клик по валюте: " + currency.getId());
+            LogManager.d(TAG, "Клик по валюте: " + currency.getId());
             goToEdit(currency);
         });
         
         adapter.setLongClickListener(currency -> {
-            Log.d(TAG, "Длительный клик по валюте: " + currency.getId());
+            LogManager.d(TAG, "Длительный клик по валюте: " + currency.getId());
             showDeleteConfirmationDialog(currency);
         });
         
         adapter.setSelectionListener(selectedCount -> {
-            Log.d(TAG, "Выбрано валют: " + selectedCount);
+            LogManager.d(TAG, "Выбрано валют: " + selectedCount);
             // Уведомляем Activity о количестве выбранных элементов
             if (getActivity() instanceof CurrenciesActivity) {
                 ((CurrenciesActivity) getActivity()).updateSelectionCount(selectedCount);

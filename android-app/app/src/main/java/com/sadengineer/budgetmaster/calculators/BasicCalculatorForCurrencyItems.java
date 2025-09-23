@@ -1,15 +1,18 @@
 package com.sadengineer.budgetmaster.calculators;
 
 import android.app.Application;
-import android.util.Log;
+ 
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +63,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         // Инициализируем сервисы
         currencyService = new CurrencyService(application, userName);
         
-        Log.d(TAG, "BasicCalculatorForCurrencyItems создан");
+        LogManager.d(TAG, "BasicCalculatorForCurrencyItems создан");
     }
 
     /**
@@ -69,11 +72,11 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
      */
     public void initialize() {
         if (isInitialized) {
-            Log.d(TAG, "Калькулятор уже инициализирован");
+            LogManager.d(TAG, "Калькулятор уже инициализирован");
             return;
         }
         
-        Log.d(TAG, "Инициализация калькулятора бюджетов...");
+        LogManager.d(TAG, "Инициализация калькулятора бюджетов...");
         
         // Подписываемся на изменения списка валют
         LiveData<List<Integer>> currencyIdsLiveData = currencyService.getAvailableIds(EntityFilter.ACTIVE);
@@ -83,11 +86,11 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
                 @Override
                 public void onChanged(List<Integer> newCurrencyIds) {
                     if (newCurrencyIds != null && !newCurrencyIds.isEmpty()) {
-                        Log.d(TAG, "Получены ID валют: " + newCurrencyIds);
+                        LogManager.d(TAG, "Получены ID валют: " + newCurrencyIds);
                         availableCurrencyIds.setValue(newCurrencyIds);
                         updateForNewCurrencyIds(newCurrencyIds);
                     } else {
-                        Log.d(TAG, "Список валют пуст или null");
+                        LogManager.d(TAG, "Список валют пуст или null");
                         availableCurrencyIds.setValue(null);
                         clearCurrencyAmounts();
                     }
@@ -95,11 +98,11 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
             };
             currencyIdsLiveData.observeForever(currencyIdsObserver);
         } else {
-            Log.w(TAG, "currencyService.getAvalibleIds() вернул null");
+            LogManager.w(TAG, "currencyService.getAvalibleIds() вернул null");
         }
         
         isInitialized = true;
-        Log.d(TAG, "Калькулятор инициализирован");
+        LogManager.d(TAG, "Калькулятор инициализирован");
     }
 
     /**
@@ -129,7 +132,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
      */
     private void clearCurrencyAmounts() {
         currencyAmounts.clear();
-        Log.d(TAG, "Суммы по валютам очищены");
+        LogManager.d(TAG, "Суммы по валютам очищены");
 
     }
 
@@ -138,7 +141,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
      * Перезагружает список валют и суммы бюджетов
      */
     public void refreshData() {
-        Log.d(TAG, "Принудительное обновление данных...");
+        LogManager.d(TAG, "Принудительное обновление данных...");
         
         if (!isInitialized) {
             initialize();
@@ -151,13 +154,13 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         if (currencyIdsLiveData != null) {
             List<Integer> currentIds = currencyIdsLiveData.getValue();
             if (currentIds != null && !currentIds.isEmpty()) {
-                Log.d(TAG, "Обновляем данные для " + currentIds.size() + " валют");
+                LogManager.d(TAG, "Обновляем данные для " + currentIds.size() + " валют");
                 updateForNewCurrencyIds(currentIds);
             } else {
-                Log.d(TAG, "Текущий список валют пуст, ждем обновления...");
+                LogManager.d(TAG, "Текущий список валют пуст, ждем обновления...");
             }
         } else {
-            Log.w(TAG, "Не удалось получить список валют для обновления");
+            LogManager.w(TAG, "Не удалось получить список валют для обновления");
         }
     }
 
@@ -194,10 +197,10 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
     protected void setCurrencyAmount(int currencyId, long amount) {
         MutableLiveData<Long> amountLiveData = currencyAmounts.get(currencyId);
         if (amountLiveData != null) {
-            Log.d(TAG, "setCurrencyAmount: устанавливаем сумму для валюты " + currencyId + ": " + amount);
+            LogManager.d(TAG, "setCurrencyAmount: устанавливаем сумму для валюты " + currencyId + ": " + amount);
             amountLiveData.setValue(amount);
         } else {
-            Log.w(TAG, "setCurrencyAmount: валюта с ID " + currencyId + " не найдена в карте сумм");
+            LogManager.w(TAG, "setCurrencyAmount: валюта с ID " + currencyId + " не найдена в карте сумм");
         }
     }
     
@@ -208,7 +211,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
     protected void initializeCurrencyAmount(int currencyId) {
         if (!currencyAmounts.containsKey(currencyId)) {
             currencyAmounts.put(currencyId, new MutableLiveData<>(0L));
-            Log.d(TAG, "Инициализирована сумма для валюты " + currencyId);
+            LogManager.d(TAG, "Инициализирована сумма для валюты " + currencyId);
         }
     }
     
@@ -233,7 +236,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
      * @param currencyId ID валюты для отображения
      */
     public void setDisplayCurrencyId(int currencyId) {
-        Log.d(TAG, "Установка отображаемой валюты: " + currencyId);
+        LogManager.d(TAG, "Установка отображаемой валюты: " + currencyId);
         displayCurrencyId.setValue(currencyId);
         
         // Пересчитываем результат математической операции с новой валютой
@@ -267,25 +270,25 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
         try {
             // Получаем курс исходной валюты к рублю
             double fromRate = currencyService.getExchangeRateById(fromCurrencyId);
-            Log.d(TAG, "Получен курс для валюты " + fromCurrencyId + ": " + fromRate);
+            LogManager.d(TAG, "Получен курс для валюты " + fromCurrencyId + ": " + fromRate);
             
             // Получаем курс целевой валюты к рублю
             double toRate = currencyService.getExchangeRateById(toCurrencyId);
-            Log.d(TAG, "Получен курс для валюты " + toCurrencyId + ": " + toRate);
+            LogManager.d(TAG, "Получен курс для валюты " + toCurrencyId + ": " + toRate);
             
             // Если курс не найден, используем 1.0
             if (fromRate == 0 || toRate == 0) {
-                Log.w(TAG, "Курс валюты не найден: from=" + fromCurrencyId + ", to=" + toCurrencyId + ", используем 1.0");
+                LogManager.w(TAG, "Курс валюты не найден: from=" + fromCurrencyId + ", to=" + toCurrencyId + ", используем 1.0");
                 return 1.0;
             }
             
             // Конвертируем: fromCurrency -> RUB -> toCurrency
             double exchangeRate = fromRate / toRate;
-            Log.d(TAG, "Курс обмена " + fromCurrencyId + " -> " + toCurrencyId + ": " + exchangeRate + " (fromRate=" + fromRate + ", toRate=" + toRate + ")");
+            LogManager.d(TAG, "Курс обмена " + fromCurrencyId + " -> " + toCurrencyId + ": " + exchangeRate + " (fromRate=" + fromRate + ", toRate=" + toRate + ")");
             
             return exchangeRate;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка получения курса валют: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка получения курса валют: " + e.getMessage(), e);
             return 1.0; // Возвращаем 1.0 в случае ошибки
         }
     }
@@ -303,7 +306,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
             currencyIdsObserver = null;
         }
         
-        Log.d(TAG, "BasicCalculatorForCurrencyItems очищен");
+        LogManager.d(TAG, "BasicCalculatorForCurrencyItems очищен");
     }
 }
 
@@ -356,7 +359,7 @@ public abstract class BasicCalculatorForCurrencyItems extends AndroidViewModel {
  *    
  *    // Подписываемся на изменения отображаемой валюты
  *    calculator.getDisplayCurrencyId().observe(this, currencyId -> {
- *        Log.d(TAG, "Отображаемая валюта: " + currencyId);
+ *        LogManager.d(TAG, "Отображаемая валюта: " + currencyId);
  *    });
  *    
  *    // Устанавливаем новую отображаемую валюту

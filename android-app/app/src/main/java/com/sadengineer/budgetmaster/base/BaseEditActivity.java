@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.base;
-
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -9,6 +8,7 @@ import android.widget.TextView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Базовый класс для экранов редактирования сущностей.
@@ -57,7 +57,7 @@ public abstract class BaseEditActivity<T> extends BaseNavigationActivity {
                 finish();
             }
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при сохранении", e);
+            LogManager.e(TAG, "Ошибка при сохранении", e);
         }
     }
 

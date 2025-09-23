@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.budget;
 
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -13,6 +13,7 @@ import com.sadengineer.budgetmaster.base.BaseContentActivity;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 public class BudgetActivity extends BaseContentActivity {
 
@@ -41,7 +42,7 @@ public class BudgetActivity extends BaseContentActivity {
         // Обработчики кнопок бюджета
         setupButtons();
         // Кнопки скрыты, поэтому режим выбора не нужен
-        Log.d(TAG, "Режим выбора отключен - кнопки скрыты");
+        LogManager.d(TAG, "Режим выбора отключен - кнопки скрыты");
         // Инициализация ViewPager2 и TabLayout
         setupViewPager();
     }
@@ -57,7 +58,7 @@ public class BudgetActivity extends BaseContentActivity {
         addBudgetButton.setVisibility(View.GONE);
         deleteBudgetButton.setVisibility(View.GONE);
         
-        Log.d(TAG, "Кнопки создания/удаления бюджетов скрыты - бюджеты управляются через категории");
+        LogManager.d(TAG, "Кнопки создания/удаления бюджетов скрыты - бюджеты управляются через категории");
     }
     
     /**

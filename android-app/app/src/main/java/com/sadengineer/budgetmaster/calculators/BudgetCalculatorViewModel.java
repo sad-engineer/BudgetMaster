@@ -1,14 +1,16 @@
 package com.sadengineer.budgetmaster.calculators;
 
 import android.app.Application;
-import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+
 import com.sadengineer.budgetmaster.backend.service.BudgetService;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.List;
 import java.util.Map;
@@ -38,12 +40,12 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
         // Инициализируем сервис бюджетов
         budgetService = new BudgetService(application, "BudgetCalculator");
         
-        Log.d(TAG, "BudgetCalculatorViewModel создан");
+        LogManager.d(TAG, "BudgetCalculatorViewModel создан");
     }
 
     @Override
     protected void updateForNewCurrencyIds(List<Integer> newCurrencyIds) {
-        Log.d(TAG, "Обновление сумм бюджетов для " + newCurrencyIds.size() + " валют");
+        LogManager.d(TAG, "Обновление сумм бюджетов для " + newCurrencyIds.size() + " валют");
         
         // Сбрасываем счетчики
         loadedCurrenciesCount = 0;
@@ -62,8 +64,8 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
             // Метод уже вызывается в фоновом потоке, выполняем пересчет напрямую
             Integer displayCurrencyId = getDisplayCurrencyId().getValue();
             
-            Log.d(TAG, "recalculateResultAmount: displayCurrencyId = " + displayCurrencyId);
-            Log.d(TAG, "recalculateResultAmount: currencyAmounts.size() = " + getCurrencyAmounts().size());
+            LogManager.d(TAG, "recalculateResultAmount: displayCurrencyId = " + displayCurrencyId);
+            LogManager.d(TAG, "recalculateResultAmount: currencyAmounts.size() = " + getCurrencyAmounts().size());
             
             if (displayCurrencyId != null) {
                 long totalAmount = 0L;
@@ -73,20 +75,20 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
                     final Integer currencyId = entry.getKey();
                     final Long value = entry.getValue().getValue();
                     
-                    Log.d(TAG, "recalculateResultAmount: валюта " + currencyId + " = " + value);
+                    LogManager.d(TAG, "recalculateResultAmount: валюта " + currencyId + " = " + value);
                     
                     if (value != null && value != 0) {
                         long convertedAmount = convertAmountToDisplayCurrency(value, currencyId, displayCurrencyId);
                         totalAmount += convertedAmount;
-                        Log.d(TAG, "Валюта " + currencyId + ": " + value + " -> " + convertedAmount);
+                        LogManager.d(TAG, "Валюта " + currencyId + ": " + value + " -> " + convertedAmount);
                     }
                 }
                 
-                Log.d(TAG, "Пересчет общей суммы бюджетов: " + totalAmount);
+                LogManager.d(TAG, "Пересчет общей суммы бюджетов: " + totalAmount);
                 // Обновляем UI в главном потоке
                 setResultAmount(totalAmount);
             } else {
-                Log.w(TAG, "displayCurrencyId is null, не можем пересчитать сумму");
+                LogManager.w(TAG, "displayCurrencyId is null, не можем пересчитать сумму");
                 setResultAmount(0L);
             }
         });
@@ -97,7 +99,7 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
      * @param currencyId ID валюты
      */
     private void loadBudgetAmount(Integer currencyId) {
-        Log.d(TAG, "Загрузка суммы бюджета для валюты ID: " + currencyId);
+        LogManager.d(TAG, "Загрузка суммы бюджета для валюты ID: " + currencyId);
         
         LiveData<Long> serviceAmount = budgetService.getTotalAmountByCurrency(currencyId, EntityFilter.ACTIVE);
         
@@ -106,35 +108,35 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
                 @Override
                 public void onChanged(Long newAmount) {
                     if (newAmount != null) {
-                        Log.d(TAG, "Валюты ID " + currencyId + ": сумма " + newAmount);
+                        LogManager.d(TAG, "Валюты ID " + currencyId + ": сумма " + newAmount);
                         setCurrencyAmount(currencyId, newAmount);
                     } else {
-                        Log.d(TAG, "Валюты ID " + currencyId + ": сумма null, устанавливаем 0");
+                        LogManager.d(TAG, "Валюты ID " + currencyId + ": сумма null, устанавливаем 0");
                         setCurrencyAmount(currencyId, 0L);
                     }
                     
                     // Увеличиваем счетчик загруженных валют
                     loadedCurrenciesCount++;
-                    Log.d(TAG, "Загружено валют: " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
+                    LogManager.d(TAG, "Загружено валют: " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
                     
                     // Если все валюты загружены, выполняем пересчет
                     if (loadedCurrenciesCount >= totalCurrenciesCount) {
-                        Log.d(TAG, "Все валюты загружены, выполняем пересчет");
+                        LogManager.d(TAG, "Все валюты загружены, выполняем пересчет");
                         recalculateResultAmount();
                     }
                 }
             });
         } else {
-            Log.w(TAG, "budgetService.getTotalAmountByCurrency() вернул null для валюты ID: " + currencyId);
+            LogManager.w(TAG, "budgetService.getTotalAmountByCurrency() вернул null для валюты ID: " + currencyId);
             setCurrencyAmount(currencyId, 0L);
             
             // Увеличиваем счетчик загруженных валют
             loadedCurrenciesCount++;
-            Log.d(TAG, "Загружено валют (null): " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
+            LogManager.d(TAG, "Загружено валют (null): " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
             
             // Если все валюты загружены, выполняем пересчет
             if (loadedCurrenciesCount >= totalCurrenciesCount) {
-                Log.d(TAG, "Все валюты загружены (null), выполняем пересчет");
+                LogManager.d(TAG, "Все валюты загружены (null), выполняем пересчет");
                 recalculateResultAmount();
             }
         }
@@ -157,13 +159,13 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
  *    calculatorViewModel.getResultAmount().observe(this, totalAmount -> {
  *        // totalAmount - общая сумма всех бюджетов в отображаемой валюте
  *        // Автоматически обновляется при изменении данных в базе
- *        Log.d(TAG, "Общая сумма бюджетов: " + totalAmount);
+ *        LogManager.d(TAG, "Общая сумма бюджетов: " + totalAmount);
  *    });
  * 
  * 4. УПРАВЛЕНИЕ ОТОБРАЖАЕМОЙ ВАЛЮТОЙ:
  *    // Получить текущую отображаемую валюту
  *    calculatorViewModel.getDisplayCurrencyId().observe(this, currencyId -> {
- *        Log.d(TAG, "Отображаемая валюта: " + currencyId);
+ *        LogManager.d(TAG, "Отображаемая валюта: " + currencyId);
  *    });
  *    
  *    // Установить новую отображаемую валюту
@@ -203,7 +205,7 @@ public class BudgetCalculatorViewModel extends BasicCalculatorForCurrencyItems {
  *         
  *         // Подписываемся на изменения отображаемой валюты
  *         calculatorViewModel.getDisplayCurrencyId().observe(this, currencyId -> {
- *             Log.d(TAG, "Валюта отображения изменена на: " + currencyId);
+ *             LogManager.d(TAG, "Валюта отображения изменена на: " + currencyId);
  *         });
  *     }
  *     

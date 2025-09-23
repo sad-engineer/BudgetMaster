@@ -1,13 +1,10 @@
 package com.sadengineer.budgetmaster.base;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -18,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sadengineer.budgetmaster.interfaces.ISelectionAdapter;
 import com.sadengineer.budgetmaster.backend.interfaces.IService;
+import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.io.Serializable;
 import java.util.List;
@@ -31,52 +30,53 @@ import java.util.ArrayList;
  * @param <A> Тип адаптера (должен реализовывать ISelectionAdapter<T>)
  * @param <V> Тип ViewModel (должен наследоваться от ViewModel)
  * @param <S> Тип сервиса (должен реализовывать IService<T>)
- * @param <C> Тип калькулятора (должен наследоваться от ViewModel)
  */
 public abstract class BaseListFragmentN<T extends Serializable,
         A extends RecyclerView.Adapter & ISelectionAdapter<T>,
-        V extends ViewModel, S extends IService<T>, C > extends Fragment {
+        V extends ViewModel, S extends IService<T> > extends Fragment {
     // тег для логирования
     protected final String TAG = this.getClass().getSimpleName();
 
-    /** Имя пользователя по умолчанию */
-    /** TODO: передлать на получение имени пользователя из SharedPreferences */
-    private String userName = "default_user";
+    /* Имя пользователя по умолчанию */
+    /* TODO: переделать на получение имени пользователя из SharedPreferences */
+    protected final String mUserName = "default_user";
     
     // переменные класса, которые используются во всех фрагментах
-    protected RecyclerView recyclerView;
-    protected A adapter;
-    protected V viewModel;
+    protected RecyclerView mRecyclerView;
+    protected A mAdapter;
+    protected V mViewModel;
 
     // --- Переменные класса, которые настраиваются в наследниках ---
     // ресурс разметки
-    protected int layoutResourceId;
+    protected int mLayoutResourceId;
     // ресурс recyclerView
-    protected int recyclerViewId;
+    protected int mRecyclerViewId;
     // класс viewModel 
-    protected Class<V> viewModelClass;
-    // класс сервиса
-    protected Class<S> serviceClass;
+    protected Class<V> mViewModelClass;
+    // экземпляр сервиса
+    protected S mService;
     // класс активности для редактирования
-    protected Class<?> editActivityClass;
+    protected Class<?> mEditActivityClass;
     // номер вкладки
-    protected int sourceTab;  // передает пейджер при создании фрагмента
-    // Калькулятор для итоговых полей (если есть)
-    private C calculator;
+    protected int mSourceTab;  // передает пейджер при создании фрагмента
+    
     
     /**
      * Создает View для фрагмента
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(layoutResourceId, container, false);
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(mLayoutResourceId, container, false);
         
         // Настраиваем RecyclerView
-        recyclerView = view.findViewById(recyclerViewId);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView = view.findViewById(mRecyclerViewId);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // ViewModel из Activity
-        viewModel = new ViewModelProvider(requireActivity()).get(viewModelClass);
+        mViewModel = new ViewModelProvider(requireActivity()).get(mViewModelClass);
         // Создаем адаптер
         setupAdapter();
         // Наблюдаем за режимом выбора из ViewModel
@@ -101,14 +101,14 @@ public abstract class BaseListFragmentN<T extends Serializable,
      * Загружает данные
      */
     protected void loadData() {
-        Log.d(TAG, "Загрузка данных с параметрами: " + getLoadParameters());
+        LogManager.d(TAG, "Загрузка данных с параметрами: " + getLoadParameters());
         
         try {
             // Вызываем абстрактный метод для загрузки данных
             performDataLoading();
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки данных: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки данных: " + e.getMessage(), e);
         }
     }
     
@@ -128,17 +128,17 @@ public abstract class BaseListFragmentN<T extends Serializable,
      * Обрабатывает загруженные данные
      */
     protected void handleDataLoaded(List<T> items) {
-        Log.d(TAG, "Загружено: " + (items != null ? items.size() : 0));
+        LogManager.d(TAG, "Загружено: " + (items != null ? items.size() : 0));
         
         if (items != null && !items.isEmpty()) {
             // Логируем детали каждой загруженной записи
             for (T item : items) {
-                Log.d(TAG, "   - " + getItemTitle(item));
+                LogManager.d(TAG, "   - " + getItemTitle(item));
             }
             setAdapterData(items);
-            Log.d(TAG, "Список данных обновлён");
+            LogManager.d(TAG, "Список данных обновлён");
         } else {
-            Log.i(TAG, "Данные не найдены");
+            LogManager.i(TAG, "Данные не найдены");
         }
     }
     
@@ -158,8 +158,8 @@ public abstract class BaseListFragmentN<T extends Serializable,
      * Устанавливает режим выбора 
      */
     public void setSelectionMode(boolean enabled) {
-        if (adapter != null) {
-            adapter.setSelectionMode(enabled);
+        if (mAdapter != null) {
+            mAdapter.setSelectionMode(enabled);
         }
     }
     
@@ -167,8 +167,8 @@ public abstract class BaseListFragmentN<T extends Serializable,
      * Получает выбранные элементы
      */
     public List<T> getSelectedItems() {
-        if (adapter != null) {
-            return adapter.getSelectedItems();
+        if (mAdapter != null) {
+            return mAdapter.getSelectedItems();
         }
         return new ArrayList<>();
     }
@@ -176,31 +176,22 @@ public abstract class BaseListFragmentN<T extends Serializable,
     /**
      * Переходит на экран редактирования элемента
      * @param item - выбранный элемент
-     * TODO: проверить на использование методов навигации
      */
     protected void goToEdit(T item) {
-        Log.d(TAG, "Переход к окну редактирования");
-        Intent intent = new Intent(getActivity(), editActivityClass);
-        intent.putExtra("item", item);
-        intent.putExtra("source_tab", sourceTab);
-        startActivity(intent);
-    }    
-    
-    /**
-     * Возвращает экземпляр сервиса
-     * todo: Лучше сразу передавать настроенный сервис а не создавать его здесь
-     */
-    @SuppressWarnings("unchecked")
-    protected S getServiceInstance() {
-        try {
-            return (S) serviceClass.getDeclaredConstructor(Context.class, String.class)
-                    .newInstance(requireContext(), userName);
-        } catch (Exception e) {
-            Log.e(TAG, "Ошибка создания сервиса: " + e.getMessage(), e);
-            return null;
+        LogManager.d(TAG, "Переход к окну редактирования элемента: " + getItemTitle(item));
+        
+        // Проверяем, что активность поддерживает навигацию
+        if (getActivity() instanceof BaseNavigationActivity) {
+            BaseNavigationActivity navActivity = (BaseNavigationActivity) getActivity();
+            
+            // Используем централизованную навигацию с объектом
+            navActivity.goTo(mEditActivityClass, false, item, mSourceTab);
+        } else {
+            // выбрасываем ошибку 
+            LogManager.e(TAG, "Фрагмент используется в активности, которая не поддерживает навигацию");
+            throw new RuntimeException("Фрагмент используется в активности, которая не поддерживает навигацию");
         }
-    }
-    
+    }    
     
 }
 

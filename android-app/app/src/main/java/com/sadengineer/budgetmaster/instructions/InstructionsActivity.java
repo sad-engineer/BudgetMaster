@@ -1,10 +1,10 @@
 package com.sadengineer.budgetmaster.instructions;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Activity для отображения инструкций
@@ -21,6 +21,6 @@ public class InstructionsActivity extends BaseContentActivity {
         initializeNavigation();
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_instructions, R.dimen.toolbar_text);
-        Log.d(TAG, "InstructionsActivity создана");
+        LogManager.d(TAG, "InstructionsActivity создана");
     }
 } 

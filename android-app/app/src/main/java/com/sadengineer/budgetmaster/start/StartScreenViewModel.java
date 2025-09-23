@@ -1,8 +1,7 @@
 package com.sadengineer.budgetmaster.start;
 
 import android.app.Application;
-import android.util.Log;
-
+ 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
@@ -19,6 +18,7 @@ import com.sadengineer.budgetmaster.backend.filters.AccountTypeFilter;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.time.LocalDate;
 
@@ -70,7 +70,7 @@ public class StartScreenViewModel extends AndroidViewModel {
         this.monthlyEarnedCalculator.setOperationType(OperationTypeFilter.INCOME);
         this.monthlyEarnedCalculator.setEntityFilter(EntityFilter.ACTIVE);
         
-        Log.d(TAG, "StartScreenViewModel инициализирован");
+        LogManager.d(TAG, "StartScreenViewModel инициализирован");
     }
     
     /**
@@ -105,7 +105,7 @@ public class StartScreenViewModel extends AndroidViewModel {
      * Обновить все данные главного экрана
      */
     public void refreshData() {
-        Log.d(TAG, "Запрос на обновление данных главного экрана");
+        LogManager.d(TAG, "Запрос на обновление данных главного экрана");
         isRefreshing.setValue(true);
         
         repository.refreshData();
@@ -129,7 +129,7 @@ public class StartScreenViewModel extends AndroidViewModel {
      * Вызывается при возврате на главный экран
      */
     public void onResume() {
-        Log.d(TAG, "Главный экран возобновлен, обновляем данные");
+        LogManager.d(TAG, "Главный экран возобновлен, обновляем данные");
         refreshData();
     }
     
@@ -226,7 +226,7 @@ public class StartScreenViewModel extends AndroidViewModel {
             if (totalAmount != null) {
                 String formatted = formatter.formatFromCents(totalAmount);
                 formattedAmount.setValue(formatted);
-                Log.d(TAG, "Общая сумма бюджетов обновлена: " + formatted);
+                LogManager.d(TAG, "Общая сумма бюджетов обновлена: " + formatted);
             } else {
                 formattedAmount.setValue("0.00");
             }
@@ -285,7 +285,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void forceRecalculateBudgets() {
         if (budgetCalculator != null) {
             budgetCalculator.refreshData();
-            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора");
+            LogManager.d(TAG, "Запрошено принудительное обновление данных калькулятора");
         }
     }
 
@@ -295,7 +295,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void forceRecalculateCurrentAccounts() {
         if (currentAccountsCalculator != null) {
             currentAccountsCalculator.refreshData();
-            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора текущих счетов");
+            LogManager.d(TAG, "Запрошено принудительное обновление данных калькулятора текущих счетов");
         }
     }
 
@@ -305,7 +305,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void forceRecalculateSavingsAccounts() {
         if (savingsAccountsCalculator != null) {
             savingsAccountsCalculator.refreshData();
-            Log.d(TAG, "Запрошено принудительное обновление данных калькулятора сберегательных счетов");
+            LogManager.d(TAG, "Запрошено принудительное обновление данных калькулятора сберегательных счетов");
         }
     }
     
@@ -316,18 +316,18 @@ public class StartScreenViewModel extends AndroidViewModel {
         // Освобождаем ресурсы калькуляторов
         if (budgetCalculator != null) {
             // ViewModel автоматически очищается системой
-            Log.d(TAG, "Калькулятор бюджетов будет очищен системой");
+            LogManager.d(TAG, "Калькулятор бюджетов будет очищен системой");
         }
         
         if (currentAccountsCalculator != null) {
-            Log.d(TAG, "Калькулятор текущих счетов будет очищен системой");
+            LogManager.d(TAG, "Калькулятор текущих счетов будет очищен системой");
         }
         
         if (savingsAccountsCalculator != null) {
-            Log.d(TAG, "Калькулятор сберегательных счетов будет очищен системой");
+            LogManager.d(TAG, "Калькулятор сберегательных счетов будет очищен системой");
         }
         
-        Log.d(TAG, "StartScreenViewModel очищен");
+        LogManager.d(TAG, "StartScreenViewModel очищен");
     }
     
     /**
@@ -337,7 +337,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void setBudgetCalculatorDisplayCurrency(int currencyId) {
         if (budgetCalculator != null) {
             budgetCalculator.setDisplayCurrencyId(currencyId);
-            Log.d(TAG, "Установлена отображаемая валюта для калькулятора: " + currencyId);
+            LogManager.d(TAG, "Установлена отображаемая валюта для калькулятора: " + currencyId);
         }
     }
     
@@ -386,7 +386,7 @@ public class StartScreenViewModel extends AndroidViewModel {
                 if (totalAmount != null) {
                     String formatted = formatter.formatFromCents(totalAmount);
                     formattedAmount.setValue(formatted);
-                    Log.d(TAG, "Общая сумма текущих счетов обновлена: " + formatted);
+                    LogManager.d(TAG, "Общая сумма текущих счетов обновлена: " + formatted);
                 } else {
                     formattedAmount.setValue("0.00");
                 }
@@ -409,7 +409,7 @@ public class StartScreenViewModel extends AndroidViewModel {
                 if (totalAmount != null) {
                     String formatted = formatter.formatFromCents(totalAmount);
                     formattedAmount.setValue(formatted);
-                    Log.d(TAG, "Общая сумма сберегательных счетов обновлена: " + formatted);
+                    LogManager.d(TAG, "Общая сумма сберегательных счетов обновлена: " + formatted);
                 } else {
                     formattedAmount.setValue("0.00");
                 }
@@ -427,12 +427,12 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void setAccountsCalculatorDisplayCurrency(int currencyId) {
         if (currentAccountsCalculator != null) {
             currentAccountsCalculator.setDisplayCurrencyId(currencyId);
-            Log.d(TAG, "Установлена отображаемая валюта для калькулятора текущих счетов: " + currencyId);
+            LogManager.d(TAG, "Установлена отображаемая валюта для калькулятора текущих счетов: " + currencyId);
         }
         
         if (savingsAccountsCalculator != null) {
             savingsAccountsCalculator.setDisplayCurrencyId(currencyId);
-            Log.d(TAG, "Установлена отображаемая валюта для калькулятора сберегательных счетов: " + currencyId);
+            LogManager.d(TAG, "Установлена отображаемая валюта для калькулятора сберегательных счетов: " + currencyId);
         }
     }
     
@@ -443,7 +443,7 @@ public class StartScreenViewModel extends AndroidViewModel {
     public void setOperationsCalculatorDisplayCurrency(int currencyId) {
         if (monthlyEarnedCalculator != null) {
             monthlyEarnedCalculator.setDisplayCurrencyId(currencyId);
-            Log.d(TAG, "Установлена отображаемая валюта для калькулятора операций: " + currencyId);
+            LogManager.d(TAG, "Установлена отображаемая валюта для калькулятора операций: " + currencyId);
         }
     }
 }

@@ -2,7 +2,7 @@ package com.sadengineer.budgetmaster.base;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +17,8 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.io.Serializable;
 import java.util.List;
@@ -150,14 +152,14 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
      * Загружает данные
      */
     protected void loadData() {
-        Log.d(TAG, "Загрузка данных с параметрами: " + getLoadParameters());
+        LogManager.d(TAG, "Загрузка данных с параметрами: " + getLoadParameters());
         
         try {
             // Вызываем абстрактный метод для загрузки данных
             performDataLoading();
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки данных: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки данных: " + e.getMessage(), e);
         }
     }
     
@@ -170,23 +172,23 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
      * Обрабатывает загруженные данные
      */
     protected void handleDataLoaded(List<T> items) {
-        Log.d(TAG, "Загружено: " + (items != null ? items.size() : 0));
+        LogManager.d(TAG, "Загружено: " + (items != null ? items.size() : 0));
         
         if (items != null && !items.isEmpty()) {
             // Логируем детали каждой загруженной записи
             for (T item : items) {
-                Log.d(TAG, "   - " + getItemTitle(item));
+                LogManager.d(TAG, "   - " + getItemTitle(item));
             }
             
             setAdapterData(items);
-            Log.d(TAG, "Список данных обновлён");
+            LogManager.d(TAG, "Список данных обновлён");
             
             // // Сбрасываем счетчик свайпов при изменении содержимого списка
             // if (getActivity() instanceof BaseNavigationActivity) {
             //     ((BaseNavigationActivity) getActivity()).resetSwipeCount();
             // }
         } else {
-            Log.i(TAG, "Данные не найдены");
+            LogManager.i(TAG, "Данные не найдены");
         }
     }
     
@@ -226,7 +228,7 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
      * @param item - выбранный элемент
      */
     protected void goToEdit(T item) {
-        Log.d(TAG, "Переход к окну редактирования");
+        LogManager.d(TAG, "Переход к окну редактирования");
         Intent intent = new Intent(getActivity(), getEditActivityClass());
         intent.putExtra("item", item);
         intent.putExtra("source_tab", getSourceTab());
@@ -272,17 +274,17 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
      */
     protected void deleteItem(T item) {
         try {
-            Log.d(TAG, "Удаление элемента: " + getItemTitle(item));
+            LogManager.d(TAG, "Удаление элемента: " + getItemTitle(item));
             
             S service = getServiceInstance();
             if (service != null) {
                 performDelete(service, item);
             }
             
-            Log.d(TAG, "Запрос на удаление элемента отправлен");
+            LogManager.d(TAG, "Запрос на удаление элемента отправлен");
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка удаления элемента " + getItemTitle(item) + ": " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка удаления элемента " + getItemTitle(item) + ": " + e.getMessage(), e);
         }
     }
     
@@ -299,7 +301,7 @@ public abstract class BaseListFragment<T extends Serializable, A extends Recycle
             return getServiceClass().getDeclaredConstructor(Context.class, String.class)
                     .newInstance(requireContext(), "default_user");
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка создания сервиса: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка создания сервиса: " + e.getMessage(), e);
             return null;
         }
     }

@@ -1,11 +1,11 @@
 package com.sadengineer.budgetmaster.base;
-
-import android.util.Log;
+ 
 import android.util.TypedValue;
 import android.widget.TextView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Базовый Activity для отображения экранов с собственным контентом
@@ -25,12 +25,12 @@ public abstract class BaseContentActivity extends BaseNavigationActivity {
         TextView toolbarTitle = findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
             toolbarTitle.setText(titleResId);
-            Log.d(TAG, "Заголовок тулбара установлен");
+            LogManager.d(TAG, "Заголовок тулбара установлен");
             
             // Устанавливаем размер шрифта
             float textSize = getResources().getDimension(textSizeResId);
             toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен");
+            LogManager.d(TAG, "Размер шрифта установлен");
         }
     }
    

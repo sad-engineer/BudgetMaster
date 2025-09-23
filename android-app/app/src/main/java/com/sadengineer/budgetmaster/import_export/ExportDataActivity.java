@@ -1,10 +1,10 @@
 package com.sadengineer.budgetmaster.import_export;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Activity для экспорта данных
@@ -23,6 +23,6 @@ public class ExportDataActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_export_data, R.dimen.toolbar_text);
 
-        Log.d(TAG, "ExportDataActivity создана");
+        LogManager.d(TAG, "ExportDataActivity создана");
     }
 } 

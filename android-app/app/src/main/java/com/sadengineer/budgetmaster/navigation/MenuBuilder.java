@@ -1,11 +1,11 @@
 package com.sadengineer.budgetmaster.navigation;
 
 import android.content.Context;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationNode;
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationTree;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +28,11 @@ public class MenuBuilder {
      */
     public static void initialize(Context context) {
         if (isInitialized) {
-            Log.d(TAG, "MenuBuilder уже инициализирован, пропускаем повторную инициализацию");
+            LogManager.d(TAG, "MenuBuilder уже инициализирован, пропускаем повторную инициализацию");
             return;
         }
         
-        Log.d(TAG, "Инициализация MenuBuilder...");
+        LogManager.d(TAG, "Инициализация MenuBuilder...");
         
         // Инициализируем NavigationTree если еще не инициализирован
         NavigationTree.initialize(context);
@@ -41,7 +41,7 @@ public class MenuBuilder {
         populateMenuMap();
         
         isInitialized = true;
-        Log.d(TAG, "MenuBuilder инициализирован");
+        LogManager.d(TAG, "MenuBuilder инициализирован");
     }
     
     /**
@@ -62,12 +62,12 @@ public class MenuBuilder {
                 
                 if (menuId != null) {
                     menuIdToActivityMap.put(menuId, activityClass);
-                    Log.d(TAG, "Добавлен пункт меню: " + node.name + " -> " + activityClass.getSimpleName() + " (ID: " + menuId + ")");
+                    LogManager.d(TAG, "Добавлен пункт меню: " + node.name + " -> " + activityClass.getSimpleName() + " (ID: " + menuId + ")");
                 } else {
-                    Log.w(TAG, "Не найден ID меню в ресурсах для: " + node.menuId);
+                    LogManager.w(TAG, "Не найден ID меню в ресурсах для: " + node.menuId);
                 }
             } else {
-                Log.d(TAG, "Узел " + node.name + " не имеет пункта в меню");
+                LogManager.d(TAG, "Узел " + node.name + " не имеет пункта в меню");
             }
         }
     }
@@ -78,8 +78,8 @@ public class MenuBuilder {
      * @return ID пункта меню или null, если не найден
      */
     private static Integer getMenuIdFromResources(String menuIdString) {
-        if (menuIdString == null || menuIdString.isEmpty()) {
-            Log.w(TAG, "menuIdString is null or empty, skipping");
+        if (menuIdString == null || menuIdString.isEmpty() || "null".equals(menuIdString)) {
+            LogManager.w(TAG, "menuIdString is null, empty, or 'null' string, skipping");
             return null;
         }
         
@@ -87,7 +87,7 @@ public class MenuBuilder {
             // Получаем ID ресурса по строковому имени
             return R.id.class.getField(menuIdString).getInt(null);
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка получения ID меню для: " + menuIdString, e);
+            LogManager.e(TAG, "Ошибка получения ID меню для: " + menuIdString, e);
             return null;
         }
     }
@@ -141,11 +141,11 @@ public class MenuBuilder {
      */
     public static void logAvailableMenuItems() {
         ensureInitialized();
-        Log.d(TAG, "Доступные пункты меню (" + getMenuItemsCount() + "):");
+        LogManager.d(TAG, "Доступные пункты меню (" + getMenuItemsCount() + "):");
         for (Map.Entry<Integer, Class<?>> entry : menuIdToActivityMap.entrySet()) {
             NavigationNode node = NavigationTree.getNode(entry.getValue());
             String nodeName = node != null ? node.name : "Неизвестно";
-            Log.d(TAG, "  " + entry.getValue().getSimpleName() + " -> " + nodeName + " (ID: " + entry.getKey() + ")");
+            LogManager.d(TAG, "  " + entry.getValue().getSimpleName() + " -> " + nodeName + " (ID: " + entry.getKey() + ")");
         }
     }
     
@@ -154,7 +154,7 @@ public class MenuBuilder {
      */
     private static void ensureInitialized() {
         if (!isInitialized) {
-            Log.w(TAG, "MenuBuilder не инициализирован! Вызовите initialize()");
+            LogManager.w(TAG, "MenuBuilder не инициализирован! Вызовите initialize()");
         }
     }
 }

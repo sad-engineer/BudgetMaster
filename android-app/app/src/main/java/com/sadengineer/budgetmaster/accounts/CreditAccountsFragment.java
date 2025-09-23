@@ -14,8 +14,8 @@ public class CreditAccountsFragment extends BaseAccountsFragment {
     
     @Override
     protected void initializeResources() {
-        this.layoutResourceId = R.layout.fragment_transfers_accounts;
-        this.recyclerViewId = R.id.accounts_transfers_recycler;
-        this.accountType = AccountTypeFilter.CREDIT;
+        this.mLayoutResourceId = R.layout.fragment_credit_accounts;
+        this.mRecyclerViewId = R.id.accounts_credit_recycler;
+        this.mAccountType = AccountTypeFilter.CREDIT;
     }
 } 

@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.budget;
 
 import android.content.Context;
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -14,6 +14,7 @@ import com.sadengineer.budgetmaster.backend.entity.Budget;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +137,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
                 false  // не показываем ID
             );
             
-            Log.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + totalAmount);
+            LogManager.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + totalAmount);
         } else if (position > 0 && position <= budgets.size()) {
             // Обычные бюджеты (смещаем позицию на -1)
             Budget budget = budgets.get(position - 1);
@@ -146,7 +147,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             String title = category != null ? category.getTitle() : "Неизвестная категория";
             String shortName = currency != null ? currency.getShortName() : "RUB";
             
-            Log.d(TAG, "onBindViewHolder: бюджет ID=" + budget.getId() + 
+            LogManager.d(TAG, "onBindViewHolder: бюджет ID=" + budget.getId() + 
                       ", сумма=" + budget.getAmount() + 
                       ", категория=" + title + 
                       ", валюта=" + shortName);
@@ -180,7 +181,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
     public void setBudgets(List<Budget> budgets) {
         this.budgets = budgets != null ? budgets : new ArrayList<>();
         notifyDataSetChanged();
-        Log.d(TAG, "Установлено бюджетов: " + this.budgets.size());
+        LogManager.d(TAG, "Установлено бюджетов: " + this.budgets.size());
     }
     
     /**
@@ -188,7 +189,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setCategories(List<Category> categories) {
         this.categories = categories != null ? categories : new ArrayList<>();
-        Log.d(TAG, "Установлено категорий: " + this.categories.size());
+        LogManager.d(TAG, "Установлено категорий: " + this.categories.size());
     }
     
     /**
@@ -196,7 +197,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setCurrencies(List<Currency> currencies) {
         this.currencies = currencies != null ? currencies : new ArrayList<>();
-        Log.d(TAG, "Установлено валют: " + this.currencies.size());
+        LogManager.d(TAG, "Установлено валют: " + this.currencies.size());
     }
     
     /**
@@ -229,7 +230,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             selectedBudgets.clear();
         }
         notifyDataSetChanged();
-        Log.d(TAG, "Режим выбора: " + (enabled ? "включен" : "выключен"));
+        LogManager.d(TAG, "Режим выбора: " + (enabled ? "включен" : "выключен"));
     }
     
     /**
@@ -248,7 +249,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
             selectionListener.onSelectionChanged(selectedBudgets.size());
         }
         
-        Log.d(TAG, "Выбрано бюджетов: " + selectedBudgets.size());
+        LogManager.d(TAG, "Выбрано бюджетов: " + selectedBudgets.size());
     }
     
     /**
@@ -309,6 +310,6 @@ public class BudgetAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         this.totalAmount = totalAmount != null ? totalAmount : 0L;
         // Уведомляем об изменении только первой позиции (карточка "Итого")
         notifyItemChanged(0);
-        Log.d(TAG, "Обновлена общая сумма бюджетов: " + totalAmount);
+        LogManager.d(TAG, "Обновлена общая сумма бюджетов: " + totalAmount);
     }
 }

@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.currencies;
-
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -141,7 +141,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
         // Определяем, выбран ли текущий элемент
         boolean isSelected = selectedCurrencies.contains(currency.getId());
 
-        Log.d(TAG, "Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
+        LogManager.d(TAG, "Привязываем данные к ViewHolder: " + currency.getTitle() + " (позиция " + currency.getPosition() + ")" +
         "ID: " + currency.getId() + ", режим выбора: " + isSelectionMode + ", выбран: " + isSelected); 
         holder.bind(currency.getPosition(), currency.getTitle(), currency.getId(), 
                    0, currency.getShortName(), isSelectionMode, isSelected,
@@ -161,7 +161,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<StandartViewHolder> {
      */
     public void setCurrencies(List<Currency> currencies) {
         this.currencies = currencies != null ? currencies : new ArrayList<>();
-        Log.d(TAG, "Обновляем список валют: " + this.currencies.size() + " элементов");
+        LogManager.d(TAG, "Обновляем список валют: " + this.currencies.size() + " элементов");
         notifyDataSetChanged();
     }
     

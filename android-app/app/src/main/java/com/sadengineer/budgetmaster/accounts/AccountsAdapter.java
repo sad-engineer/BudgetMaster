@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.accounts;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,20 +7,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Account;
-import com.sadengineer.budgetmaster.backend.entity.Currency;
-import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
 import com.sadengineer.budgetmaster.interfaces.ISelectionAdapter;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,21 +25,23 @@ import java.util.Set;
 public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> implements ISelectionAdapter<Account> {
     private static final String TAG = "AccountsAdapter";
 
-    /** Имя пользователя по умолчанию */
-    /** TODO: передлать на получение имени пользователя из SharedPreferences */
-    private String userName = "default_user";
 
-    private List<Account> accounts = new ArrayList<>();
-    private OnAccountClickListener listener;
-    private OnAccountLongClickListener longClickListener;
-    private boolean isSelectionMode = false;
-    private Set<Integer> selectedAccounts = new HashSet<>();
-    private OnSelectedAccountsChanged externalSelectedAccountsChanged;
-    private CurrencyService currencyService;
-    private Map<Integer, String> currencyCache = new HashMap<>();
+    private List<Account> mAccounts = new ArrayList<>();
+    private OnAccountClickListener mListener;
+    private OnAccountLongClickListener mLongClickListener;
+    private boolean mIsSelectionMode = false;
+    private Set<Integer> mSelectedAccounts = new HashSet<>();
+    private OnSelectedAccountsChanged mExternalSelectedAccountsChanged;
     
     /** Общая сумма всех счетов для карточки "Итого" */
-    private long totalAmount = 0L;
+    private long mTotalAmount = 0L;
+    
+    /** Интерфейс для получения валюты */
+    public interface CurrencyProvider {
+        String getCurrencyShortName(int currencyId);
+    }
+    
+    private CurrencyProvider mCurrencyProvider;
     
     public interface OnAccountClickListener {
         void onAccountClick(Account account);
@@ -58,33 +55,33 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
      * Интерфейс для передачи полного списка выбранных аккаунтов наружу
      */
     public interface OnSelectedAccountsChanged {
-        void onSelectedAccountsChanged(List<Account> selectedAccounts);
+        void onSelectedAccountsChanged(List<Account> mSelectedAccounts);
     }
     
     /**
      * Конструктор адаптера
-     * @param listener обработчик клика на счет
-     * @param context контекст приложения
+     * @param mListener обработчик клика на счет
+     * @param currencyProvider поставщик валют
      */
-    public AccountsAdapter(OnAccountClickListener listener, Context context) {
-        this.listener = listener;
-        this.currencyService = new CurrencyService(context, userName);
+    public AccountsAdapter(OnAccountClickListener mListener, CurrencyProvider currencyProvider) {
+        this.mListener = mListener;
+        this.mCurrencyProvider = currencyProvider;
     }
     
     /**
      * Устанавливает обработчик длинного клика на счет
-     * @param longClickListener обработчик длинного клика
+     * @param mLongClickListener обработчик длинного клика
      */
-    public void setLongClickListener(OnAccountLongClickListener longClickListener) {
-        this.longClickListener = longClickListener;
+    public void setLongClickListener(OnAccountLongClickListener mLongClickListener) {
+        this.mLongClickListener = mLongClickListener;
     }
 
     /**
      * Устанавливает обработчик изменения выбора
-     * @param listener обработчик изменения выбора
+     * @param mListener обработчик изменения выбора
      */
-    public void setOnSelectedAccountsChanged(OnSelectedAccountsChanged listener) {
-        this.externalSelectedAccountsChanged = listener;
+    public void setOnSelectedAccountsChanged(OnSelectedAccountsChanged mListener) {
+        this.mExternalSelectedAccountsChanged = mListener;
     }
     
     /**
@@ -121,10 +118,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
                 return;
             }
             
-            if (listener != null) {
+            if (mListener != null) {
                 Account account = findAccountById(itemId);
                 if (account != null) {
-                    listener.onAccountClick(account);
+                    mListener.onAccountClick(account);
                 }
             }
         });
@@ -136,10 +133,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
                 return;
             }
             
-            if (longClickListener != null) {
+            if (mLongClickListener != null) {
                 Account account = findAccountById(itemId);
                 if (account != null) {
-                    longClickListener.onAccountLongClick(account);
+                    mLongClickListener.onAccountLongClick(account);
                 }
             }
         });
@@ -150,16 +147,16 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
             Account account = findAccountById(itemId);
             if (account != null && !account.isDeleted()) {
                 if (isSelected) {
-                    selectedAccounts.add(itemId);
+                    mSelectedAccounts.add(itemId);
                 } else {
-                    selectedAccounts.remove(itemId);
+                    mSelectedAccounts.remove(itemId);
                 }
                 // Сообщаем наружу полный набор выбранных счетов
-                if (externalSelectedAccountsChanged != null) {
-                    externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
+                if (mExternalSelectedAccountsChanged != null) {
+                    mExternalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedItems());
                 }
             } else {
-                Log.w(TAG, "Попытка выбора удалённого счёта: ID=" + itemId);
+                LogManager.w(TAG, "Попытка выбора удалённого счёта: ID=" + itemId);
             }
         });        
         return holder;
@@ -178,7 +175,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
                 0, // позиция
                 "Итого", // заголовок
                 -1, // специальный ID для карточки "Итого"
-                totalAmount, // общая сумма
+                mTotalAmount, // общая сумма
                 "₽", // используем рубли как основную валюту
                 false, // режим выбора отключен для итоговой карточки
                 false, // не выбрана
@@ -186,21 +183,22 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
                 false  // не показываем ID
             );
             
-            Log.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + totalAmount);
-        } else if (position > 0 && position <= accounts.size()) {
+            LogManager.d(TAG, "onBindViewHolder: карточка 'Итого' с суммой: " + mTotalAmount);
+        } else if (position > 0 && position <= mAccounts.size()) {
             // Обычные счета (смещаем позицию на -1)
-            Account account = accounts.get(position - 1);
+            Account account = mAccounts.get(position - 1);
             holder.resetToInitialState();
             // Определяем, выбран ли текущий элемент (только для неудаленных счетов)
-            boolean isSelected = !account.isDeleted() && selectedAccounts.contains(account.getId()); 
+            boolean isSelected = !account.isDeleted() && mSelectedAccounts.contains(account.getId()); 
             
-            // Получаем короткое имя валюты из кэша
-            String currencyShortName = currencyCache.getOrDefault(account.getCurrencyId(), "RUB");
-            Log.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
+            // Получаем короткое имя валюты через провайдера
+            String currencyShortName = mCurrencyProvider != null ? 
+                mCurrencyProvider.getCurrencyShortName(account.getCurrencyId()) : "RUB";
+            LogManager.d(TAG, "Счет ID=" + account.getId() + ", currencyId=" + account.getCurrencyId() + ", валюта: " + currencyShortName);
             
             // Используем новый форматтер для отображения сумм в копейках
             holder.bind(
-                account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, isSelectionMode, isSelected,
+                account.getPosition(), account.getTitle(), account.getId(), account.getAmount(), currencyShortName, mIsSelectionMode, isSelected,
                 SettingsManager.isShowPosition(), SettingsManager.isShowId());
         }
     }
@@ -211,60 +209,35 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
     @Override
     public int getItemCount() {
         // +1 для карточки "Итого"
-        return accounts.size() + 1;
+        return mAccounts.size() + 1;
     }
     
     /**
      * Обновляет список счетов
-     * @param accounts список счетов
+     * @param mAccounts список счетов
      */
-    public void setItems(List<Account> accounts) {
-        this.accounts = accounts != null ? accounts : new ArrayList<>();
-        loadCurrencyCache();
+    public void setItems(List<Account> mAccounts) {
+        this.mAccounts = mAccounts != null ? mAccounts : new ArrayList<>();
         notifyDataSetChanged();
     }
     
     
     /**
      * Обновляет общую сумму для карточки "Итого"
-     * @param totalAmount общая сумма всех счетов
+     * @param mTotalAmount общая сумма всех счетов
      */
-    public void setTotalAmount(long totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setTotalAmount(long mTotalAmount) {
+        this.mTotalAmount = mTotalAmount;
         // Обновляем только первую позицию (карточка "Итого")
         notifyItemChanged(0);
-        Log.d(TAG, "Обновлена общая сумма счетов: " + totalAmount);
+        LogManager.d(TAG, "Обновлена общая сумма счетов: " + mTotalAmount);
     }
-    
+        
     /**
-     * Загружает валюты в кэш
+     * Устанавливает провайдера валют
      */
-    private void loadCurrencyCache() {
-        currencyCache.clear();
-        try {
-            // Получаем все валюты асинхронно
-            currencyService.getAll().observeForever(currencies -> {
-                if (currencies != null) {
-                    for (Currency currency : currencies) {
-                        if (currency.getShortName() != null && !currency.getShortName().isEmpty()) {
-                            currencyCache.put(currency.getId(), currency.getShortName());
-                        }
-                    }
-                    Log.d(TAG, "Кэш валют загружен: " + currencyCache.size() + " валют");
-                    // Обновляем UI после загрузки кэша
-                    notifyDataSetChanged();
-                }
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки кэша валют: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Обновляет кэш валют
-     */
-    public void refreshCurrencyCache() {
-        loadCurrencyCache();
+    public void setCurrencyProvider(CurrencyProvider currencyProvider) {
+        this.mCurrencyProvider = currencyProvider;
     }
     
     /**
@@ -272,14 +245,14 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
      * @param enabled true - включить режим выбора, false - выключить
      */
     public void setSelectionMode(boolean enabled) {
-        this.isSelectionMode = enabled;
+        this.mIsSelectionMode = enabled;
         if (!enabled) {
-            selectedAccounts.clear();
+            mSelectedAccounts.clear();
         }
         notifyDataSetChanged();
         // Сообщаем наружу полный набор выбранных
-        if (externalSelectedAccountsChanged != null) {
-            externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
+        if (mExternalSelectedAccountsChanged != null) {
+            mExternalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedItems());
         }
     }
     
@@ -287,9 +260,9 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
      * Получает выбранные счета
      * @return список выбранных счетов
      */
-    public List<Account> getSelectedAccounts() {
+    public List<Account> getSelectedItems() {
         List<Account> selected = new ArrayList<>();
-        for (Integer id : selectedAccounts) {
+        for (Integer id : mSelectedAccounts) {
             Account account = findAccountById(id);
             if (account != null && !account.isDeleted()) { // Исключаем уже удаленные счета
                 selected.add(account);
@@ -303,10 +276,10 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
      * @return список выбранных счетов
      */
     public void clearSelection() {
-        selectedAccounts.clear();
+        mSelectedAccounts.clear();
         notifyDataSetChanged();
-        if (externalSelectedAccountsChanged != null) {
-            externalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedAccounts());
+        if (mExternalSelectedAccountsChanged != null) {
+            mExternalSelectedAccountsChanged.onSelectedAccountsChanged(getSelectedItems());
         }
     }
     
@@ -316,7 +289,7 @@ public class AccountsAdapter extends RecyclerView.Adapter<StandartViewHolder> im
      * @return счет или null, если счет не найден
      */
     private Account findAccountById(int id) {
-        for (Account account : accounts) {
+        for (Account account : mAccounts) {
             if (account.getId() == id) {
                 return account;
             }

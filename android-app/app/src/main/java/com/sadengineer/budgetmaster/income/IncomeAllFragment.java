@@ -2,7 +2,7 @@ package com.sadengineer.budgetmaster.income;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -24,6 +24,7 @@ import com.sadengineer.budgetmaster.calculators.OperationCalculatorConfig;
 import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.settings.AppSettings;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -134,7 +135,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
      * Очистка данных перед загрузкой новых
      */
     private void clearData() {
-        Log.d(TAG, "Очищаем данные перед загрузкой нового месяца");
+        LogManager.d(TAG, "Очищаем данные перед загрузкой нового месяца");
         
         // Очищаем список операций
         if (adapter != null) {
@@ -200,19 +201,19 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
      */
     @Override
     protected void performDataLoading() {
-        Log.d(TAG, "performDataLoading() вызван");
-        Log.d(TAG, "currentMonth: " + currentMonth);
-        Log.d(TAG, "appSettings: " + (appSettings != null ? "инициализирован" : "null"));
-        Log.d(TAG, "operationCalculator: " + (operationCalculator != null ? "инициализирован" : "null"));
+        LogManager.d(TAG, "performDataLoading() вызван");
+        LogManager.d(TAG, "currentMonth: " + currentMonth);
+        LogManager.d(TAG, "appSettings: " + (appSettings != null ? "инициализирован" : "null"));
+        LogManager.d(TAG, "operationCalculator: " + (operationCalculator != null ? "инициализирован" : "null"));
         
         if (currentMonth == null || appSettings == null) {
-            Log.e(TAG, "Критическая ошибка: currentMonth или appSettings не инициализированы!");
+            LogManager.e(TAG, "Критическая ошибка: currentMonth или appSettings не инициализированы!");
             return;
         }
         
         // Инициализируем калькулятор если он еще не инициализирован
         if (operationCalculator == null) {
-            Log.d(TAG, "Инициализируем operationCalculator в performDataLoading()");
+            LogManager.d(TAG, "Инициализируем operationCalculator в performDataLoading()");
             operationCalculator = new OperationCalculatorViewModel(requireActivity().getApplication());
             operationCalculator.initialize();
             
@@ -221,7 +222,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
                 @Override
                 public void onChanged(Long totalAmount) {
                     if (totalAmount != null && tvTotalAmount != null) {
-                        Log.d(TAG, "Обновляем сумму: " + totalAmount);
+                        LogManager.d(TAG, "Обновляем сумму: " + totalAmount);
                         tvTotalAmount.setText(formatter.formatFromCents(totalAmount));
                     }
                 }
@@ -244,7 +245,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
             LocalDate startDate = currentMonth.withDayOfMonth(1);
             LocalDate endDate = currentMonth.withDayOfMonth(currentMonth.lengthOfMonth());
             
-            Log.d(TAG, "Загружаем операции с " + startDate + " по " + endDate);
+            LogManager.d(TAG, "Загружаем операции с " + startDate + " по " + endDate);
             
             service.getByTypeAndDateRange(
                 OperationTypeFilter.INCOME.getIndex(),
@@ -253,7 +254,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
                 EntityFilter.ACTIVE
             ).observe(getViewLifecycleOwner(), this::handleDataLoaded);
         } else {
-            Log.e(TAG, "OperationService не создан!");
+            LogManager.e(TAG, "OperationService не создан!");
         }
     }
 
@@ -262,7 +263,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
      */
     @Override
     protected void setAdapterData(List<Operation> items) {
-        Log.d(TAG, "setAdapterData() вызван с " + (items != null ? items.size() : 0) + " операциями");
+        LogManager.d(TAG, "setAdapterData() вызван с " + (items != null ? items.size() : 0) + " операциями");
         adapter.setIncomes(items);
     }
 
@@ -294,7 +295,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
         adapter = new IncomeAdapter(new IncomeAdapter.OnIncomeClickListener() {
             @Override
             public void onIncomeClick(Operation income) {
-                Log.d(TAG, "Переход к окну редактирования операции дохода");
+                LogManager.d(TAG, "Переход к окну редактирования операции дохода");
                 goToEdit(income);
             }
         }, requireContext());
@@ -302,7 +303,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
         adapter.setLongClickListener(new IncomeAdapter.OnIncomeLongClickListener() {
             @Override
             public void onIncomeLongClick(Operation income) {
-                Log.d(TAG, "Длительное нажатие на операцию дохода: " + income.getDescription());
+                LogManager.d(TAG, "Длительное нажатие на операцию дохода: " + income.getDescription());
                 showDeleteConfirmationDialog(income);
             }
         });
@@ -328,7 +329,7 @@ public class IncomeAllFragment extends BaseListFragment<Operation, IncomeAdapter
      */
     @Override
     protected void goToEdit(Operation item) {
-        Log.d(TAG, "Переход к окну редактирования операции дохода ID: " + item.getId());
+        LogManager.d(TAG, "Переход к окну редактирования операции дохода ID: " + item.getId());
         Intent intent = new Intent(getActivity(), OperationEditActivity.class);
         intent.putExtra("operation_type", OperationTypeFilter.INCOME.getIndex());
         intent.putExtra("operation", item);

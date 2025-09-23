@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.categories;
 
 import android.content.Context;
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.animations.StandartViewHolder;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -177,7 +178,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
     public void setCategories(List<Category> categories) {
         this.categories = categories != null ? categories : new ArrayList<>();
         notifyDataSetChanged();
-        Log.d(TAG, "Установлено категорий: " + this.categories.size());
+        LogManager.d(TAG, "Установлено категорий: " + this.categories.size());
     }
     
     /**
@@ -189,7 +190,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
             clearSelection();
         }
         notifyDataSetChanged();
-        Log.d(TAG, "Режим выбора категорий: " + (enabled ? "включен" : "выключен"));
+        LogManager.d(TAG, "Режим выбора категорий: " + (enabled ? "включен" : "выключен"));
     }
     
     /**
@@ -220,7 +221,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<StandartViewHolder> 
     public void clearSelection() {
         selectedCategories.clear();
         notifyDataSetChanged();
-        Log.d(TAG, "Выбор категорий очищен");
+        LogManager.d(TAG, "Выбор категорий очищен");
     }
     
     /**

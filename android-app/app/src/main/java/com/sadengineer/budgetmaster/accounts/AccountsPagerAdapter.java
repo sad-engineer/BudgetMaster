@@ -9,6 +9,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
  * Адаптер для отображения вкладок с счетами
  */
 public class AccountsPagerAdapter extends FragmentStateAdapter {
+    
+    // Константы для индексов вкладок
+    private static final int TAB_CURRENT = 0;
+    private static final int TAB_SAVINGS = 1;
+    private static final int TAB_CREDIT = 2;
+    private static final int TAB_COUNT = 3;
+    
     public AccountsPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
@@ -22,14 +29,14 @@ public class AccountsPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position) {
-            case 0:
-                return new CurrentAccountsFragment(0);
-            case 1:
-                return new SavingsAccountsFragment(1);
-            case 2:
-                return new CreditAccountsFragment(2);
+            case TAB_CURRENT:
+                return new CurrentAccountsFragment(TAB_CURRENT);
+            case TAB_SAVINGS:
+                return new SavingsAccountsFragment(TAB_SAVINGS);
+            case TAB_CREDIT:
+                return new CreditAccountsFragment(TAB_CREDIT);
             default:
-                return new CurrentAccountsFragment(0);
+                return new CurrentAccountsFragment(TAB_CURRENT);
         }
     }
 
@@ -39,6 +46,6 @@ public class AccountsPagerAdapter extends FragmentStateAdapter {
      */
     @Override
     public int getItemCount() {
-        return 3;
+        return TAB_COUNT;
     }
 } 

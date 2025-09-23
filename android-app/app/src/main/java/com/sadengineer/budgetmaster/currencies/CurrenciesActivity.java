@@ -1,13 +1,13 @@
 package com.sadengineer.budgetmaster.currencies;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import androidx.lifecycle.ViewModelProvider;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 
 /**
@@ -50,14 +50,14 @@ public class CurrenciesActivity extends BaseCardsActivity<Currency> {
      */
     @Override
     protected void onAddClicked() {
-        Log.d(TAG, "onAddClicked: Нажата кнопка 'Добавить валюту'");
+        LogManager.d(TAG, "onAddClicked: Нажата кнопка 'Добавить валюту'");
         // Запускаем окно создания валюты (режим выбора обрабатывается базовым классом)
         try {
-            Log.d(TAG, "onAddClicked: Попытка перехода к CurrencyEditActivity");
+            LogManager.d(TAG, "onAddClicked: Попытка перехода к CurrencyEditActivity");
             goTo(CurrencyEditActivity.class, false, new String[0]);
-            Log.d(TAG, "onAddClicked: Переход к CurrencyEditActivity выполнен");
+            LogManager.d(TAG, "onAddClicked: Переход к CurrencyEditActivity выполнен");
         } catch (Exception e) {
-            Log.e(TAG, "onAddClicked: Ошибка при переходе к CurrencyEditActivity", e);
+            LogManager.e(TAG, "onAddClicked: Ошибка при переходе к CurrencyEditActivity", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class CurrenciesActivity extends BaseCardsActivity<Currency> {
      * Обновляет количество выбранных элементов
      */
     public void updateSelectionCount(int count) {
-        Log.d(TAG, "Выбрано элементов: " + count);
+        LogManager.d(TAG, "Выбрано элементов: " + count);
         // Можно добавить отображение количества в UI
     }
 } 

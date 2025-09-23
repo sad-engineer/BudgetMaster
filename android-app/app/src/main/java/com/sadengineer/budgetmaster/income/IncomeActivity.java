@@ -1,8 +1,7 @@
 package com.sadengineer.budgetmaster.income;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -11,6 +10,7 @@ import com.sadengineer.budgetmaster.base.BaseCardsActivity;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.operations.OperationEditActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -86,7 +86,7 @@ public class IncomeActivity extends BaseCardsActivity<Operation> {
         // Получаем индекс вкладки из Intent (по умолчанию 0)
         int tabIndex = getIntent().getIntExtra("selected_tab", 0);
         viewPager.setCurrentItem(tabIndex, false);
-        Log.d(TAG, "Открыта вкладка: " + tabIndex);
+        LogManager.d(TAG, "Открыта вкладка: " + tabIndex);
         
         // Массив названий вкладок
         String[] tabTitles = {

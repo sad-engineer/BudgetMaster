@@ -1,0 +1,98 @@
+{
+    "description": "Конфигурация логирования для BudgetMaster",
+    "default_log_level": "DEBUG",
+    "log_levels": {
+        // === АККАУНТЫ ===
+        "AccountsActivity": "DEBUG",
+        "AccountsAdapter": "DEBUG",
+        "AccountsEditActivity": "DEBUG",
+        "AccountsSharedViewModel": "DEBUG",
+        "BaseAccountsFragment": "DEBUG",
+        "CurrentAccountsFragment": "DEBUG",
+        "SavingsAccountsFragment": "DEBUG",
+        "CreditAccountsFragment": "DEBUG",
+        "AccountsPagerAdapter": "DEBUG",
+        // === НАВИГАЦИЯ ===
+        "NavigationConfigLoader": "INFO",
+        "BaseNavigationActivity": "DEBUG",
+        "IntentFactory": "DEBUG",
+        "MenuHandler": "DEBUG",
+        "NavigationController": "DEBUG",
+        "NavigationTree": "DEBUG",
+        "NavigationTreeBuilder": "DEBUG",
+        "MenuBuilder": "INFO",
+        "SwipeNavigationHelper": "DEBUG",
+
+        // === КАЛЬКУЛЯТОРЫ ===
+        "AccountCalculatorViewModel": "INFO",
+        "OperationCalculatorViewModel": "INFO",
+        "BudgetCalculatorViewModel": "INFO",
+
+        // === Бекенд ===
+        "AccountService": "DEBUG",
+        "DatabaseInitializer": "DEBUG",
+        "DatabaseManager": "DEBUG",
+        "ThreadManager": "DEBUG",
+
+        // === НАСТРОЙКИ ===
+        "AppSettings": "DEBUG",
+        // === АВТОРЫ ===
+        "AuthorsActivity": "DEBUG",
+        // === БЮДЖЕТ ===
+        "BudgetActivity": "DEBUG",
+        "BudgetAdapter": "DEBUG",
+        "BudgetEditActivity": "DEBUG",
+        "BudgetLimitsFragment": "DEBUG",
+        "BudgetService": "DEBUG",
+        "BudgetSharedViewModel": "DEBUG",
+        // === КАТЕГОРИИ ===
+        "CategoriesAdapter": "DEBUG",
+        "CategoryEditActivity": "DEBUG",
+        "CategoryService": "DEBUG",
+        "CategoryTreeAdapter": "DEBUG",
+        // === ВАЛЮТЫ ===
+        "CurrenciesActivity": "DEBUG",
+        "CurrenciesSharedViewModel": "DEBUG",
+        "CurrencyAdapter": "DEBUG",
+        "CurrencyCacheService": "DEBUG",
+        "CurrencyConverter": "DEBUG",
+        "CurrencyEditActivity": "DEBUG",
+        "CurrencyService": "DEBUG",
+        // === РАСХОДЫ ===
+        "ExpenseActivity": "DEBUG",
+        "ExpenseAdapter": "DEBUG",
+        "ExpenseAllFragment": "DEBUG",
+        "ExpenseCategoriesActivity": "DEBUG",
+        "ExpenseSharedViewModel": "DEBUG",
+        "ExportDataActivity": "DEBUG",
+        
+        // === ДОХОДЫ ===
+        "IncomeActivity": "DEBUG",
+        "IncomeAdapter": "DEBUG",
+        "IncomeAllFragment": "DEBUG",
+        "IncomeCategoriesActivity": "DEBUG",
+        "IncomeSharedViewModel": "DEBUG",
+        // === ИМПОРТ ===
+        "ImportDataActivity": "DEBUG",
+        // === ИНСТРУКЦИИ ===
+        "InstructionsActivity": "DEBUG",
+        // === ЛОГ КОНФИГУРАЦИЯ ===
+        "LogConfigManager": "DEBUG",
+        // === ГЛАВНЫЙ ЭКРАН ===
+        "MainScreenRepository": "DEBUG",
+        "MainScreenViewModel": "DEBUG",
+        "StartScreenViewModel": "DEBUG",
+        "StartActivity": "DEBUG",
+        
+        // === СТАТИСТИКА ===
+        "StatisticsActivity": "DEBUG",
+        
+        // === Базовые ===
+        "TabInteractionManager": "DEBUG",
+        "StandartViewHolder": "DEBUG",
+        
+        
+        // === ТУЛБАР МЕНЕДЖЕР ===
+        "ToolbarManager": "DEBUG"
+    }
+}

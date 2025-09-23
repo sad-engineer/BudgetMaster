@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.start;
 
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,6 +16,7 @@ import com.sadengineer.budgetmaster.settings.SettingsManager;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.settings.AppSettings;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 public class StartActivity extends BaseNavigationActivity {
     
@@ -39,7 +40,7 @@ public class StartActivity extends BaseNavigationActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "StartActivity.onCreate() - начало инициализации");
+        LogManager.d(TAG, "StartActivity.onCreate() - начало инициализации");
         setContentView(R.layout.activity_main);
         // Инициализация базы данных
         initializeDatabase();
@@ -128,12 +129,12 @@ public class StartActivity extends BaseNavigationActivity {
         valueBudget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Касание поля суммы бюджетов - принудительный пересчет");
+                LogManager.d(TAG, "Касание поля суммы бюджетов - принудительный пересчет");
                 viewModel.forceRecalculateBudgets();
             }
         });
         
-        Log.d(TAG, "StartActivity.onCreate() - инициализация завершена успешно");
+        LogManager.d(TAG, "StartActivity.onCreate() - инициализация завершена успешно");
     }
     
     /**
@@ -144,21 +145,21 @@ public class StartActivity extends BaseNavigationActivity {
         viewModel.getMainScreenData().observe(this, data -> {
             if (data != null) {
                 updateUI(data);
-                Log.d(TAG, "Данные стартового экрана обновлены: " + data);
+                LogManager.d(TAG, "Данные стартового экрана обновлены: " + data);
             }
         });
         
         // Наблюдаем за состоянием загрузки
         viewModel.getIsLoading().observe(this, isLoading -> {
             // TODO: показать/скрыть индикатор загрузки
-            Log.d(TAG, "Состояние загрузки: " + isLoading);
+            LogManager.d(TAG, "Состояние загрузки: " + isLoading);
         });
         
         // Наблюдаем за ошибками
         viewModel.getErrorMessage().observe(this, error -> {
             if (error != null && !error.isEmpty()) {
                 // TODO: показать сообщение об ошибке
-                Log.e(TAG, "Ошибка: " + error);
+                LogManager.e(TAG, "Ошибка: " + error);
             }
         });
         
@@ -167,7 +168,7 @@ public class StartActivity extends BaseNavigationActivity {
             if (totalAmount != null) {
                 valueBudget.setText(viewModel.getFormattedTotalBudgetAmount());
                 valueBudget.setTextColor(viewModel.getBudgetRemainingColor());
-                Log.d(TAG, "Общая сумма бюджетов обновлена: " + totalAmount);
+                LogManager.d(TAG, "Общая сумма бюджетов обновлена: " + totalAmount);
             }
         });
         
@@ -176,7 +177,7 @@ public class StartActivity extends BaseNavigationActivity {
             if (totalAmount != null) {
                 valueAccounts.setText(viewModel.getFormattedTotalAccountsBalance());
                 valueAccounts.setTextColor(viewModel.getAmountColor(totalAmount));
-                Log.d(TAG, "Сумма текущих счетов обновлена: " + totalAmount);
+                LogManager.d(TAG, "Сумма текущих счетов обновлена: " + totalAmount);
             }
         });
         
@@ -185,7 +186,7 @@ public class StartActivity extends BaseNavigationActivity {
             if (totalAmount != null) {
                 valueSavings.setText(viewModel.getFormattedTotalSavingsBalance());
                 valueSavings.setTextColor(viewModel.getAmountColor(totalAmount));
-                Log.d(TAG, "Сумма сберегательных счетов обновлена: " + totalAmount);
+                LogManager.d(TAG, "Сумма сберегательных счетов обновлена: " + totalAmount);
             }
         });
         
@@ -194,7 +195,7 @@ public class StartActivity extends BaseNavigationActivity {
             if (totalAmount != null) {
                 valueEarned.setText(viewModel.getFormattedMonthlyEarned());
                 valueEarned.setTextColor(viewModel.getAmountColor(totalAmount));
-                Log.d(TAG, "Сумма месячного дохода обновлена: " + totalAmount);
+                LogManager.d(TAG, "Сумма месячного дохода обновлена: " + totalAmount);
             }
         });
     }
@@ -214,7 +215,7 @@ public class StartActivity extends BaseNavigationActivity {
      * Обновление UI с новыми данными
      */
     private void updateUI(MainScreenData data) {
-        Log.d(TAG, "Обновление UI с данными: " + data);
+        LogManager.d(TAG, "Обновление UI с данными: " + data);
         
         // Обновляем текстовые поля с форматированными значениями
         valueEarned.setText(viewModel.getFormattedMonthlyEarned());
@@ -224,7 +225,7 @@ public class StartActivity extends BaseNavigationActivity {
         valueReserve.setTextColor(viewModel.getAmountColor(data.getReserveAmount()));
         valueEarned.setTextColor(viewModel.getAmountColor(data.getMonthlyEarned()));
         
-        Log.d(TAG, "UI успешно обновлен");
+        LogManager.d(TAG, "UI успешно обновлен");
     }
             
     /**
@@ -248,7 +249,7 @@ public class StartActivity extends BaseNavigationActivity {
         // ThreadManager.shutdown() должен вызываться только при завершении всего приложения
         
         super.onDestroy();
-        Log.d(TAG, "StartActivity уничтожена");
+        LogManager.d(TAG, "StartActivity уничтожена");
     }
     
     /**
@@ -257,23 +258,23 @@ public class StartActivity extends BaseNavigationActivity {
      */
     private void initializeDatabase() {
         try {
-            Log.d(TAG, "Инициализация базы данных...");
+            LogManager.d(TAG, "Инициализация базы данных...");
             databaseManager = new DatabaseManager(this);
             
             // Инициализируем базу данных асинхронно
             databaseManager.initializeDatabase().thenAccept(success -> {
                 if (success) {
-                    Log.d(TAG, "База данных инициализирована успешно");
+                    LogManager.d(TAG, "База данных инициализирована успешно");
                 } else {
-                    Log.e(TAG, "Ошибка инициализации базы данных");
+                    LogManager.e(TAG, "Ошибка инициализации базы данных");
                 }
             }).exceptionally(throwable -> {
-                Log.e(TAG, "Исключение при инициализации БД: " + throwable.getMessage(), throwable);
+                LogManager.e(TAG, "Исключение при инициализации БД: " + throwable.getMessage(), throwable);
                 return null;
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка создания DatabaseManager: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка создания DatabaseManager: " + e.getMessage(), e);
         }
     }
 }

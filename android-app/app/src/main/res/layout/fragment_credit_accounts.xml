@@ -9,7 +9,7 @@
 
     <!-- RecyclerView для списка переводов -->
     <androidx.recyclerview.widget.RecyclerView 
-        android:id="@+id/accounts_transfers_recycler"
+        android:id="@+id/accounts_credit_recycler"
         android:layout_height="match_parent"
         android:layout_width="match_parent"/>
 </LinearLayout> 

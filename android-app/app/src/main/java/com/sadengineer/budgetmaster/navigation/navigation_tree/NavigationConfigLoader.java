@@ -1,7 +1,8 @@
 package com.sadengineer.budgetmaster.navigation.navigation_tree;
 
 import android.content.Context;
-import android.util.Log;
+ 
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +30,7 @@ public class NavigationConfigLoader {
      * @return карта узлов навигации по классу Activity
      */
     public static Map<Class<?>, NavigationNode> loadConfig(Context context) {
-        Log.d(TAG, "Загрузка конфигурации навигации из JSON файла...");
+        LogManager.d(TAG, "Загрузка конфигурации навигации из JSON файла...");
         Map<Class<?>, NavigationNode> nodesByClass = new HashMap<>();
         Map<String, NavigationNode> nodesByClassName = new HashMap<>();
         
@@ -75,15 +76,15 @@ public class NavigationConfigLoader {
                 }
             }
             
-            Log.d(TAG, "Загружено " + nodesByClass.size() + " узлов навигации");
+            LogManager.d(TAG, "Загружено " + nodesByClass.size() + " узлов навигации");
             
         } catch (JSONException e) {
-            Log.e(TAG, "Ошибка парсинга JSON конфигурации", e);
+            LogManager.e(TAG, "Ошибка парсинга JSON конфигурации", e);
         } catch (IOException e) {
-            Log.e(TAG, "Ошибка загрузки файла конфигурации", e);
+            LogManager.e(TAG, "Ошибка загрузки файла конфигурации", e);
         }
         
-        Log.d(TAG, "Конфигурация навигации загружена успешно");
+        LogManager.d(TAG, "Конфигурация навигации загружена успешно");
         return nodesByClass;
     }
     
@@ -114,7 +115,10 @@ public class NavigationConfigLoader {
         }
         
         // Парсим ID пункта меню
-        String menuId = json.optString("menu_id", null);
+        String menuId = null;
+        if (json.has("menu_id") && !json.isNull("menu_id")) {
+            menuId = json.getString("menu_id");
+        }
         
         try {
             // Получаем класс Activity
@@ -136,7 +140,7 @@ public class NavigationConfigLoader {
             return node;
             
         } catch (ClassNotFoundException e) {
-            Log.e("NavigationConfigLoader", "Класс Activity не найден: " + className, e);
+            LogManager.e("NavigationConfigLoader", "Класс Activity не найден: " + className, e);
             return null;
         }
     }

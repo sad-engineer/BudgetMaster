@@ -1,7 +1,8 @@
 package com.sadengineer.budgetmaster.navigation.navigation_tree;
 
 import android.content.Context;
-import android.util.Log;
+ 
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class NavigationTreeBuilder {
         // Загружаем конфигурацию (узлы уже созданы с установленными связями)
         Map<Class<?>, NavigationNode> nodesByClass = NavigationConfigLoader.loadConfig(context);
         
-        Log.d(TAG, "Навигационное дерево построено. Узлов: " + nodesByClass.size());
+        LogManager.d(TAG, "Навигационное дерево построено. Узлов: " + nodesByClass.size());
         return nodesByClass;
     }
     

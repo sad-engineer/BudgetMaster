@@ -14,8 +14,8 @@ public class SavingsAccountsFragment extends BaseAccountsFragment {
     
     @Override
     protected void initializeResources() {
-        this.layoutResourceId = R.layout.fragment_savings_accounts;
-        this.recyclerViewId = R.id.accounts_savings_recycler;
-        this.accountType = AccountTypeFilter.SAVINGS;
+        this.mLayoutResourceId = R.layout.fragment_savings_accounts;
+        this.mRecyclerViewId = R.id.accounts_savings_recycler;
+        this.mAccountType = AccountTypeFilter.SAVINGS;
     }
 } 

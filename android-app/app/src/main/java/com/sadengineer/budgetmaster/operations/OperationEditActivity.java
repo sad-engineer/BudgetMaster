@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -29,6 +29,7 @@ import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -153,7 +154,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                 categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 categorySpinner.setAdapter(categoryAdapter);
                 
-                Log.d(TAG, "Спиннер категорий настроен: " + categories.size() + " категорий");
+                LogManager.d(TAG, "Спиннер категорий настроен: " + categories.size() + " категорий");
             }
         });
     }
@@ -177,7 +178,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                 accountAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 accountSpinner.setAdapter(accountAdapter);
                 
-                Log.d(TAG, "Спиннер счетов настроен: " + accounts.size() + " счетов");
+                LogManager.d(TAG, "Спиннер счетов настроен: " + accounts.size() + " счетов");
                 
                 // Если есть операция для редактирования, устанавливаем выбранный счет
                 if (currentOperation != null && isEditMode) {
@@ -233,9 +234,9 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                     try {
                         LocalDateTime parsedDate = LocalDateTime.parse(dateText, dateFormatter);
                         selectedDate = parsedDate;
-                        Log.d(TAG, "Дата введена вручную: " + dateText);
+                        LogManager.d(TAG, "Дата введена вручную: " + dateText);
                     } catch (Exception e) {
-                        Log.d(TAG, "Не удалось распарсить дату: " + dateText);
+                        LogManager.d(TAG, "Не удалось распарсить дату: " + dateText);
                         // Не очищаем поле, позволяем пользователю исправить
                     }
                 }
@@ -247,7 +248,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                 // Валюта определяется автоматически из выбранного счета
-                Log.d(TAG, "Выбран счет: " + (position >= 0 && position < accounts.size() ? accounts.get(position).getTitle() : "неизвестно"));
+                LogManager.d(TAG, "Выбран счет: " + (position >= 0 && position < accounts.size() ? accounts.get(position).getTitle() : "неизвестно"));
             }
             
             @Override
@@ -311,7 +312,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             // Устанавливаем курсор в конец текста
             dateEdit.setSelection(dateEdit.getText().length());
         });
-        
+
         dialog.show();
     }
     
@@ -497,7 +498,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
     private void updateDateField() {
         String formattedDate = selectedDate.format(dateFormatter);
         dateEdit.setText(formattedDate);
-        Log.d(TAG, "Выбрана дата: " + formattedDate);
+        LogManager.d(TAG, "Выбрана дата: " + formattedDate);
     }
     
     /**
@@ -553,18 +554,18 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         if (intent != null) {
             // Получаем тип операции из Intent
             operationType = intent.getIntExtra("operation_type", OperationTypeFilter.INCOME.getIndex());
-            Log.d(TAG, "Загружен тип операции из Intent: " + operationType);
+            LogManager.d(TAG, "Загружен тип операции из Intent: " + operationType);
             
             // Получаем информацию о вкладке
             sourceTab = intent.getIntExtra("source_tab", 0);
-            Log.d(TAG, "Загружена вкладка из Intent: " + sourceTab);
+            LogManager.d(TAG, "Загружена вкладка из Intent: " + sourceTab);
             
             // Получаем операцию для редактирования
             currentOperation = (Operation) intent.getSerializableExtra("operation");
             
             if (currentOperation != null) {
                 isEditMode = true;
-                Log.d(TAG, "Режим редактирования операции ID: " + currentOperation.getId());
+                LogManager.d(TAG, "Режим редактирования операции ID: " + currentOperation.getId());
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_operation_edit, R.dimen.toolbar_text);
@@ -574,15 +575,15 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                     if (loadedOperation != null) {
                         currentOperation = loadedOperation;
                         fillOperationData();
-                        Log.d(TAG, "Данные операции загружены из базы");
+                        LogManager.d(TAG, "Данные операции загружены из базы");
                     } else {
-                        Log.e(TAG, "Операция с ID " + currentOperation.getId() + " не найдена");
+                        LogManager.e(TAG, "Операция с ID " + currentOperation.getId() + " не найдена");
                         finish();
                     }
                 });
             } else {
                 isEditMode = false;
-                Log.d(TAG, "Режим создания новой операции");
+                LogManager.d(TAG, "Режим создания новой операции");
                 
                 // Устанавливаем заголовок для режима создания
                 setToolbarTitle(R.string.toolbar_title_operation_add, R.dimen.toolbar_text);
@@ -591,7 +592,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
                 setDefaultData();
             }
         } else {
-            Log.e(TAG, "Intent равен null");
+            LogManager.e(TAG, "Intent равен null");
             finish();
         }
     }
@@ -616,7 +617,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      */
     private void fillOperationData() {
         if (currentOperation != null) {
-            Log.d(TAG, "fillOperationData: загружаем операцию ID=" + currentOperation.getId() + 
+            LogManager.d(TAG, "fillOperationData: загружаем операцию ID=" + currentOperation.getId() + 
                       ", сумма в копейках=" + currentOperation.getAmount());
             
             // Устанавливаем сумму
@@ -634,9 +635,9 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             
             // Счет будет установлен в loadAccounts() после загрузки счетов
             
-            Log.d(TAG, "Данные операции загружены в поля");
+            LogManager.d(TAG, "Данные операции загружены в поля");
         } else {
-            Log.w(TAG, "fillOperationData: currentOperation равен null");
+            LogManager.w(TAG, "fillOperationData: currentOperation равен null");
         }
     }
     
@@ -676,24 +677,24 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      * Сохраняет операцию
      */
     private boolean saveOperation() {
-        Log.d(TAG, "Сохранение операции...");
+        LogManager.d(TAG, "Сохранение операции...");
         
         // Валидация категории
         if (categorySpinner.getSelectedItemPosition() == -1 || categorySpinner.getSelectedItemPosition() >= categories.size()) {
-            Log.e(TAG, "Не выбрана категория");
+            LogManager.e(TAG, "Не выбрана категория");
             return false;
         }
         
         // Валидация счета
         if (accountSpinner.getSelectedItemPosition() == -1 || accountSpinner.getSelectedItemPosition() >= accounts.size()) {
-            Log.e(TAG, "Не выбран счет");
+            LogManager.e(TAG, "Не выбран счет");
             return false;
         }
         
         // Валидация суммы
         String amountText = amountEdit.getText().toString().trim();
         if (TextUtils.isEmpty(amountText)) {
-            Log.e(TAG, "Не введена сумма");
+            LogManager.e(TAG, "Не введена сумма");
             return false;
         }
         
@@ -703,7 +704,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             amount = Math.round(amountDouble * 100); // Конвертируем в копейки
             validator.validateAmount(amount);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Ошибка валидации суммы: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка валидации суммы: " + e.getMessage(), e);
             amountEdit.setError(e.getMessage());
             amountEdit.requestFocus();
             return false;
@@ -711,7 +712,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
         
         // Валидация даты
         if (selectedDate == null) {
-            Log.e(TAG, "Не выбрана дата");
+            LogManager.e(TAG, "Не выбрана дата");
             return false;
         }
         
@@ -730,7 +731,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при сохранении операции: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при сохранении операции: " + e.getMessage(), e);
             return false;
         }
     }
@@ -740,7 +741,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      */
     private boolean createOperation(long amount, int categoryId, int accountId, String comment) {
         try {
-            Log.d(TAG, "Создание новой операции: тип=" + operationType + 
+            LogManager.d(TAG, "Создание новой операции: тип=" + operationType + 
                       ", сумма=" + amount + " копеек (" + (amount / 100.0) + " рублей)" +
                       ", категория=" + categoryId + ", счет=" + accountId);
             
@@ -750,11 +751,11 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             
             operationService.createWithoutValidation(operationType, selectedDate, amount, comment, categoryId, accountId, currencyId);
             
-            Log.d(TAG, "Операция создана успешно");
+            LogManager.d(TAG, "Операция создана успешно");
             returnToPrevious();
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при создании операции: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при создании операции: " + e.getMessage(), e);
             return false;
         }
     }
@@ -764,12 +765,12 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      */
     private boolean updateOperation(long amount, int categoryId, int accountId, String comment) {
         if (currentOperation == null) {
-            Log.e(TAG, "currentOperation равен null, невозможно обновить операцию");
+            LogManager.e(TAG, "currentOperation равен null, невозможно обновить операцию");
             return false;
         }
         
         try {
-            Log.d(TAG, "Обновление операции ID: " + currentOperation.getId() + 
+            LogManager.d(TAG, "Обновление операции ID: " + currentOperation.getId() + 
                       ", новая сумма: " + amount + " копеек (" + (amount / 100.0) + " рублей)" +
                       ", новая категория: " + categoryId + ", новый счет: " + accountId);
             
@@ -783,11 +784,11 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
             
             operationService.update(currentOperation);
             
-            Log.d(TAG, "Операция обновлена успешно");
+            LogManager.d(TAG, "Операция обновлена успешно");
             returnToPrevious();
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при обновлении операции: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при обновлении операции: " + e.getMessage(), e);
             return false;
         }
     }
@@ -826,13 +827,13 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
     }
 
     private void returnToIncomeActivity() {
-        Log.d(TAG, "Переход к окну списка доходов, вкладка " + sourceTab);
+        LogManager.d(TAG, "Переход к окну списка доходов, вкладка " + sourceTab);
         String[] params = {"selected_tab", String.valueOf(sourceTab)};
         returnTo(com.sadengineer.budgetmaster.income.IncomeActivity.class, true, params);
     }
 
     private void returnToExpenseActivity() {
-        Log.d(TAG, "Переход к окну списка расходов, вкладка " + sourceTab);
+        LogManager.d(TAG, "Переход к окну списка расходов, вкладка " + sourceTab);
         String[] params = {"selected_tab", String.valueOf(sourceTab)};
         returnTo(com.sadengineer.budgetmaster.expense.ExpenseActivity.class, true, params);
     }
@@ -841,7 +842,7 @@ public class OperationEditActivity extends BaseEditActivity<Operation> {
      * Возвращается к предыдущему экрану
      */
     private void returnToPrevious() {
-        Log.d(TAG, "Переход к окну списка операций, вкладка " + sourceTab);
+        LogManager.d(TAG, "Переход к окну списка операций, вкладка " + sourceTab);
         // Возвращаемся к соответствующему экрану операций в зависимости от типа операции
         if (operationType == OperationTypeFilter.INCOME.getIndex()) {
             String[] params = {"selected_tab", String.valueOf(sourceTab)};

@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.categories;
 
 import android.content.Context;
-import android.util.Log;
+ 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.settings.SettingsManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,7 +136,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
         this.allCategories = categories != null ? categories : new ArrayList<>();
         buildTree();
         notifyDataSetChanged();
-        Log.d(TAG, "Установлено категорий: " + this.allCategories.size() + ", элементов дерева: " + this.treeItems.size());
+        LogManager.d(TAG, "Установлено категорий: " + this.allCategories.size() + ", элементов дерева: " + this.treeItems.size());
     }
     
     /**
@@ -144,7 +145,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
     private void buildTree() {
         treeItems.clear();
         
-        Log.d(TAG, "Строим дерево из " + allCategories.size() + " категорий");
+        LogManager.d(TAG, "Строим дерево из " + allCategories.size() + " категорий");
         
         // Создаем карту категорий по ID для быстрого поиска
         Map<Integer, Category> categoryMap = new HashMap<>();
@@ -158,22 +159,22 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             Integer parentId = category.getParentId();
             if (parentId != null && parentId > 0) { // Не корневая категория
                 childrenMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(category);
-                Log.d(TAG, "Дочерняя категория: " + category.getTitle() + " -> родитель ID: " + parentId);
+                LogManager.d(TAG, "Дочерняя категория: " + category.getTitle() + " -> родитель ID: " + parentId);
             }
         }
         
-        Log.d(TAG, "Найдено " + childrenMap.size() + " родительских категорий с дочерними элементами");
+        LogManager.d(TAG, "Найдено " + childrenMap.size() + " родительских категорий с дочерними элементами");
         
         // Добавляем корневые категории (parentId == null или <= 0)
         for (Category category : allCategories) {
             Integer parentId = category.getParentId();
             if (parentId == null || parentId <= 0) {
-                Log.d(TAG, "Корневая категория: " + category.getTitle() + " (ID: " + category.getId() + ")");
+                LogManager.d(TAG, "Корневая категория: " + category.getTitle() + " (ID: " + category.getId() + ")");
                 addCategoryToTree(category, 0, childrenMap, new HashMap<>());
             }
         }
         
-        Log.d(TAG, "Построено дерево с " + treeItems.size() + " элементами");
+        LogManager.d(TAG, "Построено дерево с " + treeItems.size() + " элементами");
     }
     
     /**
@@ -194,7 +195,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
         if (children != null && !children.isEmpty()) {
             treeItem.setHasChildren(true);
             treeItems.add(treeItem);
-            Log.d(TAG, "Добавлен узел с дочерними элементами: " + category.getTitle() + " (уровень " + level + ", " + children.size() + " дочерних)");
+            LogManager.d(TAG, "Добавлен узел с дочерними элементами: " + category.getTitle() + " (уровень " + level + ", " + children.size() + " дочерних)");
             
             // Добавляем дочерние элементы только если узел развернут
             if (treeItem.isExpanded()) {
@@ -205,7 +206,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
         } else {
             treeItem.setHasChildren(false);
             treeItems.add(treeItem);
-            Log.d(TAG, "Добавлен листовой узел: " + category.getTitle() + " (уровень " + level + ")");
+            LogManager.d(TAG, "Добавлен листовой узел: " + category.getTitle() + " (уровень " + level + ")");
         }
     }
     
@@ -263,7 +264,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             clearSelection();
         }
         notifyDataSetChanged();
-        Log.d(TAG, "Режим выбора категорий: " + (enabled ? "включен" : "выключен"));
+        LogManager.d(TAG, "Режим выбора категорий: " + (enabled ? "включен" : "выключен"));
     }
     
     /**
@@ -285,7 +286,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
     public void clearSelection() {
         selectedCategories.clear();
         notifyDataSetChanged();
-        Log.d(TAG, "Выбор категорий очищен");
+        LogManager.d(TAG, "Выбор категорий очищен");
     }
     
     /**
@@ -296,7 +297,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
         this.showPosition = SettingsManager.isShowPosition();
         this.showId = SettingsManager.isShowId();
         
-        Log.d(TAG, "refreshSettings: showPosition=" + showPosition + ", showId=" + showId);
+        LogManager.d(TAG, "refreshSettings: showPosition=" + showPosition + ", showId=" + showId);
         
         // Перерисовываем все элементы
         notifyDataSetChanged();
@@ -349,7 +350,7 @@ public class CategoryTreeAdapter extends RecyclerView.Adapter<CategoryTreeAdapte
             if (idText != null) {
                 if (showId) {
                     int categoryId = category.getId();
-                    Log.d(TAG, "Category: " + category.getTitle() + ", ID: " + categoryId + ", showId: " + showId);
+                    LogManager.d(TAG, "Category: " + category.getTitle() + ", ID: " + categoryId + ", showId: " + showId);
                     idText.setText("ID: " + categoryId);
                     idText.setVisibility(View.VISIBLE);
                 } else {

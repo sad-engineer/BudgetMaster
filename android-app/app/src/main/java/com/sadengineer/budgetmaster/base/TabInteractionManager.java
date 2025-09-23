@@ -2,10 +2,11 @@ package com.sadengineer.budgetmaster.base;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
+ 
 import androidx.appcompat.app.AlertDialog;
 
 import com.sadengineer.budgetmaster.backend.interfaces.IService;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.io.Serializable;
 
@@ -81,16 +82,16 @@ public class TabInteractionManager<T extends Serializable, S extends IService<T>
      * @param itemTitle заголовок элемента для вывода в лог
      */
     public void deleteItem(T item, String itemTitle ) {
-        Log.d(TAG, "Удаление элемента: " + itemTitle);
+        LogManager.d(TAG, "Удаление элемента: " + itemTitle);
         try {
             if (service != null) {
                 service.delete(item, false);
-                Log.d(TAG, "Запрос на удаление элемента отправлен");
+                LogManager.d(TAG, "Запрос на удаление элемента отправлен");
             } else {
-                Log.e(TAG, "Сервис не найден");
+                LogManager.e(TAG, "Сервис не найден");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка удаления элемента " + itemTitle + ": " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка удаления элемента " + itemTitle + ": " + e.getMessage(), e);
         }
     }
 }

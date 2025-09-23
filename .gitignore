@@ -51,7 +51,7 @@ MANIFEST
 *.spec
 
 # Installer logs
-pip-log.txt
+pip-LogManager.txt
 pip-delete-this-directory.txt
 
 # Unit tests / coverage reports

@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -20,6 +20,7 @@ import com.sadengineer.budgetmaster.backend.validator.CategoryValidator;
 import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Activity для создания/изменения категории
@@ -142,7 +143,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                             categoryParentSpinner.setAdapter(parentAdapter);
                             
                             // Устанавливаем родительскую категорию для редактирования
-                            Log.d(TAG, "Устанавливаем родительскую категорию для редактирования. ParentId: " + currentCategory.getParentId());
+                            LogManager.d(TAG, "Устанавливаем родительскую категорию для редактирования. ParentId: " + currentCategory.getParentId());
                             if (currentCategory.getParentId() != null && currentCategory.getParentId() != PARENT) {
                                 setSelectedParentCategory(currentCategory.getParentId());
                             } else {
@@ -178,21 +179,21 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         if (intent != null) {
             // Получаем тип операции из Intent
             sourceOperationType = intent.getIntExtra("operation_type", 1);
-            Log.d(TAG, "Загружен тип операции из Intent: " + sourceOperationType);
+            LogManager.d(TAG, "Загружен тип операции из Intent: " + sourceOperationType);
             
             // Получаем категорию для редактирования
             currentCategory = (Category) intent.getSerializableExtra("category");
             
             if (currentCategory != null) {
                 isEditMode = true;
-                Log.d(TAG, "Режим редактирования. Категория: " + currentCategory.getTitle() + 
+                LogManager.d(TAG, "Режим редактирования. Категория: " + currentCategory.getTitle() + 
                           ", ID: " + currentCategory.getId() + 
                           ", ParentId: " + currentCategory.getParentId());
                 fillCategoryData();
                 setToolbarTitle(R.string.toolbar_title_category_edit, R.dimen.toolbar_text);
             } else {
                 isEditMode = false;
-                Log.d(TAG, "Режим создания новой категории");
+                LogManager.d(TAG, "Режим создания новой категории");
                 setToolbarTitle(R.string.toolbar_title_category_add, R.dimen.toolbar_text);
             }
         }
@@ -204,7 +205,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
     private void fillCategoryData() {
         if (currentCategory != null) {
             categoryNameEdit.setText(currentCategory.getTitle());
-            Log.d(TAG, "Заполнено название категории: " + currentCategory.getTitle());
+            LogManager.d(TAG, "Заполнено название категории: " + currentCategory.getTitle());
             
             // Родительская категория будет установлена после загрузки списка в loadParentCategories()
         }
@@ -217,7 +218,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         ImageButton back = findViewById(backButtonId);
         if (back != null) {
             back.setOnClickListener(v -> {
-                Log.d(TAG, "Нажата кнопка 'Назад'");
+                LogManager.d(TAG, "Нажата кнопка 'Назад'");
                 returnToCategories();
             });
         }
@@ -241,7 +242,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
         try {
             validator.validateTitle(title);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
+            LogManager.e(TAG, e.getMessage());
             editText.setError(e.getMessage());
             editText.requestFocus();
             return false;
@@ -254,15 +255,15 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      * Сохраняет категорию
      */
     private boolean saveCategory() {
-        Log.d(TAG, "Сохранение категории...");
+        LogManager.d(TAG, "Сохранение категории...");
         String title = categoryNameEdit.getText().toString().trim();
 
         if (!validateCategoryName(categoryNameEdit)) return false;
         
         try {
             if (isEditMode) {
-                Log.d(TAG, "Редактирование категории.");
-                Log.d(TAG, "Текущая категория: название=" + currentCategory.getTitle() + ", operationType=" + currentCategory.getOperationType() + ", тип=" + currentCategory.getType() + ", родитель=" + currentCategory.getParentId());
+                LogManager.d(TAG, "Редактирование категории.");
+                LogManager.d(TAG, "Текущая категория: название=" + currentCategory.getTitle() + ", operationType=" + currentCategory.getOperationType() + ", тип=" + currentCategory.getType() + ", родитель=" + currentCategory.getParentId());
 
                 // Редактирование существующей категории
                 if (currentCategory != null) {
@@ -270,17 +271,17 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
                     currentCategory.setOperationType(sourceOperationType);
                     currentCategory.setType(getSelectedCategoryType());
                     currentCategory.setParentId(getSelectedParentId());
-                    Log.d(TAG, "Обновленнаz категория: название=" + title + ", operationType=" + sourceOperationType + ", тип=" + getSelectedCategoryType() + ", родитель=" + getSelectedParentId());
+                    LogManager.d(TAG, "Обновленнаz категория: название=" + title + ", operationType=" + sourceOperationType + ", тип=" + getSelectedCategoryType() + ", родитель=" + getSelectedParentId());
                     serviceManager.categories.update(currentCategory);
-                    Log.d(TAG, "Запрос на обновление счета отправлен");
+                    LogManager.d(TAG, "Запрос на обновление счета отправлен");
                 }
             } else {
                 // Создание новой категории с бюджетом
                 int categoryType = getSelectedCategoryType();
                 int parentId = getSelectedParentId();
-                Log.d(TAG, "Создание новой категории с бюджетом: " + title);
+                LogManager.d(TAG, "Создание новой категории с бюджетом: " + title);
                 serviceManager.createCategoryWithBudgetWithoutValidation(title, sourceOperationType, categoryType, parentId, null, null);
-                Log.d(TAG, "Запрос на создание категории с бюджетом отправлен");
+                LogManager.d(TAG, "Запрос на создание категории с бюджетом отправлен");
             }
             
             // Возвращаемся к списку категорий
@@ -288,7 +289,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
             return true;
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при сохранении категории: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при сохранении категории: " + e.getMessage(), e);
             return false;
         }
     }
@@ -322,10 +323,10 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      * Устанавливает выбранную родительскую категорию по ID
      */
     private void setSelectedParentCategory(Integer parentId) {
-        Log.d(TAG, "setSelectedParentCategory вызван с parentId: " + parentId);
+        LogManager.d(TAG, "setSelectedParentCategory вызван с parentId: " + parentId);
         if (parentId == null || parentId == DEFAULT_CATEGORY_ID) {
             categoryParentSpinner.setSelection(0); // "Нет родителя"
-            Log.d(TAG, "Установлена позиция 0 (Нет родителя)");
+            LogManager.d(TAG, "Установлена позиция 0 (Нет родителя)");
             return;
         }
         
@@ -333,7 +334,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
             Category category = parentCategories.get(i);
             if (category != null && category.getId() == parentId) {
                 categoryParentSpinner.setSelection(i);
-                Log.d(TAG, "Установлена позиция " + i + " для категории с ID " + parentId);
+                LogManager.d(TAG, "Установлена позиция " + i + " для категории с ID " + parentId);
                 break;
             }
         }
@@ -343,7 +344,7 @@ public class CategoryEditActivity extends BaseEditActivity<Category> {
      * Возвращается к списку категорий
      */
     private void returnToCategories() {
-        Log.d(TAG, "Переход к окну списка категорий, вкладка " + sourceOperationType);
+        LogManager.d(TAG, "Переход к окну списка категорий, вкладка " + sourceOperationType);
         // Возвращаемся к соответствующему экрану категорий в зависимости от типа операции
         if (sourceOperationType == ModelConstants.OPERATION_TYPE_INCOME) {
             returnTo(IncomeCategoriesActivity.class, true, new String[0]);

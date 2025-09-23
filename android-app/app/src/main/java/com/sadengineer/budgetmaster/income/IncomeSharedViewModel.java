@@ -1,8 +1,7 @@
 package com.sadengineer.budgetmaster.income;
 
 import android.app.Application;
-import android.util.Log;
-
+ 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -11,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.sadengineer.budgetmaster.backend.entity.Operation;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
 import com.sadengineer.budgetmaster.base.SelectionListViewModel;    
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,38 +116,38 @@ public class IncomeSharedViewModel extends AndroidViewModel implements Selection
             if (!income.isDeleted()) {
                 incomesToDelete.add(income);
             } else {
-                Log.w(TAG, "Пропуск операции: ID=" + income.getId() + ", уже удалена");
+                LogManager.w(TAG, "Пропуск операции: ID=" + income.getId() + ", уже удалена");
             }
         }
 
         if (incomesToDelete.isEmpty()) {
-            Log.w(TAG, "Нет операций для удаления - все уже удалены");
+            LogManager.w(TAG, "Нет операций для удаления - все уже удалены");
             softDeletionDone.setValue(0);
             selectionMode.setValue(false);
             return;
         }
 
-        Log.d(TAG, "Начато удаление операций. Количество: " + incomesToDelete.size());
+        LogManager.d(TAG, "Начато удаление операций. Количество: " + incomesToDelete.size());
         // Устанавливаем состояние удаления
         deleting.setValue(true);
         ioExecutor.execute(() -> {
             int deletedCount = 0;
             for (Operation income : incomesToDelete) {
                 try {
-                    Log.d(TAG, "Удаление операции: ID=" + income.getId());
+                    LogManager.d(TAG, "Удаление операции: ID=" + income.getId());
                     // TODO: Реализовать метод delete в OperationService
                     // operationService.delete(true, income);
                     deletedCount++;
-                    Log.d(TAG, "Операция ID: " + income.getId() + " успешно удалена");
+                    LogManager.d(TAG, "Операция ID: " + income.getId() + " успешно удалена");
                 } catch (Exception e) {
-                    Log.e(TAG, "Ошибка удаления операции: ID=" + income.getId() + ", причина: " + e.getMessage());
+                    LogManager.e(TAG, "Ошибка удаления операции: ID=" + income.getId() + ", причина: " + e.getMessage());
                 }
             }
             deleting.postValue(false);
             softDeletionDone.postValue(deletedCount);
             selectionMode.postValue(false);
             selectedIncomes.postValue(null);
-            Log.d(TAG, "Удаление завершено. Удалено операций: " + deletedCount);
+            LogManager.d(TAG, "Удаление завершено. Удалено операций: " + deletedCount);
         });
     }
 
@@ -155,7 +155,7 @@ public class IncomeSharedViewModel extends AndroidViewModel implements Selection
       * Обновляет текущий набор выбранных операций.
       */
      public void setSelectedIncomes(List<Operation> incomes) {
-        Log.d(TAG, "Выбранных операций: " + (incomes != null ? incomes.size() : 0));
+        LogManager.d(TAG, "Выбранных операций: " + (incomes != null ? incomes.size() : 0));
         selectedIncomes.setValue(incomes);
      }
 

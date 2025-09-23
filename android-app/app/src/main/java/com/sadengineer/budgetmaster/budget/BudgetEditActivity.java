@@ -2,7 +2,7 @@ package com.sadengineer.budgetmaster.budget;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -17,6 +17,7 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.BudgetValidator;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -112,14 +113,14 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                     @Override
                     public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                         // Валюта изменена, но курс не обновляем здесь
-                        Log.d(TAG, "Выбрана валюта: " + currencies.get(position).getTitle());
+                        LogManager.d(TAG, "Выбрана валюта: " + currencies.get(position).getTitle());
                     }
                     
                     @Override
                     public void onNothingSelected(android.widget.AdapterView<?> parent) {}
                 });
                 
-                Log.d(TAG, "Спиннер валют настроен: " + currencies.size() + " валют");
+                LogManager.d(TAG, "Спиннер валют настроен: " + currencies.size() + " валют");
             }
         });
     }
@@ -138,7 +139,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 // Режим редактирования
                 isEditMode = true;
                 currentBudget = budget;
-                Log.d(TAG, "Режим редактирования бюджета ID: " + budget.getId());
+                LogManager.d(TAG, "Режим редактирования бюджета ID: " + budget.getId());
                 
                 // Устанавливаем заголовок для режима редактирования
                 setToolbarTitle(R.string.toolbar_title_budget_edit, R.dimen.toolbar_text);
@@ -148,19 +149,19 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                     if (loadedBudget != null) {
                         currentBudget = loadedBudget;
                         fillBudgetData();
-                        Log.d(TAG, "Данные бюджета загружены из базы");
+                        LogManager.d(TAG, "Данные бюджета загружены из базы");
                     } else {
-                        Log.e(TAG, "Бюджет с ID " + budget.getId() + " не найден");
+                        LogManager.e(TAG, "Бюджет с ID " + budget.getId() + " не найден");
                         finish();
                     }
                 });
             } else {
                 // Бюджеты создаются только через категории, поэтому всегда режим редактирования
-                Log.e(TAG, "BudgetEditActivity открыт без данных бюджета. Бюджеты создаются только через категории.");
+                LogManager.e(TAG, "BudgetEditActivity открыт без данных бюджета. Бюджеты создаются только через категории.");
                 finish();
             }
         } else {
-            Log.e(TAG, "Intent равен null");
+            LogManager.e(TAG, "Intent равен null");
             finish();
         }
     }
@@ -170,27 +171,27 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private void fillBudgetData() {
         if (currentBudget != null) {
-            Log.d(TAG, "fillBudgetData: загружаем бюджет ID=" + currentBudget.getId() + 
+            LogManager.d(TAG, "fillBudgetData: загружаем бюджет ID=" + currentBudget.getId() + 
                       ", сумма в копейках=" + currentBudget.getAmount());
             
             // Конвертируем копейки в рубли для отображения
             double amount = currentBudget.getAmount() / 100.0;
             budgetAmountEdit.setText(formatter.format(amount));
-            Log.d(TAG, "fillBudgetData: установлена сумма в рублях=" + amount);
+            LogManager.d(TAG, "fillBudgetData: установлена сумма в рублях=" + amount);
             
             // В режиме редактирования категория не изменяется, только отображаем её ID
-            Log.d(TAG, "fillBudgetData: категория бюджета ID=" + currentBudget.getCategoryId() + " (не изменяется)");
+            LogManager.d(TAG, "fillBudgetData: категория бюджета ID=" + currentBudget.getCategoryId() + " (не изменяется)");
             
             // Устанавливаем выбранную валюту
             int currencyPosition = findCurrencyPosition(currentBudget.getCurrencyId());
             if (currencyPosition != -1) {
                 budgetCurrencySpinner.setSelection(currencyPosition);
-                Log.d(TAG, "Установлена валюта: " + currencies.get(currencyPosition).getTitle());
+                LogManager.d(TAG, "Установлена валюта: " + currencies.get(currencyPosition).getTitle());
             }
             
-            Log.d(TAG, "Данные бюджета загружены в поля");
+            LogManager.d(TAG, "Данные бюджета загружены в поля");
         } else {
-            Log.w(TAG, "fillBudgetData: currentBudget равен null");
+            LogManager.w(TAG, "fillBudgetData: currentBudget равен null");
         }
     }
     
@@ -218,7 +219,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      * Сохраняет бюджет
      */
     private boolean saveBudget() {
-        Log.d(TAG, "Сохранение бюджета...");
+        LogManager.d(TAG, "Сохранение бюджета...");
         long balance = DEFAULT_AMOUNT;    
         
         // Получаем данные из полей
@@ -229,7 +230,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
             balance = (long) (amount * 100);
             validator.validateAmount(balance);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Ошибка валидации суммы бюджета: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка валидации суммы бюджета: " + e.getMessage(), e);
             budgetAmountEdit.setError(e.getMessage());
             budgetAmountEdit.requestFocus();
             return false;
@@ -237,7 +238,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
 
         int currencyPosition = budgetCurrencySpinner.getSelectedItemPosition();
         if (currencyPosition == -1 || currencyPosition >= currencies.size()) {
-            Log.e(TAG, "Не выбрана валюта");
+            LogManager.e(TAG, "Не выбрана валюта");
             return false;
         }
         
@@ -249,13 +250,13 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
                 return updateBudget(balance, currentBudget.getCategoryId(), selectedCurrency.getId());
             } else {
                 // Создаем новый бюджет (этот код не должен выполняться)
-                Log.e(TAG, "Попытка создания бюджета в режиме редактирования");
+                LogManager.e(TAG, "Попытка создания бюджета в режиме редактирования");
                 return false;
             }
             
         } catch (NumberFormatException e) {
             budgetAmountEdit.setError("Введите корректную сумму");
-            Log.e(TAG, "Ошибка парсинга суммы: " + e.getMessage());
+            LogManager.e(TAG, "Ошибка парсинга суммы: " + e.getMessage());
             return false;
         }
     }
@@ -264,8 +265,8 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      * Создает новый бюджет (не используется - бюджеты создаются только через категории)
      */
     private boolean createBudget(int categoryId, long amount, int currencyId) {
-        Log.e(TAG, "Попытка создания бюджета через BudgetEditActivity - недопустимо!");
-        Log.e(TAG, "Бюджеты создаются только автоматически при создании категорий");
+        LogManager.e(TAG, "Попытка создания бюджета через BudgetEditActivity - недопустимо!");
+        LogManager.e(TAG, "Бюджеты создаются только автоматически при создании категорий");
         throw new UnsupportedOperationException("Создание бюджетов через BudgetEditActivity не предусмотрено. Бюджеты создаются автоматически при создании категорий.");
     }
     
@@ -274,12 +275,12 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private boolean updateBudget(long amount, int categoryId, int currencyId) {
         if (currentBudget == null) {
-            Log.e(TAG, "currentBudget равен null, невозможно обновить бюджет");
+            LogManager.e(TAG, "currentBudget равен null, невозможно обновить бюджет");
             return false;
         }
         
         try {
-            Log.d(TAG, "Обновление бюджета ID: " + currentBudget.getId() + 
+            LogManager.d(TAG, "Обновление бюджета ID: " + currentBudget.getId() + 
                       ", новая сумма: " + amount + " копеек (" + (amount / 100.0) + " рублей)" +
                       ", категория остается: " + categoryId +
                       ", новая валюта: " + currencyId);
@@ -289,11 +290,11 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
             currentBudget.setCurrencyId(currencyId);
             serviceManager.budgets.update(currentBudget);
             
-            Log.d(TAG, "Бюджет обновлен успешно");
+            LogManager.d(TAG, "Бюджет обновлен успешно");
             returnToBudget();
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка при обновлении бюджета: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при обновлении бюджета: " + e.getMessage(), e);
             return false;
         }
     }
@@ -304,7 +305,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
     protected void setupBackButton(int backButtonId) {
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
-                Log.d(TAG, "Нажата кнопка 'Назад'");
+                LogManager.d(TAG, "Нажата кнопка 'Назад'");
                 // Возвращаемся к списку бюджетов
                 returnToBudget();
             });
@@ -316,7 +317,7 @@ public class BudgetEditActivity extends BaseEditActivity<Budget> {
      */
     private void returnToBudget() {
         // Переходим к списку бюджетов
-        Log.d(TAG, "Переходим к окну списка бюджетов");
+        LogManager.d(TAG, "Переходим к окну списка бюджетов");
         returnTo(BudgetActivity.class, true, null);
     }
 }

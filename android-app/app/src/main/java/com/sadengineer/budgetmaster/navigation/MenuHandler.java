@@ -3,8 +3,7 @@ package com.sadengineer.budgetmaster.navigation;
 import android.content.Context;
 import android.content.Intent;
 import android.view.MenuItem;
-import android.util.Log;
-
+ 
 import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -13,6 +12,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationTree;
 import com.sadengineer.budgetmaster.navigation.navigation_tree.NavigationNode;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Обработчик навигационного меню
@@ -65,14 +65,14 @@ public class MenuHandler implements NavigationView.OnNavigationItemSelectedListe
                 Intent intent = NavigationTree.createIntent(context, targetNode, 0);
                 if (intent != null) {
                     context.startActivity(intent);
-                    Log.d(TAG, "Переход к " + targetNode.name);
+                    LogManager.d(TAG, "Переход к " + targetNode.name);
                     return true;
                 }
             } else {
-                Log.w(TAG, "Узел навигации не найден для " + targetActivityClass.getSimpleName());
+                LogManager.w(TAG, "Узел навигации не найден для " + targetActivityClass.getSimpleName());
             }
         } else {
-            Log.w(TAG, "Activity не найден для пункта меню с ID: " + menuItemId);
+            LogManager.w(TAG, "Activity не найден для пункта меню с ID: " + menuItemId);
         }
         
         return false;

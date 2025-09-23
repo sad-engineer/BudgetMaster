@@ -3,7 +3,7 @@ package com.sadengineer.budgetmaster.categories;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -16,6 +16,7 @@ import com.sadengineer.budgetmaster.backend.entity.Category;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.constants.ModelConstants;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -121,7 +122,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
         // Небольшая задержка для плавного перехода
         recyclerView.postDelayed(() -> {
             adapter.setSelectionMode(true);
-            Log.d(TAG, "Режим выбора категорий включен");
+            LogManager.d(TAG, "Режим выбора категорий включен");
         }, 100);
     }
     
@@ -137,7 +138,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
         addCategoryButton.setImageResource(R.drawable.ic_add);
         deleteCategoryButton.setImageResource(R.drawable.ic_delete);
         
-        Log.d(TAG, "Режим выбора категорий отменен");
+        LogManager.d(TAG, "Режим выбора категорий отменен");
     }
     
     /**
@@ -146,21 +147,21 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
     private void deleteSelectedCategories() {
         List<Category> selectedCategories = adapter.getSelectedCategories();
         
-        Log.d(TAG, "Удаляем выбранные категории: " + selectedCategories.size());
+        LogManager.d(TAG, "Удаляем выбранные категории: " + selectedCategories.size());
         
         // Удаляем категории из базы данных
         for (Category category : selectedCategories) {
             try {
                 serviceManager.deleteCategoryWithBudget(category, true);
-                Log.d(TAG, "Удалена категория: " + category.getTitle());
+                LogManager.d(TAG, "Удалена категория: " + category.getTitle());
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
+                LogManager.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
             }
         }
         
         // Отменяем режим выбора
         cancelSelectionMode();
-        Log.d(TAG, "Удалено категорий: " + selectedCategories.size());
+        LogManager.d(TAG, "Удалено категорий: " + selectedCategories.size());
     }
     
     /**
@@ -201,11 +202,11 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      */
     private void deleteCategory(Category category) {
         try {
-            Log.d(TAG, "Удаляем категорию из базы данных: " + category.getTitle());
+            LogManager.d(TAG, "Удаляем категорию из базы данных: " + category.getTitle());
             serviceManager.deleteCategoryWithBudget(category, false);
-            Log.d(TAG, "Запрос на удаление категории отправлен: " + category.getTitle());
+            LogManager.d(TAG, "Запрос на удаление категории отправлен: " + category.getTitle());
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка удаления категории " + category.getTitle() + ": " + e.getMessage(), e);
         }
     }
     
@@ -213,27 +214,27 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * Загружает категории расходов из базы данных
      */
     private void loadCategoriesFromDatabase() {
-        Log.d(TAG, "Загружаем категории расходов из базы данных...");
+        LogManager.d(TAG, "Загружаем категории расходов из базы данных...");
         
         try {   
 
             serviceManager.categories.getAllByOperationType(OPERATION_TYPE, EntityFilter.ALL).observe(this, loadedCategories -> {
-                Log.d(TAG, "Загружено категорий расходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
+                LogManager.d(TAG, "Загружено категорий расходов: " + (loadedCategories != null ? loadedCategories.size() : 0));
                 if (loadedCategories != null && !loadedCategories.isEmpty()) {
                     categories.clear();
                     categories.addAll(loadedCategories);
                     adapter.setCategories(loadedCategories);
-                    Log.d(TAG, "Категории расходов отображены в списке");
+                    LogManager.d(TAG, "Категории расходов отображены в списке");
                     
                     // // Сбрасываем счетчик свайпов при изменении содержимого списка
                     // resetSwipeCount();
                 } else {
                     categories.clear();
-                    Log.w(TAG, "Категории расходов не найдены в базе данных");
+                    LogManager.w(TAG, "Категории расходов не найдены в базе данных");
                 }
             }); 
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки категорий расходов: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки категорий расходов: " + e.getMessage(), e);
         }
     }
     
@@ -242,7 +243,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * @param categoryId - ID выбранной категории
      */
     private void onCategoryClick(int categoryId) {
-        Log.d(TAG, "Клик по категории с ID: " + categoryId);
+        LogManager.d(TAG, "Клик по категории с ID: " + categoryId);
         // Находим категорию по ID и переходим к редактированию
         Category category = findCategoryById(categoryId);
         if (category != null) {
@@ -255,7 +256,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * @param categoryId - ID выбранной категории
      */
     private void onCategoryLongClick(int categoryId) {
-        Log.d(TAG, "Длительное нажатие на категорию с ID: " + categoryId);
+        LogManager.d(TAG, "Длительное нажатие на категорию с ID: " + categoryId);
         // Находим категорию по ID и показываем диалог удаления
         Category category = findCategoryById(categoryId);
         if (category != null) {
@@ -269,7 +270,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * @param isSelected - выбрана ли категория
      */
     private void onSelectedCategoriesChanged(int categoryId, boolean isSelected) {
-        Log.d(TAG, "Категория " + categoryId + " " + (isSelected ? "выбрана" : "снята с выбора"));
+        LogManager.d(TAG, "Категория " + categoryId + " " + (isSelected ? "выбрана" : "снята с выбора"));
         // Здесь можно добавить логику, если нужно реагировать на изменения выбора
     }
     
@@ -292,7 +293,7 @@ public class ExpenseCategoriesActivity extends BaseContentActivity {
      * @param category - выбранная категория
      */
     private void goToCategoryEdit(Category category) {
-        Log.d(TAG, "Переходим к окну редактирования категории");
+        LogManager.d(TAG, "Переходим к окну редактирования категории");
         String[] params = {"operation_type", String.valueOf(OPERATION_TYPE), "category", category.getTitle()};
         goTo(CategoryEditActivity.class, false, params);
     }

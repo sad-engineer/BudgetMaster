@@ -2,7 +2,7 @@ package com.sadengineer.budgetmaster.currencies;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+ 
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -11,6 +11,7 @@ import com.sadengineer.budgetmaster.base.BaseEditActivity;
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.validator.CurrencyValidator;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 
 /**
@@ -81,7 +82,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             if (currentCurrency != null) {
                 // Режим редактирования
                 isEditMode = true;
-                Log.d(TAG, "Режим редактирования валюты: " + currentCurrency.getTitle());
+                LogManager.d(TAG, "Режим редактирования валюты: " + currentCurrency.getTitle());
                 
                 // Заполняем поля данными валюты
                 currencyNameEdit.setText(currentCurrency.getTitle());
@@ -100,14 +101,14 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             } else {
                 // Режим создания новой валюты
                 isEditMode = false;
-                Log.d(TAG, "Режим создания новой валюты");
+                LogManager.d(TAG, "Режим создания новой валюты");
                 
                 // Устанавливаем заголовок для режима создания
                 setToolbarTitle(R.string.toolbar_title_currency_add, R.dimen.toolbar_text_currencies_add);
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки данных валюты: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки данных валюты: " + e.getMessage(), e);
             isEditMode = false;
             
             // Устанавливаем заголовок для режима создания по умолчанию
@@ -122,7 +123,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         ImageButton back = findViewById(backButtonId);
         if (back != null) {
             back.setOnClickListener(v -> {
-                Log.d(TAG, "Нажата кнопка 'Назад'");
+                LogManager.d(TAG, "Нажата кнопка 'Назад'");
                 returnToCurrencies();
             });
         }   
@@ -150,7 +151,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             CurrencyValidator.validateTitle(currencyName);
         } catch (IllegalArgumentException e) {
             // при ошибке выделять поле ввода красной рамкой
-            Log.e(TAG, "Ошибка валидации названия валюты: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка валидации названия валюты: " + e.getMessage(), e);
             currencyNameEdit.setError(e.getMessage());
             currencyNameEdit.requestFocus();
             return false;
@@ -161,7 +162,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             CurrencyValidator.validateShortName(currencyShortName);
         } catch (IllegalArgumentException e) {
             // при ошибке выделять поле ввода красной рамкой
-            Log.e(TAG, "Ошибка валидации короткого имени валюты: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка валидации короткого имени валюты: " + e.getMessage(), e);
             currencyShortNameEdit.setError(e.getMessage());
             currencyShortNameEdit.requestFocus();
             return false;
@@ -179,12 +180,12 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 }
             }
         } catch (NumberFormatException e) {
-            Log.e(TAG, "Ошибка валидации обменного курса: некорректный формат", e);
+            LogManager.e(TAG, "Ошибка валидации обменного курса: некорректный формат", e);
             exchangeRateEdit.setError("Введите корректный курс (например: 80.0)");
             exchangeRateEdit.requestFocus();
             return false;
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Ошибка валидации обменного курса: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка валидации обменного курса: " + e.getMessage(), e);
             exchangeRateEdit.setError(e.getMessage());
             exchangeRateEdit.requestFocus();
             return false;
@@ -193,7 +194,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
         try {
             if (isEditMode && currentCurrency != null) {
                 // Режим редактирования
-                Log.d(TAG, "Попытка обновления валюты '" + currencyName + "' (ID: " + currentCurrency.getId() + ")");
+                LogManager.d(TAG, "Попытка обновления валюты '" + currencyName + "' (ID: " + currentCurrency.getId() + ")");
                 
                 // Обновляем данные валюты через сервис
                 currentCurrency.setTitle(currencyName);
@@ -201,16 +202,16 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
                 currentCurrency.setExchangeRate(exchangeRate);
                 serviceManager.currencies.update(currentCurrency);
                 
-                Log.d(TAG, "Запрос на обновление валюты отправлен");
+                LogManager.d(TAG, "Запрос на обновление валюты отправлен");
                 
             } else {
                 // Режим создания новой валюты
-                Log.d(TAG, "Попытка создания валюты '" + currencyName + "'");
+                LogManager.d(TAG, "Попытка создания валюты '" + currencyName + "'");
 
                 // Создаем валюту через сервис (проверки уникальности внутри сервиса)
                 serviceManager.currencies.create(currencyName, currencyShortName, exchangeRate);
                 
-                Log.d(TAG, "Запрос на создание валюты отправлен");
+                LogManager.d(TAG, "Запрос на создание валюты отправлен");
             }
             
             // Возвращаемся к списку валют
@@ -218,7 +219,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             return true;
 
         } catch (Exception e) {
-            Log.e(TAG, "Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
+            LogManager.e(TAG, "Критическая ошибка при сохранении валюты: " + e.getMessage(), e);
             return false;
         }
     }
@@ -228,7 +229,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
      */
     private void returnToCurrencies() {
         // Переходим к списку валют
-        Log.d(TAG, "Переходим к окну списка валют");
+        LogManager.d(TAG, "Переходим к окну списка валют");
         returnTo(CurrenciesActivity.class, true, new String[0]);
     }
     
@@ -244,7 +245,7 @@ public class CurrencyEditActivity extends BaseEditActivity<Currency> {
             exchangeRateEdit.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | 
                                         android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
             
-            Log.d(TAG, "Поле обменного курса настроено");
+            LogManager.d(TAG, "Поле обменного курса настроено");
         }
     }
 } 

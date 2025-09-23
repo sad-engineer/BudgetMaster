@@ -1,8 +1,7 @@
 package com.sadengineer.budgetmaster.settings;
 
-
 import android.os.Bundle;
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -16,6 +15,7 @@ import com.sadengineer.budgetmaster.backend.entity.Currency;
 import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.backend.service.CurrencyService;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class SettingsActivity extends BaseContentActivity {
         // Загружаем текущие настройки
         loadSettings();
 
-        Log.d(TAG, "SettingsActivity создана");
+        LogManager.d(TAG, "SettingsActivity создана");
     }
 
     /**
@@ -85,7 +85,7 @@ public class SettingsActivity extends BaseContentActivity {
                 showPositionChecked = !showPositionChecked;
                 updateCheckboxIcon(checkboxShowPositionIcon, showPositionChecked);
                 appSettings.setShowPosition(showPositionChecked);
-                Log.d(TAG, "Настройка show_position изменена на: " + showPositionChecked);
+                LogManager.d(TAG, "Настройка show_position изменена на: " + showPositionChecked);
             }
         });
 
@@ -96,7 +96,7 @@ public class SettingsActivity extends BaseContentActivity {
                 showIdChecked = !showIdChecked;
                 updateCheckboxIcon(checkboxShowIdIcon, showIdChecked);
                 appSettings.setShowId(showIdChecked);
-                Log.d(TAG, "Настройка show_id изменена на: " + showIdChecked);
+                LogManager.d(TAG, "Настройка show_id изменена на: " + showIdChecked);
             }
         });
     }
@@ -140,7 +140,7 @@ public class SettingsActivity extends BaseContentActivity {
                 // Устанавливаем текущую валюту по умолчанию
                 setCurrentDefaultCurrency();
                 
-                Log.d(TAG, "Загружено валют: " + currencies.size());
+                LogManager.d(TAG, "Загружено валют: " + currencies.size());
             }
         });
     }
@@ -168,7 +168,7 @@ public class SettingsActivity extends BaseContentActivity {
         updateCheckboxIcon(checkboxShowPositionIcon, showPositionChecked);
         updateCheckboxIcon(checkboxShowIdIcon, showIdChecked);
 
-        Log.d(TAG, "Загружены настройки: show_position=" + showPositionChecked + ", show_id=" + showIdChecked);
+        LogManager.d(TAG, "Загружены настройки: show_position=" + showPositionChecked + ", show_id=" + showIdChecked);
     }
 
 } 

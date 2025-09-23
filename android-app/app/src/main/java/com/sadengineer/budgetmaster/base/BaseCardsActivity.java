@@ -5,13 +5,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.util.Log;
-
+ 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.navigation.BaseNavigationActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Базовый Activity для отображения списков данных в виде карточек (RecyclerView)
@@ -41,9 +41,9 @@ public abstract class BaseCardsActivity<T> extends BaseNavigationActivity {
         if (addButtonId != null && addButtonId != 0) {
             addButton = findViewById(addButtonId);
             if (addButton != null) {
-                Log.d(TAG, "setupCommonCardsUi: Устанавливаем обработчик для кнопки добавления");
+                LogManager.d(TAG, "setupCommonCardsUi: Устанавливаем обработчик для кнопки добавления");
                 addButton.setOnClickListener(v -> {
-                    Log.d(TAG, "setupCommonCardsUi: Нажата кнопка добавления");
+                    LogManager.d(TAG, "setupCommonCardsUi: Нажата кнопка добавления");
                     onAddClicked();
                 });
             }

@@ -2,7 +2,8 @@ package com.sadengineer.budgetmaster.navigation.navigation_tree;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+ 
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +25,11 @@ public class NavigationTree {
      */
     public static void initialize(Context context) {
         if (rootNode != null) {
-            Log.d(TAG, "Навигационное дерево уже инициализировано, пропускаем повторную инициализацию");
+            LogManager.d(TAG, "Навигационное дерево уже инициализировано, пропускаем повторную инициализацию");
             return;
         }
         
-        Log.d(TAG, "Инициализация навигационного дерева...");
+        LogManager.d(TAG, "Инициализация навигационного дерева...");
         
         // Строим дерево
         nodesByClass = NavigationTreeBuilder.buildTree(context);
@@ -42,17 +43,17 @@ public class NavigationTree {
         }
         
         if (rootNode == null) {
-            Log.w(TAG, "Корневой узел (StartActivity) не найден");
+            LogManager.w(TAG, "Корневой узел (StartActivity) не найден");
             // Берем первый узел как корневой
             if (!nodesByClass.isEmpty()) {
                 rootNode = nodesByClass.values().iterator().next();
-                Log.d(TAG, "Установлен корневой узел: " + rootNode.name);
+                LogManager.d(TAG, "Установлен корневой узел: " + rootNode.name);
             }
         } else {
-            Log.d(TAG, "Установлен корневой узел: " + rootNode.name);
+            LogManager.d(TAG, "Установлен корневой узел: " + rootNode.name);
         }
         
-        Log.d(TAG, "Навигационное дерево инициализировано. Узлов: " + nodesByClass.size());
+        LogManager.d(TAG, "Навигационное дерево инициализировано. Узлов: " + nodesByClass.size());
     }
     
     /**

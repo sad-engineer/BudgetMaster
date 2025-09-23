@@ -1,6 +1,5 @@
 package com.sadengineer.budgetmaster.animations;
-
-import android.util.Log;
+ 
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Универсальный ViewHolder для элементов с возможностью выбора
@@ -402,7 +402,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
         
-        Log.d(TAG, "bind() для элемента " + id + " (позиция " + position + "): " + 
+        LogManager.d(TAG, "bind() для элемента " + id + " (позиция " + position + "): " + 
             "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected + 
             ", showPosition=" + showPosition + ", showId=" + showId);
         
@@ -431,7 +431,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             String currencySymbol = (shortName != null && !shortName.isEmpty()) ? shortName : "RUB";
             String formattedSum = formatter.formatCompact(rubles) + " " + currencySymbol;
             sumText.setText(formattedSum);
-            Log.d(TAG, "Установлена сумма: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
+            LogManager.d(TAG, "Установлена сумма: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
         }
         if (shortNameText != null) {
             shortNameText.setText(shortName != null ? shortName : "");
@@ -498,7 +498,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
         this.isSelectionMode = isSelectionMode;
         this.isSelected = isSelected;
         
-        Log.d(TAG, "bindOperation() для операции " + id + " (позиция " + position + "): " + 
+        LogManager.d(TAG, "bindOperation() для операции " + id + " (позиция " + position + "): " + 
             "isSelectionMode=" + isSelectionMode + ", isSelected=" + isSelected);
         
         // Устанавливаем значения
@@ -515,7 +515,7 @@ public class StandartViewHolder extends RecyclerView.ViewHolder {
             double rubles = sum / 100.0;
             String formattedSum = formatter.formatCompact(rubles);
             sumText.setText(formattedSum);
-            Log.d(TAG, "Установлена сумма операции: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
+            LogManager.d(TAG, "Установлена сумма операции: " + formattedSum + " (исходная сумма в копейках: " + sum + ")");
         }
         if (shortNameText != null) {
             shortNameText.setText(shortName != null ? shortName : "₽");

@@ -1,13 +1,13 @@
 package com.sadengineer.budgetmaster.start;
 
 import android.content.Context;
-import android.util.Log;
-
+ 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.sadengineer.budgetmaster.backend.service.ServiceManager;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Repository для агрегации данных главного экрана
@@ -31,7 +31,7 @@ public class MainScreenRepository {
         this.isLoading = new MutableLiveData<>(false);
         this.errorMessage = new MutableLiveData<>();
         
-        Log.d(TAG, "MainScreenRepository инициализирован для пользователя: " + userName);
+        LogManager.d(TAG, "MainScreenRepository инициализирован для пользователя: " + userName);
     }
     
     /**
@@ -60,7 +60,7 @@ public class MainScreenRepository {
      * Сервисы сами управляют своими потоками выполнения
      */
     public void refreshData() {
-        Log.d(TAG, "Начинаем обновление данных главного экрана");
+        LogManager.d(TAG, "Начинаем обновление данных главного экрана");
         isLoading.setValue(true);
         errorMessage.setValue(null);
         
@@ -69,9 +69,9 @@ public class MainScreenRepository {
             try {
                 MainScreenData newData = loadAllData();
                 data.postValue(newData);
-                Log.d(TAG, "Данные главного экрана обновлены: " + newData);
+                LogManager.d(TAG, "Данные главного экрана обновлены: " + newData);
             } catch (Exception e) {
-                Log.e(TAG, "Ошибка при обновлении данных: " + e.getMessage(), e);
+                LogManager.e(TAG, "Ошибка при обновлении данных: " + e.getMessage(), e);
                 errorMessage.postValue("Ошибка загрузки данных: " + e.getMessage());
             } finally {
                 isLoading.postValue(false);
@@ -117,7 +117,7 @@ public class MainScreenRepository {
             //TODO: заменить на реальные данные
             return 1250000;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки общей суммы на счетах: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки общей суммы на счетах: " + e.getMessage(), e);
             throw new RuntimeException (e);
         }
     }
@@ -136,7 +136,7 @@ public class MainScreenRepository {
             //TODO: заменить на реальные данные
             return 1260000L;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки заработанного за месяц: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки заработанного за месяц: " + e.getMessage(), e);
             throw new RuntimeException (e);
         }
     }
@@ -154,7 +154,7 @@ public class MainScreenRepository {
             //TODO: заменить на реальные данные
             return 1270000;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки суммы сбережений: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки суммы сбережений: " + e.getMessage(), e);
             throw new RuntimeException (e);
         }
     }
@@ -181,7 +181,7 @@ public class MainScreenRepository {
             //TODO: заменить на реальные данные
             return 1280000;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка получения остатка бюджета: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка получения остатка бюджета: " + e.getMessage(), e);
             throw new RuntimeException (e);
         }
     }
@@ -209,7 +209,7 @@ public class MainScreenRepository {
             //TODO: заменить на реальные данные
             return 1290000;
         } catch (Exception e) {
-            Log.e(TAG, "Ошибка загрузки суммы резерва: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка загрузки суммы резерва: " + e.getMessage(), e);
             throw new RuntimeException (e);
         }
     }
@@ -240,11 +240,11 @@ public class MainScreenRepository {
                 newData.setReserveAmount(value);
                 break;
             default:
-                Log.w(TAG, "Неизвестное поле для обновления: " + fieldName);
+                LogManager.w(TAG, "Неизвестное поле для обновления: " + fieldName);
                 return;
         }
         
         data.setValue(newData);
-        Log.d(TAG, "Обновлено поле " + fieldName + " = " + value);
+        LogManager.d(TAG, "Обновлено поле " + fieldName + " = " + value);
     }
 }

@@ -14,8 +14,8 @@ public class CurrentAccountsFragment extends BaseAccountsFragment {
     
     @Override
     protected void initializeResources() {
-        this.layoutResourceId = R.layout.fragment_current_accounts;
-        this.recyclerViewId = R.id.accounts_current_recycler;
-        this.accountType = AccountTypeFilter.CURRENT;
+        this.mLayoutResourceId = R.layout.fragment_current_accounts;
+        this.mRecyclerViewId = R.id.accounts_current_recycler;
+        this.mAccountType = AccountTypeFilter.CURRENT;
     }
 } 

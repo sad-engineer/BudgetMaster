@@ -1,10 +1,10 @@
 package com.sadengineer.budgetmaster.statistics;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.R;
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Activity для отображения статистики
@@ -23,6 +23,6 @@ public class StatisticsActivity extends BaseContentActivity {
         // Устанавливаем заголовок
         setToolbarTitle(R.string.menu_statistics, R.dimen.toolbar_text);
 
-        Log.d(TAG, "StatisticsActivity создана");
+        LogManager.d(TAG, "StatisticsActivity создана");
     }
 } 

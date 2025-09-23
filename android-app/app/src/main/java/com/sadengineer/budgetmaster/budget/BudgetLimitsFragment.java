@@ -1,8 +1,7 @@
 package com.sadengineer.budgetmaster.budget;
 
 import android.os.Bundle;
-import android.util.Log;
-
+ 
 import androidx.lifecycle.ViewModelProvider;
 
 import com.sadengineer.budgetmaster.R;
@@ -14,6 +13,7 @@ import com.sadengineer.budgetmaster.backend.filters.EntityFilter;
 import com.sadengineer.budgetmaster.calculators.BudgetCalculatorViewModel;
 import com.sadengineer.budgetmaster.formatters.CurrencyAmountFormatter;
 import com.sadengineer.budgetmaster.start.StartScreenViewModel;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     @Override
     protected void performDataLoading() {
         serviceManager.budgets.getAllByOperationType(operationType, EntityFilter.ACTIVE).observe(getViewLifecycleOwner(), this::handleDataLoaded);
-        Log.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = " + operationType.getIndex() + ")");
+        LogManager.d(TAG, "Загружаем бюджеты только для категорий расходов (operation_type = " + operationType.getIndex() + ")");
     }
     
     @Override
@@ -93,7 +93,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         adapter = new BudgetAdapter();
         
         adapter.setClickListener(budget -> {
-            Log.d(TAG, "Клик по бюджету: " + budget.getId());
+            LogManager.d(TAG, "Клик по бюджету: " + budget.getId());
             goToEdit(budget);
         });
         
@@ -119,7 +119,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
             .observe(getViewLifecycleOwner(), categories -> {
                 if (adapter != null && categories != null) {
                     adapter.setCategories(categories);
-                    Log.d(TAG, "Установлено категорий в адаптер: " + categories.size());
+                    LogManager.d(TAG, "Установлено категорий в адаптер: " + categories.size());
                 }
             });
         
@@ -127,7 +127,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
         serviceManager.currencies.getAll().observe(getViewLifecycleOwner(), currencies -> {
             if (adapter != null && currencies != null) {
                 adapter.setCurrencies(currencies);
-                Log.d(TAG, "Установлено валют в адаптер: " + currencies.size());
+                LogManager.d(TAG, "Установлено валют в адаптер: " + currencies.size());
             }
         });
     }
@@ -141,7 +141,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
                 if (totalAmount != null && adapter != null) {
                     // Обновляем карточку "Итого" в адаптере
                     adapter.updateTotalAmount(totalAmount);
-                    Log.d(TAG, "Обновлена общая сумма бюджетов: " + formatter.formatFromCents(totalAmount));
+                    LogManager.d(TAG, "Обновлена общая сумма бюджетов: " + formatter.formatFromCents(totalAmount));
                 }
             });
         }
@@ -149,10 +149,10 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
 
     @Override
     protected void setAdapterData(List<Budget> items) {
-        Log.d(TAG, "setAdapterData: получено бюджетов: " + (items != null ? items.size() : 0));
+        LogManager.d(TAG, "setAdapterData: получено бюджетов: " + (items != null ? items.size() : 0));
         if (items != null) {
             for (Budget budget : items) {
-                Log.d(TAG, "  - Бюджет ID=" + budget.getId() + 
+                LogManager.d(TAG, "  - Бюджет ID=" + budget.getId() + 
                           ", сумма=" + budget.getAmount() + 
                           ", категория=" + budget.getCategoryId() + 
                           ", валюта=" + budget.getCurrencyId());
@@ -169,7 +169,7 @@ public class BudgetLimitsFragment extends BaseListFragment<Budget, BudgetAdapter
     @Override
     protected void observeSelectionMode() {
         // Режим выбора отключен, так как кнопки скрыты
-        Log.d(TAG, "Режим выбора отключен - кнопки скрыты");
+        LogManager.d(TAG, "Режим выбора отключен - кнопки скрыты");
     }
 
     @Override

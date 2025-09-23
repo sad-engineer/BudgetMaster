@@ -1,13 +1,15 @@
 package com.sadengineer.budgetmaster.navigation;
 
-import android.util.Log;
-
+import android.content.Intent;
+ 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
-
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.utils.LogManager;
+
+import java.io.Serializable;
 
 /**
  * Базовый класс для всех Activity с навигацией
@@ -55,7 +57,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
         // Логируем доступные пункты меню
         MenuBuilder.logAvailableMenuItems();
         
-        Log.d(TAG, "Навигация инициализирована");
+        LogManager.d(TAG, "Навигация инициализирована");
     }
     
     /**
@@ -79,7 +81,7 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      * @param tabIndex - индекс вкладки
      */
     protected void switchToTab(int tabIndex) {
-        Log.d(TAG, "Переключение на вкладку " + tabIndex + " (базовая реализация)");
+        LogManager.d(TAG, "Переключение на вкладку " + tabIndex + " (базовая реализация)");
         // Дочерние классы должны переопределить этот метод для работы с ViewPager
     }
         
@@ -170,12 +172,12 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
      * @param params - массив параметров в формате [name1, value1, name2, value2, ...]
      */
     public void goTo(Class<?> targetActivity, boolean clearTop, String[] params) { 
-        Log.d(TAG, "goTo: Попытка перехода к " + targetActivity.getSimpleName() + ", clearTop=" + clearTop);
+        LogManager.d(TAG, "goTo: Попытка перехода к " + targetActivity.getSimpleName() + ", clearTop=" + clearTop);
         if (navigationController != null) {
-            Log.d(TAG, "goTo: navigationController найден, делегируем переход");
+            LogManager.d(TAG, "goTo: navigationController найден, делегируем переход");
             navigationController.goTo(targetActivity, clearTop, params);
         } else {
-            Log.e(TAG, "goTo: navigationController равен null!");
+            LogManager.e(TAG, "goTo: navigationController равен null!");
         }
     }
 
@@ -187,6 +189,27 @@ public abstract class BaseNavigationActivity extends AppCompatActivity {
         if (navigationController != null) {
             navigationController.goTo(targetActivity, false, null);
         }
+    }
+
+    /**
+     * Переход к конкретной Activity с сериализуемым объектом
+     * @param targetActivity - класс активности
+     * @param clearTop - флаг, определяющий, нужно ли очистить стек активностей
+     * @param item - сериализуемый объект для передачи
+     * @param sourceTab - номер вкладки источника
+     */
+    public void goTo(Class<?> targetActivity, boolean clearTop, Serializable item, int sourceTab) {
+        LogManager.d(TAG, "goTo: Переход к " + targetActivity.getSimpleName() + " с объектом, clearTop=" + clearTop);
+        
+        Intent intent = new Intent(this, targetActivity);
+        intent.putExtra("item", item);
+        intent.putExtra("source_tab", sourceTab);
+        
+        if (clearTop) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        }
+        
+        startActivity(intent);
     }
 
     /**

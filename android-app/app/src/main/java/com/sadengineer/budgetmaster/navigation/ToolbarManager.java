@@ -1,7 +1,7 @@
 package com.sadengineer.budgetmaster.navigation;
 
 import android.app.Activity;
-import android.util.Log;
+ 
 import android.util.TypedValue;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -10,6 +10,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.sadengineer.budgetmaster.R;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Менеджер для управления тулбаром
@@ -61,7 +62,7 @@ public class ToolbarManager {
             menuButton.setOnClickListener(v -> {
                 if (drawerLayout != null) {
                     drawerLayout.openDrawer(GravityCompat.START);
-                    Log.d(TAG, "Нажата кнопка меню");
+                    LogManager.d(TAG, "Нажата кнопка меню");
                 }
             });
         }
@@ -76,7 +77,7 @@ public class ToolbarManager {
             backButton.setOnClickListener(v -> {
                 if (navigationController != null) {
                     navigationController.goToRoot();
-                    Log.d(TAG, "Нажата кнопка назад");
+                    LogManager.d(TAG, "Нажата кнопка назад");
                 }
             });
         }
@@ -88,7 +89,7 @@ public class ToolbarManager {
     public void setupPositionChangeButton() {
         ImageButton positionButton = activity.findViewById(R.id.position_change_button);
         if (positionButton != null) {
-            positionButton.setOnClickListener(v -> Log.d(TAG, "Нажата кнопка смены позиции"));
+            positionButton.setOnClickListener(v -> LogManager.d(TAG, "Нажата кнопка смены позиции"));
         }
     }   
     
@@ -101,12 +102,12 @@ public class ToolbarManager {
         TextView toolbarTitle = activity.findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
             toolbarTitle.setText(titleResId);
-            Log.d(TAG, "Заголовок тулбара установлен");
+            LogManager.d(TAG, "Заголовок тулбара установлен");
             
             // Устанавливаем размер шрифта
             float textSize = activity.getResources().getDimension(textSizeResId);
             toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен");
+            LogManager.d(TAG, "Размер шрифта установлен");
         }
     }
 
@@ -119,10 +120,10 @@ public class ToolbarManager {
         TextView toolbarTitle = activity.findViewById(R.id.toolbar_title);
         if (toolbarTitle != null) {
             toolbarTitle.setText(titleText);
-            Log.d(TAG, "Заголовок тулбара установлен");
+            LogManager.d(TAG, "Заголовок тулбара установлен");
 
             toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-            Log.d(TAG, "Размер шрифта установлен");
+            LogManager.d(TAG, "Размер шрифта установлен");
         }
     }
 }

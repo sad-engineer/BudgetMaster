@@ -1,7 +1,6 @@
 package com.sadengineer.budgetmaster.calculators;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -11,6 +10,7 @@ import com.sadengineer.budgetmaster.backend.filters.OperationTypeFilter;
 import com.sadengineer.budgetmaster.backend.service.OperationService;
 import com.sadengineer.budgetmaster.backend.ThreadManager;
 import com.sadengineer.budgetmaster.backend.filters.OperationPeriod;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -45,12 +45,12 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
      */
     public void setConfig(OperationCalculatorConfig config) {
         if (config == null || !config.isValid()) {
-            Log.e(TAG, "Invalid config provided");
+            LogManager.e(TAG, "Invalid config provided");
             return;
         }
         
         this.config = config;
-        Log.d(TAG, "Config updated: " + config.toString());
+        LogManager.d(TAG, "Config updated: " + config.toString());
         
         // Перезагружаем данные с новой конфигурацией
         loadOperationAmounts();
@@ -131,11 +131,11 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
      */
     private void loadOperationAmounts() {
         if (!isInitialized()) {
-            Log.d(TAG, "Calculator not initialized, skipping loadOperationAmounts");
+            LogManager.d(TAG, "Calculator not initialized, skipping loadOperationAmounts");
             return;
         }
 
-        Log.d(TAG, "Loading operation amounts for config: " + config.toString());
+        LogManager.d(TAG, "Loading operation amounts for config: " + config.toString());
 
         try {
             // Если указана конкретная валюта (не 0), загружаем только её
@@ -149,7 +149,7 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
             totalCurrenciesCount = currencyAmounts.size();
             loadedCurrenciesCount = 0;
             
-            Log.d(TAG, "Total currencies to load: " + totalCurrenciesCount);
+            LogManager.d(TAG, "Total currencies to load: " + totalCurrenciesCount);
             
             // Загружаем суммы для каждой валюты
             for (Map.Entry<Integer, MutableLiveData<Long>> entry : currencyAmounts.entrySet()) {
@@ -158,7 +158,7 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error loading operation amounts", e);
+            LogManager.e(TAG, "Error loading operation amounts", e);
         }
     }
     
@@ -184,11 +184,11 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
             // Подписываемся на результат
             amountLiveData.observeForever(amount -> {
                 if (amount != null) {
-                    Log.d(TAG, "Loaded amount for currency " + currencyId + ": " + amount);
+                    LogManager.d(TAG, "Loaded amount for currency " + currencyId + ": " + amount);
                     setCurrencyAmount(currencyId, amount);
                     
                     loadedCurrenciesCount++;
-                    Log.d(TAG, "Loaded currencies: " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
+                    LogManager.d(TAG, "Loaded currencies: " + loadedCurrenciesCount + "/" + totalCurrenciesCount);
                     
                     // Если загрузили все валюты, пересчитываем результат
                     if (loadedCurrenciesCount >= totalCurrenciesCount) {
@@ -198,14 +198,14 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
             });
             
         } catch (Exception e) {
-            Log.e(TAG, "Error loading operation amount for currency " + currencyId, e);
+            LogManager.e(TAG, "Error loading operation amount for currency " + currencyId, e);
             loadedCurrenciesCount++;
         }
     }
     
     @Override
     protected void updateForNewCurrencyIds(List<Integer> newCurrencyIds) {
-        Log.d(TAG, "Обновление сумм операций для " + newCurrencyIds.size() + " валют");
+        LogManager.d(TAG, "Обновление сумм операций для " + newCurrencyIds.size() + " валют");
         
         // Сбрасываем счетчики
         loadedCurrenciesCount = 0;
@@ -224,14 +224,14 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
     @Override
     protected void recalculateResultAmount() {
         ThreadManager.getExecutor().execute(() -> {
-            Log.d(TAG, "Recalculating result amount");
+            LogManager.d(TAG, "Recalculating result amount");
             
             try {
                 // Получаем все суммы по валютам
                 Map<Integer, MutableLiveData<Long>> currencyAmounts = getCurrencyAmounts();
                 
                 if (currencyAmounts.isEmpty()) {
-                    Log.d(TAG, "No currency amounts available for recalculation");
+                    LogManager.d(TAG, "No currency amounts available for recalculation");
                     setResultAmount(0L);
                     return;
                 }
@@ -256,11 +256,11 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
                     }
                 }
                 
-                Log.d(TAG, "Recalculated total amount: " + totalAmount);
+                LogManager.d(TAG, "Recalculated total amount: " + totalAmount);
                 setResultAmount(totalAmount);
                 
             } catch (Exception e) {
-                Log.e(TAG, "Error recalculating result amount", e);
+                LogManager.e(TAG, "Error recalculating result amount", e);
                 setResultAmount(0L);
             }
         });
@@ -373,6 +373,6 @@ public class OperationCalculatorViewModel extends BasicCalculatorForCurrencyItem
     @Override
     protected void onCleared() {
         super.onCleared();
-        Log.d(TAG, "OperationCalculatorViewModel cleared");
+        LogManager.d(TAG, "OperationCalculatorViewModel cleared");
     }
 }

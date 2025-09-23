@@ -2,9 +2,9 @@ package com.sadengineer.budgetmaster;
 
 import android.os.Bundle;
 import android.widget.TextView;
-import android.util.Log;
-
+ 
 import com.sadengineer.budgetmaster.base.BaseContentActivity;
+import com.sadengineer.budgetmaster.utils.LogManager;
 
 /**
  * Экран версии приложения
@@ -37,7 +37,7 @@ public class VersionActivity extends BaseContentActivity {
         getFrontendVersion(frontendVersionText);
         getBackendVersion(backendVersionText);
 
-        Log.d(TAG, "VersionActivity создана");
+        LogManager.d(TAG, "VersionActivity создана");
 
     }
 
@@ -50,13 +50,13 @@ public class VersionActivity extends BaseContentActivity {
         // Устанавливаем версию фронтенда из BuildConfig
         try {
             String frontendVersion = BuildConfig.APP_VERSION;
-            Log.d(TAG, "Найдена версия фронтенда: " + frontendVersion);
+            LogManager.d(TAG, "Найдена версия фронтенда: " + frontendVersion);
             frontendVersionText.setText(frontendVersion);
             return frontendVersion;
         } catch (Exception e) {
             String errorVersion = "Неизвестно";
             frontendVersionText.setText(errorVersion);
-            Log.e(TAG, "Ошибка при получении версии фронтенда: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при получении версии фронтенда: " + e.getMessage(), e);
             return errorVersion;
         }
     }
@@ -70,13 +70,13 @@ public class VersionActivity extends BaseContentActivity {
         // Устанавливаем версию бекенда из BuildConfig
         try {
             String backendVersion = BuildConfig.BACKEND_VERSION;
-            Log.d(TAG, "Найдена версия бекенда: " + backendVersion);
+            LogManager.d(TAG, "Найдена версия бекенда: " + backendVersion);
             backendVersionText.setText(backendVersion);
             return backendVersion;
         } catch (Exception e) {
             String errorVersion = "Неизвестно";
             backendVersionText.setText(errorVersion);
-            Log.e(TAG, "Ошибка при получении версии бекенда: " + e.getMessage(), e);
+            LogManager.e(TAG, "Ошибка при получении версии бекенда: " + e.getMessage(), e);
             return errorVersion;
         }
     }
